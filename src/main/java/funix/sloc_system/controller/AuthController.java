@@ -33,24 +33,6 @@ public class AuthController {
         return "login";
     }
 
-    @GetMapping("/register")
-    public String register() {
-        return "register";
-    }
-
-    @PostMapping("/register")
-    public String register(@RequestParam String username, @RequestParam String password, @RequestParam String email, @RequestParam String name, @RequestParam String role) {
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setEmail(email);
-        user.setName(name);
-        user.setRole(User.Role.valueOf(role.toUpperCase()));
-
-        userRepository.save(user);
-        return "redirect:/login";
-    }
-
     @GetMapping("/home")
     public String home(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");

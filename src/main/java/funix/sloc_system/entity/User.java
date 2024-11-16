@@ -10,13 +10,20 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String username;
+
+    @Column(nullable = false, unique = true)
     private String email;
+
     private String name;
+
+    @Column(nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)  // Use EnumType.STRING to store the role as a string in the database
-    private Role role;
+    @Column(nullable = false)
+    private Role role = Role.STUDENT;
 
     // Getters and setters
     public Long getId() {
