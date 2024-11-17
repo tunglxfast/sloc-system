@@ -5,6 +5,10 @@ import funix.sloc_system.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Chứa các chức năng của user
+ * làm việc với Repository
+ */
 @Service
 public class UserService {
     @Autowired

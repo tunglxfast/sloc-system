@@ -21,7 +21,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Enumerated(EnumType.STRING)  // Use EnumType.STRING to store the role as a string in the database
+    @Enumerated(EnumType.STRING)  // dùng EnumType.STRING để khi lưu vào database sẽ là String
     @Column(nullable = false)
     private Role role = Role.STUDENT;
 

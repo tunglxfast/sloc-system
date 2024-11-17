@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+/**
+ * Điều khiển login, logout.
+ */
 @Controller
 public class AuthController {
     private final UserRepository userRepository;
