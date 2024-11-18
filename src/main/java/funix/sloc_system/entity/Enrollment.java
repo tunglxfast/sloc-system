@@ -2,7 +2,7 @@ package funix.sloc_system.entity;
 
 import jakarta.persistence.*;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 @Entity
 public class Enrollment {
@@ -18,7 +18,7 @@ public class Enrollment {
     @JoinColumn(name = "course_id")
     private Course course;
 
-    private Date enrollmentDate; // Ngày đăng ký khóa học
+    private LocalDate enrollmentDate; // Ngày đăng ký khóa học
 
     public Long getId() {
         return id;
@@ -44,11 +44,11 @@ public class Enrollment {
         this.course = course;
     }
 
-    public Date getEnrollmentDate() {
+    public LocalDate getEnrollmentDate() {
         return enrollmentDate;
     }
 
-    public void setEnrollmentDate(Date enrollmentDate) {
+    public void setEnrollmentDate(LocalDate enrollmentDate) {
         this.enrollmentDate = enrollmentDate;
     }
 }

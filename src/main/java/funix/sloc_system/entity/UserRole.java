@@ -17,9 +17,6 @@ public class UserRole {
     @JoinColumn(name = "role_id")
     private Role role;
 
-    @Enumerated(EnumType.STRING)
-    private RoleType roleType;
-
     public Long getId() {
         return id;
     }
@@ -45,10 +42,6 @@ public class UserRole {
     }
 
     public RoleType getRoleType() {
-        return roleType;
-    }
-
-    public void setRoleType(RoleType roleType) {
-        this.roleType = roleType;
+        return role.getRoleType();
     }
 }

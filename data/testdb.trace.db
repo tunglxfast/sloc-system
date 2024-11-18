@@ -463,3 +463,6 @@ select * from users where username = admin [42122-224]
 2024-11-16 20:58:46.583186+07:00 jdbc[13]: exception
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "select * from users where username =[*]= admin"; expected "ALL (, ANY (, SOME ("; SQL statement:
 select * from users where username == admin [42001-224]
+2024-11-18 22:18:34.792247+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "LETE" not found; SQL statement:
+DeLETE LETE [42102-224]

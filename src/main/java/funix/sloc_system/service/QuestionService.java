@@ -12,8 +12,8 @@ public class QuestionService {
     @Autowired
     private QuestionRepository questionRepository;
 
-    public List<Question> getQuestionsByTest(Long testId) {
-        return questionRepository.findByTestId(testId);
+    public List<Question> getQuestionsByTopic(Long topicId) {
+        return questionRepository.findByTopicId(topicId);
     }
 }
 
