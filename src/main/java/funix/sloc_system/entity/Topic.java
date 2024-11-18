@@ -1,12 +1,12 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.enums.TopicType;
 import jakarta.persistence.*;
 
 /**
  * Lớp cha của ReadingLesson, VideoLesson, Quiz, Exam
  */
 @Entity
-@Table(name = "topics")
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Topic {
     @Id
@@ -20,7 +20,7 @@ public abstract class Topic {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TopicType type;
+    private TopicType topicType;
 
     // Thứ tự trong chapter
     @Column(nullable = false)
@@ -29,10 +29,6 @@ public abstract class Topic {
     @ManyToOne
     @JoinColumn(name = "chapter_id")
     private Chapter chapter;
-
-    public enum TopicType {
-        READING, VIDEO, QUIZ, EXAM
-    }
 
     public Long getId() {
         return id;
@@ -58,12 +54,12 @@ public abstract class Topic {
         this.description = description;
     }
 
-    public TopicType getType() {
-        return type;
+    public TopicType getTopicType() {
+        return topicType;
     }
 
-    public void setType(TopicType type) {
-        this.type = type;
+    public void setTopicType(TopicType topicType) {
+        this.topicType = topicType;
     }
 
     public int getOrder() {

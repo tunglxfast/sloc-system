@@ -1,2 +1,5 @@
-package funix.sloc_system.enums;public class QuestionType {
+package funix.sloc_system.enums;
+
+public enum QuestionType {
+    MULTIPLE_CHOICE, TRUE_FALSE
 }

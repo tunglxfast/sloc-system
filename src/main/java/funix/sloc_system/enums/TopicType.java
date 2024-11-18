@@ -1,4 +1,5 @@
 package funix.sloc_system.enums;
 
-public class TopicType {
+public enum TopicType {
+    READING, VIDEO, QUIZ, EXAM
 }

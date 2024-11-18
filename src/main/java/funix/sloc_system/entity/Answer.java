@@ -8,12 +8,13 @@ public class Answer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // nội dung câu trả lời
     private String content;
 
     private boolean isCorrect;
 
     @ManyToOne
-    @JoinColumn(name = "question_id")
+    @JoinColumn(name = "question_id", nullable = false)
     private Question question;
 
     public Long getId() {

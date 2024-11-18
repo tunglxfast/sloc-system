@@ -2,7 +2,10 @@ package funix.sloc_system.entity;
 
 import jakarta.persistence.*;
 
+import java.sql.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Course {
@@ -10,20 +13,44 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title")
     private String title;
 
     private String description;
 
+    // href tới hình đại diện khóa học
     private String thumbnailUrl;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
+
+    // người tạo khóa học
+    @ManyToOne
+    @JoinColumn(name = "created_by", nullable = false)
+    private User createdBy;
+
+    // người thay đổi khóa học gần nhất
+    @ManyToOne
+    @JoinColumn(name = "last_updated_by", nullable = true)
+    private User lastUpdatedBy;
 
     // tự động cập nhật chapters database khi có thay trên course
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Chapter> chapters;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User instructor;
+    // Mối quan hệ với table enrollment (số học viên theo học)
+    @OneToMany(mappedBy = "course")
+    private Set<Enrollment> enrollments = new HashSet<>();
+
+    // Mối quan hệ với table instructor_course (giảng viên quản lý khóa học)
+    @OneToMany(mappedBy = "course")
+    private Set<InstructorCourse> instructorCourses = new HashSet<>();
+
+    private Date startDate;
+    private Date endDate;
+
+    private Date createdAt;
+    private Date updatedAt;
 
     public Long getId() {
         return id;
@@ -57,6 +84,30 @@ public class Course {
         this.thumbnailUrl = thumbnailUrl;
     }
 
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public User getLastUpdatedBy() {
+        return lastUpdatedBy;
+    }
+
+    public void setLastUpdatedBy(User lastUpdatedBy) {
+        this.lastUpdatedBy = lastUpdatedBy;
+    }
+
     public List<Chapter> getChapters() {
         return chapters;
     }
@@ -65,11 +116,51 @@ public class Course {
         this.chapters = chapters;
     }
 
-    public User getInstructor() {
-        return instructor;
+    public Set<Enrollment> getEnrollments() {
+        return enrollments;
     }
 
-    public void setInstructor(User instructor) {
-        this.instructor = instructor;
+    public void setEnrollments(Set<Enrollment> enrollments) {
+        this.enrollments = enrollments;
+    }
+
+    public Set<InstructorCourse> getInstructorCourses() {
+        return instructorCourses;
+    }
+
+    public void setInstructorCourses(Set<InstructorCourse> instructorCourses) {
+        this.instructorCourses = instructorCourses;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

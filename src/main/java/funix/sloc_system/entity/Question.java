@@ -1,5 +1,6 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.enums.QuestionType;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -10,18 +11,20 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // nội dung câu hỏi
     private String content;
 
-    private int score;
+    @Enumerated(EnumType.STRING)
+    private QuestionType questionType; // MULTIPLE_CHOICE, TRUE_FALSE
 
     // Thứ tự trong bài Test
     private int order;
 
     @ManyToOne
-    @JoinColumn(name = "test_id")
-    private Topic test;
+    @JoinColumn(name = "topic_id", nullable = false)
+    private Topic topic;
 
-    @OneToMany(mappedBy = "question")
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
     private List<Answer> answers;
 
     public Long getId() {
@@ -40,12 +43,12 @@ public class Question {
         this.content = content;
     }
 
-    public int getScore() {
-        return score;
+    public QuestionType getQuestionType() {
+        return questionType;
     }
 
-    public void setScore(int score) {
-        this.score = score;
+    public void setQuestionType(QuestionType questionType) {
+        this.questionType = questionType;
     }
 
     public int getOrder() {
@@ -56,12 +59,12 @@ public class Question {
         this.order = order;
     }
 
-    public Topic getTest() {
-        return test;
+    public Topic getTopic() {
+        return topic;
     }
 
-    public void setTest(Topic test) {
-        this.test = test;
+    public void setTopic(Topic topic) {
+        this.topic = topic;
     }
 
     public List<Answer> getAnswers() {

@@ -3,22 +3,50 @@ package funix.sloc_system.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 
 import java.util.List;
 
 @Entity
-@Table(name = "quizzes")
 public class Exam extends Topic {
 
-    private int passScore;
+    private Integer passScore;
 
-    private int HighestScore;
+    private Integer totalScore;
 
-    private int totalScore;
+    private Integer timeLimit;
 
-    private int timeLimit;
-
-    @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;
+
+    public Integer getPassScore() {
+        return passScore;
+    }
+
+    public void setPassScore(Integer passScore) {
+        this.passScore = passScore;
+    }
+
+    public Integer getTotalScore() {
+        return totalScore;
+    }
+
+    public void setTotalScore(Integer totalScore) {
+        this.totalScore = totalScore;
+    }
+
+    public Integer getTimeLimit() {
+        return timeLimit;
+    }
+
+    public void setTimeLimit(Integer timeLimit) {
+        this.timeLimit = timeLimit;
+    }
+
+    public List<Question> getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(List<Question> questions) {
+        this.questions = questions;
+    }
 }

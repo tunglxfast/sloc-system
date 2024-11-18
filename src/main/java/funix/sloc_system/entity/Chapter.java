@@ -16,7 +16,7 @@ public class Chapter {
     private int order;
 
     @ManyToOne
-    @JoinColumn(name = "course_id")
+    @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
     // tự động cập nhật topic database khi có thay trên chapter
