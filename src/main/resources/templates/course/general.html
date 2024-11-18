@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Giới thiệu khóa học</title>
+</head>
+<body>
+<h1 th:text="${course.title}">Tên khóa học</h1>
+<p th:text="${course.description}">Mô tả khóa học</p>
+<a th:href="${course.thumbnailUrl}" />
+<form th:action="@{/courses/{id}/enroll}" method="post">
+  <button type="submit">Enroll</button>
+</form>
+
+<a th:href="@{/courses}">Trở lại danh sách khóa học</a>
+</body>
+</html>
