@@ -1,7 +1,7 @@
 package funix.sloc_system.service;
 
 import funix.sloc_system.entity.Chapter;
-import funix.sloc_system.repository.ChapterRepository;
+import funix.sloc_system.dao.ChapterDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,13 +11,13 @@ import java.util.List;
 public class ChapterService {
 
     @Autowired
-    private ChapterRepository chapterRepository;
+    private ChapterDAO chapterDAO;
 
     public Chapter getChapterById(Long id) {
-        return chapterRepository.findById(id).orElse(null);
+        return chapterDAO.findById(id).orElse(null);
     }
 
     public List<Chapter> getChaptersByCourse(Long courseId) {
-        return chapterRepository.findByCourseId(courseId);
+        return chapterDAO.findByCourseId(courseId);
     }
 }

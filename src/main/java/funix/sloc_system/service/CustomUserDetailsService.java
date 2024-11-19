@@ -2,7 +2,7 @@ package funix.sloc_system.service;
 
 import funix.sloc_system.entity.Role;
 import funix.sloc_system.entity.User;
-import funix.sloc_system.repository.UserRepository;
+import funix.sloc_system.dao.UserDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,11 +17,11 @@ import java.util.stream.Collectors;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
-    private UserRepository userRepository;
+    private UserDAO userDAO;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
+        User user = userDAO.findByUsername(username);
 
         if (user == null) {
             throw new UsernameNotFoundException("Invalid username or password.");

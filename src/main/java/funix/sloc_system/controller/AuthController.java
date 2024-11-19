@@ -1,7 +1,7 @@
 package funix.sloc_system.controller;
 
 import funix.sloc_system.entity.User;
-import funix.sloc_system.repository.UserRepository;
+import funix.sloc_system.dao.UserDAO;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 public class AuthController {
-    private final UserRepository userRepository;
+    private final UserDAO userDAO;
 
-    public AuthController(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public AuthController(UserDAO userDAO) {
+        this.userDAO = userDAO;
     }
 
     @GetMapping("/login")
@@ -27,7 +27,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public String login(@RequestParam String username, @RequestParam String password, HttpSession session, Model model) {
-        User user = userRepository.findByUsername(username);
+        User user = userDAO.findByUsername(username);
         if (user != null && user.getPassword().equals(password)) {
             session.setAttribute("user", user);
             return "redirect:/home";  // Chuyển đến trang chính sau khi đăng nhập

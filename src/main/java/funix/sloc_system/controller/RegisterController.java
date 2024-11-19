@@ -1,7 +1,7 @@
 package funix.sloc_system.controller;
 
 import funix.sloc_system.entity.User;
-import funix.sloc_system.repository.UserRepository;
+import funix.sloc_system.dao.UserDAO;
 import funix.sloc_system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,7 +21,7 @@ public class RegisterController {
     private UserService userService;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserDAO userDAO;
 
     @GetMapping("/register")
     public String register() {
@@ -35,7 +35,7 @@ public class RegisterController {
 
         if (checkRegistered.equalsIgnoreCase("Pass")) {
             user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-            userRepository.save(user);
+            userDAO.save(user);
             return "redirect:/login";
         } else {
             model.addAttribute("error-message", checkRegistered);

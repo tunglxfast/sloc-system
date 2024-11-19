@@ -1,4 +1,4 @@
-package funix.sloc_system.repository;
+package funix.sloc_system.dao;
 
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Enrollment;
@@ -10,7 +10,7 @@ import java.util.List;
 
 
 @Repository
-public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
+public interface EnrollmentDAO extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findByUser(User user);
     List<Enrollment> findByCourse(Course course);
 

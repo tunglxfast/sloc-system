@@ -1,4 +1,4 @@
-package funix.sloc_system.repository;
+package funix.sloc_system.dao;
 
 import funix.sloc_system.entity.Course;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +8,6 @@ import java.util.List;
 
 
 @Repository
-public interface CourseRepository extends JpaRepository<Course, Long> {
+public interface CourseDAO extends JpaRepository<Course, Long> {
     List<Course> findByCategoryId(Long categoryId);
 }
