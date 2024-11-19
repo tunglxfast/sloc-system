@@ -26,8 +26,13 @@ public class User {
     private String password;
 
     // Mỗi user có thể có nhiều Role
-    @OneToMany
-    private Set<UserRole> userRoles = new HashSet<>();
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
 
     // Mối quan hệ với table enrollment (học viên đăng ký khóa học)
     @OneToMany(mappedBy = "user")
@@ -79,12 +84,12 @@ public class User {
         this.password = password;
     }
 
-    public Set<UserRole> getUserRoles() {
-        return userRoles;
+    public Set<Role> getRoles() {
+        return roles;
     }
 
-    public void setUserRoles(Set<UserRole> userRoles) {
-        this.userRoles = userRoles;
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 
     public Set<Enrollment> getEnrollments() {

@@ -1,11 +1,11 @@
 package funix.sloc_system.controller;
 
 import funix.sloc_system.entity.Course;
-import funix.sloc_system.entity.Enrollment;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.service.CourseService;
 import funix.sloc_system.service.EnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
