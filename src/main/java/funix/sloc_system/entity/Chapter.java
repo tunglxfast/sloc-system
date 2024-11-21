@@ -13,7 +13,7 @@ public class Chapter {
     private String title;
 
     // Thứ tự trong khóa học
-    private int order;
+    private int sequence;
 
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
@@ -39,12 +39,12 @@ public class Chapter {
         this.title = title;
     }
 
-    public int getOrder() {
-        return order;
+    public int getSequence() {
+        return sequence;
     }
 
-    public void setOrder(int order) {
-        this.order = order;
+    public void setSequence(int sequence) {
+        this.sequence = sequence;
     }
 
     public Course getCourse() {

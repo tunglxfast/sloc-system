@@ -18,7 +18,7 @@ public class Question {
     private QuestionType questionType; // MULTIPLE_CHOICE, TRUE_FALSE
 
     // Thứ tự trong bài Test
-    private int order;
+    private int sequence;
 
     @ManyToOne
     @JoinColumn(name = "topic_id", nullable = false)
@@ -51,12 +51,12 @@ public class Question {
         this.questionType = questionType;
     }
 
-    public int getOrder() {
-        return order;
+    public int getSequence() {
+        return sequence;
     }
 
-    public void setOrder(int order) {
-        this.order = order;
+    public void setSequence(int sequence) {
+        this.sequence = sequence;
     }
 
     public Topic getTopic() {

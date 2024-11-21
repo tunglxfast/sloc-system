@@ -24,7 +24,7 @@ public abstract class Topic {
 
     // Thứ tự trong chapter
     @Column(nullable = false)
-    private int order;
+    private int sequence;
 
     @ManyToOne
     @JoinColumn(name = "chapter_id")
@@ -62,12 +62,12 @@ public abstract class Topic {
         this.topicType = topicType;
     }
 
-    public int getOrder() {
-        return order;
+    public int getSequence() {
+        return sequence;
     }
 
-    public void setOrder(int order) {
-        this.order = order;
+    public void setSequence(int sequence) {
+        this.sequence = sequence;
     }
 
     public Chapter getChapter() {

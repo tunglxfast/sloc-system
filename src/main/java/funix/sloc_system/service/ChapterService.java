@@ -1,7 +1,7 @@
 package funix.sloc_system.service;
 
 import funix.sloc_system.entity.Chapter;
-import funix.sloc_system.dao.ChapterDAO;
+import funix.sloc_system.dao.ChapterDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import java.util.List;
 public class ChapterService {
 
     @Autowired
-    private ChapterDAO chapterDAO;
+    private ChapterDao chapterDAO;
 
     public Chapter getChapterById(Long id) {
         return chapterDAO.findById(id).orElse(null);

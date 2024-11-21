@@ -8,6 +8,6 @@ import java.util.List;
 
 
 @Repository
-public interface QuestionDAO extends JpaRepository<Question, Long> {
+public interface QuestionDao extends JpaRepository<Question, Long> {
     List<Question> findByTopicId(Long TopicId);
 }

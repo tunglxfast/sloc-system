@@ -8,6 +8,6 @@ import java.util.List;
 
 
 @Repository
-public interface CourseDAO extends JpaRepository<Course, Long> {
+public interface CourseDao extends JpaRepository<Course, Long> {
     List<Course> findByCategoryId(Long categoryId);
 }

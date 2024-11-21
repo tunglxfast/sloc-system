@@ -1,7 +1,7 @@
 package funix.sloc_system.controller;
 
 import funix.sloc_system.entity.User;
-import funix.sloc_system.dao.UserDAO;
+import funix.sloc_system.dao.UserDao;
 import funix.sloc_system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,7 +21,7 @@ public class RegisterController {
     private UserService userService;
 
     @Autowired
-    private UserDAO userDAO;
+    private UserDao userDAO;
 
     @GetMapping("/register")
     public String register() {

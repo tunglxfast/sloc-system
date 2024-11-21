@@ -1,7 +1,7 @@
 package funix.sloc_system.service;
 
 import funix.sloc_system.entity.User;
-import funix.sloc_system.dao.UserDAO;
+import funix.sloc_system.dao.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
     @Autowired
-    private UserDAO userDAO;
+    private UserDao userDAO;
 
     public String checkRegistered(User user) {
         // Kiểm tra username hoặc email đã tồn tại

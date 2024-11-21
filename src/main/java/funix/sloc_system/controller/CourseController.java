@@ -24,7 +24,7 @@ public class CourseController {
     private EnrollmentService enrollmentService;
 
     // xem tất cả khóa học
-    @GetMapping("/")
+    @GetMapping(value = {"","/"})
     public String listCourses(Model model) {
         List<Course> courses = courseService.getAllCourses();
         model.addAttribute("courses", courses);

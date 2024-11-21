@@ -28,7 +28,29 @@
         </div>
         <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
           <h2 >Login</h2>
-          <form th:action="@{/login}" method="POST">
+          <form th:action="@{/authenticateTheUser}" method="POST">
+
+            <!-- Messages: error, alert ... -->
+            <div class="form-group">
+              <div class="col-xs-15">
+                <div>
+                  <!-- Login error -->
+                  <div th:if="${param.error}">
+                    <div class="alert alert-danger col-xs-offset-1 col-xs-10">
+                      Invalid username or password.
+                    </div>
+                  </div>
+
+                  <!-- Logout msg -->
+                  <div th:if="${param.logout}">
+                    <div class="alert alert-success col-xs-offset-1 col-xs-10">
+                      You have been logged out.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Username input -->
             <div data-mdb-input-init class="form-outline mb-4">
               <input type="text" id="username" name="username" class="form-control form-control-lg" required/>

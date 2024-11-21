@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
  * DAO của user chung
  */
 @Repository
-public interface UserDAO extends JpaRepository<User, Long> {
+public interface UserDao extends JpaRepository<User, Long> {
     User findByUsername(String username);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);

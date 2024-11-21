@@ -1,46 +1,62 @@
 package funix.sloc_system.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
 
+    @Autowired
+    private ApplicationUserDetailsService applicationUserDetailsService;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/login", "/register").permitAll()
-                .anyRequest().authenticated()
+        http.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
+            .authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers("/login", "/login_form", "/register", "/register_form").permitAll()
+                    .requestMatchers("/h2-console/**").permitAll()
+                    .anyRequest().authenticated()
             )
+//            .userDetailsService(applicationUserDetailsService)
             .formLogin(form -> form
                     .loginPage("/login")
+                    .loginProcessingUrl("/authenticateTheUser") // URL xử lý đăng nhập (tự xử lý)
+                    .defaultSuccessUrl("/home", true) // Chuyển hướng sau login thành công
                     .permitAll()
             )
             .logout(logout -> logout
                     .logoutUrl("/logout")
-                    .logoutSuccessUrl("/login")
+                    .logoutSuccessUrl("/login?logout")
+                    .invalidateHttpSession(true)
                     .permitAll()
-            );
+            )
+            .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
         return http.build();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public AuthenticationManager authenticationManager() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(applicationUserDetailsService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
+
+        return new ProviderManager(authenticationProvider);
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider(UserDetailsService userService) {
-        DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
-        auth.setUserDetailsService(userService); //set the custom user details service
-        auth.setPasswordEncoder(passwordEncoder()); //set the password encoder - bcrypt
-        return auth;
+    public PasswordEncoder passwordEncoder() {
+        return NoOpPasswordEncoder.getInstance();
     }
+
+
 }

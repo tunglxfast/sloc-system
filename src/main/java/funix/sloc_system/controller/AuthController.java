@@ -1,44 +1,34 @@
 package funix.sloc_system.controller;
 
+import funix.sloc_system.dao.UserDao;
 import funix.sloc_system.entity.User;
-import funix.sloc_system.dao.UserDAO;
+import funix.sloc_system.security.SecurityUser;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Điều khiển login, logout.
  */
 @Controller
 public class AuthController {
-    private final UserDAO userDAO;
+    private final UserDao userDAO;
 
-    public AuthController(UserDAO userDAO) {
+    public AuthController(UserDao userDAO) {
         this.userDAO = userDAO;
     }
 
-    @GetMapping("/login")
+    @GetMapping(value={"", "/", "/login"})
     public String login() {
-        return "login";
-    }
-
-    @PostMapping("/login")
-    public String login(@RequestParam String username, @RequestParam String password, HttpSession session, Model model) {
-        User user = userDAO.findByUsername(username);
-        if (user != null && user.getPassword().equals(password)) {
-            session.setAttribute("user", user);
-            return "redirect:/home";  // Chuyển đến trang chính sau khi đăng nhập
-        }
-        model.addAttribute("error", "Invalid credentials");
-        return "login";
+        return "login-form";
     }
 
     @GetMapping("/home")
-    public String home(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("user");
+    public String home(@AuthenticationPrincipal SecurityUser securityUser, Model model) {
+        User user = securityUser.getUser();
         if (user == null) {
             return "redirect:/login"; // Chuyển đến trang đăng nhập
         }
@@ -48,7 +38,14 @@ public class AuthController {
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
-        session.invalidate();  // Đăng xuất người dùng
-        return "redirect:/login";
+        if (session != null && session.getAttributeNames() != null) {
+            session.invalidate();
+        }
+
+        // Xóa thông tin bảo mật
+        SecurityContextHolder.getContext().setAuthentication(null);
+        SecurityContextHolder.clearContext();
+
+        return "redirect:/login?logout";
     }
 }

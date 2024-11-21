@@ -10,7 +10,7 @@ import java.util.List;
 
 
 @Repository
-public interface EnrollmentDAO extends JpaRepository<Enrollment, Long> {
+public interface EnrollmentDao extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findByUser(User user);
     List<Enrollment> findByCourse(Course course);
 

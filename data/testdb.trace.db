@@ -466,3 +466,1068 @@ select * from users where username == admin [42001-224]
 2024-11-18 22:18:34.792247+07:00 jdbc[13]: exception
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "LETE" not found; SQL statement:
 DeLETE LETE [42102-224]
+2024-11-19 23:37:23.375101+07:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "USER_ROLES" not found; SQL statement:
+select r1_0.user_id,r1_1.id,r1_1.name from user_roles r1_0 join role r1_1 on r1_1.id=r1_0.role_id where r1_0.user_id=? [42102-224]
+2024-11-19 23:46:11.539779+07:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "USER_ROLES" not found; SQL statement:
+select r1_0.user_id,r1_1.id,r1_1.name from user_roles r1_0 join role r1_1 on r1_1.id=r1_0.role_id where r1_0.user_id=? [42102-224]
+2024-11-19 23:46:20.328153+07:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "USER_ROLES" not found; SQL statement:
+select r1_0.user_id,r1_1.id,r1_1.name from user_roles r1_0 join role r1_1 on r1_1.id=r1_0.role_id where r1_0.user_id=? [42102-224]
+2024-11-19 23:46:28.499370+07:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "USER_ROLES" not found; SQL statement:
+select r1_0.user_id,r1_1.id,r1_1.name from user_roles r1_0 join role r1_1 on r1_1.id=r1_0.role_id where r1_0.user_id=? [42102-224]
+2024-11-19 23:54:07.196036+07:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "USER_ROLES" not found; SQL statement:
+select r1_0.user_id,r1_1.id,r1_1.name from user_roles r1_0 join role r1_1 on r1_1.id=r1_0.role_id where r1_0.user_id=? [42102-224]
+2024-11-20 00:03:48.168023+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "[*]remove table users"; expected "ROLLBACK, REVOKE, RUNSCRIPT, RELEASE, REFRESH"; SQL statement:
+remove table users [42001-224]
+2024-11-20 00:05:56.977129+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapter (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    course_id BIGINT,\000d\000a    FOREIGN KEY (course_id) REFERENCES course(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE chapter (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    order INT,
+    course_id BIGINT,
+    FOREIGN KEY (course_id) REFERENCES course(id)
+) [42001-224]
+2024-11-20 00:07:17.327914+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapter (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    course_id BIGINT,\000d\000a    FOREIGN KEY (course_id) REFERENCES course(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE chapter (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    order INT,
+    course_id BIGINT,
+    FOREIGN KEY (course_id) REFERENCES course(id)
+) [42001-224]
+2024-11-20 00:08:52.677896+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapter (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    ""course_id"" BIGINT,\000d\000a    FOREIGN KEY (""course_id"") REFERENCES course(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE chapter (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    order INT,
+    "course_id" BIGINT,
+    FOREIGN KEY ("course_id") REFERENCES course(id)
+) [42001-224]
+2024-11-20 00:09:13.410434+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapter (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    cou_id BIGINT,\000d\000a    FOREIGN KEY (cou_id) REFERENCES course(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE chapter (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    order INT,
+    cou_id BIGINT,
+    FOREIGN KEY (cou_id) REFERENCES course(id)
+) [42001-224]
+2024-11-20 00:09:50.000879+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE topic (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a    description TEXT,\000d\000a    topic_type VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    chapter_id BIGINT,\000d\000a    FOREIGN KEY (chapter_id) REFERENCES chapter(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE topic (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    description TEXT,
+    topic_type VARCHAR(255),
+    order INT,
+    chapter_id BIGINT,
+    FOREIGN KEY (chapter_id) REFERENCES chapter(id)
+) [42001-224]
+2024-11-20 00:10:07.342381+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "TOPIC" not found; SQL statement:
+CREATE TABLE video_lesson (
+    id BIGINT PRIMARY KEY,
+    video_url VARCHAR(255),
+    FOREIGN KEY (id) REFERENCES topic(id)
+) [42102-224]
+2024-11-20 00:10:17.329879+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE topic (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a    description TEXT,\000d\000a    topic_type VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    chapter_id BIGINT,\000d\000a    FOREIGN KEY (chapter_id) REFERENCES chapter(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE topic (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    description TEXT,
+    topic_type VARCHAR(255),
+    order INT,
+    chapter_id BIGINT,
+    FOREIGN KEY (chapter_id) REFERENCES chapter(id)
+) [42001-224]
+2024-11-20 00:11:28.485475+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapter (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    course_id BIGINT,\000d\000a    FOREIGN KEY (course_id) REFERENCES course(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE chapter (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    order INT,
+    course_id BIGINT,
+    FOREIGN KEY (course_id) REFERENCES course(id)
+) [42001-224]
+2024-11-20 00:11:33.544500+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapters (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    course_id BIGINT,\000d\000a    FOREIGN KEY (course_id) REFERENCES course(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE chapters (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    order INT,
+    course_id BIGINT,
+    FOREIGN KEY (course_id) REFERENCES course(id)
+) [42001-224]
+2024-11-20 00:11:41.484850+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapters (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    course_id BIGINT,\000d\000a    FOREIGN KEY (course_id) REFERENCES courses(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE chapters (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    order INT,
+    course_id BIGINT,
+    FOREIGN KEY (course_id) REFERENCES courses(id)
+) [42001-224]
+2024-11-20 00:11:49.970285+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapters (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    course_id BIGINT,\000d\000a    FOREIGN KEY (course_id) REFERENCES course(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE chapters (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    order INT,
+    course_id BIGINT,
+    FOREIGN KEY (course_id) REFERENCES course(id)
+) [42001-224]
+2024-11-20 00:11:56.731570+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapters (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    course_ids BIGINT,\000d\000a    FOREIGN KEY (course_ids) REFERENCES course(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE chapters (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    order INT,
+    course_ids BIGINT,
+    FOREIGN KEY (course_ids) REFERENCES course(id)
+) [42001-224]
+2024-11-20 00:12:07.388839+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapterss (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    course_ids BIGINT,\000d\000a    FOREIGN KEY (course_ids) REFERENCES course(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE chapterss (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    order INT,
+    course_ids BIGINT,
+    FOREIGN KEY (course_ids) REFERENCES course(id)
+) [42001-224]
+2024-11-20 00:12:15.826851+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapter (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    course_id BIGINT\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE chapter (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    order INT,
+    course_id BIGINT
+) [42001-224]
+2024-11-20 00:12:18.907789+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapter (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a    [*]order INT,\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE chapter (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    order INT,
+) [42001-224]
+2024-11-20 00:12:23.857851+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapter (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE chapter (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+) [42001-224]
+2024-11-20 00:12:26.178180+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapters (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE chapters (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+) [42001-224]
+2024-11-20 00:12:28.370845+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE aa(\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE aa(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+) [42001-224]
+2024-11-20 00:12:32.210548+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE aad(\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE aad(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+) [42001-224]
+2024-11-20 00:12:32.689551+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE aad(\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE aad(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+) [42001-224]
+2024-11-20 00:13:07.487662+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE aa(\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000atitle VARCHAR(255),\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE aa(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+title VARCHAR(255),
+) [42001-224]
+2024-11-20 00:13:12.890899+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE aa(\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE aa(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+) [42001-224]
+2024-11-20 00:13:16.378837+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE aa(\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    titles VARCHAR(255),\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE aa(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    titles VARCHAR(255),
+) [42001-224]
+2024-11-20 00:13:18.730484+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE aa(\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    titlesa VARCHAR(255),\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE aa(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    titlesa VARCHAR(255),
+) [42001-224]
+2024-11-20 00:13:21.050832+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE aa(\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    titles VARCHAR(255),\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE aa(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    titles VARCHAR(255),
+) [42001-224]
+2024-11-20 00:13:21.921204+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE aa(\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    titles VARCHAR(255),\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE aa(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    titles VARCHAR(255),
+) [42001-224]
+2024-11-20 00:13:29.610896+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE aa(\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    description TEXT,\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE aa(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    description TEXT,
+) [42001-224]
+2024-11-20 00:13:37.810231+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE aa(\000d\000a    id BIGINT PRIMARY KEY,\000d\000a    description TEXT,\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE aa(
+    id BIGINT PRIMARY KEY,
+    description TEXT,
+) [42001-224]
+2024-11-20 00:13:46.524272+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE aa(\000d\000a    id BIGINT PRIMARY KEY,\000d\000a    category_id BIGINT,\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE aa(
+    id BIGINT PRIMARY KEY,
+    category_id BIGINT,
+) [42001-224]
+2024-11-20 00:13:47.066825+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE aa(\000d\000a    id BIGINT PRIMARY KEY,\000d\000a    category_id BIGINT,\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE aa(
+    id BIGINT PRIMARY KEY,
+    category_id BIGINT,
+) [42001-224]
+2024-11-20 00:13:47.314809+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE aa(\000d\000a    id BIGINT PRIMARY KEY,\000d\000a    category_id BIGINT,\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE aa(
+    id BIGINT PRIMARY KEY,
+    category_id BIGINT,
+) [42001-224]
+2024-11-20 00:13:53.258831+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE aa(\000d\000a    id BIGINT PRIMARY KEY,\000d\000a[*])"; expected "identifier"; SQL statement:
+CREATE TABLE aa(
+    id BIGINT PRIMARY KEY,
+) [42001-224]
+2024-11-20 00:13:57.025829+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "AA" already exists; SQL statement:
+CREATE TABLE aa(
+    id BIGINT PRIMARY KEY
+) [42101-224]
+2024-11-20 00:14:49.026893+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "QUESTION" not found; SQL statement:
+CREATE TABLE answer (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    content TEXT,
+    is_correct BOOLEAN,
+    question_id BIGINT,
+    FOREIGN KEY (question_id) REFERENCES question(id)
+) [42102-224]
+2024-11-20 00:14:56.706713+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE question (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    content TEXT,\000d\000a    question_type VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    topic_id BIGINT,\000d\000a    FOREIGN KEY (topic_id) REFERENCES topic(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE question (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    content TEXT,
+    question_type VARCHAR(255),
+    order INT,
+    topic_id BIGINT,
+    FOREIGN KEY (topic_id) REFERENCES topic(id)
+) [42001-224]
+2024-11-20 00:15:05.368811+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE question (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    content TEXT,\000d\000a    question_type VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    topic_id BIGINT,\000d\000a    FOREIGN KEY (topic_id) REFERENCES topic(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE question (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    content TEXT,
+    question_type VARCHAR(255),
+    order INT,
+    topic_id BIGINT,
+    FOREIGN KEY (topic_id) REFERENCES topic(id)
+) [42001-224]
+2024-11-20 00:15:49.428334+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapter (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    course_id BIGINT,\000d\000a    FOREIGN KEY (course_id) REFERENCES course(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE chapter (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    order INT,
+    course_id BIGINT,
+    FOREIGN KEY (course_id) REFERENCES course(id)
+) [42001-224]
+2024-11-20 00:15:55.346302+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapter (\000d\000a    title VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    course_id BIGINT,\000d\000a    FOREIGN KEY (course_id) REFERENCES course(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE chapter (
+    title VARCHAR(255),
+    order INT,
+    course_id BIGINT,
+    FOREIGN KEY (course_id) REFERENCES course(id)
+) [42001-224]
+2024-11-20 00:15:58.816505+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapter (\000d\000a    title VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    course_id BIGINT,\000d\000a    FOREIGN KEY (course_id) REFERENCES course(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE chapter (
+    title VARCHAR(255),
+    order INT,
+    course_id BIGINT,
+    FOREIGN KEY (course_id) REFERENCES course(id)
+) [42001-224]
+2024-11-20 00:16:19.664500+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE chapter (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    title VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    course_id BIGINT,\000d\000a    FOREIGN KEY (course_id) REFERENCES course(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE chapter (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    order INT,
+    course_id BIGINT,
+    FOREIGN KEY (course_id) REFERENCES course(id)
+) [42001-224]
+2024-11-20 00:21:42.801618+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE question (\000d\000a    id BIGINT AUTO_INCREMENT PRIMARY KEY,\000d\000a    content TEXT,\000d\000a    question_type VARCHAR(255),\000d\000a    [*]order INT,\000d\000a    topic_id BIGINT,\000d\000a    FOREIGN KEY (topic_id) REFERENCES topic(id)\000d\000a)"; expected "identifier"; SQL statement:
+CREATE TABLE question (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    content TEXT,
+    question_type VARCHAR(255),
+    order INT,
+    topic_id BIGINT,
+    FOREIGN KEY (topic_id) REFERENCES topic(id)
+) [42001-224]
+2024-11-20 00:22:02.057428+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "ENROLLMENT" already exists; SQL statement:
+CREATE TABLE enrollment (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT,
+    course_id BIGINT,
+    enrollment_date DATE,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (course_id) REFERENCES course(id)
+) [42101-224]
+2024-11-20 01:05:00.511051+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "-- Insert sample users\000d\000aINSERT INTO users (username, email, name, password) VALUES \000d\000a('admin’, 'admin@example.com', 'Admin', 'adminpassword'),\000d\000a('moderator_01', ' moderator 1@example.com', 'Mod One', 'modpassword'),\000d\000a('instructor_01', 'instructor1@example.com', 'Instructor One', 'instructorpassword'),\000d\000a('student_01', 'student1@example.com', 'Student One', 'studentpassword');\000d\000a\000d\000a-- Assign roles to users\000d\000aINSERT INTO user_roles (user_id, role_id) VALUES\000d\000a(1, 1),  -- admin_user is an Admin\000d\000a(2, 2),  -- moderator_01 is a Moderator\000d\000a\000d\000a(3, 3),  -- instructor_01 is an Instructor\000d\000a(4, 4);  -- student_01 is a Student\000d\000a\000d\000a-- Insert sample courses\000d\000aINSERT INTO course (title, description, thumbnailUrl, category_id, created_by, last_updated_by, start_date, end_date, created_at, updated_at) VALUES \000d\000a('Introduction to Web Development', 'Learn the basics of web development including HTML, CSS, and JavaScript.', '/img/thumbnail1.jpg', 1, 3, 3, '2024-01-01', '2024-06-01', '2024-01-01', '2024-01-01'),\000d\000a('Data Science for Beginners', 'Learn the fundamentals of data science and machine learning.', 'img /thumbnail2.jpg', 2, 3, 3, '2024-02-01', '2024-07-01', '2024-02-01', '2024-02-01');\000d\000a\000d\000a-- Insert sample chapters\000d\000aINSERT INTO chapter (title, sequence, course_id) VALUES\000d\000a('Chapter 1: HTML Basics', 1, 1),\000d\000a('Chapter 2: CSS Styling', 2, 1),\000d\000a('Chapter 1: Introduction to Data Science', 1, 2);\000d\000a\000d\000a-- Insert sample topics\000d\000aINSERT INTO topic (title, description, topic_type, sequence, chapter_id) VALUES\000d\000a('HTML Syntax', 'Learn the basic syntax of HTML', 'Text', 1, 1),\000d\000a('CSS Selectors', 'Learn about different CSS selectors and how to use them', 'Text', 1, 2),\000d\000a('What is Data Science?', 'Introduction to Data Science concepts', 'Text', 1, 3);\000d\000a\000d\000a-- Insert sample lessons\000d\000aINSERT INTO video_lesson (id, video_url) VALUES\000d\000a(1, ' <iframe width=""560"" height=""315"" src=""https://www.youtube.com/embed/9r_hbFzA8ho?si=pyTUZYtQjuOYk2Uh"" title=""YouTube video player"" frameborder=""0"" allow=""accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"" referrerpolicy=""strict-origin-when-cross-origin"" allowfullscreen></iframe> '),\000d\000a(2, ' <iframe width=""560"" height=""315"" src=""https://www.youtube.com/embed/l1mER1bV0N0?si=Lhp6M1Tzl5La5BQ-"" title=""YouTube video player"" frameborder=""0"" allow=""accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"" referrerpolicy=""strict-origin-when-cross-origin"" allowfullscreen></iframe> ');\000d\000a\000d\000aINSERT INTO reading_lesson (id, file_url) VALUES\000d\000a(3, '/reading/intro_data_science.pdf');\000d\000a\000d\000a-- Insert sample quizzes\000d\000aINSERT INTO quiz (id, pass_score, total_score) VALUES\000d\000a(1, 70, 100),  -- HTML Syntax Quiz\000d\000a(2, 70, 100);  -- CSS Selectors Quiz\000d\000a\000d\000a-- Insert sample exams\000d\000aINSERT INTO exam (id, pass_score, total_score) VALUES\000d\000a(1, 80, 100);  -- Final Exam for Data Science\000d\000a\000d\000a-- Insert sample questions\000d\000aINSERT INTO question (content, question_type, sequence, topic_id) VALUES\000d\000a('What is HTML?', 'CHOICE_ONE', 1, 1),\000d\000a('What is a CSS Selector?', 'CHOICE_ONE', 1, 2),\000d\000a('What is Data Science?', 'CHOICE_ONE', 1, 3);\000d\000a\000d\000a-- Insert sample answers\000d\000aINSERT INTO answer (content, is_correct, question_id) VALUES\000d\000a('A markup language', TRUE, 1),\000d\000a('A programming language', FALSE, 1),\000d\000a('A mathematical formula', FALSE, 1),\000d\000a('A type of HTML tag', FALSE, 1),\000d\000a\000d\000a('A way to select HTML elements', TRUE, 2),\000d\000a('A CSS property', FALSE, 2),\000d\000a('A JavaScript function', FALSE, 2),\000d\000a('A data format', FALSE, 2),\000d\000a\000d\000a('An interdisciplinary field', TRUE, 3),\000d\000a('A type of software', FALSE, 3),\000d\000a('A programming language', FALSE, 3),\000d\000a('A database', FALSE, 3);\000d\000a\000d\000a-- Insert sample enrollment data\000d\000aINSERT INTO enrollment (user_id, course_id, enrollment_date) VALUES\000d\000a(4, 1, '2024-01-01'),  -- student_01 enrolls in Web Development course\000d\000a(4, 2, '2024-02-01[*]');  -- student_01 enrolls in Data Science course\000d\000a\000d\000a-- Insert sample instructor assignments\000d\000aINSERT INTO instructor_course (user_id, course_id) VALUES\000d\000a(3, 1),  -- instructor_01 teaches Web Development course\000d\000a(3, 2);  -- instructor_01 teaches Data Science course"; SQL statement:
+-- Insert sample users
+INSERT INTO users (username, email, name, password) VALUES 
+('admin’, 'admin@example.com', 'Admin', 'adminpassword'),
+('moderator_01', ' moderator 1@example.com', 'Mod One', 'modpassword'),
+('instructor_01', 'instructor1@example.com', 'Instructor One', 'instructorpassword'),
+('student_01', 'student1@example.com', 'Student One', 'studentpassword');
+
+-- Assign roles to users
+INSERT INTO user_roles (user_id, role_id) VALUES
+(1, 1),  -- admin_user is an Admin
+(2, 2),  -- moderator_01 is a Moderator
+
+(3, 3),  -- instructor_01 is an Instructor
+(4, 4);  -- student_01 is a Student
+
+-- Insert sample courses
+INSERT INTO course (title, description, thumbnailUrl, category_id, created_by, last_updated_by, start_date, end_date, created_at, updated_at) VALUES 
+('Introduction to Web Development', 'Learn the basics of web development including HTML, CSS, and JavaScript.', '/img/thumbnail1.jpg', 1, 3, 3, '2024-01-01', '2024-06-01', '2024-01-01', '2024-01-01'),
+('Data Science for Beginners', 'Learn the fundamentals of data science and machine learning.', 'img /thumbnail2.jpg', 2, 3, 3, '2024-02-01', '2024-07-01', '2024-02-01', '2024-02-01');
+
+-- Insert sample chapters
+INSERT INTO chapter (title, sequence, course_id) VALUES
+('Chapter 1: HTML Basics', 1, 1),
+('Chapter 2: CSS Styling', 2, 1),
+('Chapter 1: Introduction to Data Science', 1, 2);
+
+-- Insert sample topics
+INSERT INTO topic (title, description, topic_type, sequence, chapter_id) VALUES
+('HTML Syntax', 'Learn the basic syntax of HTML', 'Text', 1, 1),
+('CSS Selectors', 'Learn about different CSS selectors and how to use them', 'Text', 1, 2),
+('What is Data Science?', 'Introduction to Data Science concepts', 'Text', 1, 3);
+
+-- Insert sample lessons
+INSERT INTO video_lesson (id, video_url) VALUES
+(1, ' <iframe width="560" height="315" src="https://www.youtube.com/embed/9r_hbFzA8ho?si=pyTUZYtQjuOYk2Uh" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> '),
+(2, ' <iframe width="560" height="315" src="https://www.youtube.com/embed/l1mER1bV0N0?si=Lhp6M1Tzl5La5BQ-" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> ');
+
+INSERT INTO reading_lesson (id, file_url) VALUES
+(3, '/reading/intro_data_science.pdf');
+
+-- Insert sample quizzes
+INSERT INTO quiz (id, pass_score, total_score) VALUES
+(1, 70, 100),  -- HTML Syntax Quiz
+(2, 70, 100);  -- CSS Selectors Quiz
+
+-- Insert sample exams
+INSERT INTO exam (id, pass_score, total_score) VALUES
+(1, 80, 100);  -- Final Exam for Data Science
+
+-- Insert sample questions
+INSERT INTO question (content, question_type, sequence, topic_id) VALUES
+('What is HTML?', 'CHOICE_ONE', 1, 1),
+('What is a CSS Selector?', 'CHOICE_ONE', 1, 2),
+('What is Data Science?', 'CHOICE_ONE', 1, 3);
+
+-- Insert sample answers
+INSERT INTO answer (content, is_correct, question_id) VALUES
+('A markup language', TRUE, 1),
+('A programming language', FALSE, 1),
+('A mathematical formula', FALSE, 1),
+('A type of HTML tag', FALSE, 1),
+
+('A way to select HTML elements', TRUE, 2),
+('A CSS property', FALSE, 2),
+('A JavaScript function', FALSE, 2),
+('A data format', FALSE, 2),
+
+('An interdisciplinary field', TRUE, 3),
+('A type of software', FALSE, 3),
+('A programming language', FALSE, 3),
+('A database', FALSE, 3);
+
+-- Insert sample enrollment data
+INSERT INTO enrollment (user_id, course_id, enrollment_date) VALUES
+(4, 1, '2024-01-01'),  -- student_01 enrolls in Web Development course
+(4, 2, '2024-02-01');  -- student_01 enrolls in Data Science course
+
+-- Insert sample instructor assignments
+INSERT INTO instructor_course (user_id, course_id) VALUES
+(3, 1),  -- instructor_01 teaches Web Development course
+(3, 2);  -- instructor_01 teaches Data Science course [42000-224]
+2024-11-20 01:05:47.810802+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT * FROM ANSWER CATEGORY [*]CHAPTER COURSE ENROLLMENT"; SQL statement:
+SELECT * FROM ANSWER CATEGORY CHAPTER COURSE ENROLLMENT [42000-224]
+2024-11-20 01:05:53.771049+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "[*]CATEGORY"; expected "COMMIT, CREATE, CALL, CHECKPOINT, COMMENT"; SQL statement:
+CATEGORY [42001-224]
+2024-11-20 01:07:56.528451+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "INSERT INTO users (username, email, name, password) VALUES \000d\000a('admin’, 'admin@example.com', 'Admin', 'adminpassword'),\000d\000a('moderator_01', ' moderator 1@example.com', 'Mod One', 'modpassword'),\000d\000a('instructor_01', 'instructor1@example.com', 'Instructor One', 'instructorpassword'),\000d\000a('student_01', 'student1@example.com', 'Student One', 'studentpassword[*]'"; SQL statement:
+INSERT INTO users (username, email, name, password) VALUES 
+('admin’, 'admin@example.com', 'Admin', 'adminpassword'),
+('moderator_01', ' moderator 1@example.com', 'Mod One', 'modpassword'),
+('instructor_01', 'instructor1@example.com', 'Instructor One', 'instructorpassword'),
+('student_01', 'student1@example.com', 'Student One', 'studentpassword' [42000-224]
+2024-11-20 01:08:21.234067+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "INSERT INTO users (username, email, name, password) VALUES \000d\000a('admin’, 'admin@example.com', 'Admin', 'adminpassword'),\000d\000a('moderator_01', ' moderator 1@example.com', 'Mod One', 'modpassword'),\000d\000a('instructor_01', 'instructor1@example.com', 'Instructor One', 'instructorpassword'),\000d\000a('student_01', 'student1@example.com', 'Student One', 'studentpassword[*]');"; SQL statement:
+INSERT INTO users (username, email, name, password) VALUES 
+('admin’, 'admin@example.com', 'Admin', 'adminpassword'),
+('moderator_01', ' moderator 1@example.com', 'Mod One', 'modpassword'),
+('instructor_01', 'instructor1@example.com', 'Instructor One', 'instructorpassword'),
+('student_01', 'student1@example.com', 'Student One', 'studentpassword'); [42000-224]
+2024-11-20 01:09:13.236438+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "INSERT INTO users (username, email, name, password) VALUES \000d\000a('admin’, 'admin@example.com', 'Admin', 'adminpassword[*]'),"; SQL statement:
+INSERT INTO users (username, email, name, password) VALUES 
+('admin’, 'admin@example.com', 'Admin', 'adminpassword'), [42000-224]
+2024-11-20 01:09:17.964750+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "INSERT INTO users (username, email, name, password) VALUES \000d\000a('admin’, 'admin@example.com', 'Admin', 'adminpassword[*]');"; SQL statement:
+INSERT INTO users (username, email, name, password) VALUES 
+('admin’, 'admin@example.com', 'Admin', 'adminpassword'); [42000-224]
+2024-11-20 01:09:25.331012+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "INSERT INTO users (username, email, name, password) VALUES \000d\000a('admin’, 'admin@example.com', 'Admin', 'adminpassword[*]');"; SQL statement:
+INSERT INTO users (username, email, name, password) VALUES 
+('admin’, 'admin@example.com', 'Admin', 'adminpassword'); [42000-224]
+2024-11-20 01:11:12.043028+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "[*]USERS"; expected "UPDATE"; SQL statement:
+USERS [42001-224]
+2024-11-20 01:11:50.596016+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLDataException: Value too long for column "VIDEO_URL CHARACTER VARYING(255)": "' <iframe width=""560"" height=""315"" src=""https://www.youtube.com/embed/9r_hbFzA8h... (330)"; SQL statement:
+-- Insert sample lessons
+INSERT INTO video_lesson (id, video_url) VALUES
+(1, ' <iframe width="560" height="315" src="https://www.youtube.com/embed/9r_hbFzA8ho?si=pyTUZYtQjuOYk2Uh" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> '),
+(2, ' <iframe width="560" height="315" src="https://www.youtube.com/embed/l1mER1bV0N0?si=Lhp6M1Tzl5La5BQ-" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" al [22001-224]
+2024-11-20 01:12:18.597448+07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLDataException: Value too long for column "VIDEO_URL CHARACTER VARYING(255)": "' <iframe width=""560"" height=""315"" src=""https://www.youtube.com/embed/9r_hbFzA8h... (330)"; SQL statement:
+INSERT INTO video_lesson (id, video_url) VALUES
+(1, ' <iframe width="560" height="315" src="https://www.youtube.com/embed/9r_hbFzA8ho?si=pyTUZYtQjuOYk2Uh" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> '),
+(2, ' <iframe width="560" height="315" src="https://www.youtube.com/embed/l1mER1bV0N0?si=Lhp6M1Tzl5La5BQ-" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> ') [22001-224]
+2024-11-20 22:16:37.811475+07:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-224]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:690)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.message.DbException.get(DbException.java:188)
+	at org.h2.jdbc.JdbcConnection.checkClosed(JdbcConnection.java:1425)
+	at org.h2.jdbc.JdbcConnection.getAutoCommit(JdbcConnection.java:465)
+	at com.zaxxer.hikari.pool.HikariProxyConnection.getAutoCommit(HikariProxyConnection.java)
+	at org.hibernate.resource.jdbc.internal.AbstractLogicalConnectionImplementor.determineInitialAutoCommitMode(AbstractLogicalConnectionImplementor.java:145)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.begin(LogicalConnectionManagedImpl.java:294)
+	at org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl$TransactionDriverControlImpl.begin(JdbcResourceLocalTransactionCoordinatorImpl.java:232)
+	at org.hibernate.engine.transaction.internal.TransactionImpl.begin(TransactionImpl.java:83)
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.beginTransaction(HibernateJpaDialect.java:176)
+	at org.springframework.orm.jpa.JpaTransactionManager.doBegin(JpaTransactionManager.java:420)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.startTransaction(AbstractPlatformTransactionManager.java:532)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.getTransaction(AbstractPlatformTransactionManager.java:405)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.createTransactionIfNecessary(TransactionAspectSupport.java:604)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:373)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:138)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.data.jpa.repository.support.CrudMethodMetadataPostProcessor$CrudMethodMetadataPopulatingMethodInterceptor.invoke(CrudMethodMetadataPostProcessor.java:165)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.interceptor.ExposeInvocationInterceptor.invoke(ExposeInvocationInterceptor.java:97)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.JdkDynamicAopProxy.invoke(JdkDynamicAopProxy.java:223)
+	at jdk.proxy4/jdk.proxy4.$Proxy130.save(Unknown Source)
+	at funix.sloc_system.controller.RegisterController.register(RegisterController.java:38)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:227)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:221)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.csrf.CsrfFilter.doFilterInternal(CsrfFilter.java:131)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:362)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:278)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:384)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2024-11-20 22:16:37.832615+07:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-224]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:690)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.message.DbException.get(DbException.java:188)
+	at org.h2.jdbc.JdbcConnection.checkClosed(JdbcConnection.java:1425)
+	at org.h2.jdbc.JdbcConnection.setAutoCommit(JdbcConnection.java:437)
+	at com.zaxxer.hikari.pool.ProxyConnection.setAutoCommit(ProxyConnection.java:402)
+	at com.zaxxer.hikari.pool.HikariProxyConnection.setAutoCommit(HikariProxyConnection.java)
+	at org.hibernate.resource.jdbc.internal.AbstractLogicalConnectionImplementor.begin(AbstractLogicalConnectionImplementor.java:72)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.begin(LogicalConnectionManagedImpl.java:295)
+	at org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl$TransactionDriverControlImpl.begin(JdbcResourceLocalTransactionCoordinatorImpl.java:232)
+	at org.hibernate.engine.transaction.internal.TransactionImpl.begin(TransactionImpl.java:83)
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.beginTransaction(HibernateJpaDialect.java:176)
+	at org.springframework.orm.jpa.JpaTransactionManager.doBegin(JpaTransactionManager.java:420)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.startTransaction(AbstractPlatformTransactionManager.java:532)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.getTransaction(AbstractPlatformTransactionManager.java:405)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.createTransactionIfNecessary(TransactionAspectSupport.java:604)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:373)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:138)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.data.jpa.repository.support.CrudMethodMetadataPostProcessor$CrudMethodMetadataPopulatingMethodInterceptor.invoke(CrudMethodMetadataPostProcessor.java:165)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.interceptor.ExposeInvocationInterceptor.invoke(ExposeInvocationInterceptor.java:97)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.JdkDynamicAopProxy.invoke(JdkDynamicAopProxy.java:223)
+	at jdk.proxy4/jdk.proxy4.$Proxy130.save(Unknown Source)
+	at funix.sloc_system.controller.RegisterController.register(RegisterController.java:38)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:227)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:221)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.csrf.CsrfFilter.doFilterInternal(CsrfFilter.java:131)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:362)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:278)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:384)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2024-11-20 22:16:37.875502+07:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-224]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:690)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.message.DbException.get(DbException.java:188)
+	at org.h2.jdbc.JdbcConnection.checkClosed(JdbcConnection.java:1425)
+	at org.h2.jdbc.JdbcConnection.getWarnings(JdbcConnection.java:646)
+	at com.zaxxer.hikari.pool.HikariProxyConnection.getWarnings(HikariProxyConnection.java)
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.handleAndClearWarnings(SqlExceptionHelper.java:298)
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.logAndClearWarnings(SqlExceptionHelper.java:277)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.releaseConnection(LogicalConnectionManagedImpl.java:233)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.close(LogicalConnectionManagedImpl.java:271)
+	at org.hibernate.engine.jdbc.internal.JdbcCoordinatorImpl.close(JdbcCoordinatorImpl.java:161)
+	at org.hibernate.internal.AbstractSharedSessionContract.close(AbstractSharedSessionContract.java:454)
+	at org.hibernate.internal.SessionImpl.closeWithoutOpenChecks(SessionImpl.java:412)
+	at org.hibernate.internal.SessionImpl.close(SessionImpl.java:394)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.orm.jpa.ExtendedEntityManagerCreator$ExtendedEntityManagerInvocationHandler.invoke(ExtendedEntityManagerCreator.java:364)
+	at jdk.proxy4/jdk.proxy4.$Proxy126.close(Unknown Source)
+	at org.springframework.orm.jpa.EntityManagerFactoryUtils.closeEntityManager(EntityManagerFactoryUtils.java:424)
+	at org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor.afterCompletion(OpenEntityManagerInViewInterceptor.java:112)
+	at org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter.afterCompletion(WebRequestHandlerInterceptorAdapter.java:73)
+	at org.springframework.web.servlet.HandlerExecutionChain.triggerAfterCompletion(HandlerExecutionChain.java:176)
+	at org.springframework.web.servlet.DispatcherServlet.triggerAfterCompletion(DispatcherServlet.java:1486)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1109)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:227)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:221)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.csrf.CsrfFilter.doFilterInternal(CsrfFilter.java:131)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:362)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:278)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:384)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2024-11-20 22:16:37.882483+07:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-224]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:690)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.message.DbException.get(DbException.java:188)
+	at org.h2.jdbc.JdbcConnection.checkClosed(JdbcConnection.java:1425)
+	at org.h2.jdbc.JdbcConnection.clearWarnings(JdbcConnection.java:660)
+	at com.zaxxer.hikari.pool.HikariProxyConnection.clearWarnings(HikariProxyConnection.java)
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.handleAndClearWarnings(SqlExceptionHelper.java:307)
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.logAndClearWarnings(SqlExceptionHelper.java:277)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.releaseConnection(LogicalConnectionManagedImpl.java:233)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.close(LogicalConnectionManagedImpl.java:271)
+	at org.hibernate.engine.jdbc.internal.JdbcCoordinatorImpl.close(JdbcCoordinatorImpl.java:161)
+	at org.hibernate.internal.AbstractSharedSessionContract.close(AbstractSharedSessionContract.java:454)
+	at org.hibernate.internal.SessionImpl.closeWithoutOpenChecks(SessionImpl.java:412)
+	at org.hibernate.internal.SessionImpl.close(SessionImpl.java:394)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.orm.jpa.ExtendedEntityManagerCreator$ExtendedEntityManagerInvocationHandler.invoke(ExtendedEntityManagerCreator.java:364)
+	at jdk.proxy4/jdk.proxy4.$Proxy126.close(Unknown Source)
+	at org.springframework.orm.jpa.EntityManagerFactoryUtils.closeEntityManager(EntityManagerFactoryUtils.java:424)
+	at org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor.afterCompletion(OpenEntityManagerInViewInterceptor.java:112)
+	at org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter.afterCompletion(WebRequestHandlerInterceptorAdapter.java:73)
+	at org.springframework.web.servlet.HandlerExecutionChain.triggerAfterCompletion(HandlerExecutionChain.java:176)
+	at org.springframework.web.servlet.DispatcherServlet.triggerAfterCompletion(DispatcherServlet.java:1486)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1109)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:227)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:221)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.csrf.CsrfFilter.doFilterInternal(CsrfFilter.java:131)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:362)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:278)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:384)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2024-11-20 22:16:37.888467+07:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-224]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:690)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.message.DbException.get(DbException.java:188)
+	at org.h2.jdbc.JdbcConnection.checkClosed(JdbcConnection.java:1425)
+	at org.h2.jdbc.JdbcConnection.clearWarnings(JdbcConnection.java:660)
+	at com.zaxxer.hikari.pool.ProxyConnection.close(ProxyConnection.java:258)
+	at org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl.closeConnection(DatasourceConnectionProviderImpl.java:127)
+	at org.hibernate.internal.NonContextualJdbcConnectionAccess.releaseConnection(NonContextualJdbcConnectionAccess.java:64)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.releaseConnection(LogicalConnectionManagedImpl.java:237)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.close(LogicalConnectionManagedImpl.java:271)
+	at org.hibernate.engine.jdbc.internal.JdbcCoordinatorImpl.close(JdbcCoordinatorImpl.java:161)
+	at org.hibernate.internal.AbstractSharedSessionContract.close(AbstractSharedSessionContract.java:454)
+	at org.hibernate.internal.SessionImpl.closeWithoutOpenChecks(SessionImpl.java:412)
+	at org.hibernate.internal.SessionImpl.close(SessionImpl.java:394)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.orm.jpa.ExtendedEntityManagerCreator$ExtendedEntityManagerInvocationHandler.invoke(ExtendedEntityManagerCreator.java:364)
+	at jdk.proxy4/jdk.proxy4.$Proxy126.close(Unknown Source)
+	at org.springframework.orm.jpa.EntityManagerFactoryUtils.closeEntityManager(EntityManagerFactoryUtils.java:424)
+	at org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor.afterCompletion(OpenEntityManagerInViewInterceptor.java:112)
+	at org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter.afterCompletion(WebRequestHandlerInterceptorAdapter.java:73)
+	at org.springframework.web.servlet.HandlerExecutionChain.triggerAfterCompletion(HandlerExecutionChain.java:176)
+	at org.springframework.web.servlet.DispatcherServlet.triggerAfterCompletion(DispatcherServlet.java:1486)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1109)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:227)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:221)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.csrf.CsrfFilter.doFilterInternal(CsrfFilter.java:131)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:362)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:278)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:384)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)

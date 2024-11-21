@@ -3,7 +3,7 @@ package funix.sloc_system.service;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Enrollment;
 import funix.sloc_system.entity.User;
-import funix.sloc_system.dao.EnrollmentDAO;
+import funix.sloc_system.dao.EnrollmentDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @Service
 public class EnrollmentService {
     @Autowired
-    private EnrollmentDAO enrollmentDAO;
+    private EnrollmentDao enrollmentDAO;
 
     public Enrollment enrollCourse(User user, Course course) {
         Enrollment enrollment = new Enrollment();

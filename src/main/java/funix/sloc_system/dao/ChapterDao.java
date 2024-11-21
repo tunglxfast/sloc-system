@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ChapterDAO extends JpaRepository<Chapter, Long> {
+public interface ChapterDao extends JpaRepository<Chapter, Long> {
 
     List<Chapter> findByCourseId(Long courseId);
 }

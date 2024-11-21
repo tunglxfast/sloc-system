@@ -1,6 +1,5 @@
 package funix.sloc_system.entity;
 
-import funix.sloc_system.enums.RoleType;
 import jakarta.persistence.*;
 
 @Entity
@@ -9,9 +8,15 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    @Enumerated(EnumType.STRING)
-    private RoleType name;
+    @Column(name = "name", nullable = false, unique = true)
+    private String name;
+
+    public Role() {
+    }
+
+    public Role(String name) {
+        this.name = name;
+    }
 
     public Long getId() {
         return id;
@@ -21,11 +26,11 @@ public class Role {
         this.id = id;
     }
 
-    public RoleType getName() {
+    public String getName() {
         return name;
     }
 
-    public void setName(RoleType name) {
+    public void setName(String name) {
         this.name = name;
     }
 }
