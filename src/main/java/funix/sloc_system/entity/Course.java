@@ -35,15 +35,15 @@ public class Course {
     private User lastUpdatedBy;
 
     // tự động cập nhật chapters database khi có thay trên course
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Chapter> chapters;
 
     // Mối quan hệ với table enrollment (số học viên theo học)
-    @OneToMany(mappedBy = "course")
+    @OneToMany(mappedBy = "course", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Set<Enrollment> enrollments = new HashSet<>();
 
     // Mối quan hệ với table instructor_course (giảng viên quản lý khóa học)
-    @OneToMany(mappedBy = "course")
+    @OneToMany(mappedBy = "course", fetch = FetchType.EAGER)
     private Set<InstructorCourse> instructorCourses = new HashSet<>();
 
     private LocalDate startDate;
@@ -51,6 +51,18 @@ public class Course {
 
     private LocalDate createdAt;
     private LocalDate updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        if (createdAt == null) {
+            createdAt = LocalDate.now();
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = LocalDate.now();
+    }
 
     public Long getId() {
         return id;

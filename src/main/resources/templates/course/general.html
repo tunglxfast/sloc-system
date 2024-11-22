@@ -2,16 +2,38 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Giới thiệu khóa học</title>
+  <title>Course Details</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" style="text/css" href="/css/style.css">
+  <script src="/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
-<h1 th:text="${course.title}">Tên khóa học</h1>
-<p th:text="${course.description}">Mô tả khóa học</p>
-<a th:href="${course.thumbnailUrl}" />
-<form th:action="@{/courses/{id}/enroll}" method="post">
-  <button type="submit">Enroll</button>
-</form>
+<div class="container py-5">
+  <div class="row">
 
-<a th:href="@{/courses}">Trở lại danh sách khóa học</a>
+    <div class="col-md-4">
+      <img th:src="${course.thumbnailUrl}" class="img-fluid rounded" alt="Course Image">
+    </div>
+    <div class="col-md-8">
+
+      <h1 th:text="${course.title}">Course Title</h1>
+
+      <p th:text="${course.description}">Full course description...</p>
+
+      <p><strong>Start Date:</strong> <span th:text="${course.startDate}">YYYY-MM-DD</span></p>
+      <p><strong>End Date:</strong> <span th:text="${course.endDate}">YYYY-MM-DD</span></p>
+
+      <div th:if="${!isEnrolled}">
+        <a th:href="@{/courses/{id}/enroll(id=${course.id})}" class="btn btn-success">Enroll</a>
+      </div>
+      <div th:if="${isEnrolled}">
+        <a th:href="@{/courses/{id}/{chapterNumber}_{topicNumber}(id=${course.id},chapterNumber=1,topicNumber=1)}"
+           class="btn btn-primary">
+          Access
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

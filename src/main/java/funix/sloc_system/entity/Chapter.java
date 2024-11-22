@@ -20,7 +20,7 @@ public class Chapter {
     private Course course;
 
     // tự động cập nhật topic database khi có thay trên chapter
-    @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Topic> topics;
 
     public Long getId() {

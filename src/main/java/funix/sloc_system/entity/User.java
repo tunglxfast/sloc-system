@@ -26,7 +26,7 @@ public class User {
     private String password;
 
     // Mỗi user có thể có nhiều Role
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -35,11 +35,11 @@ public class User {
     private Set<Role> roles = new HashSet<>();
 
     // Mối quan hệ với table enrollment (học viên đăng ký khóa học)
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<Enrollment> enrollments = new HashSet<>();
 
     // Mối quan hệ với table instructor_course (giảng viên quản lý khoá học)
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private Set<InstructorCourse> instructorCourses = new HashSet<>();
 
     // Các phương thức getter, setter

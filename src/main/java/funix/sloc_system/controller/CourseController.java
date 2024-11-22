@@ -2,6 +2,7 @@ package funix.sloc_system.controller;
 
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.User;
+import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.CourseService;
 import funix.sloc_system.service.EnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,24 +29,36 @@ public class CourseController {
     public String listCourses(Model model) {
         List<Course> courses = courseService.getAllCourses();
         model.addAttribute("courses", courses);
-        return "courses/list";
+        return "courses";
     }
 
     // Xem giới thiệu sơ về khóa học
-    @GetMapping("/{id}/general")
-    public String viewCourseGeneral(@PathVariable Long id, Model model) {
+    @GetMapping(value = {"/{id}/" ,"/{id}/general"})
+    public String viewCourseGeneral(@PathVariable Long id, @AuthenticationPrincipal SecurityUser securityUser, Model model) {
         Course course = courseService.getCourseById(id);
-        model.addAttribute("course", course);
-        return "course/general";
+        User user = securityUser.getUser();
+        if (course != null && user != null) {
+            boolean isEnrolled = enrollmentService.isEnrolled(user, course);
+            model.addAttribute("course", course);
+            model.addAttribute("isEnrolled", isEnrolled);
+            return "course/general";
+        } else {
+            return "redirect:/courses";
+        }
     }
 
     // đăng ký khóa học
-    @GetMapping("/{id}/enroll")
-    public String enrollCourse(@PathVariable Long id, @AuthenticationPrincipal User user, Model model) {
-        Course course = courseService.getCourseById(id);
+    @GetMapping("/{courseId}/enroll")
+    public String enrollCourse(@PathVariable Long courseId, @AuthenticationPrincipal SecurityUser securityUser, Model model) {
+        Course course = courseService.getCourseById(courseId);
+        User user = securityUser.getUser();
         if (course != null && user != null) {
-            enrollmentService.enrollCourse(user, course);
-            return String.format("redirect:/courses/%d/topics", id);
+            String response  = enrollmentService.enrollCourse(user, course);
+            if (response.equalsIgnoreCase("Register successfully")) {
+                return String.format("redirect:/courses/%d/topics", courseId);
+            } else {
+                return String.format("redirect:/courses?error=%s",response);
+            }
         } else {
             return "redirect:/courses";
         }
