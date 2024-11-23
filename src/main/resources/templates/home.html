@@ -6,6 +6,10 @@
 </head>
 <body>
 <h1>Welcome, <span th:text="${user.name}">User</span></h1>
-<a href="/logout">Logout</a>
+
+<a th:href="@{/courses}">Courses</a>
+<form th:action="@{/logout}" method="POST">
+    <button type="submit">Logout</button>
+</form>
 </body>
 </html>
