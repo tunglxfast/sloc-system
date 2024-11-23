@@ -41,7 +41,7 @@
           <ul>
             <li th:each="topic : ${chapter.topics}">
               <a th:href="@{/courses/{id}/{chapterNumber}_{topicNumber}
-              (id=${course.id}, chapterNumber=${chapter.getSequence()}, lessonNumber=${topic.getSequence()})}"
+              (id=${course.id}, chapterNumber=${chapter.getSequence()}, topicNumber=${topic.getSequence()})}"
                  th:text="${topic.title}"></a>
             </li>
           </ul>

@@ -122,7 +122,11 @@ public class CourseController {
 
         model.addAttribute("result", result);
         model.addAttribute("topic", quiz);
-        model.addAttribute("coursesId", quiz.getChapter().getCourse().getId());
+        model.addAttribute("courseId", quiz.getChapter().getCourse().getId());
+
+        Topic nextTopic = appUtil.findNextTopic(quiz.getId());
+        model.addAttribute("nextTopic", nextTopic);
+
         return "course/quiz";
     }
 }

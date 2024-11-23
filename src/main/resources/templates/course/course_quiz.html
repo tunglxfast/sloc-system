@@ -34,13 +34,13 @@
             </h2>
 
             <!-- Lặp qua danh sách câu trả lời -->
-            <div th:each="answer : ${question.answers}">
+            <div th:each="answer : ${question.getAnswers()}">
                 <input
                         type="radio"
                         th:name="'question_' + ${question.id}"
                         th:value="${answer.id}"
-                        id="answer_${answer.id}">
-                <label th:for="answer_${answer.id}" th:text="${answer.content}">Answer content</label>
+                        th:id="'answer_' + ${answer.id}">
+                <label th:for="'answer_' + ${answer.id}" th:text="${answer.content}">Answer content</label>
             </div>
         </div>
 
@@ -49,6 +49,15 @@
     </form>
 </div>
 
-<a href="/courses">Trở lại danh sách khóa học</a>
+
+<div th:if="${nextTopic != null}">
+    <a th:href="@{/courses/{courseId}/{chapterNumber}_{topicNumber}
+    (courseId=${courseId}, chapterNumber=${nextTopic.getChapter().getSequence()}, topicNumber=${nextTopic.getSequence()})}">
+        Tới bài tiếp theo</a>
+</div>
+
+<a th:href="@{/courses/{courseId}(courseId=${courseId})}">Trở lại khóa học</a>
+
+<a th:href="@{/courses}">Trở lại trang chủ các khóa học</a>
 </body>
 </html>
