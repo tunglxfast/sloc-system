@@ -2,6 +2,7 @@ package funix.sloc_system.controller;
 
 import funix.sloc_system.entity.Enrollment;
 import funix.sloc_system.entity.User;
+import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.EnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,7 +22,8 @@ public class SettingController {
 
     // Xem các khóa học người dùng đã tham gia
     @GetMapping("/my-courses")
-    public String myCourses(@AuthenticationPrincipal User user, Model model) {
+    public String myCourses(@AuthenticationPrincipal SecurityUser securityUser, Model model) {
+        User user = securityUser.getUser();
         List<Enrollment> enrollments = enrollmentService.getEnrollmentsByUser(user);
         model.addAttribute("enrollments", enrollments);
         return "course/my-courses";

@@ -27,7 +27,7 @@ public abstract class Topic {
     private int sequence;
 
     @ManyToOne
-    @JoinColumn(name = "chapter_id")
+    @JoinColumn(name = "chapter_id", nullable = false)
     private Chapter chapter;
 
     public Long getId() {

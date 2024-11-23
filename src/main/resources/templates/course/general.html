@@ -29,9 +29,24 @@
       <div th:if="${isEnrolled}">
         <a th:href="@{/courses/{id}/{chapterNumber}_{topicNumber}(id=${course.id},chapterNumber=1,topicNumber=1)}"
            class="btn btn-primary">
-          Access
+          Start Learning
         </a>
       </div>
+
+      <!-- Danh sách chương và bài học -->
+      <h3>Course Chapters</h3>
+      <ul>
+        <li th:each="chapter : ${course.chapters}">
+          <strong th:text="${chapter.title}">Chapter Title</strong>
+          <ul>
+            <li th:each="topic : ${chapter.topics}">
+              <a th:href="@{/courses/{id}/{chapterNumber}_{topicNumber}
+              (id=${course.id}, chapterNumber=${chapter.getSequence()}, lessonNumber=${topic.getSequence()})}"
+                 th:text="${topic.title}"></a>
+            </li>
+          </ul>
+        </li>
+      </ul>
     </div>
   </div>
 </div>

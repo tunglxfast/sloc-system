@@ -36,6 +36,7 @@ public class Course {
 
     // tự động cập nhật chapters database khi có thay trên course
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OrderBy("sequence ASC")
     private List<Chapter> chapters;
 
     // Mối quan hệ với table enrollment (số học viên theo học)

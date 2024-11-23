@@ -21,6 +21,7 @@ public class Chapter {
 
     // tự động cập nhật topic database khi có thay trên chapter
     @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OrderBy("sequence ASC")
     private List<Topic> topics;
 
     public Long getId() {

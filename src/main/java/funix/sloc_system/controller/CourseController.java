@@ -1,19 +1,18 @@
 package funix.sloc_system.controller;
 
-import funix.sloc_system.entity.Course;
-import funix.sloc_system.entity.User;
+import funix.sloc_system.entity.*;
+import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.security.SecurityUser;
-import funix.sloc_system.service.CourseService;
-import funix.sloc_system.service.EnrollmentService;
+import funix.sloc_system.service.*;
+import funix.sloc_system.util.ApplicationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/courses")
@@ -24,6 +23,18 @@ public class CourseController {
     @Autowired
     private EnrollmentService enrollmentService;
 
+    @Autowired
+    private ChapterService chapterService;
+
+    @Autowired
+    private TopicService topicService;
+
+    @Autowired
+    private ApplicationUtil appUtil;
+
+    @Autowired
+    private QuizService quizService;
+
     // xem tất cả khóa học
     @GetMapping(value = {"","/"})
     public String listCourses(Model model) {
@@ -33,7 +44,7 @@ public class CourseController {
     }
 
     // Xem giới thiệu sơ về khóa học
-    @GetMapping(value = {"/{id}/" ,"/{id}/general"})
+    @GetMapping(value = {"/{id}" ,"/{id}/general"})
     public String viewCourseGeneral(@PathVariable Long id, @AuthenticationPrincipal SecurityUser securityUser, Model model) {
         Course course = courseService.getCourseById(id);
         User user = securityUser.getUser();
@@ -68,19 +79,50 @@ public class CourseController {
     @GetMapping("/{courseId}/{chapterNumber}_{topicNumber}")
     public String viewCourseDetail(
             @PathVariable Long courseId,
-            @PathVariable Integer chapterNumber,
-            @PathVariable Integer topicNumber,
-            @AuthenticationPrincipal User user,
+            @PathVariable int chapterNumber,
+            @PathVariable int topicNumber,
+            @AuthenticationPrincipal SecurityUser securityUser,
             Model model) {
 
+        User user = securityUser.getUser();
         Course course = courseService.getCourseById(courseId);
-        // Kiểm tra xem đã đăng ký khóa học chưa
-        Boolean isEnrolled = enrollmentService.isEnrolled(user, course);
-        if (!isEnrolled) {
-            return String.format("redirect:/courses/%d/general", courseId);
+        if (course == null || user == null ) {
+            return "redirect:/courses";
         }
 
-        model.addAttribute("course", course);
-        return "course/detail";
+        // Kiểm tra topic tồn tại
+        Topic topic = topicService.getTopicByChapterAndTopicSequence(courseId, chapterNumber, topicNumber);
+        // Kiểm tra đăng ký khóa học
+        boolean isEnrolled = enrollmentService.isEnrolled(user, course);
+        if (!isEnrolled || topic == null) {
+            return String.format("redirect:/courses/%d", courseId);
+        }
+
+        Topic nextTopic = appUtil.findNextTopic(topic.getId());
+
+        model.addAttribute("topic", topic);
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("nextTopic", nextTopic);
+
+        TopicType topicType = topic.getTopicType();
+        if (topicType.equals(TopicType.READING) || topicType.equals(TopicType.VIDEO)){
+            return "course/course_lesson";
+        } else {
+            return "course/course_quiz";
+        }
+    }
+
+    @PostMapping("/{courseId}/submit")
+    public String submitQuiz(@RequestParam Long quizId,
+                             @RequestParam Map<String, String> answers,
+                             Model model) {
+
+        QuizResult result = quizService.calculateScore(quizId, answers);
+        Quiz quiz = quizService.getQuizById(quizId);
+
+        model.addAttribute("result", result);
+        model.addAttribute("topic", quiz);
+        model.addAttribute("coursesId", quiz.getChapter().getCourse().getId());
+        return "course/quiz";
     }
 }
