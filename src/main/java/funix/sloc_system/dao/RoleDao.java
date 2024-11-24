@@ -2,9 +2,12 @@ package funix.sloc_system.dao;
 
 
 import funix.sloc_system.entity.Role;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface RoleDao {
+import java.util.Optional;
 
-	public Role findRoleByName(String theRoleName);
+public interface RoleDao extends JpaRepository<Role, Long> {
+
+	Optional<Role> findByName(String name);
 	
 }

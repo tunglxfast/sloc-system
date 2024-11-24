@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class QuizService {
@@ -17,8 +18,12 @@ public class QuizService {
     private QuizDao quizDao;
 
     public Quiz getQuizById(Long quizId) {
-        return quizDao.findById(quizId)
-                .orElseThrow(() -> new RuntimeException("Quiz not found"));
+        Optional<Quiz> response = quizDao.findById(quizId);
+        if (response.isEmpty()) {
+            return null;
+        } else {
+            return response.get();
+        }
     }
 
     public QuizResult calculateScore(Long quizId, Map<String, String> answers) {

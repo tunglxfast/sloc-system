@@ -66,7 +66,7 @@ public class CourseController {
         if (course != null && user != null) {
             String response  = enrollmentService.enrollCourse(user, course);
             if (response.equalsIgnoreCase("Register successfully")) {
-                return String.format("redirect:/courses/%d/topics", courseId);
+                return String.format("redirect:/courses/%d/1_1", courseId);
             } else {
                 return String.format("redirect:/courses?error=%s",response);
             }
@@ -120,13 +120,15 @@ public class CourseController {
         QuizResult result = quizService.calculateScore(quizId, answers);
         Quiz quiz = quizService.getQuizById(quizId);
 
-        model.addAttribute("result", result);
-        model.addAttribute("topic", quiz);
-        model.addAttribute("courseId", quiz.getChapter().getCourse().getId());
+        if (quiz != null) {
+            model.addAttribute("result", result);
+            model.addAttribute("topic", quiz);
+            model.addAttribute("courseId", quiz.getChapter().getCourse().getId());
 
-        Topic nextTopic = appUtil.findNextTopic(quiz.getId());
-        model.addAttribute("nextTopic", nextTopic);
+            Topic nextTopic = appUtil.findNextTopic(quiz.getId());
+            model.addAttribute("nextTopic", nextTopic);
 
+        }
         return "course/quiz";
     }
 }
