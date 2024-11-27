@@ -1,3 +1,12 @@
-.body {
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+.col-centered {
+    float: none;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.custom-box {
+    border-radius: 30px;
+    background-color: azure;
+    padding: 20px;
+    margin-bottom: 15px;
 }
