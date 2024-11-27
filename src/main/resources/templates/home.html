@@ -1,15 +1,249 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<h1>Welcome, <span th:text="${user.name}">User</span></h1>
+    <title>Home</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.0.0/mdb.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Laila';
+        }
 
-<a th:href="@{/courses}">Courses</a>
-<form th:action="@{/logout}" method="POST">
-    <button type="submit">Logout</button>
-</form>
+        h4 {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 
+<h1>Welcome, <span th:text="${user.name}">User</span></h1>
+<a href="/logout">Logout</a>
+-->
+    <!-- Navbar -->
+    <nav class="sticky-top navbar navbar-expand-lg navbar-light bg-body-tertiary">
+        <div class="container-fluid justify-content-between">
+            <!-- Left elements -->
+            <div class="d-flex">
+                <a class="navbar-brand me-2 mb-1 d-flex align-items-center" href="#">
+                    <img src="https://i.imgur.com/FsIOl6L.png" height="20" alt="SLOC Logo" loading="lazy"
+                        style="margin-top: 2px;" />
+                </a>
+                <form class="input-group w-auto my-auto d-none d-sm-flex">
+                    <input autocomplete="off" type="search" class="form-control rounded" placeholder="Search"
+                        style="min-width: 350px;" />
+                    <span class="input-group-text border-0 d-none d-lg-flex"><i class="fas fa-search"></i></span>
+                </form>
+            </div>
+            <!-- Right elements -->
+            <ul class="navbar-nav flex-row">
+                <li class="nav-item me-3 me-lg-1"><a class="nav-link active" aria-current="page" href="#">Home</a>
+                </li>
+                <li class="nav-item me-3 me-lg-1"> <a class="nav-link" th:href="@{/courses}">Courses</a>
+                </li>
+                <li class="nav-item me-3 me-lg-1"> <a class="nav-link" href="#">About</a>
+                </li>
+                <li class="nav-item me-3 me-lg-1"> <a class="nav-link" href="#">My Learning</a>
+                </li>
+                <li class="nav-item me-3 me-lg-1">
+                    <form th:action="@{/logout}" method="POST">
+                        <button type="submit">Logout</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="row" style="vertical-align: top; padding-top: 60px; margin-left: 10px; margin-right: 10px;">
+        <div class="col-md-8">
+            <h2> Education is the best way to </h2>
+            <h2 style="color: rgb(2, 117, 2);"> Broaden your knowledge </h2>
+            <h5 style="padding-top: 40px; padding-bottom: 40px;">It is the mark of an educated mind to be able to
+                entertain a thought without accepting it.</h5>
+            <button type="button" class="btn btn-success btn-rounded btn-lg">Try out now</button>
+        </div>
+        <div class="col-md-4">
+            <img src="https://i.imgur.com/Aeg7nh9.png" style="max-height: 300px;"></a>
+        </div>
+    </div>
+
+    <!-- Various Categories -->
+    <h2 style="color: rgb(2, 117, 2); vertical-align: top; padding-top: 60px; padding-left: 10px; 
+    margin-left: 10px; margin-right: 10px; font-weight: bold;">Various Categories</h2>
+    <div class="container mt-5 border-0">
+        <div class="row row-cols-lg-3 row-cols-md-2 row-cols-1 g-3">
+            <div class="col d-flex align-items-center justify-content-center">
+                <a href="https://example.com">
+                    <img src="https://i.imgur.com/ycq7WuV.png" alt="Design" style="width:150px; height:auto;">
+                    <h4 style="text-align: center; padding-top: 40px; padding-bottom: 30px;">Design</h4>
+                </a>
+            </div>
+            <div class="col d-flex align-items-center justify-content-center">
+                <a href="https://example.com">
+                    <img src="https://i.imgur.com/zl7ELtP.png" alt="Business" style="width:150px; height:auto;">
+                    <h4 style="text-align: center; padding-top: 30px; padding-bottom: 30px;">Business</h4>
+                </a>
+            </div>
+            <div class="col d-flex align-items-center justify-content-center">
+                <a href="https://example.com">
+                    <img src="https://i.imgur.com/r9UUEsx.png" alt="Services" style="width:150px; height:auto;">
+                    <h4 style="text-align: center; padding-top: 40px; padding-bottom: 30px;">Services</h4>
+                </a>
+            </div>
+            <div class="col d-flex align-items-center justify-content-center">
+                <a href="https://example.com">
+                    <img src="https://i.imgur.com/vYAk6ez.png" alt="Finance" style="width:150px; height:auto;">
+                    <h4 style="text-align: center; padding-top: 40px; padding-bottom: 30px;">Finance</h4>
+                </a>
+            </div>
+            <div class="col d-flex align-items-center justify-content-center">
+                <a href="https://example.com">
+                    <img src="https://i.imgur.com/8J6V7XY.png" alt="Programming" style="width:150px; height:auto;">
+                    <h4 style="text-align: center; padding-top: 40px; padding-bottom: 30px;">Programming</h4>
+                </a>
+            </div>
+            <div class="col d-flex align-items-center justify-content-center">
+                <a href="https://example.com">
+                    <img src="https://i.imgur.com/S5QLU9X.png" alt="Accounting" style="width:150px; height:auto;">
+                    <h4 style="text-align: center; padding-top: 40px; padding-bottom: 30px;">Accounting</h4>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popular Courses -->
+    <h2 style="color: rgb(2, 117, 2); vertical-align: top; padding-top: 60px; padding-left: 10px; 
+    margin-left: 10px; margin-right: 10px; font-weight: bold;">Popular Courses</h2>
+    <div class="container">
+        <div class="row">
+            <!-- Box 1 -->
+            <div class="d-flex col-lg-4 col-md-12 p-4" style="border-radius: 30px; padding: 20px;">
+                <div class="row align-items-center">
+                    <div class="col-12 d-flex justify-content-center align-items-center">
+                        <img src="https://i.imgur.com/PHJHzYu.png" class="img-fluid" style="max-height: 220px;">
+                    </div>
+                    <div class="col-12" style="margin-top: 20px;">
+                        <h4 style="text-align: center;">Google Data Analytics</h4>
+                    </div>
+                    <div class="col-6" style="margin-top: 20px;">
+                        <img src="https://i.imgur.com/r9UUEsx.png" class="img-fluid" style="width: 80px;">
+                    </div>
+                    <div class="col-6" style="text-align: right;">
+                        <h5 style="color: rgb(2, 117, 2);">Services</h5>
+                    </div>
+                    <div class="col-12" style="margin-top: 20px;">
+                        <a href="">
+                            <img src="https://i.imgur.com/YZzVT9m.png" class="img-fluid"
+                                style="width: 60px; float: right;">
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- Box 2 -->
+            <div class="d-flex col-lg-4 col-md-12 p-4" style="border-radius: 30px; padding: 20px;">
+                <div class="row align-items-center">
+                    <div class="col-12 d-flex justify-content-center align-items-center">
+                        <img src="https://i.imgur.com/xBRfgqG.png" class="img-fluid"
+                            style="max-height: 220px; margin: 0 auto;">
+                    </div>
+                    <div class="col-12" style="margin-top: 20px;">
+                        <h4 style="text-align: center;">SAS Visual Business Analytics</h4>
+                    </div>
+                    <div class="col-6" style="margin-top: 20px;">
+                        <img src="https://i.imgur.com/zl7ELtP.png" class="img-fluid" style="width: 80px;">
+                    </div>
+                    <div class="col-6 align-items-center" style="text-align: right;">
+                        <h5 style="color: rgb(2, 117, 2);">Business</h5>
+                    </div>
+                    <div class="col-12" style="margin-top: 20px;">
+                        <a href="">
+                            <img src="https://i.imgur.com/YZzVT9m.png" class="img-fluid"
+                                style="width: 60px; float: right;">
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- Box 3 -->
+            <div class="d-flex col-lg-4 col-md-12 p-4" style="border-radius: 30px; padding: 20px;">
+                <div class="row align-items-center">
+                    <div class="col-12 d-flex justify-content-center align-items-center">
+                        <img src="https://i.imgur.com/XvvAAJQ.png" class="img-fluid" style="max-height: 220px;">
+                    </div>
+                    <div class="col-12" style="margin-top: 20px;">
+                        <h4 style="text-align: center;">IT Automation with Python</h4>
+                    </div>
+                    <div class="col-6" style="margin-top: 20px;">
+                        <img src="https://i.imgur.com/8J6V7XY.png" class="img-fluid" style="width: 80px;">
+                    </div>
+                    <div class="col-6 align-items-center" style="text-align: right;">
+                        <h5 style="color: rgb(2, 117, 2);">Programming</h5>
+                    </div>
+                    <div class="col-12" style="margin-top: 20px;">
+                        <a href="">
+                            <img src="https://i.imgur.com/YZzVT9m.png" class="img-fluid"
+                                style="width: 60px; float: right;">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Footer -->
+        <div class="container" style="margin-top: 200px;">
+            <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-12 mb-4">
+                    <div class="mb-4">
+                        <h4>About</h4>
+                    </div>
+                    <div class="mb-4"><a href="">Patches</a></div>
+                    <div class="mb-4"><a href="">Updates</a></br></div>
+                    <div class="mb-4"><a href="">Members</a></div>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-12 mb-4">
+                    <div class="mb-4">
+                        <h4>Helps and Solution</h4>
+                    </div>
+                    <div class="mb-4"><a href="">Talk to support</a></div>
+                    <div class="mb-4"><a href="">Support document</a></br></div>
+                    <div class="mb-4"><a href="">System status</a></div>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-12 mb-4">
+                    <div class="mb-4">
+                        <h4>Community</h4>
+                    </div>
+                    <div class="mb-4">
+                        <a href="">
+                            <img src="https://i.imgur.com/dhHS8Kn.png" alt="Facebook" style="max-width: 40px;">
+                        </a>
+                    </div>
+                    <div class="mb-4">
+                        <a href="">
+                            <img src="https://i.imgur.com/pSauLmA.png" alt="Twitter" style="max-width: 40px;">
+                        </a>
+                    </div>
+                    <div class=" mb-4">
+                            <a href="">
+                                <img src="https://i.imgur.com/iCaEfZE.png" alt="LinkedIn" style="max-width: 40px;">
+                        </a>
+                        </div>
+                </div>
+            </div>
+        </div>
+        <!-- Bootstrap -->
+        <script src=" /js/popper.min.js"></script>
+                                <script src="/js/bootstrap.bundle.min.js"></script>
+                                <!-- MDB -->
+                                <script type="text/javascript"
+                                    src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.0.0/mdb.umd.min.js"></script>
 </body>
+
 </html>

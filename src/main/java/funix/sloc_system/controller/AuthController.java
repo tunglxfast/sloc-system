@@ -22,8 +22,12 @@ public class AuthController {
     }
 
     @GetMapping(value={"", "/", "/login"})
-    public String login() {
-        return "login-form";
+    public String login(@AuthenticationPrincipal SecurityUser securityUser) {
+        if (securityUser == null) {
+            return "login-form";
+        } else {
+            return "home";
+        }
     }
 
     @GetMapping("/home")
