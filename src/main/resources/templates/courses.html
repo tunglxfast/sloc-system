@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Courses</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+
+</head>
+<body>
+<div class="container py-5">
+    <h1 class="text-center mb-4">Available Courses</h1>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <!-- Đọc danh sách courses -->
+        <div class="col" th:each="course : ${courses}">
+            <div class="card h-100">
+
+                <img th:src="${course.thumbnailUrl}" class="card-img-top" alt="Course Image">
+                <div class="card-body">
+
+                    <h5 class="card-title" th:text="${course.title}">Course Title</h5>
+
+                    <p class="card-text"
+                       th:text="${#strings.length(course.description) > 100 ? course.description.substring(0, 100) + '...' : course.description}"
+                    >
+                        Short description
+                    </p>
+
+                    <a th:href="@{/courses/{id}/general(id=${course.id})}" class="btn btn-primary">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết khóa học</title>
+</head>
+<body>
+<h1 th:text="${topic.title}"></h1>
+<p th:text="${topic.description}"></p>
+
+
+<!-- Nội dung bài học -->
+<div th:if="${topic.getTopicType == T(funix.sloc_system.enums.TopicType).READING}">
+    <p>Reading Material:</p>
+    <iframe th:src="@{${topic.fileUrl}}" style="width: 100%; height: 500px;"></iframe>
+</div>
+
+<div th:if="${topic.getTopicType == T(funix.sloc_system.enums.TopicType).VIDEO}">
+    <p>Video Lesson:</p>
+    <iframe th:src="${topic.videoUrl}" style="width: 100%; height: 400px;" allowfullscreen></iframe>
+</div>
+
+<div th:if="${nextTopic == null}">
+    <a th:href="@{/courses/{courseId}(courseId=${courseId})}">Tới bài tiếp theo</a>
+</div>
+
+<div th:if="${nextTopic != null}">
+    <a th:href="@{/courses/{courseId}/{chapterNumber}_{topicNumber}
+    (courseId=${courseId}, chapterNumber=${nextTopic.getChapter().getSequence()}, topicNumber=${nextTopic.getSequence()})}">
+        Tới bài tiếp theo</a>
+</div>
+
+<a th:href="@{/courses/{courseId}(courseId=${courseId})}">Trở lại khóa học</a>
+
+<a th:href="@{/courses}">Trở lại trang chủ các khóa học</a>
+
+</body>
+</html>

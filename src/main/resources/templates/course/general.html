@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Course Details</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" style="text/css" href="/css/style.css">
+  <script src="/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+<div class="container py-5">
+  <div class="row">
+
+    <div class="col-md-4">
+      <img th:src="${course.thumbnailUrl}" class="img-fluid rounded" alt="Course Image">
+    </div>
+    <div class="col-md-8">
+
+      <h1 th:text="${course.title}">Course Title</h1>
+
+      <p th:text="${course.description}">Full course description...</p>
+
+      <p><strong>Start Date:</strong> <span th:text="${course.startDate}">YYYY-MM-DD</span></p>
+      <p><strong>End Date:</strong> <span th:text="${course.endDate}">YYYY-MM-DD</span></p>
+
+      <div th:if="${!isEnrolled}">
+        <a th:href="@{/courses/{id}/enroll(id=${course.id})}" class="btn btn-success">Enroll</a>
+      </div>
+      <div th:if="${isEnrolled}">
+        <a th:href="@{/courses/{id}/{chapterNumber}_{topicNumber}(id=${course.id},chapterNumber=1,topicNumber=1)}"
+           class="btn btn-primary">
+          Start Learning
+        </a>
+      </div>
+
+      <!-- Danh sách chương và bài học -->
+      <h3>Course Chapters</h3>
+      <ul>
+        <li th:each="chapter : ${course.chapters}">
+          <strong th:text="${chapter.title}">Chapter Title</strong>
+          <ul>
+            <li th:each="topic : ${chapter.topics}">
+              <a th:href="@{/courses/{id}/{chapterNumber}_{topicNumber}
+              (id=${course.id}, chapterNumber=${chapter.getSequence()}, topicNumber=${topic.getSequence()})}"
+                 th:text="${topic.title}"></a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
+</html>

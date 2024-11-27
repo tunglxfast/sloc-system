@@ -2,8 +2,12 @@ package funix.sloc_system.entity;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "users")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User {
 
     @Id
@@ -21,11 +25,25 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Enumerated(EnumType.STRING)  // Use EnumType.STRING to store the role as a string in the database
-    @Column(nullable = false)
-    private Role role = Role.STUDENT;
+    // Mỗi user có thể có nhiều Role
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
 
-    // Getters and setters
+    // Mối quan hệ với table enrollment (học viên đăng ký khóa học)
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<Enrollment> enrollments = new HashSet<>();
+
+    // Mối quan hệ với table instructor_course (giảng viên quản lý khoá học)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private Set<InstructorCourse> instructorCourses = new HashSet<>();
+
+    // Các phương thức getter, setter
+
     public Long getId() {
         return id;
     }
@@ -66,15 +84,27 @@ public class User {
         this.password = password;
     }
 
-    public Role getRole() {
-        return role;
+    public Set<Role> getRoles() {
+        return roles;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 
-    public enum Role {
-        STUDENT, INSTRUCTOR, MODERATOR, ADMIN
+    public Set<Enrollment> getEnrollments() {
+        return enrollments;
+    }
+
+    public void setEnrollments(Set<Enrollment> enrollments) {
+        this.enrollments = enrollments;
+    }
+
+    public Set<InstructorCourse> getInstructorCourses() {
+        return instructorCourses;
+    }
+
+    public void setInstructorCourses(Set<InstructorCourse> instructorCourses) {
+        this.instructorCourses = instructorCourses;
     }
 }

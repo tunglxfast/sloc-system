@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết khóa học</title>
+</head>
+<body>
+<!-- Kết quả -->
+<div class="quiz-result" th:if="${result != null}">
+    <h2>Kết quả</h2>
+    <p>
+        <strong>Điểm:</strong> <span th:text="${result.score}"></span> |
+        <strong>Trạng thái:</strong>
+        <span th:text="${result.passed ? 'Pass' : 'Fail'}"></span>
+    </p>
+</div>
+
+<div class="quiz-container">
+    <h1 th:text="${topic.title}">Quiz Title</h1>
+    <p>
+        <strong>Total Score:</strong> <span th:text="${topic.totalScore}"></span> |
+        <strong>Passing Score:</strong> <span th:text="${topic.passScore}"></span>
+    </p>
+
+    <!-- Form để xử lý các câu trả lời -->
+    <form th:action="@{/courses/{id}/submit(id=${coursesId})}" method="post" id="quiz-form">
+        <input type="hidden" name="quizId" th:value="${topic.id}">
+
+        <!-- Lặp qua danh sách câu hỏi -->
+        <div th:each="question : ${topic.questions}" class="question">
+            <h2>
+                Câu hỏi <span th:text="${question.sequence}"></span>:
+                <span th:text="${question.content}">Question content</span>
+            </h2>
+
+            <!-- Lặp qua danh sách câu trả lời -->
+            <div th:each="answer : ${question.getAnswers()}">
+                <input
+                        type="radio"
+                        th:name="'question_' + ${question.id}"
+                        th:value="${answer.id}"
+                        th:id="'answer_' + ${answer.id}">
+                <label th:for="'answer_' + ${answer.id}" th:text="${answer.content}">Answer content</label>
+            </div>
+        </div>
+
+        <!-- Nút Submit -->
+        <button type="submit" class="btn btn-primary">Submit Quiz</button>
+    </form>
+</div>
+
+
+<div th:if="${nextTopic != null}">
+    <a th:href="@{/courses/{courseId}/{chapterNumber}_{topicNumber}
+    (courseId=${courseId}, chapterNumber=${nextTopic.getChapter().getSequence()}, topicNumber=${nextTopic.getSequence()})}">
+        Tới bài tiếp theo</a>
+</div>
+
+<a th:href="@{/courses/{courseId}(courseId=${courseId})}">Trở lại khóa học</a>
+
+<a th:href="@{/courses}">Trở lại trang chủ các khóa học</a>
+</body>
+</html>
