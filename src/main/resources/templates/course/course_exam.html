@@ -23,7 +23,7 @@
     </p>
 
     <!-- Form để xử lý các câu trả lời -->
-    <form th:action="@{/courses/{id}/quiz/submit(id=${coursesId})}" method="post" id="quiz-form">
+    <form th:action="@{/courses/{id}/exam/submit(id=${coursesId})}" method="post" id="quiz-form">
         <input type="hidden" name="quizId" th:value="${topic.id}">
 
         <!-- Lặp qua danh sách câu hỏi -->

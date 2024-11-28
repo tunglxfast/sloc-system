@@ -18,21 +18,21 @@ public class TopicService {
     @Autowired
     private ChapterDao chapterDao;
 
-    public Topic getTopicById(Long id) {
+    public Topic findById(Long id) {
         return topicDao.findById(id).orElse(null);
     }
 
-    public List<Topic> getTopicsByChapter(Long chapterId) {
+    public List<Topic> findByChapterId(Long chapterId) {
         return topicDao.findByChapterId(chapterId);
     }
 
-    public Topic getTopicByChapterAndTopicSequence(Long courseId, int chapterSequence, int topicSequence) {
-        Optional<Chapter> chapter = chapterDao.findByCourseIdAndSequence(courseId, chapterSequence);
-        if (chapter.isEmpty()) {
+    public Topic findByChapterAndTopicSequence(Long courseId, int chapterSequence, int topicSequence) {
+        Chapter chapter = chapterDao.findByCourseIdAndSequence(courseId, chapterSequence).orElse(null);
+        if (chapter == null) {
             return null;
         }
 
-        Optional<Topic> topic = topicDao.findByChapterIdAndSequence(chapter.get().getId(), topicSequence);
+        Optional<Topic> topic = topicDao.findByChapterIdAndSequence(chapter.getId(), topicSequence);
         if (topic.isEmpty()) {
             return null;
         } else {
