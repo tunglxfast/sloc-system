@@ -1,6 +1,7 @@
 -- Drop tables in reverse order of dependency to avoid foreign key issues
 DROP TABLE IF EXISTS instructor_course;
 DROP TABLE IF EXISTS enrollment;
+DROP TABLE IF EXISTS test_result;
 DROP TABLE IF EXISTS answer;
 DROP TABLE IF EXISTS question;
 DROP TABLE IF EXISTS exam;
@@ -140,6 +141,19 @@ CREATE TABLE instructor_course (
     FOREIGN KEY (course_id) REFERENCES course(id)
 );
 
+CREATE TABLE test_result (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    highest_score INT NOT NULL,
+    latest_score INT NOT NULL,
+    passed BOOLEAN NOT NULL,
+    participation_count INT,
+    test_type VARCHAR(255) NOT NULL,
+    user_id BIGINT NOT NULL,
+    topic_id BIGINT NOT NULL,
+    CONSTRAINT fk_test_result_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_test_result_topic FOREIGN KEY (topic_id) REFERENCES topic(id)
+);
+
 -- Insert sample data
 
 -- Insert sample categories
@@ -202,18 +216,22 @@ INSERT INTO reading_lesson (id, file_url) VALUES
 
 -- Insert sample quizzes
 INSERT INTO quiz (id, pass_score, total_score) VALUES
-(4, 70, 100),  -- HTML Syntax Quiz
-(5, 70, 100);  -- CSS Selectors Quiz
+(4, 3, 4),  -- HTML Syntax Quiz
+(5, 1, 1);  -- CSS Selectors Quiz
 
 -- Insert sample exams
 INSERT INTO exam (id, pass_score, total_score) VALUES
-(6, 80, 100);  -- Final Exam for Data Science
+(6, 1, 1);  -- Final Exam for Data Science
 
 -- Insert sample questions
 INSERT INTO question (content, question_type, sequence, topic_id) VALUES
 ('What is HTML?', 'CHOICE_ONE', 1, 4),
 ('What is a CSS Selector?', 'CHOICE_ONE', 1, 5),
-('What is Data Science?', 'CHOICE_ONE', 1, 6);
+('What is Data Science?', 'CHOICE_ONE', 1, 6),
+('What does the `<title>` tag do?', 'CHOICE_ONE', 2, 4),
+('Which tag is used to create a hyperlink?', 'CHOICE_ONE', 3, 4),
+('Which of the following are valid HTML tags?', 'CHOICE_MANY', 4, 4);
+
 
 -- Insert sample answers
 INSERT INTO answer (content, is_correct, question_id) VALUES
@@ -230,7 +248,23 @@ INSERT INTO answer (content, is_correct, question_id) VALUES
 ('An interdisciplinary field', TRUE, 3),
 ('A type of software', FALSE, 3),
 ('A programming language', FALSE, 3),
-('A database', FALSE, 3);
+('A database', FALSE, 3),
+
+('Defines the title of the document', TRUE, 4),
+('Adds a link to an image', FALSE, 4),
+('Styles the text in bold', FALSE, 4),
+('Creates a table in HTML', FALSE, 4),
+
+('<a>', TRUE, 5),
+('<div>', FALSE, 5),
+('<h1>', FALSE, 5),
+('<img>', FALSE, 5),
+
+('<div>', TRUE, 6),
+('<span>', TRUE, 6),
+('<customtag>', FALSE, 6),
+('<script>', TRUE, 6),
+('<abc>', FALSE, 6);
 
 -- Insert sample enrollment data
 INSERT INTO enrollment (user_id, course_id, enrollment_date) VALUES

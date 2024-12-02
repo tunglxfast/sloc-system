@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,9 +33,12 @@ public class TestResultService {
     @Autowired
     private TestResultDao testResultDao;
 
+    public TestResult findByUserIdAndTopicId(Long userId, Long topicId) {
+        return testResultDao.findByUserIdAndTopicId(userId, topicId).orElse(null);
+    }
 
     @Transactional
-    public TestResult calculateScore(Long userId, Long topicId, Map<String, List<String>> answers) {
+    public TestResult calculateScore(Long userId, Long topicId, Map<String, String> answers) {
         User user = userDao.findById(userId).orElse(null);
         Topic topic = topicDao.findById(topicId).orElse(null);
         if (user == null || topic == null) {
@@ -55,95 +59,7 @@ public class TestResultService {
     }
 
     @Transactional
-    private TestResult calculateQuizScore(Long userId, Long topicId, Map<String, List<String>> answers) {
-        User user = userDao.findById(userId).orElse(null);
-        Quiz quiz = quizDao.findById(topicId).orElse(null);
-        if (user == null || quiz == null) {
-            return null;
-        }
-        int totalScore = 0;
-
-        List<Answer> correctAnswers = null;
-        List<String> correctAnswerIds = null;
-        for (Question question : quiz.getQuestions()) {
-            List<String> selectedAnswerIds = answers.get("question_" + question.getId());
-            correctAnswers = answerDao.findByQuestionIdAndIsCorrectTrue(question.getId());
-            correctAnswerIds = correctAnswers.stream().map(answer -> answer.getId().toString()).toList();
-
-
-            if (new HashSet<>(selectedAnswerIds).containsAll(correctAnswerIds)
-                    && new HashSet<>(correctAnswerIds).containsAll(selectedAnswerIds)) {
-                totalScore += 1;
-            }
-        }
-
-        boolean isPassed = totalScore >= quiz.getPassScore();
-
-        TestResult testResult = testResultDao.findByUserIdAndTopicId(userId, topicId).orElse(null);
-        if (testResult == null){
-            testResult = new TestResult(totalScore, totalScore, isPassed, null, quiz.getTopicType().toString(), user, quiz);
-        } else {
-            testResult.setLastestScore(totalScore);
-            if (testResult.getHighestScore() < totalScore) {
-                testResult.setHighestScore(totalScore);
-            }
-            if (!testResult.isPassed()) {
-                testResult.setPassed(isPassed);
-            }
-        }
-
-        return testResultDao.save(testResult);
-    }
-
-
-    @Transactional
-    private TestResult calculateExamScore(Long userId, Long topicId, Map<String, List<String>> answers) {
-        User user = userDao.findById(userId).orElse(null);
-        Exam exam = examDao.findById(topicId).orElse(null);
-        if (user == null || exam == null) {
-            return null;
-        }
-        int totalScore = 0;
-
-        List<Answer> correctAnswers = null;
-        List<String> correctAnswerIds = null;
-        for (Question question : exam.getQuestions()) {
-            List<String> selectedAnswerIds = answers.get("question_" + question.getId());
-            correctAnswers = answerDao.findByQuestionIdAndIsCorrectTrue(question.getId());
-            correctAnswerIds = correctAnswers.stream().map(answer -> answer.getId().toString()).toList();
-
-
-            if (new HashSet<>(selectedAnswerIds).containsAll(correctAnswerIds)
-                    && new HashSet<>(correctAnswerIds).containsAll(selectedAnswerIds)) {
-                totalScore += 1;
-            }
-        }
-
-        boolean isPassed = totalScore >= exam.getPassScore();
-
-        TestResult testResult = testResultDao.findByUserIdAndTopicId(userId, topicId).orElse(null);
-        if (testResult == null){
-            testResult = new TestResult(totalScore, totalScore, isPassed, 1, exam.getTopicType().toString(), user, exam);
-        } else {
-            testResult.setLastestScore(totalScore);
-            if (testResult.getParticipationCount() != null) {
-                testResult.setParticipationCount(testResult.getParticipationCount()+1);
-            } else {
-                testResult.setParticipationCount(1);
-            }
-            if (testResult.getHighestScore() < totalScore) {
-                testResult.setHighestScore(totalScore);
-            }
-            if (!testResult.isPassed()) {
-                testResult.setPassed(isPassed);
-            }
-        }
-
-        return testResultDao.save(testResult);
-    }
-
-    @Transactional
-    private TestResult calculateScore(Long userId, Long topicId, Map<String, List<String>> answers, boolean isQuiz) {
+    private TestResult calculateScore(Long userId, Long topicId, Map<String, String> answers, boolean isQuiz) {
         User user = userDao.findById(userId).orElse(null);
         Object topic = isQuiz ? quizDao.findById(topicId).orElse(null) : examDao.findById(topicId).orElse(null);
 
@@ -152,13 +68,22 @@ public class TestResultService {
         }
         int totalScore = 0;
 
-        List<Answer> correctAnswers = null;
-        List<String> correctAnswerIds = null;
+        List<Answer> correctAnswers = new ArrayList<>();
+        List<String> correctAnswerIds = new ArrayList<>();
+        List<String> selectedAnswerIds = new ArrayList<>();
         List<Question> questions = isQuiz ? ((Quiz) topic).getQuestions() : ((Exam) topic).getQuestions();
         for (Question question : questions) {
-            List<String> selectedAnswerIds = answers.get("question_" + question.getId());
-            correctAnswers = answerDao.findByQuestionIdAndIsCorrectTrue(question.getId());
-            correctAnswerIds = correctAnswers.stream().map(answer -> answer.getId().toString()).toList();
+            correctAnswers.clear();
+            correctAnswerIds.clear();
+            selectedAnswerIds.clear();
+
+            selectedAnswerIds.addAll(
+                    answers.entrySet().stream()
+                            .filter(entry -> entry.getKey().startsWith("question_" + question.getId()))
+                            .map(stringEntry -> stringEntry.getValue()).toList())
+            ;
+            correctAnswers.addAll(answerDao.findByQuestionIdAndIsCorrectTrue(question.getId()));
+            correctAnswerIds.addAll(correctAnswers.stream().map(answer -> answer.getId().toString()).toList());
 
             if (new HashSet<>(selectedAnswerIds).containsAll(correctAnswerIds)
                     && new HashSet<>(correctAnswerIds).containsAll(selectedAnswerIds)) {
@@ -175,7 +100,7 @@ public class TestResultService {
         if (testResult == null){
             testResult = new TestResult(totalScore, totalScore, isPassed, 1, topicType, user, ((Topic) topic));
         } else {
-            testResult.setLastestScore(totalScore);
+            testResult.setLatestScore(totalScore);
             if (testResult.getParticipationCount() != null) {
                 testResult.setParticipationCount(testResult.getParticipationCount()+1);
             } else {

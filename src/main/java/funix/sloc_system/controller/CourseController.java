@@ -109,7 +109,10 @@ public class CourseController {
         model.addAttribute("topic", topic);
         model.addAttribute("courseId", courseId);
         model.addAttribute("nextTopic", nextTopic);
-
+        TestResult testResult = testResultService.findByUserIdAndTopicId(user.getId(), topic.getId());
+        if (testResult != null) {
+            model.addAttribute("result", testResult);
+        }
         TopicType topicType = topic.getTopicType();
         if (topicType.equals(TopicType.EXAM)){
             return "course/course_exam";
@@ -120,9 +123,10 @@ public class CourseController {
         }
     }
 
-    @PostMapping("/{courseId}/quiz/submit")
-    public String submitQuiz(@RequestParam Long quizId,
-                             @RequestParam Map<String, List<String>> answers,
+    @PostMapping("{courseId}/quiz/submit")
+    public String submitQuiz(@PathVariable Long courseId,
+                             @RequestParam("quizId") Long quizId,
+                             @RequestParam Map<String, String> answers,
                              @AuthenticationPrincipal SecurityUser securityUser,
                              Model model) {
 
@@ -132,7 +136,7 @@ public class CourseController {
         if (quiz != null) {
             model.addAttribute("result", result);
             model.addAttribute("topic", quiz);
-            model.addAttribute("courseId", quiz.getChapter().getCourse().getId());
+            model.addAttribute("courseId", courseId);
 
             Topic nextTopic = appUtil.findNextTopic(quiz.getId());
             model.addAttribute("nextTopic", nextTopic);
@@ -142,8 +146,9 @@ public class CourseController {
     }
 
     @PostMapping("/{courseId}/exam/submit")
-    public String submitExam(@RequestParam Long examId,
-                             @RequestParam Map<String, List<String>> answers,
+    public String submitExam(@PathVariable Long courseId,
+                             @RequestParam Long examId,
+                             @RequestParam Map<String, String> answers,
                              @AuthenticationPrincipal SecurityUser securityUser,
                              Model model) {
 
@@ -153,7 +158,7 @@ public class CourseController {
         if (exam != null) {
             model.addAttribute("result", result);
             model.addAttribute("topic", exam);
-            model.addAttribute("courseId", exam.getChapter().getCourse().getId());
+            model.addAttribute("courseId", courseId);
 
             Topic nextTopic = appUtil.findNextTopic(exam.getId());
             model.addAttribute("nextTopic", nextTopic);

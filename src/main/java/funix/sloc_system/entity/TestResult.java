@@ -11,7 +11,7 @@ public class TestResult {
     @Column(nullable = false)
     private int highestScore;
     @Column(nullable = false)
-    private int lastestScore;
+    private int latestScore;
     @Column(nullable = false)
     private boolean passed;
 
@@ -28,9 +28,9 @@ public class TestResult {
     public TestResult() {
     }
 
-    public TestResult(int highestScore, int lastestScore, boolean passed, Integer participationCount, String testType, User user, Topic topic) {
+    public TestResult(int highestScore, int latestScore, boolean passed, Integer participationCount, String testType, User user, Topic topic) {
         this.highestScore = highestScore;
-        this.lastestScore = lastestScore;
+        this.latestScore = latestScore;
         this.passed = passed;
         this.participationCount = participationCount;
         this.testType = testType;
@@ -54,12 +54,12 @@ public class TestResult {
         this.highestScore = highestScore;
     }
 
-    public int getLastestScore() {
-        return lastestScore;
+    public int getLatestScore() {
+        return latestScore;
     }
 
-    public void setLastestScore(int lastestScore) {
-        this.lastestScore = lastestScore;
+    public void setLatestScore(int latestScore) {
+        this.latestScore = latestScore;
     }
 
     public boolean isPassed() {

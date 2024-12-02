@@ -5,12 +5,13 @@
     <title>Chi tiết khóa học</title>
 </head>
 <body>
-<!-- Kết quả -->
+<!-- Result -->
 <div class="quiz-result" th:if="${result != null}">
-    <h2>Kết quả</h2>
+    <h2>Result</h2>
     <p>
-        <strong>Điểm:</strong> <span th:text="${result.score}"></span> |
-        <strong>Trạng thái:</strong>
+        <strong>Highest Score:</strong> <span th:text="${result.highestScore}"></span> |
+        <strong>Latest Score:</strong> <span th:text="${result.latestScore}"></span> |
+        <strong>Status:</strong>
         <span th:text="${result.passed ? 'Pass' : 'Fail'}"></span>
     </p>
 </div>
@@ -22,29 +23,28 @@
         <strong>Passing Score:</strong> <span th:text="${topic.passScore}"></span>
     </p>
 
-    <!-- Form để xử lý các câu trả lời -->
-    <form th:action="@{/courses/{id}/quiz/submit(id=${coursesId})}" method="post" id="quiz-form">
+    <!-- Form to process responses -->
+    <form th:action="@{/courses/{id}/quiz/submit(id=${courseId})}" method="post" id="quiz-form">
         <input type="hidden" name="quizId" th:value="${topic.id}">
 
-        <!-- Lặp qua danh sách câu hỏi -->
+        <!-- Loop through the question list -->
         <div th:each="question : ${topic.questions}" class="question">
             <h2>
                 Câu hỏi <span th:text="${question.sequence}"></span>:
                 <span th:text="${question.content}">Question content</span>
             </h2>
 
-            <!-- Lặp qua danh sách câu trả lời -->
+            <!-- Loop through the answer list -->
             <div th:each="answer : ${question.getAnswers()}">
                 <input
-                        type="radio"
-                        th:name="'question_' + ${question.id}"
+                        type="checkbox"
+                        th:name="'question_' + ${question.id} + '_answer_' + ${answer.id}"
                         th:value="${answer.id}"
                         th:id="'answer_' + ${answer.id}">
                 <label th:for="'answer_' + ${answer.id}" th:text="${answer.content}">Answer content</label>
             </div>
         </div>
 
-        <!-- Nút Submit -->
         <button type="submit" class="btn btn-primary">Submit Quiz</button>
     </form>
 </div>
@@ -53,11 +53,11 @@
 <div th:if="${nextTopic != null}">
     <a th:href="@{/courses/{courseId}/{chapterNumber}_{topicNumber}
     (courseId=${courseId}, chapterNumber=${nextTopic.getChapter().getSequence()}, topicNumber=${nextTopic.getSequence()})}">
-        Tới bài tiếp theo</a>
+        Go to next topic</a>
 </div>
 
-<a th:href="@{/courses/{courseId}(courseId=${courseId})}">Trở lại khóa học</a>
+<a th:href="@{/courses/{courseId}(courseId=${courseId})}">Back to course</a>
 
-<a th:href="@{/courses}">Trở lại trang chủ các khóa học</a>
+<a th:href="@{/courses}">Back to courses homepage</a>
 </body>
 </html>
