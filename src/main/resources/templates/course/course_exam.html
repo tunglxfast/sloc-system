@@ -53,11 +53,11 @@
 <div th:if="${nextTopic != null}">
     <a th:href="@{/courses/{courseId}/{chapterNumber}_{topicNumber}
     (courseId=${courseId}, chapterNumber=${nextTopic.getChapter().getSequence()}, topicNumber=${nextTopic.getSequence()})}">
-        Tới bài tiếp theo</a>
+        Go to next topic</a>
 </div>
 
-<a th:href="@{/courses/{courseId}(courseId=${courseId})}">Trở lại khóa học</a>
+<a th:href="@{/courses/{courseId}(courseId=${courseId})}">Back to course</a>
 
-<a th:href="@{/courses}">Trở lại trang chủ các khóa học</a>
+<a th:href="@{/courses}">Back to courses homepage</a>
 </body>
 </html>

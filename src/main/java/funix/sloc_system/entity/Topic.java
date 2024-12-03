@@ -1,6 +1,5 @@
 package funix.sloc_system.entity;
 
-import funix.sloc_system.enums.TopicStatus;
 import funix.sloc_system.enums.TopicType;
 import jakarta.persistence.*;
 
@@ -20,10 +19,6 @@ public class Topic {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TopicType topicType;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TopicStatus status = TopicStatus.PENDING;
 
     // topic order
     @Column(nullable = false)
@@ -48,7 +43,6 @@ public class Topic {
     private List<Question> questions;
 
     // Getters and setters...
-
     public Long getId() {
         return id;
     }
@@ -79,14 +73,6 @@ public class Topic {
 
     public void setTopicType(TopicType topicType) {
         this.topicType = topicType;
-    }
-
-    public TopicStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(TopicStatus status) {
-        this.status = status;
     }
 
     public int getSequence() {

@@ -1,6 +1,7 @@
 package funix.sloc_system.enums;
 
-public enum TopicStatus {
+public enum CourseStatus {
+    DRAFT,
     PENDING,
     UPDATING,
     APPROVED,
