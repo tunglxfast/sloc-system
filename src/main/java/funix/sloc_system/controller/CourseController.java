@@ -33,12 +33,6 @@ public class CourseController {
     private ApplicationUtil appUtil;
 
     @Autowired
-    private QuizService quizService;
-
-    @Autowired
-    private ExamService examService;
-
-    @Autowired
     private TestResultService testResultService;
 
     // xem tất cả khóa học
@@ -131,14 +125,14 @@ public class CourseController {
                              Model model) {
 
         TestResult result = testResultService.calculateScore(securityUser.getUser().getId(), quizId, answers);
-        Quiz quiz = quizService.getQuizById(quizId);
+        Topic topic = topicService.findById(quizId);
 
-        if (quiz != null) {
+        if (topic != null) {
             model.addAttribute("result", result);
-            model.addAttribute("topic", quiz);
+            model.addAttribute("topic", topic);
             model.addAttribute("courseId", courseId);
 
-            Topic nextTopic = appUtil.findNextTopic(quiz.getId());
+            Topic nextTopic = appUtil.findNextTopic(topic.getId());
             model.addAttribute("nextTopic", nextTopic);
 
         }
@@ -153,7 +147,7 @@ public class CourseController {
                              Model model) {
 
         TestResult result = testResultService.calculateScore(securityUser.getUser().getId(), examId, answers);
-        Exam exam = examService.getExamById(examId);
+        Topic exam = topicService.findById(examId);
 
         if (exam != null) {
             model.addAttribute("result", result);

@@ -1,5 +1,6 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.enums.TopicType;
 import jakarta.persistence.*;
 
 @Entity
@@ -34,6 +35,16 @@ public class TestResult {
         this.passed = passed;
         this.participationCount = participationCount;
         this.testType = testType;
+        this.user = user;
+        this.topic = topic;
+    }
+
+    public TestResult(int highestScore, int latestScore, boolean passed, Integer participationCount, TopicType testType, User user, Topic topic) {
+        this.highestScore = highestScore;
+        this.latestScore = latestScore;
+        this.passed = passed;
+        this.participationCount = participationCount;
+        this.testType = testType.toString();
         this.user = user;
         this.topic = topic;
     }
