@@ -1,38 +1,131 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Courses</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.0.0/mdb.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Laila';
+        }
 
+        h4 {
+            font-weight: bold;
+        }
+    </style>
 </head>
+
 <body>
-<div class="container py-5">
-    <h1 class="text-center mb-4">Available Courses</h1>
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        <!-- Đọc danh sách courses -->
-        <div class="col" th:each="course : ${courses}">
-            <div class="card h-100">
-
-                <img th:src="${course.thumbnailUrl}" class="card-img-top" alt="Course Image">
-                <div class="card-body">
-
-                    <h5 class="card-title" th:text="${course.title}">Course Title</h5>
-
-                    <p class="card-text"
-                       th:text="${#strings.length(course.description) > 100 ? course.description.substring(0, 100) + '...' : course.description}"
-                    >
-                        Short description
-                    </p>
-
-                    <a th:href="@{/courses/{id}/general(id=${course.id})}" class="btn btn-primary">Learn More</a>
+    <!-- Navbar -->
+    <nav class="sticky-top navbar navbar-expand-lg navbar-light bg-body-tertiary">
+        <div class="container-fluid justify-content-between">
+            <!-- Left elements -->
+            <div class="d-flex">
+                <a class="navbar-brand me-2 mb-1 d-flex align-items-center" href="#">
+                    <img src="https://i.imgur.com/FsIOl6L.png" height="20" alt="SLOC Logo" loading="lazy"
+                        style="margin-top: 2px;" />
+                </a>
+                <form class="input-group w-auto my-auto d-none d-sm-flex">
+                    <input autocomplete="off" type="search" class="form-control rounded" placeholder="Search"
+                        style="min-width: 350px;" />
+                    <span class="input-group-text border-0 d-none d-lg-flex"><i class="fas fa-search"></i></span>
+                </form>
+            </div>
+            <!-- Right elements -->
+            <ul class="navbar-nav flex-row">
+                <li class="nav-item me-3 me-lg-1"><a class="nav-link active" aria-current="page"
+                        th:href="@{/home}">Home</a>
+                </li>
+                <li class="nav-item me-3 me-lg-1"> <a class="nav-link" th:href="@{/courses}">Courses</a>
+                </li>
+                <li class="nav-item me-3 me-lg-1"> <a class="nav-link" href="#">About</a>
+                </li>
+                <li class="nav-item me-3 me-lg-1"> <a class="nav-link" href="#">My Learning</a>
+                </li>
+                <li class="nav-item me-3 me-lg-1">
+                    <form th:action="@{/logout}" method="POST">
+                        <button type="submit">Logout</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+        </div>
+    </nav>
+    <img src="img\headerimg.png" style="max-width: 100%; height: auto;">
+    <div class="container">
+        <div class="row" th:each="course : ${courses}" style="margin-top: 30px;">
+            <!-- Box 1 -->
+            <div class="d-flex col-lg-4 col-md-12 p-4 border border-success border-3"
+                style="border-radius: 30px; padding: 20px;">
+                <div class="row align-items-center">
+                    <div class="col-12 d-flex justify-content-center align-items-center">
+                        <img th:src="${course.thumbnailUrl}" class="img-fluid" style="height: auto;">
+                    </div>
+                    <div class="col-12" style="margin-top: 20px;">
+                        <h4 style="text-align: center;" th:text="${course.title}">Web Development</h4>
+                    </div>
+                    <div class="col-12" style="margin-top: 20px;">
+                        <h5
+                            th:text="${#strings.length(course.description) > 100 ? course.description.substring(0, 100) + '...' : course.description}">
+                            Courses about building websites and web applications</h5>
+                    </div>
+                    <div class="col-12" style="margin-top: 20px;">
+                        <a th:href="@{/courses/{id}/general(id=${course.id})}">
+                            <button type="button" class="btn btn-outline-success" data-mdb-ripple-init
+                                data-mdb-ripple-color="green" style="float: right;">Enroll now</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- 
+            <div class="d-flex col-lg-4 col-md-12 p-4 border border-success border-3"
+                style="border-radius: 30px; padding: 20px;">
+                <div class="row align-items-center">
+                    <div class="col-12 d-flex justify-content-center align-items-center">
+                        <img src="img/courses/thumbnail2.jpg" class="img-fluid" style="height: auto;">
+                    </div>
+                    <div class="col-12" style="margin-top: 20px;">
+                        <h4 style="text-align: center;">Data Science</h4>
+                    </div>
+                    <div class="col-12" style="margin-top: 20px;">
+                        <h5>Courses about data analysis and machine learning</h5>
+                    </div>
+                    <div class="col-12" style="margin-top: 20px;">
+                        <button type="button" class="btn btn-outline-success" data-mdb-ripple-init
+                            data-mdb-ripple-color="dark" style="float: right;">Enroll now</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex col-lg-4 col-md-12 p-4 border border-success border-3"
+                style="border-radius: 30px; padding: 20px;">
+                <div class="row align-items-center">
+                    <div class="col-12 d-flex justify-content-center align-items-center">
+                        <img src="img/courses/thumbnail3.jpg" class="img-fluid" style="height: auto;">
+                    </div>
+                    <div class="col-12" style="margin-top: 20px;">
+                        <h4 style="text-align: center;">User Design</h4>
+                    </div>
+                    <div class="col-12" style="margin-top: 20px;">
+                        <h5>Courses on graphic and UI/UX design</h5>
+                    </div>
+                    <div class="col-12 " style="margin-top: 20px;">
+                        <button type="button" class="btn btn-outline-success" data-mdb-ripple-init
+                            data-mdb-ripple-color="dark" style="float: right;">Enroll now</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-
-<script src="/js/bootstrap.bundle.min.js"></script>
+    -->
+            <script src="/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

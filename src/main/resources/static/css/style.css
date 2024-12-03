@@ -10,3 +10,12 @@
     padding: 20px;
     margin-bottom: 15px;
 }
+
+
+body {
+    font-family: 'Laila';
+}
+
+h4 {
+    font-weight: bold;
+}
