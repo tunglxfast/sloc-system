@@ -3,12 +3,10 @@ package funix.sloc_system.entity;
 import funix.sloc_system.enums.TopicType;
 import jakarta.persistence.*;
 
-/**
- * Lớp cha của ReadingLesson, VideoLesson, Quiz, Exam
- */
+import java.util.List;
+
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Topic {
+public class Topic {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,7 +20,7 @@ public abstract class Topic {
     @Column(nullable = false)
     private TopicType topicType;
 
-    // Thứ tự trong chapter
+    // topic order
     @Column(nullable = false)
     private int sequence;
 
@@ -30,6 +28,21 @@ public abstract class Topic {
     @JoinColumn(name = "chapter_id", nullable = false)
     private Chapter chapter;
 
+    // Fields for ReadingLesson
+    private String fileUrl;
+
+    // Fields for VideoLesson
+    private String videoUrl;
+
+    // Fields for Quiz and Exam
+    private Integer passScore;
+    private Integer totalScore;
+    private Integer timeLimit; // Only for Exam
+
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<Question> questions;
+
+    // Getters and setters...
     public Long getId() {
         return id;
     }
@@ -76,5 +89,53 @@ public abstract class Topic {
 
     public void setChapter(Chapter chapter) {
         this.chapter = chapter;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
+    }
+
+    public Integer getPassScore() {
+        return passScore;
+    }
+
+    public void setPassScore(Integer passScore) {
+        this.passScore = passScore;
+    }
+
+    public Integer getTotalScore() {
+        return totalScore;
+    }
+
+    public void setTotalScore(Integer totalScore) {
+        this.totalScore = totalScore;
+    }
+
+    public Integer getTimeLimit() {
+        return timeLimit;
+    }
+
+    public void setTimeLimit(Integer timeLimit) {
+        this.timeLimit = timeLimit;
+    }
+
+    public List<Question> getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(List<Question> questions) {
+        this.questions = questions;
     }
 }

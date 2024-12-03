@@ -5,13 +5,12 @@
     <title>Chi tiết khóa học</title>
 </head>
 <body>
-<!-- Result -->
+<!-- Kết quả -->
 <div class="quiz-result" th:if="${result != null}">
-    <h2>Result</h2>
+    <h2>Kết quả</h2>
     <p>
-        <strong>Highest Score:</strong> <span th:text="${result.highestScore}"></span> |
-        <strong>Latest Score:</strong> <span th:text="${result.latestScore}"></span> |
-        <strong>Status:</strong>
+        <strong>Điểm:</strong> <span th:text="${result.score}"></span> |
+        <strong>Trạng thái:</strong>
         <span th:text="${result.passed ? 'Pass' : 'Fail'}"></span>
     </p>
 </div>
@@ -23,28 +22,29 @@
         <strong>Passing Score:</strong> <span th:text="${topic.passScore}"></span>
     </p>
 
-    <!-- Form to process responses -->
-    <form th:action="@{/courses/{id}/quiz/submit(id=${courseId})}" method="post" id="quiz-form">
+    <!-- Form để xử lý các câu trả lời -->
+    <form th:action="@{/courses/{id}/exam/submit(id=${courseId})}" method="post" id="quiz-form">
         <input type="hidden" name="quizId" th:value="${topic.id}">
 
-        <!-- Loop through the question list -->
+        <!-- Lặp qua danh sách câu hỏi -->
         <div th:each="question : ${topic.questions}" class="question">
             <h2>
                 Câu hỏi <span th:text="${question.sequence}"></span>:
                 <span th:text="${question.content}">Question content</span>
             </h2>
 
-            <!-- Loop through the answer list -->
+            <!-- Lặp qua danh sách câu trả lời -->
             <div th:each="answer : ${question.getAnswers()}">
                 <input
-                        type="checkbox"
-                        th:name="'question_' + ${question.id} + '_answer_' + ${answer.id}"
+                        type="radio"
+                        th:name="'question_' + ${question.id}"
                         th:value="${answer.id}"
                         th:id="'answer_' + ${answer.id}">
                 <label th:for="'answer_' + ${answer.id}" th:text="${answer.content}">Answer content</label>
             </div>
         </div>
 
+        <!-- Nút Submit -->
         <button type="submit" class="btn btn-primary">Submit Quiz</button>
     </form>
 </div>

@@ -17,7 +17,6 @@ public class UserService {
     private UserDao userDao;
 
     public String checkRegistered(User user) {
-        // Kiểm tra username hoặc email đã tồn tại
         if (userDao.existsByUsername(user.getUsername())) {
             return "Username already exists";
         } else if (userDao.existsByEmail(user.getEmail())) {
@@ -42,5 +41,9 @@ public class UserService {
 
     public boolean existsByEmail(String email) {
         return userDao.existsByEmail(email);
+    }
+
+    public User findById(Long id) {
+        return userDao.findById(id).orElse(null);
     }
 }

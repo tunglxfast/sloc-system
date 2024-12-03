@@ -33,7 +33,7 @@ public class CourseController {
     private ApplicationUtil appUtil;
 
     @Autowired
-    private QuizService quizService;
+    private TestResultService testResultService;
 
     // xem tất cả khóa học
     @GetMapping(value = {"","/"})
@@ -91,7 +91,7 @@ public class CourseController {
         }
 
         // Kiểm tra topic tồn tại
-        Topic topic = topicService.getTopicByChapterAndTopicSequence(courseId, chapterNumber, topicNumber);
+        Topic topic = topicService.findByChapterAndTopicSequence(courseId, chapterNumber, topicNumber);
         // Kiểm tra đăng ký khóa học
         boolean isEnrolled = enrollmentService.isEnrolled(user, course);
         if (!isEnrolled || topic == null) {
@@ -103,32 +103,61 @@ public class CourseController {
         model.addAttribute("topic", topic);
         model.addAttribute("courseId", courseId);
         model.addAttribute("nextTopic", nextTopic);
-
+        TestResult testResult = testResultService.findByUserIdAndTopicId(user.getId(), topic.getId());
+        if (testResult != null) {
+            model.addAttribute("result", testResult);
+        }
         TopicType topicType = topic.getTopicType();
-        if (topicType.equals(TopicType.READING) || topicType.equals(TopicType.VIDEO)){
-            return "course/course_lesson";
-        } else {
+        if (topicType.equals(TopicType.EXAM)){
+            return "course/course_exam";
+        } else if (topicType.equals(TopicType.QUIZ)) {
             return "course/course_quiz";
+        } else {
+            return "course/course_lesson";
         }
     }
 
-    @PostMapping("/{courseId}/submit")
-    public String submitQuiz(@RequestParam Long quizId,
+    @PostMapping("{courseId}/quiz/submit")
+    public String submitQuiz(@PathVariable Long courseId,
+                             @RequestParam("quizId") Long quizId,
                              @RequestParam Map<String, String> answers,
+                             @AuthenticationPrincipal SecurityUser securityUser,
                              Model model) {
 
-        QuizResult result = quizService.calculateScore(quizId, answers);
-        Quiz quiz = quizService.getQuizById(quizId);
+        TestResult result = testResultService.calculateScore(securityUser.getUser().getId(), quizId, answers);
+        Topic topic = topicService.findById(quizId);
 
-        if (quiz != null) {
+        if (topic != null) {
             model.addAttribute("result", result);
-            model.addAttribute("topic", quiz);
-            model.addAttribute("courseId", quiz.getChapter().getCourse().getId());
+            model.addAttribute("topic", topic);
+            model.addAttribute("courseId", courseId);
 
-            Topic nextTopic = appUtil.findNextTopic(quiz.getId());
+            Topic nextTopic = appUtil.findNextTopic(topic.getId());
             model.addAttribute("nextTopic", nextTopic);
 
         }
-        return "course/quiz";
+        return "course/course_quiz";
+    }
+
+    @PostMapping("/{courseId}/exam/submit")
+    public String submitExam(@PathVariable Long courseId,
+                             @RequestParam Long examId,
+                             @RequestParam Map<String, String> answers,
+                             @AuthenticationPrincipal SecurityUser securityUser,
+                             Model model) {
+
+        TestResult result = testResultService.calculateScore(securityUser.getUser().getId(), examId, answers);
+        Topic exam = topicService.findById(examId);
+
+        if (exam != null) {
+            model.addAttribute("result", result);
+            model.addAttribute("topic", exam);
+            model.addAttribute("courseId", courseId);
+
+            Topic nextTopic = appUtil.findNextTopic(exam.getId());
+            model.addAttribute("nextTopic", nextTopic);
+
+        }
+        return "course/course_exam";
     }
 }
