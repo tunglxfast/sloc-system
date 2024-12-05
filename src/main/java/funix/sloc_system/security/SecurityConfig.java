@@ -23,6 +23,7 @@ public class SecurityConfig {
 
         http.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
             .authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers("/instructor").hasRole("INSTRUCTOR")
                     .requestMatchers("/login", "/login_form", "/register", "/register_form").permitAll()
                     .requestMatchers("/h2-console/**").permitAll()
                     .anyRequest().authenticated()
@@ -30,8 +31,8 @@ public class SecurityConfig {
 //            .userDetailsService(applicationUserDetailsService)
             .formLogin(form -> form
                     .loginPage("/login")
-                    .loginProcessingUrl("/authenticateTheUser") // URL xử lý đăng nhập (tự xử lý)
-                    .defaultSuccessUrl("/home", true) // Chuyển hướng sau login thành công
+                    .loginProcessingUrl("/authenticateTheUser")
+                    .defaultSuccessUrl("/home", true)
                     .permitAll()
             )
             .logout(logout -> logout

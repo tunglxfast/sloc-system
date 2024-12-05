@@ -1,17 +1,22 @@
 package funix.sloc_system.service;
 
-import funix.sloc_system.entity.Course;
 import funix.sloc_system.dao.CourseDao;
+import funix.sloc_system.dao.UserDao;
+import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.CourseStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
 @Service
 public class CourseService {
+
+    @Autowired
+    private UserDao userDao;
     @Autowired
     private CourseDao courseDAO;
     @Autowired
@@ -35,6 +40,17 @@ public class CourseService {
 
     public List<Course> findAllByInstructorAndStatus(User instructor, CourseStatus status) {
         return courseDAO.findAllByInstructorAndStatus(instructor, status);
+    }
+
+    public Course createCourse(Course course, String username) {
+        User creator = userDao.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not exist"));
+
+        course.getInstructors().add(creator);
+        course.setStatus(CourseStatus.PENDING);
+        course.setCreatedAt(LocalDate.now());
+
+        return courseDAO.save(course);
     }
 
     public void sendRejectionEmail(Set<User> instructors, Course course, String reason) {
@@ -72,4 +88,6 @@ public class CourseService {
                 instructor.getName(), course.getTitle());
         emailService.sendEmail(instructor.getEmail(), subject, body);
     }
+
+
 }
