@@ -46,7 +46,7 @@ public class CourseController {
     // Xem giới thiệu sơ về khóa học
     @GetMapping(value = {"/{id}" ,"/{id}/general"})
     public String viewCourseGeneral(@PathVariable Long id, @AuthenticationPrincipal SecurityUser securityUser, Model model) {
-        Course course = courseService.getCourseById(id);
+        Course course = courseService.findById(id);
         User user = securityUser.getUser();
         if (course != null && user != null) {
             boolean isEnrolled = enrollmentService.isEnrolled(user, course);
@@ -61,7 +61,7 @@ public class CourseController {
     // đăng ký khóa học
     @GetMapping("/{courseId}/enroll")
     public String enrollCourse(@PathVariable Long courseId, @AuthenticationPrincipal SecurityUser securityUser, Model model) {
-        Course course = courseService.getCourseById(courseId);
+        Course course = courseService.findById(courseId);
         User user = securityUser.getUser();
         if (course != null && user != null) {
             String response  = enrollmentService.enrollCourse(user, course);
@@ -85,7 +85,7 @@ public class CourseController {
             Model model) {
 
         User user = securityUser.getUser();
-        Course course = courseService.getCourseById(courseId);
+        Course course = courseService.findById(courseId);
         if (course == null || user == null ) {
             return "redirect:/courses";
         }

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="/instructor/courses/create" method="post">
+    <input type="text" name="title" placeholder="Course Title" required />
+    <textarea name="description" placeholder="Course Description" required></textarea>
+    <select name="instructors" multiple>
+        <option th:each="instructor : ${allInstructors}" th:value="${instructor.id}" th:text="${instructor.username}"></option>
+    </select>
+    <button type="submit">Create</button>
+</form>
+
+</body>
+</html>
