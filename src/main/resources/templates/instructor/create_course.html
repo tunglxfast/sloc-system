@@ -4,11 +4,9 @@
     <title>Create course</title>
 </head>
 <body>
+<h2 th:text="'Welcome ' + ${user.name}">Welcome anonymous</h2>
 <h1>Create new course</h1>
 
-<div th:if="${successMessage}">
-    <p th:text="${successMessage}" style="color: green;"></p>
-</div>
 <div th:if="${errorMessage}">
     <p th:text="${errorMessage}" style="color: red;"></p>
 </div>

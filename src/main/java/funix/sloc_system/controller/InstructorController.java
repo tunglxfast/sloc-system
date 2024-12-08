@@ -3,15 +3,16 @@ package funix.sloc_system.controller;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.CourseStatus;
+import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.CategoryService;
 import funix.sloc_system.service.CourseService;
 import funix.sloc_system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
 import java.security.Principal;
@@ -29,8 +30,19 @@ public class InstructorController {
     @Autowired
     private CategoryService categoryService;
 
+    @GetMapping(value = {"","/","instructor_courses"})
+    public String showInstructorManageList(@AuthenticationPrincipal SecurityUser securityUser, Model model){
+        User instructor = userService.findById(securityUser.getUser().getId());
+        List<Course> courseList = courseService.findByIntructors(instructor);
+        model.addAttribute("user", instructor);
+        model.addAttribute("courses", courseList);
+        return "instructor/instructor_courses";
+    }
+
     @GetMapping("/course/create")
-    public String showCreateCourseForm(Model model) {
+    public String showCreateCourseForm(@AuthenticationPrincipal SecurityUser securityUser, Model model) {
+        User instructor = userService.findById(securityUser.getUser().getId());
+        model.addAttribute("user", instructor);
         model.addAttribute("course", new Course());
         model.addAttribute("categories", categoryService.getAllCategories());
         return "instructor/create_course";
@@ -38,11 +50,12 @@ public class InstructorController {
 
     @PostMapping("/course/create_submit")
     public String createCourse(@ModelAttribute("course") Course course,
-                               Principal principal,
+                               @AuthenticationPrincipal SecurityUser securityUser,
                                @RequestParam("thumbnailFile") MultipartFile file,
-                               RedirectAttributes redirectAttributes) {
+                               Model model) {
+        User instructor = userService.findById(securityUser.getUser().getId());
         try {
-            course = courseService.createCourse(course, principal.getName());
+            course = courseService.createCourse(course, securityUser.getUser().getId());
             // save picture
             if (!file.isEmpty()) {
                 String fileName = "thumbnail_" + course.getId() + ".jpg";
@@ -51,17 +64,23 @@ public class InstructorController {
 
                 course.setThumbnailUrl("/img/" + fileName);
             }
-            courseService.save(course);
+            course = courseService.save(course);
 
-            redirectAttributes.addFlashAttribute(
+            model.addAttribute(
                     "successMessage",
-                    "The course has been created and is awaiting approval.");
+                    "The course general has been created.");
+            model.addAttribute("user", instructor);
+            model.addAttribute("course", course);
+            return "instructor/create_topic";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute(
+            model.addAttribute(
                     "errorMessage",
                     "An error occurred while creating the course.");
+            model.addAttribute("user", instructor);
+            model.addAttribute("course", new Course());
+            model.addAttribute("categories", categoryService.getAllCategories());
+            return "instructor/create_course";
         }
-        return "redirect:/instructor/courses";
     }
 
     @GetMapping("/instructor/notifications")

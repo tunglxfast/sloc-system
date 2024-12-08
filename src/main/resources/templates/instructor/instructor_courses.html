@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<a th:href="@{/instructor/course/create}">Create new course</a>
+<table class="table">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="course : ${courses}">
+        <td th:text="${course.title}"></td>
+        <td th:text="${course.description}"></td>
+        <td th:text="${course.status}"></td>
+        <a href="@{/instructor/course/{id}/edit(id=${course.id})">Edit</a>
+    </tr>
+    <tr th:if="${courses.size() == 0}">
+        <td colspan="4">No courses available for this instructor.</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

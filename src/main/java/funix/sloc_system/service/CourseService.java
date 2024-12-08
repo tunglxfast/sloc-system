@@ -42,8 +42,8 @@ public class CourseService {
         return courseDAO.findAllByInstructorAndStatus(instructor, status);
     }
 
-    public Course createCourse(Course course, String username) {
-        User creator = userDao.findByUsername(username)
+    public Course createCourse(Course course, Long userId) {
+        User creator = userDao.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not exist"));
 
         course.getInstructors().add(creator);
@@ -90,4 +90,7 @@ public class CourseService {
     }
 
 
+    public List<Course> findByIntructors(User instructor) {
+        return courseDAO.findByIntructors(instructor);
+    }
 }

@@ -21,6 +21,9 @@ public class CourseController {
     private CourseService courseService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private EnrollmentService enrollmentService;
 
     @Autowired
@@ -47,7 +50,7 @@ public class CourseController {
     @GetMapping(value = {"/{id}" ,"/{id}/general"})
     public String viewCourseGeneral(@PathVariable Long id, @AuthenticationPrincipal SecurityUser securityUser, Model model) {
         Course course = courseService.findById(id);
-        User user = securityUser.getUser();
+        User user = userService.findById(securityUser.getUser().getId());
         if (course != null && user != null) {
             boolean isEnrolled = enrollmentService.isEnrolled(user, course);
             model.addAttribute("course", course);
@@ -62,7 +65,7 @@ public class CourseController {
     @GetMapping("/{courseId}/enroll")
     public String enrollCourse(@PathVariable Long courseId, @AuthenticationPrincipal SecurityUser securityUser, Model model) {
         Course course = courseService.findById(courseId);
-        User user = securityUser.getUser();
+        User user = userService.findById(securityUser.getUser().getId());
         if (course != null && user != null) {
             String response  = enrollmentService.enrollCourse(user, course);
             if (response.equalsIgnoreCase("Register successfully")) {
@@ -84,7 +87,7 @@ public class CourseController {
             @AuthenticationPrincipal SecurityUser securityUser,
             Model model) {
 
-        User user = securityUser.getUser();
+        User user = userService.findById(securityUser.getUser().getId());
         Course course = courseService.findById(courseId);
         if (course == null || user == null ) {
             return "redirect:/courses";
