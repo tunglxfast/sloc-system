@@ -13,4 +13,6 @@ public interface ChapterDao extends JpaRepository<Chapter, Long> {
     List<Chapter> findByCourseId(Long courseId);
 
     Optional<Chapter> findByCourseIdAndSequence(Long courseId, int sequence);
+
+    List<Chapter> findByCourseIdOrderBySequence(Long courseId);
 }

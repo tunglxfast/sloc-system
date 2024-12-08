@@ -5,8 +5,6 @@ import funix.sloc_system.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 /**
  * Chứa các chức năng của user
  * làm việc với Repository
@@ -27,12 +25,7 @@ public class UserService {
     }
 
     public User findByUsername(String username) {
-        Optional<User> response = userDao.findByUsername(username);
-        if (response.isEmpty()) {
-            return null;
-        } else {
-            return response.get();
-        }
+        return userDao.findByUsername(username).orElse(null);
     }
 
     public boolean existsByUsername(String username) {

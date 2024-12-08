@@ -23,7 +23,7 @@ public class SecurityConfig {
 
         http.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
             .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers("/instructor").hasRole("INSTRUCTOR")
+                    .requestMatchers("/instructor/**").hasAuthority("INSTRUCTOR")
                     .requestMatchers("/login", "/login_form", "/register", "/register_form").permitAll()
                     .requestMatchers("/h2-console/**").permitAll()
                     .anyRequest().authenticated()

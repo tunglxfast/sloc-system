@@ -18,5 +18,5 @@ public interface CourseDao extends JpaRepository<Course, Long> {
     @Query("SELECT c FROM Course c JOIN c.instructors i WHERE i = :instructor AND c.status = :status")
     List<Course> findAllByInstructorAndStatus(@Param("instructor") User instructor, @Param("status") CourseStatus status);
 
-    List<Course> findByIntructors(User instructor);
+    List<Course> findByInstructors(User instructor);
 }

@@ -18,28 +18,28 @@ public class CourseService {
     @Autowired
     private UserDao userDao;
     @Autowired
-    private CourseDao courseDAO;
+    private CourseDao courseDao;
     @Autowired
     private EmailService emailService;
 
     public List<Course> getAllCourses() {
-        return courseDAO.findAll();
+        return courseDao.findAll();
     }
 
     public Course findById(Long id) {
-        return courseDAO.findById(id).orElse(null);
+        return courseDao.findById(id).orElse(null);
     }
 
     public List<Course> findByCategoryId(Long categoryId) {
-        return courseDAO.findByCategoryId(categoryId);
+        return courseDao.findByCategoryId(categoryId);
     }
 
     public Course save(Course course) {
-        return courseDAO.save(course);
+        return courseDao.save(course);
     }
 
     public List<Course> findAllByInstructorAndStatus(User instructor, CourseStatus status) {
-        return courseDAO.findAllByInstructorAndStatus(instructor, status);
+        return courseDao.findAllByInstructorAndStatus(instructor, status);
     }
 
     public Course createCourse(Course course, Long userId) {
@@ -47,10 +47,23 @@ public class CourseService {
                 .orElseThrow(() -> new IllegalArgumentException("User not exist"));
 
         course.getInstructors().add(creator);
-        course.setStatus(CourseStatus.PENDING);
+        course.setStatus(CourseStatus.DRAFT);
         course.setCreatedAt(LocalDate.now());
+        course.setCreatedBy(creator);
 
-        return courseDAO.save(course);
+        return courseDao.save(course);
+    }
+
+    public void submitForReview(Long courseId) {
+        Course course = courseDao.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+
+        if (course.getChapters().isEmpty()) {
+            throw new IllegalArgumentException("Course must have at least one chapter before submission.");
+        }
+
+        course.setStatus(CourseStatus.PENDING);
+        courseDao.save(course);
     }
 
     public void sendRejectionEmail(Set<User> instructors, Course course, String reason) {
@@ -90,7 +103,7 @@ public class CourseService {
     }
 
 
-    public List<Course> findByIntructors(User instructor) {
-        return courseDAO.findByIntructors(instructor);
+    public List<Course> findByInstructors(User instructor) {
+        return courseDao.findByInstructors(instructor);
     }
 }
