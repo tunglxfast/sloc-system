@@ -9,5 +9,5 @@ public class SlocSystemApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SlocSystemApplication.class, args);
 	}
-
+	
 }
