@@ -21,7 +21,7 @@ public class TopicCreateController {
         Chapter chapter = chapterService.findById(chapterId);
         model.addAttribute("chapter", chapter);
         model.addAttribute("newTopic", new Topic());
-        return "instructor/add_topic";
+        return "instructor/create_topic";
     }
 
     @PostMapping("/add")

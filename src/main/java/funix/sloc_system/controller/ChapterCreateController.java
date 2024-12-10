@@ -19,12 +19,12 @@ public class ChapterCreateController {
    CourseService courseService;
 
     @GetMapping(value = {"/{courseId}/chapters"})
-    public String showCreateChapterPage(@RequestParam("courseId") Long courseId, Model model) {
+    public String showCreateChapterPage(@PathVariable("courseId") Long courseId, Model model) {
         Course course = courseService.findById(courseId);
         model.addAttribute("course", course);
         model.addAttribute("chapters", chapterService.getChaptersByCourseId(courseId));
         model.addAttribute("newChapter", new Chapter());
-        return "instructor/create_chapters";
+        return "instructor/create_chapter";
     }
 
     @PostMapping("/{courseId}/chapters/add")
