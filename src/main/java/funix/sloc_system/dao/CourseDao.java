@@ -19,4 +19,8 @@ public interface CourseDao extends JpaRepository<Course, Long> {
     List<Course> findAllByInstructorAndStatus(@Param("instructor") User instructor, @Param("status") CourseStatus status);
 
     List<Course> findByInstructors(User instructor);
+
+    List<Course> findByStatusIn(List<CourseStatus> statuses);
+
+    List<Course> findByStatus(CourseStatus status);
 }

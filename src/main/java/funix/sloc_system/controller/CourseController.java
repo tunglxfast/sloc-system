@@ -38,17 +38,31 @@ public class CourseController {
     @Autowired
     private TestResultService testResultService;
 
-    // xem tất cả khóa học
+    /**
+     * list all courses
+     * @param model
+     * @return
+     */
     @GetMapping(value = {"","/"})
     public String listCourses(Model model) {
-        List<Course> courses = courseService.getAllCourses();
+        List<Course> courses = courseService.getApprovedOrUpdatingCourses();
         model.addAttribute("courses", courses);
         return "courses";
     }
 
-    // Xem giới thiệu sơ về khóa học
+    /**
+     * Course General View
+     * @param id
+     * @param securityUser
+     * @param model
+     * @return
+     */
     @GetMapping(value = {"/{id}" ,"/{id}/general"})
     public String viewCourseGeneral(@PathVariable Long id, @AuthenticationPrincipal SecurityUser securityUser, Model model) {
+        if (!appUtil.isCourseReady(id)) {
+            return "redirect:/courses";
+        }
+
         Course course = courseService.findById(id);
         User user = userService.findById(securityUser.getUser().getId());
         if (course != null && user != null) {
@@ -61,9 +75,12 @@ public class CourseController {
         }
     }
 
-    // đăng ký khóa học
     @GetMapping("/{courseId}/enroll")
     public String enrollCourse(@PathVariable Long courseId, @AuthenticationPrincipal SecurityUser securityUser, Model model) {
+        if (!appUtil.isCourseReady(courseId)) {
+            return "redirect:/courses";
+        }
+
         Course course = courseService.findById(courseId);
         User user = userService.findById(securityUser.getUser().getId());
         if (course != null && user != null) {
@@ -78,7 +95,6 @@ public class CourseController {
         }
     }
 
-    // xem chi tiết khóa học
     @GetMapping("/{courseId}/{chapterNumber}_{topicNumber}")
     public String viewCourseDetail(
             @PathVariable Long courseId,
@@ -86,16 +102,18 @@ public class CourseController {
             @PathVariable int topicNumber,
             @AuthenticationPrincipal SecurityUser securityUser,
             Model model) {
+        if (!appUtil.isCourseReady(courseId)) {
+            return "redirect:/courses";
+        }
 
         User user = userService.findById(securityUser.getUser().getId());
         Course course = courseService.findById(courseId);
         if (course == null || user == null ) {
             return "redirect:/courses";
         }
-
-        // Kiểm tra topic tồn tại
+        // Check topic exist
         Topic topic = topicService.findByChapterAndTopicSequence(courseId, chapterNumber, topicNumber);
-        // Kiểm tra đăng ký khóa học
+        // Check already enroll
         boolean isEnrolled = enrollmentService.isEnrolled(user, course);
         if (!isEnrolled || topic == null) {
             return String.format("redirect:/courses/%d", courseId);
@@ -127,6 +145,10 @@ public class CourseController {
                              @AuthenticationPrincipal SecurityUser securityUser,
                              Model model) {
 
+        if (!appUtil.isCourseReady(courseId)) {
+            return "redirect:/courses";
+        }
+
         TestResult result = testResultService.calculateScore(securityUser.getUser().getId(), quizId, answers);
         Topic topic = topicService.findById(quizId);
 
@@ -148,6 +170,10 @@ public class CourseController {
                              @RequestParam Map<String, String> answers,
                              @AuthenticationPrincipal SecurityUser securityUser,
                              Model model) {
+
+        if (!appUtil.isCourseReady(courseId)) {
+            return "redirect:/courses";
+        }
 
         TestResult result = testResultService.calculateScore(securityUser.getUser().getId(), examId, answers);
         Topic exam = topicService.findById(examId);

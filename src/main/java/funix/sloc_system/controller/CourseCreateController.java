@@ -40,12 +40,30 @@ public class CourseCreateController {
         return "instructor/create_course";
     }
 
+    @GetMapping("/{courseId}/edit")
+    public String showCreatingCourse(@PathVariable("courseId") Long courseId, Model model) {
+        Course course = courseService.findById(courseId);
+        if (course == null) {
+            return "redirect:/instructor";
+        }
+        model.addAttribute("course", course);
+        return "instructor/edit_course";
+    }
+
+    @PostMapping("/{courseId}/review_submit")
+    public String reviewCourseSubmit(@PathVariable("courseId") Long courseId, RedirectAttributes redirectAttributes) {
+        courseService.submitForReview(courseId);
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Waiting for moderator to review course.");
+        return "redirect:/instructor";
+    }
+
     @PostMapping("/create_submit")
     public String createCourse(@ModelAttribute("course") Course course,
                                @AuthenticationPrincipal SecurityUser securityUser,
                                @RequestParam("thumbnailFile") MultipartFile file,
-                               RedirectAttributes redirectAttributes,
-                               Model model) {
+                               RedirectAttributes redirectAttributes) {
         try {
             course = courseService.createCourse(course, securityUser.getUser().getId());
             // save picture
@@ -62,7 +80,7 @@ public class CourseCreateController {
             redirectAttributes.addFlashAttribute(
                     "successMessage",
                     "The course general has been created.");
-            return String.format("redirect:/instructor/chapter/create?courseId=%s", course.getId());
+            return String.format("redirect:/instructor/course/%s/chapters", course.getId());
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute(
                     "errorMessage",

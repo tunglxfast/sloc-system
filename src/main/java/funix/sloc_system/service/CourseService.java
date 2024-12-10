@@ -42,6 +42,10 @@ public class CourseService {
         return courseDao.findAllByInstructorAndStatus(instructor, status);
     }
 
+    public List<Course> getApprovedOrUpdatingCourses() {
+        return courseDao.findByStatusIn(List.of(CourseStatus.APPROVED, CourseStatus.UPDATING));
+    }
+
     public Course createCourse(Course course, Long userId) {
         User creator = userDao.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not exist"));

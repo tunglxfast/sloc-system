@@ -24,7 +24,7 @@ public class InstructorController {
     @Autowired
     private CourseService courseService;
 
-    @GetMapping(value = {"","/"})
+    @GetMapping(value = {"","/","/courses"})
     public String showInstructorManageList(@AuthenticationPrincipal SecurityUser securityUser, Model model){
         User instructor = userService.findById(securityUser.getUser().getId());
         List<Course> courseList = courseService.findByInstructors(instructor);

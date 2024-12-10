@@ -2,71 +2,36 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Create Chapters</title>
-  <link rel="stylesheet" href="/css/styles.css">
-  <script src="/js/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-<div class="container">
-  <h1>Create Chapters for Course: <span th:text="${course.title}"></span></h1>
 
-  <div id="tabs">
-    <ul id="chapter-tabs"></ul>
-    <div id="chapter-content"></div>
-  </div>
+<h1>Create Chapters for Course: <span th:text="${course.title}"></span></h1>
 
-  <button id="add-chapter" class="btn btn-primary">Add Chapter</button>
-
-  <form id="chapter-form" th:action="@{/instructor/chapter_create/save}" method="post">
-    <input type="hidden" name="courseId" th:value="${course.id}"/>
-    <button type="submit" class="btn btn-success">Save Draft</button>
-  </form>
-
-  <form th:action="@{/instructor/chapter_create/submit}" method="post">
-    <input type="hidden" name="courseId" th:value="${course.id}"/>
-    <button type="submit" class="btn btn-warning">Submit for Review</button>
-  </form>
+<!-- Exist chapters list -->
+<div th:if="${chapters != null}">
+  <h2>Existing Chapters</h2>
+  <ul>
+    <li th:each="chapter : ${chapters}">
+      <strong th:text="${chapter.sequence} + '. ' + ${chapter.title}"></strong>
+      <ul th:if="${chapter.topics != null and !chapter.topics.isEmpty()}">
+        <li th:each="topic : ${chapter.topics}">
+          <span th:text="'- ' + ${topic.title} + ' (' + ${topic.type} + ')'"></span>
+        </li>
+      </ul>
+      <a th:href="@{'/instructor/chapter/' + ${chapter.id} + '/topic'}">Add Topic</a>
+    </li>
+  </ul>
 </div>
 
-<script>
-$(document).ready(function () {
-    let chapterIndex = 0;
+<!-- Create new chapter form -->
+<h2>Add New Chapter</h2>
+<form th:action="@{'/instructor/course/' + ${course.id} + '/chapters/add'}" method="post">
+  <label for="title">Chapter Title:</label>
+  <input type="text" id="title" name="title" required>
+  <button type="submit">Add Chapter</button>
+</form>
 
-    function addChapterTab(title = "", id = "") {
-        chapterIndex++;
-        const tabId = "chapter-tab-" + chapterIndex;
+<a th:href="@{'/instructor/courses'}">Back to Courses</a>
 
-        $("#chapter-tabs").append(`
-            <li><a href="#${tabId}" data-id="${id}">Chapter ${chapterIndex}</a></li>
-        `);
-
-        $("#chapter-content").append(`
-            <div id="${tabId}" class="chapter-panel">
-                <label>Title:</label>
-                <input type="text" name="titles" value="${title}" required/>
-                <input type="hidden" name="chapterIds" value="${id}"/>
-            </div>
-        `);
-
-        $("#tabs").tabs("refresh");
-    }
-
-    // Load existing chapters
-    const chapters = /*[[${#json.toJson(chapters)}]]*/ [];
-    if (chapters.length === 0) {
-        $("#add-chapter").show();
-    } else {
-        chapters.forEach(chapter => addChapterTab(chapter.title, chapter.id));
-    }
-
-    // Add new chapter tab
-    $("#add-chapter").on("click", function () {
-        addChapterTab();
-        $(this).hide();
-    });
-
-    // Enable tabs
-    $("#tabs").tabs();
-});
-</script>
 </body>
 </html>

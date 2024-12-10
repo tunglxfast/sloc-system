@@ -87,6 +87,14 @@ public class User {
         return roles;
     }
 
+    public Set<String> getStringRoles() {
+        Set<String> stringRoles = new HashSet<>();
+        for (Role role : roles) {
+            stringRoles.add(role.getName());
+        }
+        return stringRoles;
+    }
+
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }

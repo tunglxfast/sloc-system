@@ -4,6 +4,7 @@ import funix.sloc_system.dao.ChapterDao;
 import funix.sloc_system.dao.CourseDao;
 import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.entity.Course;
+import funix.sloc_system.entity.Topic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,20 +14,20 @@ import java.util.List;
 public class ChapterService {
 
     @Autowired
-    private ChapterDao chapterDAO;
+    private ChapterDao chapterDao;
     @Autowired
     private CourseDao courseDao;
 
     public Chapter getChapterById(Long id) {
-        return chapterDAO.findById(id).orElse(null);
+        return chapterDao.findById(id).orElse(null);
     }
 
     public List<Chapter> getChaptersByCourse(Long courseId) {
-        return chapterDAO.findByCourseId(courseId);
+        return chapterDao.findByCourseId(courseId);
     }
 
     public Chapter findByCourseIdAndSequence(Long courseId, int chapterSequence) {
-        return chapterDAO.findByCourseIdAndSequence(courseId, chapterSequence).orElse(null);
+        return chapterDao.findByCourseIdAndSequence(courseId, chapterSequence).orElse(null);
     }
 
     public Chapter createChapter(Long courseId, String title, int sequence) {
@@ -37,11 +38,25 @@ public class ChapterService {
         chapter.setCourse(course);
         chapter.setTitle(title);
         chapter.setSequence(sequence);
-        return chapterDAO.save(chapter);
+        return chapterDao.save(chapter);
     }
 
     public List<Chapter> getChaptersByCourseId(Long courseId) {
-        return chapterDAO.findByCourseIdOrderBySequence(courseId);
+        return chapterDao.findByCourseIdOrderBySequence(courseId);
+    }
+
+    public void createChapter(Long courseId, String title) {
+        Course course = courseDao.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+
+        int nextSequence = chapterDao.findByCourseIdOrderBySequence(courseId).size() + 1;
+
+        Chapter newChapter = new Chapter();
+        newChapter.setCourse(course);
+        newChapter.setTitle(title);
+        newChapter.setSequence(nextSequence);
+
+        chapterDao.save(newChapter);
     }
 
     public void saveOrUpdateChapters(Long courseId, List<String> titles, List<Long> chapterIds) {
@@ -52,7 +67,7 @@ public class ChapterService {
             Chapter chapter;
 
             if (chapterIds.get(i) != null && chapterIds.get(i) > 0) {
-                chapter = chapterDAO.findById(chapterIds.get(i))
+                chapter = chapterDao.findById(chapterIds.get(i))
                         .orElseThrow(() -> new IllegalArgumentException("Chapter not found"));
             } else {
                 chapter = new Chapter();
@@ -61,7 +76,18 @@ public class ChapterService {
             }
 
             chapter.setTitle(titles.get(i));
-            chapterDAO.save(chapter);
+            chapterDao.save(chapter);
         }
+    }
+
+    public Chapter findById(Long chapterId) {
+        return chapterDao.findById(chapterId).orElse(null);
+    }
+
+    public Chapter addTopic(Long chapterId, Topic newTopic) {
+        Chapter chapter = chapterDao.findById(chapterId).
+                orElseThrow(() -> new IllegalArgumentException("Chapter not found"));
+        chapter.getTopics().add(newTopic);
+        return chapterDao.save(chapter);
     }
 }
