@@ -21,7 +21,7 @@ import java.nio.file.Paths;
 
 @Controller
 @RequestMapping("/instructor/course")
-public class CourseCreateController {
+public class CreatingCourseController {
     @Autowired
     private UserService userService;
     @Autowired

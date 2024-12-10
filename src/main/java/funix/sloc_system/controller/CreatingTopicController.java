@@ -11,7 +11,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/instructor/chapter/{chapterId}/topic")
-public class TopicCreateController {
+public class CreatingTopicController {
 
     @Autowired
     private ChapterService chapterService;

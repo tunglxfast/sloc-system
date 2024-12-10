@@ -12,7 +12,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/instructor/course")
-public class ChapterCreateController {
+public class CreatingChapterController {
     @Autowired
     ChapterService chapterService;
     @Autowired
