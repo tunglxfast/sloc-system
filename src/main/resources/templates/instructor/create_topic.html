@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Topic</title>
+</head>
+<body>
+
+<h1>Add Topic to Chapter: <span th:text="${chapter.title}"></span></h1>
+
+<form th:action="@{'/instructor/chapter/' + ${chapter.id} + '/topics/add'}" method="post">
+    <label for="type">Topic Type:</label>
+    <select id="type" name="type" required>
+        <option value="READING">Reading</option>
+        <option value="VIDEO">Video</option>
+        <option value="QUIZ">Quiz</option>
+        <option value="EXAM">Exam</option>
+    </select>
+
+    <label for="title">Topic Title:</label>
+    <input type="text" id="title" name="title" required>
+
+    <label for="content">Content:</label>
+    <textarea id="content" name="content" required></textarea>
+
+    <button type="submit">Add Topic</button>
+</form>
+
+<a th:href="@{'/instructor/course/' + ${chapter.course.id} + '/chapters'}">Back to Chapters</a>
+
+</body>
+</html>

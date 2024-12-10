@@ -38,11 +38,10 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<Enrollment> enrollments = new HashSet<>();
 
-    // Mối quan hệ với table instructor_course (giảng viên quản lý khoá học)
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
-    private Set<InstructorCourse> instructorCourses = new HashSet<>();
+    @ManyToMany(mappedBy = "instructors")
+    private Set<Course> courses = new HashSet<>();
 
-    // Các phương thức getter, setter
+    // getter, setter
 
     public Long getId() {
         return id;
@@ -88,6 +87,14 @@ public class User {
         return roles;
     }
 
+    public Set<String> getStringRoles() {
+        Set<String> stringRoles = new HashSet<>();
+        for (Role role : roles) {
+            stringRoles.add(role.getName());
+        }
+        return stringRoles;
+    }
+
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
@@ -100,11 +107,11 @@ public class User {
         this.enrollments = enrollments;
     }
 
-    public Set<InstructorCourse> getInstructorCourses() {
-        return instructorCourses;
+    public Set<Course> getCourses() {
+        return courses;
     }
 
-    public void setInstructorCourses(Set<InstructorCourse> instructorCourses) {
-        this.instructorCourses = instructorCourses;
+    public void setCourses(Set<Course> courses) {
+        this.courses = courses;
     }
 }

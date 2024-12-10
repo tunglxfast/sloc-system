@@ -12,18 +12,17 @@ public class Chapter {
 
     private String title;
 
-    // Thứ tự trong khóa học
     private int sequence;
 
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    // tự động cập nhật topic database khi có thay trên chapter
-    @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "chapter", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     @OrderBy("sequence ASC")
     private List<Topic> topics;
 
+    // getter & setter
     public Long getId() {
         return id;
     }

@@ -53,6 +53,9 @@
                 </li>
                 <li class="nav-item me-3 me-lg-1"> <a class="nav-link" href="#">My Learning</a>
                 </li>
+                <li class="nav-item me-3 me-lg-1" th:if="${user.getStringRoles().contains('INSTRUCTOR')}">
+                    <a class="nav-link" th:href="@{/instructor/}">Create Course</a>
+                </li>
                 <li class="nav-item me-3 me-lg-1">
                     <form th:action="@{/logout}" method="POST">
                         <button type="submit">Logout</button>

@@ -1,9 +1,11 @@
 package funix.sloc_system.util;
 
+import funix.sloc_system.dao.CourseDao;
 import funix.sloc_system.dao.TopicDao;
 import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Topic;
+import funix.sloc_system.enums.CourseStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +15,9 @@ import java.util.List;
 public class ApplicationUtil {
 
     @Autowired
-    TopicDao topicDao;
+    private TopicDao topicDao;
+    @Autowired
+    private CourseDao courseDao;
 
     public Topic findNextTopic(Long topicId){
         Topic currentTopic = topicDao.findById(topicId)
@@ -42,5 +46,17 @@ public class ApplicationUtil {
 
         // nếu vẫn không tìm được -> null
         return null;
+    }
+
+    public boolean isCourseReady(Long courseId) {
+        Course course = courseDao.findById(courseId).orElse(null);
+        if (course == null) {
+            return false;
+        }
+        CourseStatus courseStatus = course.getStatus();
+        if (courseStatus != CourseStatus.APPROVED && courseStatus != CourseStatus.APPROVED) {
+            return false;
+        }
+        return true;
     }
 }

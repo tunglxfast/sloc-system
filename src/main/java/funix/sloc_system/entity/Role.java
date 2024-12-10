@@ -2,6 +2,9 @@ package funix.sloc_system.entity;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 public class Role {
     @Id
@@ -10,6 +13,9 @@ public class Role {
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
+
+    @ManyToMany(mappedBy = "roles")
+    private Set<User> usersHaveRole = new HashSet<>();
 
     public Role() {
     }
@@ -32,5 +38,13 @@ public class Role {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Set<User> getUsersHaveRole() {
+        return usersHaveRole;
+    }
+
+    public void setUsersHaveRole(Set<User> usersHaveRole) {
+        this.usersHaveRole = usersHaveRole;
     }
 }

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Create course</title>
+</head>
+<body>
+<h2 th:text="'Welcome ' + ${user.name}">Welcome anonymous</h2>
+<h1>Create new course</h1>
+
+<div th:if="${errorMessage}">
+    <p th:text="${errorMessage}" style="color: red;"></p>
+</div>
+
+<form th:action="@{/instructor/course/create_submit}" th:object="${course}" method="post" enctype="multipart/form-data">
+    <label for="title">Course title:</label>
+    <input type="text" id="title" th:field="*{title}" required>
+    <br>
+
+    <label for="description">Description:</label>
+    <textarea id="description" th:field="*{description}" required></textarea>
+    <br>
+
+    <label for="thumbnailFile">Thumbnail:</label>
+    <input type="file" id="thumbnailFile" name="thumbnailFile" accept=".jpg,.jpeg,.png" required/>
+    <br>
+
+    <label for="category">Category:</label>
+    <select id="category" th:field="*{category}" required>
+        <option th:each="category : ${categories}"
+                th:value="${category.id}"
+                th:text="${category.name}"></option>
+    </select>
+    <br>
+
+    <label for="startDate">Stat date:</label>
+    <input type="date" id="startDate" th:field="*{startDate}" required>
+    <br>
+
+    <label for="endDate">End date:</label>
+    <input type="date" id="endDate" th:field="*{endDate}">
+    <br>
+
+    <button type="submit">Create</button>
+</form>
+
+<a th:href="@{/instructor/}">Return to instructor's courses</a>
+</body>
+</html>

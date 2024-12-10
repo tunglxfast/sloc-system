@@ -1,5 +1,6 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.enums.CourseStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -17,38 +18,43 @@ public class Course {
 
     private String description;
 
-    // href tới hình đại diện khóa học
+    // course image
     private String thumbnailUrl;
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    // người tạo khóa học
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
-    // người thay đổi khóa học gần nhất
     @ManyToOne
     @JoinColumn(name = "last_updated_by", nullable = true)
     private User lastUpdatedBy;
 
-    // tự động cập nhật chapters database khi có thay trên course
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     @OrderBy("sequence ASC")
     private List<Chapter> chapters;
 
-    // Mối quan hệ với table enrollment (số học viên theo học)
-    @OneToMany(mappedBy = "course", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.PERSIST)
     private Set<Enrollment> enrollments = new HashSet<>();
 
-    // Mối quan hệ với table instructor_course (giảng viên quản lý khóa học)
-    @OneToMany(mappedBy = "course", fetch = FetchType.EAGER)
-    private Set<InstructorCourse> instructorCourses = new HashSet<>();
+    @ManyToMany
+    @JoinTable(
+            name = "instructor_course",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> instructors = new HashSet<>();
 
     private LocalDate startDate;
     private LocalDate endDate;
+
+    @Enumerated(EnumType.STRING)
+    private CourseStatus status = CourseStatus.PENDING;
+    @Column(nullable = true)
+    private String rejectReason;
 
     private LocalDate createdAt;
     private LocalDate updatedAt;
@@ -64,6 +70,8 @@ public class Course {
     public void preUpdate() {
         updatedAt = LocalDate.now();
     }
+
+    // getter, setter
 
     public Long getId() {
         return id;
@@ -137,12 +145,12 @@ public class Course {
         this.enrollments = enrollments;
     }
 
-    public Set<InstructorCourse> getInstructorCourses() {
-        return instructorCourses;
+    public Set<User> getInstructors() {
+        return instructors;
     }
 
-    public void setInstructorCourses(Set<InstructorCourse> instructorCourses) {
-        this.instructorCourses = instructorCourses;
+    public void setInstructors(Set<User> instructors) {
+        this.instructors = instructors;
     }
 
     public LocalDate getStartDate() {
@@ -159,6 +167,22 @@ public class Course {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
+    }
+
+    public CourseStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CourseStatus status) {
+        this.status = status;
+    }
+
+    public String getRejectReason() {
+        return rejectReason;
+    }
+
+    public void setRejectReason(String rejectReason) {
+        this.rejectReason = rejectReason;
     }
 
     public LocalDate getCreatedAt() {
