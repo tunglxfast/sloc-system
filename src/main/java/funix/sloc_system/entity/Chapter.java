@@ -1,5 +1,6 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.enums.CourseStatus;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -18,9 +19,12 @@ public class Chapter {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    @OneToMany(mappedBy = "chapter", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("sequence ASC")
     private List<Topic> topics;
+
+    @Enumerated(EnumType.STRING)
+    private CourseStatus status = CourseStatus.DRAFT;
 
     // getter & setter
     public Long getId() {
@@ -61,6 +65,14 @@ public class Chapter {
 
     public void setTopics(List<Topic> topics) {
         this.topics = topics;
+    }
+
+    public CourseStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CourseStatus status) {
+        this.status = status;
     }
 }
 

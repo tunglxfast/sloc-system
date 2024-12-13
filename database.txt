@@ -55,7 +55,7 @@ CREATE TABLE course (
     last_updated_by BIGINT,
     start_date DATE,
     end_date DATE,
-    status VARCHAR(50) DEFAULT 'PENDING',
+    status VARCHAR(50) DEFAULT 'DRAFT',
     reject_reason TEXT,
     created_at DATE,
     updated_at DATE,
@@ -69,6 +69,7 @@ CREATE TABLE chapter (
     title VARCHAR(255),
     sequence INT,
     course_id BIGINT,
+    status VARCHAR(50) DEFAULT 'DRAFT',
     FOREIGN KEY (course_id) REFERENCES course(id)
 );
 
@@ -79,6 +80,7 @@ CREATE TABLE topic (
     topic_type VARCHAR(255),
     sequence INT,
     chapter_id BIGINT,
+    status VARCHAR(50) DEFAULT 'DRAFT',
     video_url VARCHAR(255),
     file_url VARCHAR(255),
     pass_score INT,
@@ -93,6 +95,7 @@ CREATE TABLE question (
     question_type VARCHAR(255),
     sequence INT,
     topic_id BIGINT,
+    status VARCHAR(50) DEFAULT 'DRAFT',
     FOREIGN KEY (topic_id) REFERENCES topic(id)
 );
 
@@ -101,6 +104,7 @@ CREATE TABLE answer (
     content TEXT,
     is_correct BOOLEAN,
     question_id BIGINT,
+    status VARCHAR(50) DEFAULT 'DRAFT',
     FOREIGN KEY (question_id) REFERENCES question(id)
 );
 
@@ -171,63 +175,63 @@ INSERT INTO course (title, description, thumbnail_url, category_id, created_by, 
 ('Data Science for Beginners', 'Learn the fundamentals of data science and machine learning.', '/img/thumbnail2.jpg', 2, 3, 3, '2024-02-01', '2024-07-01', 'APPROVED', NULL, '2024-02-01', '2024-02-01');
 
 -- Insert sample chapters
-INSERT INTO chapter (title, sequence, course_id) VALUES
-('Chapter 1: HTML Basics', 1, 1),
-('Chapter 2: CSS Styling', 2, 1),
-('Chapter 1: Introduction to Data Science', 1, 2);
+INSERT INTO chapter (title, sequence, course_id, status) VALUES
+('Chapter 1: HTML Basics', 1, 1, 'APPROVED'),
+('Chapter 2: CSS Styling', 2, 1, 'APPROVED'),
+('Chapter 1: Introduction to Data Science', 1, 2, 'APPROVED');
 
 -- Insert sample topics
-INSERT INTO topic (title, description, topic_type, sequence, chapter_id, video_url, file_url, pass_score, total_score, time_limit) VALUES
-('HTML Syntax', 'Learn the basic syntax of HTML', 'VIDEO', 1, 1, 'https://www.youtube.com/embed/9r_hbFzA8ho?si=pyTUZYtQjuOYk2Uh', NULL, NULL, NULL, NULL),
-('CSS Selectors', 'Learn about different CSS selectors and how to use them', 'VIDEO', 1, 2, 'https://www.youtube.com/embed/l1mER1bV0N0?si=Lhp6M1Tzl5La5BQ-', NULL, NULL, NULL, NULL),
-('What is Data Science?', 'Introduction to Data Science concepts', 'READING', 1, 3, NULL, '/reading/intro_data_science.pdf', NULL, NULL, NULL),
-('HTML Syntax Quiz', 'HTML Syntax Quiz', 'QUIZ', 2, 1, NULL, NULL, 3, 4, NULL),
-('CSS Selectors Quiz', 'CSS Selectors Quiz', 'QUIZ', 2, 2, NULL, NULL, 1, 1, NULL),
-('Final Exam for Data Science', 'Final Exam for Data Science', 'EXAM', 2, 3, NULL, NULL, 1, 1, 120);
+INSERT INTO topic (title, description, topic_type, sequence, chapter_id, status, video_url, file_url, pass_score, total_score, time_limit) VALUES
+('HTML Syntax', 'Learn the basic syntax of HTML', 'VIDEO', 1, 1, 'APPROVED', 'https://www.youtube.com/embed/9r_hbFzA8ho?si=pyTUZYtQjuOYk2Uh', NULL, NULL, NULL, NULL),
+('CSS Selectors', 'Learn about different CSS selectors and how to use them', 'VIDEO', 1, 2, 'APPROVED', 'https://www.youtube.com/embed/l1mER1bV0N0?si=Lhp6M1Tzl5La5BQ-', NULL, NULL, NULL, NULL),
+('What is Data Science?', 'Introduction to Data Science concepts', 'READING', 1, 3, 'APPROVED', NULL, '/reading/intro_data_science.pdf', NULL, NULL, NULL),
+('HTML Syntax Quiz', 'HTML Syntax Quiz', 'QUIZ', 2, 1, 'APPROVED', NULL, NULL, 3, 4, NULL),
+('CSS Selectors Quiz', 'CSS Selectors Quiz', 'QUIZ', 2, 2, 'APPROVED', NULL, NULL, 1, 1, NULL),
+('Final Exam for Data Science', 'Final Exam for Data Science', 'EXAM', 2, 3, 'APPROVED', NULL, NULL, 1, 1, 120);
 
 
 -- Insert sample questions
-INSERT INTO question (content, question_type, sequence, topic_id) VALUES
-('What is HTML?', 'CHOICE_ONE', 1, 4),
-('What is a CSS Selector?', 'CHOICE_ONE', 1, 5),
-('What is Data Science?', 'CHOICE_ONE', 1, 6),
-('What does the `<title>` tag do?', 'CHOICE_ONE', 2, 4),
-('Which tag is used to create a hyperlink?', 'CHOICE_ONE', 3, 4),
-('Which of the following are valid HTML tags?', 'CHOICE_MANY', 4, 4);
+INSERT INTO question (content, question_type, sequence, topic_id, status) VALUES
+('What is HTML?', 'CHOICE_ONE', 1, 4, 'APPROVED'),
+('What is a CSS Selector?', 'CHOICE_ONE', 1, 5, 'APPROVED'),
+('What is Data Science?', 'CHOICE_ONE', 1, 6, 'APPROVED'),
+('What does the `<title>` tag do?', 'CHOICE_ONE', 2, 4, 'APPROVED'),
+('Which tag is used to create a hyperlink?', 'CHOICE_ONE', 3, 4, 'APPROVED'),
+('Which of the following are valid HTML tags?', 'CHOICE_MANY', 4, 4, 'APPROVED');
 
 
 -- Insert sample answers
-INSERT INTO answer (content, is_correct, question_id) VALUES
-('A markup language', TRUE, 1),
-('A programming language', FALSE, 1),
-('A mathematical formula', FALSE, 1),
-('A type of HTML tag', FALSE, 1),
+INSERT INTO answer (content, is_correct, question_id, status) VALUES
+('A markup language', TRUE, 1, 'APPROVED'),
+('A programming language', FALSE, 1, 'APPROVED'),
+('A mathematical formula', FALSE, 1, 'APPROVED'),
+('A type of HTML tag', FALSE, 1, 'APPROVED'),
 
-('A way to select HTML elements', TRUE, 2),
-('A CSS property', FALSE, 2),
-('A JavaScript function', FALSE, 2),
-('A data format', FALSE, 2),
+('A way to select HTML elements', TRUE, 2, 'APPROVED'),
+('A CSS property', FALSE, 2, 'APPROVED'),
+('A JavaScript function', FALSE, 2, 'APPROVED'),
+('A data format', FALSE, 2, 'APPROVED'),
 
-('An interdisciplinary field', TRUE, 3),
-('A type of software', FALSE, 3),
-('A programming language', FALSE, 3),
-('A database', FALSE, 3),
+('An interdisciplinary field', TRUE, 3, 'APPROVED'),
+('A type of software', FALSE, 3, 'APPROVED'),
+('A programming language', FALSE, 3, 'APPROVED'),
+('A database', FALSE, 3, 'APPROVED'),
 
-('Defines the title of the document', TRUE, 4),
-('Adds a link to an image', FALSE, 4),
-('Styles the text in bold', FALSE, 4),
-('Creates a table in HTML', FALSE, 4),
+('Defines the title of the document', TRUE, 4, 'APPROVED'),
+('Adds a link to an image', FALSE, 4, 'APPROVED'),
+('Styles the text in bold', FALSE, 4, 'APPROVED'),
+('Creates a table in HTML', FALSE, 4, 'APPROVED'),
 
-('<a>', TRUE, 5),
-('<div>', FALSE, 5),
-('<h1>', FALSE, 5),
-('<img>', FALSE, 5),
+('<a>', TRUE, 5, 'APPROVED'),
+('<div>', FALSE, 5, 'APPROVED'),
+('<h1>', FALSE, 5, 'APPROVED'),
+('<img>', FALSE, 5, 'APPROVED'),
 
-('<div>', TRUE, 6),
-('<span>', TRUE, 6),
-('<customtag>', FALSE, 6),
-('<script>', TRUE, 6),
-('<abc>', FALSE, 6);
+('<div>', TRUE, 6, 'APPROVED'),
+('<span>', TRUE, 6, 'APPROVED'),
+('<customtag>', FALSE, 6, 'APPROVED'),
+('<script>', TRUE, 6, 'APPROVED'),
+('<abc>', FALSE, 6, 'APPROVED');
 
 -- Insert sample enrollment data
 INSERT INTO enrollment (user_id, course_id, enrollment_date) VALUES

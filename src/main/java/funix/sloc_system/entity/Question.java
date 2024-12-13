@@ -1,5 +1,6 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.enums.CourseStatus;
 import funix.sloc_system.enums.QuestionType;
 import jakarta.persistence.*;
 
@@ -27,6 +28,10 @@ public class Question {
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Answer> answers;
 
+    @Enumerated(EnumType.STRING)
+    private CourseStatus status = CourseStatus.DRAFT;
+
+    // Getters and setters...
     public Long getId() {
         return id;
     }
@@ -73,5 +78,13 @@ public class Question {
 
     public void setAnswers(List<Answer> answers) {
         this.answers = answers;
+    }
+
+    public CourseStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CourseStatus status) {
+        this.status = status;
     }
 }

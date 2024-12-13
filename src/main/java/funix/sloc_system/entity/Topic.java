@@ -1,5 +1,6 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.enums.CourseStatus;
 import funix.sloc_system.enums.TopicType;
 import jakarta.persistence.*;
 
@@ -28,6 +29,9 @@ public class Topic {
     @JoinColumn(name = "chapter_id", nullable = false)
     private Chapter chapter;
 
+    @Enumerated(EnumType.STRING)
+    private CourseStatus status = CourseStatus.DRAFT;
+
     // Fields for ReadingLesson
     private String fileUrl;
 
@@ -39,7 +43,7 @@ public class Topic {
     private Integer totalScore;
     private Integer timeLimit; // Only for Exam
 
-    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Question> questions;
 
     // Getters and setters...
@@ -137,5 +141,13 @@ public class Topic {
 
     public void setQuestions(List<Question> questions) {
         this.questions = questions;
+    }
+
+    public CourseStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CourseStatus status) {
+        this.status = status;
     }
 }

@@ -33,7 +33,7 @@ public class Course {
     @JoinColumn(name = "last_updated_by", nullable = true)
     private User lastUpdatedBy;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("sequence ASC")
     private List<Chapter> chapters;
 
@@ -52,7 +52,8 @@ public class Course {
     private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
-    private CourseStatus status = CourseStatus.PENDING;
+    private CourseStatus status = CourseStatus.DRAFT;
+
     @Column(nullable = true)
     private String rejectReason;
 
