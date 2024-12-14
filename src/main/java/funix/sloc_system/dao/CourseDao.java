@@ -23,4 +23,10 @@ public interface CourseDao extends JpaRepository<Course, Long> {
     List<Course> findByStatusIn(List<CourseStatus> statuses);
 
     List<Course> findByStatus(CourseStatus status);
+
+    // get list of courses by status
+    List<Course> findByStatusOrderByIdDesc(CourseStatus status);
+
+    // get list of courses by title
+    List<Course> findByTitleContainingIgnoreCase(String title);
 }

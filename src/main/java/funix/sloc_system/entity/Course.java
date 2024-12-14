@@ -1,5 +1,6 @@
 package funix.sloc_system.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import funix.sloc_system.enums.CourseStatus;
 import jakarta.persistence.*;
 
@@ -21,23 +22,22 @@ public class Course {
     // course image
     private String thumbnailUrl;
 
-    @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+    private Long category;
 
-    @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
-    private User createdBy;
+    private Long createdBy;
 
-    @ManyToOne
     @JoinColumn(name = "last_updated_by", nullable = true)
-    private User lastUpdatedBy;
+    private Long lastUpdatedBy;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("sequence ASC")
+    @JsonIgnore
     private List<Chapter> chapters;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.PERSIST)
+    @JsonIgnore
     private Set<Enrollment> enrollments = new HashSet<>();
 
     @ManyToMany
@@ -46,6 +46,7 @@ public class Course {
             joinColumns = @JoinColumn(name = "course_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+    @JsonIgnore
     private Set<User> instructors = new HashSet<>();
 
     private LocalDate startDate;
@@ -73,7 +74,6 @@ public class Course {
     }
 
     // getter, setter
-
     public Long getId() {
         return id;
     }
@@ -106,27 +106,27 @@ public class Course {
         this.thumbnailUrl = thumbnailUrl;
     }
 
-    public Category getCategory() {
+    public Long getCategory() {
         return category;
     }
 
-    public void setCategory(Category category) {
+    public void setCategory(Long category) {
         this.category = category;
     }
 
-    public User getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
-    public User getLastUpdatedBy() {
+    public Long getLastUpdatedBy() {
         return lastUpdatedBy;
     }
 
-    public void setLastUpdatedBy(User lastUpdatedBy) {
+    public void setLastUpdatedBy(Long lastUpdatedBy) {
         this.lastUpdatedBy = lastUpdatedBy;
     }
 

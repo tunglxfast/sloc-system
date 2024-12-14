@@ -7,8 +7,8 @@ import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.CourseStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -44,18 +44,6 @@ public class CourseService {
 
     public List<Course> getApprovedOrUpdatingCourses() {
         return courseDao.findByStatusIn(List.of(CourseStatus.APPROVED, CourseStatus.UPDATING));
-    }
-
-    public Course createCourse(Course course, Long userId) {
-        User creator = userDao.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not exist"));
-
-        course.getInstructors().add(creator);
-        course.setStatus(CourseStatus.DRAFT);
-        course.setCreatedAt(LocalDate.now());
-        course.setCreatedBy(creator);
-
-        return courseDao.save(course);
     }
 
     public void submitForReview(Long courseId) {
@@ -106,8 +94,16 @@ public class CourseService {
         emailService.sendEmail(instructor.getEmail(), subject, body);
     }
 
-
+    @Transactional
     public List<Course> findByInstructors(User instructor) {
         return courseDao.findByInstructors(instructor);
+    }
+
+    @Transactional
+    public void submitForApproval(Long courseId) {
+        Course course = courseDao.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+        course.setStatus(CourseStatus.PENDING);
+        courseDao.save(course);
     }
 }
