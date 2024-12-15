@@ -3,6 +3,7 @@ package funix.sloc_system.controller;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.CourseStatus;
+import funix.sloc_system.enums.RoleType;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.CourseService;
 import funix.sloc_system.service.UserService;
@@ -26,9 +27,14 @@ public class InstructorController {
 
     @GetMapping(value = {"","/","/courses"})
     public String showInstructorManageList(@AuthenticationPrincipal SecurityUser securityUser, Model model){
-        User instructor = userService.findById(securityUser.getUser().getId());
-        List<Course> courseList = courseService.findByInstructors(instructor);
-        model.addAttribute("user", instructor);
+        User user = userService.findById(securityUser.getUser().getId());
+        List<Course> courseList;
+        if (user.getStringRoles().contains(RoleType.MODERATOR.name())) {
+            courseList = courseService.getAllCourses();
+        } else {
+            courseList = courseService.findByInstructor(user);
+        }
+        model.addAttribute("user", user);
         model.addAttribute("courses", courseList);
         return "instructor/instructor_courses";
     }

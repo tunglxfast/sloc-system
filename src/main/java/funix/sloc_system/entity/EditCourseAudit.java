@@ -1,13 +1,13 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.enums.CourseStatus;
 import jakarta.persistence.*;
 import jakarta.persistence.GenerationType;
 
 import java.time.LocalDateTime;
 
 @Entity
-public class AuditLog {
-
+public class EditCourseAudit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,14 +17,13 @@ public class AuditLog {
     private String action;
     private String changes;
 
+    private String status = CourseStatus.PENDING.name();
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User updatedBy;
 
     private LocalDateTime changeTime;
-
-    public AuditLog() {
-    }
 
     // Getters and setters
     public Long getId() {
@@ -81,5 +80,13 @@ public class AuditLog {
 
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

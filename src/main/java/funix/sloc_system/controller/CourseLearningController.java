@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/courses")
-public class CourseController {
+public class CourseLearningController {
     @Autowired
     private CourseService courseService;
 

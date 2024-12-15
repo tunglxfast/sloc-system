@@ -1,14 +1,23 @@
 package funix.sloc_system.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import funix.sloc_system.dao.CourseDao;
 import funix.sloc_system.dao.UserDao;
 import funix.sloc_system.entity.Course;
+import funix.sloc_system.entity.EditCourseAudit;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.CourseStatus;
+import funix.sloc_system.enums.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -21,6 +30,10 @@ public class CourseService {
     private CourseDao courseDao;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private EditCourseAuditService editCourseAuditService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public List<Course> getAllCourses() {
         return courseDao.findAll();
@@ -55,6 +68,14 @@ public class CourseService {
         }
 
         course.setStatus(CourseStatus.PENDING);
+        courseDao.save(course);
+    }
+
+    public void submitForUpdateReview(Long courseId) {
+        Course course = courseDao.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+
+        course.setStatus(CourseStatus.UPDATING);
         courseDao.save(course);
     }
 
@@ -95,15 +116,71 @@ public class CourseService {
     }
 
     @Transactional
-    public List<Course> findByInstructors(User instructor) {
+    public List<Course> findByInstructor(User instructor) {
         return courseDao.findByInstructors(instructor);
     }
 
+
+    // Save directly if still in DRAFT
     @Transactional
-    public void submitForApproval(Long courseId) {
-        Course course = courseDao.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
-        course.setStatus(CourseStatus.PENDING);
+    public String createOrUpdateCourse(Course course, User instructor, MultipartFile file) throws IOException {
+        course.getInstructors().add(instructor);
+        saveCourseThumbnail(course, file);
+        String returnMessage;
+        if (course.getId() == null) {
+            // create new Course
+            course.setCreatedAt(LocalDate.now());
+            course.setCreatedBy(instructor.getId());
+            returnMessage = "The course general has been created.";
+        } else if (course.getStatus() == CourseStatus.DRAFT){
+            // save update draft to main table
+            course.setUpdatedAt(LocalDate.now());
+            course.setLastUpdatedBy(instructor.getId());
+            returnMessage = "The course general has been updated.";
+        } else {
+            // save update course not draft to audit table for later review
+            editCourseAuditService.saveEditingCourse(
+                    EntityType.COURSE.name(),
+                    course,
+                    CourseStatus.UPDATING.name(),
+                    instructor);
+            returnMessage = "The course general has been updated.";
+        }
         courseDao.save(course);
+        return returnMessage;
+    }
+
+    @Transactional
+    public void sendToReview(Course course) throws Exception {
+
+        if (course.getStatus() == CourseStatus.DRAFT) {
+            submitForReview(course.getId());
+        } else {
+            submitForUpdateReview(course.getId());
+        }
+    }
+
+    private Course getEditingCourse(Long id) throws JsonProcessingException {
+        EditCourseAudit courseAudit = editCourseAuditService.getLatestAudits(
+                EntityType.COURSE.name(),
+                id,
+                CourseStatus.PENDING.name()
+                ).orElse(null);
+        if (courseAudit == null) {
+            return courseDao.findById(id).orElse(null);
+        } else {
+            String courseContext = courseAudit.getChanges();
+            return objectMapper.readValue(courseContext, Course.class);
+        }
+    }
+
+    private void saveCourseThumbnail(Course course, MultipartFile file) throws IOException {
+        if (!file.isEmpty()) {
+            String fileName = "thumbnail_" + course.getId() + ".jpg";
+            String absolutePath = Paths.get("").toAbsolutePath().toString() + "/src/main/resources/static/img/";
+            File saveFile = new File(absolutePath + fileName);
+            file.transferTo(saveFile);
+            course.setThumbnailUrl("/img/" + fileName);
+        }
     }
 }
