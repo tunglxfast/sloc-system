@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
+
 @Controller
 @RequestMapping("/instructor/course")
 public class CourseManagementController {
@@ -44,27 +46,24 @@ public class CourseManagementController {
         return "instructor/create_course";
     }
 
-    /**
-     * Create new or update if draft course,
-     * save to temp table if updating course.
-     */
-    @PostMapping("/save_draft")
-    public String saveDraft(@ModelAttribute("course") Course course,
-                            @AuthenticationPrincipal SecurityUser securityUser,
-                            @RequestParam("thumbnailFile") MultipartFile file,
-                            RedirectAttributes redirectAttributes) {
+    @PostMapping("/create_submit")
+    public String createDraftCourse(@AuthenticationPrincipal SecurityUser securityUser,
+                                    @ModelAttribute("course") Course course,
+                                    @RequestParam("thumbnailFile") MultipartFile file,
+                                    RedirectAttributes redirectAttributes,
+                                    Model model) {
         User instructor = securityUser.getUser();
         try {
-            String message = courseService.createOrUpdateCourse(course, instructor, file);
-            redirectAttributes.addFlashAttribute(
-                    "successMessage",
-                    message);
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
+            courseService.createDraftCourse(course, instructor, file);
+            model.addAttribute("course", course);
+            model.addAttribute("successMessage",
+                    "The course general has been created.");
+            return "instructor/create_chapter";
+        } catch (IOException e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
                     "An error occurred while creating the course.");
+            return "redirect:/instructor/courses";
         }
-        return String.format("redirect:/instructor/course/edit/%s", course.getId());
     }
 
     @GetMapping("/edit/{courseId}")
@@ -77,36 +76,59 @@ public class CourseManagementController {
                 return "redirect:/instructor";
             } else {
                 model.addAttribute("course", course);
+                model.addAttribute("categories", categoryService.getAllCategories());
                 return "instructor/edit_course";
             }
         } catch (JsonProcessingException e) {
             redirectAttributes.addFlashAttribute(
                     "errorMessage",
-                    "An error occurred while editing the course.");
-            return "redirect:/instructor";
+                    "An error occurred, please try again later.");
+            return "redirect:/instructor/courses";
         }
     }
 
     /**
-     * Submit course for review.
+     * Create new or update if draft course,
+     * save to temp table if updating course.
      */
-    @PostMapping("/edit/{courseId}")
+    @PostMapping("/edit/{courseId}/submit")
     public String submitCourse(@PathVariable("courseId") Long courseId,
+                               @ModelAttribute("course") Course courseUpdateValues,
                                @AuthenticationPrincipal SecurityUser securityUser,
-                               @ModelAttribute("course") Course course,
                                @RequestParam("thumbnailFile") MultipartFile file,
-                               RedirectAttributes redirectAttributes) {
-
+                               @RequestParam("action") String action,
+                               RedirectAttributes redirectAttributes,
+                               Model model) {
         User instructor = securityUser.getUser();
+        Course course;
         try {
-            courseService.createOrUpdateCourse(course, instructor, file);
-            courseService.submitForReview(course);
+            course = courseService.getEditingCourse(courseId);
+            course.updateCourse(courseUpdateValues);
+        } catch (JsonProcessingException e) {
             redirectAttributes.addFlashAttribute(
-                    "successMessage",
-                    "Submit sucessfully! Please waiting for moderator to review course.");
-            return "redirect:instructor/courses";
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+                    "errorMessage",
+                    "An error occurred, please try again later.");
+            return "redirect:/instructor/courses";
         }
+
+        try {
+            String message = courseService.updateCourse(course, instructor, file);
+            if ("Submit".equals(action)) {
+                courseService.submitForReview(course);
+                redirectAttributes.addFlashAttribute(
+                        "successMessage",
+                        "Submit successfully! Please waiting for moderator to review course.");
+                return "redirect:/instructor/courses";
+            } else {
+                model.addAttribute("successMessage", message);
+            }
+        } catch (Exception e) {
+            model.addAttribute(
+                    "errorMessage",
+                    "An error occurred while editing the course.");
+        }
+        model.addAttribute("course", course);
+        model.addAttribute("categories", categoryService.getAllCategories());
+        return "instructor/edit_course";
     }
 }

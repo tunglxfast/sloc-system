@@ -21,6 +21,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class CourseService {
@@ -124,24 +125,30 @@ public class CourseService {
         return courseDao.findByInstructors(instructor);
     }
 
-
-    // Save directly if still in DRAFT
     @Transactional
-    public String createOrUpdateCourse(Course course, User instructor, MultipartFile file) throws IOException {
+    public void createDraftCourse(Course course, User instructor, MultipartFile file) throws IOException {
+        course.getInstructors().add(instructor);
+        course.setCreatedAt(LocalDate.now());
+        course.setCreatedBy(instructor);
+        courseDao.save(course);
+        saveCourseThumbnail(course, file);
+        courseDao.save(course);
+    }
+
+    /**
+     * Update directly to table if CourseStatus is DRAFT
+     * else update to temp table.
+     */
+    @Transactional
+    public String updateCourse(Course course, User instructor, MultipartFile file) throws IOException {
         course.getInstructors().add(instructor);
         saveCourseThumbnail(course, file);
 
         String returnMessage;
-        if (course.getId() == null) {
-            // create new Course
-            course.setCreatedAt(LocalDate.now());
-            course.setCreatedBy(instructor.getId());
-            courseDao.save(course);
-            returnMessage = "The course general has been created.";
-        } else if (course.getStatus() == CourseStatus.DRAFT){
+        if (course.getStatus() == CourseStatus.DRAFT){
             // save update draft to main table
             course.setUpdatedAt(LocalDate.now());
-            course.setLastUpdatedBy(instructor.getId());
+            course.setLastUpdatedBy(instructor);
             courseDao.save(course);
             returnMessage = "The course general has been updated.";
         } else {
@@ -169,8 +176,9 @@ public class CourseService {
     }
 
     private void saveCourseThumbnail(Course course, MultipartFile file) throws IOException {
+        String uuid = UUID.randomUUID().toString();
         if (!file.isEmpty()) {
-            String fileName = "thumbnail_" + course.getId() + ".jpg";
+            String fileName = String.format("thumbnail-%d-%s.jpg",course.getId(), uuid);
             String absolutePath = Paths.get("").toAbsolutePath().toString() + "/src/main/resources/static/img/";
             File saveFile = new File(absolutePath + fileName);
             file.transferTo(saveFile);

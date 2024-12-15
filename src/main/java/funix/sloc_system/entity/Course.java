@@ -1,8 +1,10 @@
 package funix.sloc_system.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import funix.sloc_system.enums.CourseStatus;
 import jakarta.persistence.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -22,14 +24,17 @@ public class Course {
     // course image
     private String thumbnailUrl;
 
+    @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
-    private Long category;
+    private Category category;
 
+    @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
-    private Long createdBy;
+    private User createdBy;
 
+    @ManyToOne
     @JoinColumn(name = "last_updated_by", nullable = true)
-    private Long lastUpdatedBy;
+    private User lastUpdatedBy;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("sequence ASC")
@@ -49,7 +54,9 @@ public class Course {
     @JsonIgnore
     private Set<User> instructors = new HashSet<>();
 
+    @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate startDate;
+    @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
@@ -106,27 +113,27 @@ public class Course {
         this.thumbnailUrl = thumbnailUrl;
     }
 
-    public Long getCategory() {
+    public Category getCategory() {
         return category;
     }
 
-    public void setCategory(Long category) {
+    public void setCategory(Category category) {
         this.category = category;
     }
 
-    public Long getCreatedBy() {
+    public User getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(Long createdBy) {
+    public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
     }
 
-    public Long getLastUpdatedBy() {
+    public User getLastUpdatedBy() {
         return lastUpdatedBy;
     }
 
-    public void setLastUpdatedBy(Long lastUpdatedBy) {
+    public void setLastUpdatedBy(User lastUpdatedBy) {
         this.lastUpdatedBy = lastUpdatedBy;
     }
 
@@ -200,5 +207,69 @@ public class Course {
 
     public void setUpdatedAt(LocalDate updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @JsonProperty("lastUpdatedBy")
+    public Long getUserIdThatLastUpdateCourse() {
+        return lastUpdatedBy != null ? lastUpdatedBy.getId() : null;
+    }
+
+    @JsonProperty("createdBy")
+    public Long getUserIdThatCreateCourse() {
+        return createdBy != null ? createdBy.getId() : null;
+    }
+
+    @JsonProperty("category")
+    public Long getIdOfCourseCategory() {
+        return category != null ? category.getId() : null;
+    }
+
+    // helping hand methods
+    public void updateCourse(Course otherCourse) {
+        if (otherCourse.getTitle() != null) {
+            this.setTitle(otherCourse.getTitle());
+        }
+        if (otherCourse.getDescription() != null) {
+            this.setDescription(otherCourse.getDescription());
+        }
+        if (otherCourse.getThumbnailUrl() != null) {
+            this.setThumbnailUrl(otherCourse.getThumbnailUrl());
+        }
+        if (otherCourse.getCategory() != null) {
+            this.setCategory(otherCourse.getCategory());
+        }
+        if (otherCourse.getCreatedBy() != null) {
+            this.setCreatedBy(otherCourse.getCreatedBy());
+        }
+        if (otherCourse.getLastUpdatedBy() != null) {
+            this.setLastUpdatedBy(otherCourse.getLastUpdatedBy());
+        }
+        if (otherCourse.getChapters() != null) {
+            this.setChapters(otherCourse.getChapters());
+        }
+        if (otherCourse.getEnrollments() != null) {
+            this.setEnrollments(otherCourse.getEnrollments());
+        }
+        if (otherCourse.getInstructors() != null) {
+            this.setInstructors(otherCourse.getInstructors());
+        }
+        if (otherCourse.getStartDate() != null) {
+            this.setStartDate(otherCourse.getStartDate());
+        }
+        if (otherCourse.getEndDate() != null) {
+            this.setEndDate(otherCourse.getEndDate());
+        }
+        if (otherCourse.getStatus() != null) {
+            this.setStatus(otherCourse.getStatus());
+        }
+        if (otherCourse.getRejectReason() != null) {
+            this.setRejectReason(otherCourse.getRejectReason());
+        }
+        if (otherCourse.getCreatedAt() != null) {
+            this.setCreatedAt(otherCourse.getCreatedAt());
+        }
+        if (otherCourse.getUpdatedAt() != null) {
+            this.setUpdatedAt(otherCourse.getUpdatedAt());
+        }
     }
 }

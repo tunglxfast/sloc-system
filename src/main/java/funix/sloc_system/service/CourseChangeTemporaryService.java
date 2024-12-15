@@ -31,6 +31,7 @@ public class CourseChangeTemporaryService {
                 .findByEntityTypeAndEntityId(EntityType.COURSE, editingCourse.getId())
                 .orElse(new CourseChangeTemporary());
 
+        changeTemporary.setEntityType(EntityType.COURSE);
         changeTemporary.setEntityId(editingCourse.getId());
         changeTemporary.setAction(action);
         changeTemporary.setChanges(json);

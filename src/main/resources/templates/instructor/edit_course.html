@@ -1,10 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Edit Course</title>
 </head>
 <body>
+<h2>Edit Course</h2>
 
+<div th:if="${errorMessage}">
+    <p th:text="${errorMessage}" style="color: red;"></p>
+</div>
+
+<div th:if="${successMessage}">
+    <p th:text="${successMessage}" style="color: blue;"></p>
+</div>
+
+<form th:action="@{/instructor/course/edit/submit}" th:object="${course}" method="post" enctype="multipart/form-data">
+    <input type="hidden" th:field="*{id}"/>
+<!--    <input type="hidden" th:field="*{thumbnailUrl}"/>-->
+<!--    <input type="hidden" th:field="*{createdBy}"/>-->
+<!--    <input type="hidden" th:field="*{instructors}"/>-->
+<!--    <input type="hidden" th:field="*{lastUpdatedBy}"/>-->
+<!--    <input type="hidden" th:field="*{rejectReason}"/>-->
+<!--    <input type="hidden" th:field="*{status}"/>-->
+<!--    <input type="hidden" th:field="*{createdAt}"/>-->
+<!--    <input type="hidden" th:field="*{updatedAt}"/>-->
+
+    <label for="title">Title:</label><br>
+    <input type="text" id="title" th:field="*{title}" required/><br><br>
+
+    <label for="description">Description:</label><br>
+    <textarea id="description" th:field="*{description}" rows="4" cols="50" required>
+    </textarea><br><br>
+
+    <label for="thumbnailFile">Thumbnail:</label><br>
+    <input type="file" id="thumbnailFile" name="thumbnailFile" accept=".jpg,.jpeg,.png"/><br>
+
+    <label for="category">Category:</label><br>
+    <select id="category" th:field="*{category}" required>
+        <option th:each="category : ${categories}" th:value="${category.id}"
+                th:text="${category.name}" th:selected="${course.category.id == category.id}">
+        </option>
+    </select><br><br>
+
+    <label for="startDate">Start Date:</label><br>
+    <input type="date" id="startDate" th:field="*{startDate}" required/><br><br>
+
+    <label for="endDate">End Date:</label><br>
+    <input type="date" id="endDate" th:field="*{endDate}"/><br><br>
+
+    <input type="submit" name="action" value="Save Draft"/>
+    <input type="submit" name="action" value="Submit"/>
+</form>
 </body>
 </html>

@@ -16,6 +16,10 @@
         <p th:text="${errorMessage}" style="color: red;"></p>
     </div>
 
+    <div th:if="${successMessage}">
+        <p th:text="${successMessage}" style="color: blue;"></p>
+    </div>
+
     <div th:if="${courses.size()} == 0" class="alert alert-info">
         <p>You are not managing any courses yet.</p>
         <a href="/course/create" class="btn btn-primary">Create New Course</a>
