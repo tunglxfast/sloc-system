@@ -1,6 +1,7 @@
 package funix.sloc_system.controller;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.security.SecurityUser;
@@ -44,14 +45,14 @@ public class CourseManagementController {
     }
 
     /**
-     * Save course if create new or draft.
-     * Save to AuditLog if update course
+     * Create new or update if draft course,
+     * save to temp table if updating course.
      */
-    @PostMapping("/save")
-    public String createCourse(@ModelAttribute("course") Course course,
-                               @AuthenticationPrincipal SecurityUser securityUser,
-                               @RequestParam("thumbnailFile") MultipartFile file,
-                               RedirectAttributes redirectAttributes) {
+    @PostMapping("/save_draft")
+    public String saveDraft(@ModelAttribute("course") Course course,
+                            @AuthenticationPrincipal SecurityUser securityUser,
+                            @RequestParam("thumbnailFile") MultipartFile file,
+                            RedirectAttributes redirectAttributes) {
         User instructor = securityUser.getUser();
         try {
             String message = courseService.createOrUpdateCourse(course, instructor, file);
@@ -63,40 +64,43 @@ public class CourseManagementController {
                     "errorMessage",
                     "An error occurred while creating the course.");
         }
-        redirectAttributes.addFlashAttribute("course", course);
         return String.format("redirect:/instructor/course/edit/%s", course.getId());
     }
 
     @GetMapping("/edit/{courseId}")
     public String showEditingCourse(@PathVariable("courseId") Long courseId,
-                                    @ModelAttribute("course") Course editingCourse,
-                                    Model model) {
-        Course course;
-        if (editingCourse == null) {
-            course = courseService.findById(courseId);
-        } else {
-            course = editingCourse;
-        }
-
-        if (course == null) {
+                                    Model model,
+                                    RedirectAttributes redirectAttributes) {
+        try {
+            Course course = courseService.getEditingCourse(courseId);
+            if (course == null) {
+                return "redirect:/instructor";
+            } else {
+                model.addAttribute("course", course);
+                return "instructor/edit_course";
+            }
+        } catch (JsonProcessingException e) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "An error occurred while editing the course.");
             return "redirect:/instructor";
-        } else {
-            model.addAttribute("course", course);
-            return "instructor/edit_course";
         }
     }
 
+    /**
+     * Submit course for review.
+     */
     @PostMapping("/edit/{courseId}")
-    public String submitReviewCourse(@PathVariable("courseId") Long courseId,
-                                     @AuthenticationPrincipal SecurityUser securityUser,
-                                     @ModelAttribute("course") Course course,
-                                     @RequestParam("thumbnailFile") MultipartFile file,
-                                     RedirectAttributes redirectAttributes) {
+    public String submitCourse(@PathVariable("courseId") Long courseId,
+                               @AuthenticationPrincipal SecurityUser securityUser,
+                               @ModelAttribute("course") Course course,
+                               @RequestParam("thumbnailFile") MultipartFile file,
+                               RedirectAttributes redirectAttributes) {
 
         User instructor = securityUser.getUser();
         try {
             courseService.createOrUpdateCourse(course, instructor, file);
-            courseService.sendToReview(course);
+            courseService.submitForReview(course);
             redirectAttributes.addFlashAttribute(
                     "successMessage",
                     "Submit sucessfully! Please waiting for moderator to review course.");

@@ -1,28 +1,40 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.enums.CourseChangeAction;
 import funix.sloc_system.enums.CourseStatus;
+import funix.sloc_system.enums.EntityType;
 import jakarta.persistence.*;
 import jakarta.persistence.GenerationType;
 
 import java.time.LocalDateTime;
 
 @Entity
-public class EditCourseAudit {
+@Table(name = "course_change_temporary")
+public class CourseChangeTemporary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String entityType;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EntityType entityType;
+    @Column(nullable = false)
     private Long entityId;
-    private String action;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CourseChangeAction action;
+    @Column(length = 5000, nullable = false)
     private String changes;
 
-    private String status = CourseStatus.PENDING.name();
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CourseStatus status = CourseStatus.PENDING_EDIT; // Only have PENDING_EDIT and REJECTED
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User updatedBy;
 
+    @Column(nullable = false)
     private LocalDateTime changeTime;
 
     // Getters and setters
@@ -34,11 +46,11 @@ public class EditCourseAudit {
         this.id = id;
     }
 
-    public String getEntityType() {
+    public EntityType getEntityType() {
         return entityType;
     }
 
-    public void setEntityType(String entityType) {
+    public void setEntityType(EntityType entityType) {
         this.entityType = entityType;
     }
 
@@ -50,11 +62,11 @@ public class EditCourseAudit {
         this.entityId = entityId;
     }
 
-    public String getAction() {
+    public CourseChangeAction getAction() {
         return action;
     }
 
-    public void setAction(String action) {
+    public void setAction(CourseChangeAction action) {
         this.action = action;
     }
 
@@ -82,11 +94,11 @@ public class EditCourseAudit {
         this.updatedBy = updatedBy;
     }
 
-    public String getStatus() {
+    public CourseStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(CourseStatus status) {
         this.status = status;
     }
 }

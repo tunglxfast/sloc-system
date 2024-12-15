@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import funix.sloc_system.dao.CourseDao;
 import funix.sloc_system.dao.UserDao;
 import funix.sloc_system.entity.Course;
-import funix.sloc_system.entity.EditCourseAudit;
+import funix.sloc_system.entity.CourseChangeTemporary;
 import funix.sloc_system.entity.User;
+import funix.sloc_system.enums.CourseChangeAction;
 import funix.sloc_system.enums.CourseStatus;
 import funix.sloc_system.enums.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class CourseService {
     @Autowired
     private EmailService emailService;
     @Autowired
-    private EditCourseAuditService editCourseAuditService;
+    private CourseChangeTemporaryService courseChangeTemporaryService;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -56,10 +57,10 @@ public class CourseService {
     }
 
     public List<Course> getApprovedOrUpdatingCourses() {
-        return courseDao.findByStatusIn(List.of(CourseStatus.APPROVED, CourseStatus.UPDATING));
+        return courseDao.findByStatusIn(List.of(CourseStatus.APPROVED, CourseStatus.PENDING_EDIT));
     }
 
-    public void submitForReview(Long courseId) {
+    public void submitForCreatingReview(Long courseId) {
         Course course = courseDao.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
 
@@ -67,15 +68,18 @@ public class CourseService {
             throw new IllegalArgumentException("Course must have at least one chapter before submission.");
         }
 
-        course.setStatus(CourseStatus.PENDING);
+        course.setStatus(CourseStatus.PENDING_CREATE);
         courseDao.save(course);
     }
 
-    public void submitForUpdateReview(Long courseId) {
-        Course course = courseDao.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+    public void submitForReview(Course course) {
+        // change course status for reviewing
+        if (course.getStatus() == CourseStatus.DRAFT){
+            course.setStatus(CourseStatus.PENDING_CREATE);
+        } else {
+            course.setStatus(CourseStatus.PENDING_EDIT);
+        }
 
-        course.setStatus(CourseStatus.UPDATING);
         courseDao.save(course);
     }
 
@@ -126,50 +130,40 @@ public class CourseService {
     public String createOrUpdateCourse(Course course, User instructor, MultipartFile file) throws IOException {
         course.getInstructors().add(instructor);
         saveCourseThumbnail(course, file);
+
         String returnMessage;
         if (course.getId() == null) {
             // create new Course
             course.setCreatedAt(LocalDate.now());
             course.setCreatedBy(instructor.getId());
+            courseDao.save(course);
             returnMessage = "The course general has been created.";
         } else if (course.getStatus() == CourseStatus.DRAFT){
             // save update draft to main table
             course.setUpdatedAt(LocalDate.now());
             course.setLastUpdatedBy(instructor.getId());
+            courseDao.save(course);
             returnMessage = "The course general has been updated.";
         } else {
-            // save update course not draft to audit table for later review
-            editCourseAuditService.saveEditingCourse(
-                    EntityType.COURSE.name(),
+            // save update course not draft to temp table for later review
+            courseChangeTemporaryService.saveEditingCourse(
                     course,
-                    CourseStatus.UPDATING.name(),
+                    CourseChangeAction.UPDATE,
                     instructor);
             returnMessage = "The course general has been updated.";
         }
-        courseDao.save(course);
         return returnMessage;
     }
 
     @Transactional
-    public void sendToReview(Course course) throws Exception {
-
-        if (course.getStatus() == CourseStatus.DRAFT) {
-            submitForReview(course.getId());
-        } else {
-            submitForUpdateReview(course.getId());
-        }
-    }
-
-    private Course getEditingCourse(Long id) throws JsonProcessingException {
-        EditCourseAudit courseAudit = editCourseAuditService.getLatestAudits(
-                EntityType.COURSE.name(),
-                id,
-                CourseStatus.PENDING.name()
-                ).orElse(null);
-        if (courseAudit == null) {
+    public Course getEditingCourse(Long id) throws JsonProcessingException {
+        CourseChangeTemporary changeTemporary = courseChangeTemporaryService.getCourseEditing(
+                EntityType.COURSE,
+                id).orElse(null);
+        if (changeTemporary == null) {
             return courseDao.findById(id).orElse(null);
         } else {
-            String courseContext = courseAudit.getChanges();
+            String courseContext = changeTemporary.getChanges();
             return objectMapper.readValue(courseContext, Course.class);
         }
     }

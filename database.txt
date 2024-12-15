@@ -2,6 +2,7 @@
 DROP TABLE IF EXISTS instructor_course;
 DROP TABLE IF EXISTS enrollment;
 DROP TABLE IF EXISTS test_result;
+DROP TABLE IF EXISTS course_change_temporary;
 DROP TABLE IF EXISTS answer;
 DROP TABLE IF EXISTS question;
 DROP TABLE IF EXISTS exam;
@@ -106,6 +107,18 @@ CREATE TABLE answer (
     question_id BIGINT,
     status VARCHAR(50) DEFAULT 'DRAFT',
     FOREIGN KEY (question_id) REFERENCES question(id)
+);
+
+CREATE TABLE course_change_temporary (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id BIGINT NOT NULL,
+    action VARCHAR(50) NOT NULL,
+    changes TEXT NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    user_id BIGINT NOT NULL,
+    change_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE enrollment (
