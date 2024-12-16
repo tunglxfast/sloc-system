@@ -316,4 +316,18 @@ public class CourseService {
     public boolean courseExists(Long courseId) {
         return courseDao.existsById(courseId);
     }
+
+    public boolean isEditable(Long courseId){
+        Course course = findById(courseId);
+        if (course == null) {
+            return false;
+        }
+
+        CourseStatus status = course.getStatus();
+        if (status.equals(CourseStatus.PENDING_EDIT) || status.equals(CourseStatus.PENDING_CREATE)) {
+            return false;
+        }
+
+        return true;
+    }
 }

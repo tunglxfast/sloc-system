@@ -46,11 +46,11 @@ public class CourseManagementController {
     }
 
     @PostMapping("/create")
-    public String createDraftCourse(@AuthenticationPrincipal SecurityUser securityUser,
-                                    @ModelAttribute("course") CourseDTO courseDTO,
-                                    @RequestParam("thumbnailFile") MultipartFile file,
-                                    RedirectAttributes redirectAttributes,
-                                    Model model) {
+    public String createNewCourse(@AuthenticationPrincipal SecurityUser securityUser,
+                                  @ModelAttribute("course") CourseDTO courseDTO,
+                                  @RequestParam("thumbnailFile") MultipartFile file,
+                                  RedirectAttributes redirectAttributes,
+                                  Model model) {
         User instructor = securityUser.getUser();
         try {
             CourseDTO newCourseDTO = courseService.createDraftCourse(courseDTO, instructor, file);
@@ -75,6 +75,13 @@ public class CourseManagementController {
             redirectAttributes.addFlashAttribute(
                     "errorMessage",
                     "Course is not exist.");
+            return "redirect:/instructor/courses";
+        }
+
+        if (!courseService.isEditable(courseId)) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Course can not be edited yet.");
             return "redirect:/instructor/courses";
         }
 

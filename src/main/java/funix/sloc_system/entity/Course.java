@@ -34,7 +34,9 @@ public class Course {
     private CourseStatus status = CourseStatus.DRAFT;
     @Column(nullable = true)
     private String rejectReason;
+    @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate createdAt;
+    @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate updatedAt;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.EAGER)

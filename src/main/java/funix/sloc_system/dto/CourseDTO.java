@@ -1,6 +1,7 @@
 package funix.sloc_system.dto;
 
 import funix.sloc_system.enums.CourseStatus;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -14,11 +15,15 @@ public class CourseDTO {
     private Long category; // Category id
     private Long createdBy; // User id
     private Long lastUpdatedBy; // User id
+    @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate startDate;
+    @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate endDate;
     private String status = CourseStatus.DRAFT.name();
     private String rejectReason;
+    @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate createdAt;
+    @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate updatedAt;
     private Set<Long> chapters = new HashSet<>(); // Set of Chapter id
     private Set<Long> enrollments = new HashSet<>(); // Set of Enrollment id
