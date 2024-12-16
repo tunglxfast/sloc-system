@@ -132,17 +132,17 @@ public class CourseService {
     }
 
     @Transactional
-    public CourseDTO createDraftCourse(CourseDTO courseDTO, User instructor, MultipartFile file) throws IOException {
-        Course course = reconvertToEntity(courseDTO);
-        course.getInstructors().add(instructor);
-        course.setCreatedAt(LocalDate.now());
-        course.setCreatedBy(instructor);
+    public CourseDTO createDraftCourse(CourseDTO courseDTO, Long instructorId, MultipartFile file) throws IOException {
+        courseDTO.getInstructors().add(instructorId);
+        courseDTO.setCreatedAt(LocalDate.now());
+        courseDTO.setCreatedBy(instructorId);
 
         String thumbnailUrl = saveThumbnail(file);
         if (thumbnailUrl != null && !thumbnailUrl.isBlank()){
-            course.setThumbnailUrl(thumbnailUrl);
+            courseDTO.setThumbnailUrl(thumbnailUrl);
         }
 
+        Course course = reconvertToEntity(courseDTO);
         courseDao.save(course);
         return convertToDTO(course);
     }

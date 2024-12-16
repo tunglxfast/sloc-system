@@ -51,9 +51,9 @@ public class CourseManagementController {
                                   @RequestParam("thumbnailFile") MultipartFile file,
                                   RedirectAttributes redirectAttributes,
                                   Model model) {
-        User instructor = securityUser.getUser();
+        Long instructorId = securityUser.getUserId();
         try {
-            CourseDTO newCourseDTO = courseService.createDraftCourse(courseDTO, instructor, file);
+            CourseDTO newCourseDTO = courseService.createDraftCourse(courseDTO, instructorId, file);
             model.addAttribute("course", newCourseDTO);
             model.addAttribute("successMessage",
                     "The course general has been created.");
