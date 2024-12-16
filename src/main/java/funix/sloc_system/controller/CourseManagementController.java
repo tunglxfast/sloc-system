@@ -1,8 +1,7 @@
 package funix.sloc_system.controller;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import funix.sloc_system.entity.Course;
+import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.CategoryService;
@@ -39,23 +38,23 @@ public class CourseManagementController {
      */
     @GetMapping("/create")
     public String showCreateCourseForm(@AuthenticationPrincipal SecurityUser securityUser, Model model) {
-        User instructor = userService.findById(securityUser.getUser().getId());
+        User instructor = userService.findById(securityUser.getUserId());
         model.addAttribute("user", instructor);
-        model.addAttribute("course", new Course());
+        model.addAttribute("course", new CourseDTO());
         model.addAttribute("categories", categoryService.getAllCategories());
         return "instructor/create_course";
     }
 
-    @PostMapping("/create_submit")
+    @PostMapping("/create")
     public String createDraftCourse(@AuthenticationPrincipal SecurityUser securityUser,
-                                    @ModelAttribute("course") Course course,
+                                    @ModelAttribute("course") CourseDTO courseDTO,
                                     @RequestParam("thumbnailFile") MultipartFile file,
                                     RedirectAttributes redirectAttributes,
                                     Model model) {
         User instructor = securityUser.getUser();
         try {
-            courseService.createDraftCourse(course, instructor, file);
-            model.addAttribute("course", course);
+            CourseDTO newCourseDTO = courseService.createDraftCourse(courseDTO, instructor, file);
+            model.addAttribute("course", newCourseDTO);
             model.addAttribute("successMessage",
                     "The course general has been created.");
             return "instructor/create_chapter";
@@ -70,19 +69,28 @@ public class CourseManagementController {
     public String showEditingCourse(@PathVariable("courseId") Long courseId,
                                     Model model,
                                     RedirectAttributes redirectAttributes) {
+
+        boolean isExists = courseService.courseExists(courseId);
+        if (!isExists) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Course is not exist.");
+            return "redirect:/instructor/courses";
+        }
+
         try {
-            Course course = courseService.getEditingCourse(courseId);
-            if (course == null) {
+            CourseDTO courseDTO = courseService.getEditingCourseDTO(courseId);
+            if (courseDTO == null) {
                 return "redirect:/instructor";
             } else {
-                model.addAttribute("course", course);
+                model.addAttribute("course", courseDTO);
                 model.addAttribute("categories", categoryService.getAllCategories());
                 return "instructor/edit_course";
             }
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             redirectAttributes.addFlashAttribute(
                     "errorMessage",
-                    "An error occurred, please try again later.");
+                    "An error occurred, please try again later");
             return "redirect:/instructor/courses";
         }
     }
@@ -93,41 +101,41 @@ public class CourseManagementController {
      */
     @PostMapping("/edit/{courseId}/submit")
     public String submitCourse(@PathVariable("courseId") Long courseId,
-                               @ModelAttribute("course") Course courseUpdateValues,
+                               @ModelAttribute("course") CourseDTO courseUpdateValues,
                                @AuthenticationPrincipal SecurityUser securityUser,
                                @RequestParam("thumbnailFile") MultipartFile file,
                                @RequestParam("action") String action,
                                RedirectAttributes redirectAttributes,
                                Model model) {
-        User instructor = securityUser.getUser();
-        Course course;
+        Long instructorId = securityUser.getUserId();
+        CourseDTO courseDTO;
         try {
-            course = courseService.getEditingCourse(courseId);
-            course.updateCourse(courseUpdateValues);
-        } catch (JsonProcessingException e) {
+            courseDTO = courseService.getEditingCourseDTO(courseId);
+            courseDTO.updateCourseDTO(courseUpdateValues);
+        } catch (Exception e) {
             redirectAttributes.addFlashAttribute(
                     "errorMessage",
-                    "An error occurred, please try again later.");
+                    "An error occurred, please try again later");
             return "redirect:/instructor/courses";
         }
 
         try {
-            String message = courseService.updateCourse(course, instructor, file);
+            courseService.saveUpdateCourse(courseDTO, instructorId, file);
             if ("Submit".equals(action)) {
-                courseService.submitForReview(course);
+                courseService.submitForReview(courseId);
                 redirectAttributes.addFlashAttribute(
                         "successMessage",
                         "Submit successfully! Please waiting for moderator to review course.");
                 return "redirect:/instructor/courses";
             } else {
-                model.addAttribute("successMessage", message);
+                model.addAttribute("successMessage", "The course general has been updated.");
             }
         } catch (Exception e) {
             model.addAttribute(
                     "errorMessage",
                     "An error occurred while editing the course.");
         }
-        model.addAttribute("course", course);
+        model.addAttribute("course", courseDTO);
         model.addAttribute("categories", categoryService.getAllCategories());
         return "instructor/edit_course";
     }

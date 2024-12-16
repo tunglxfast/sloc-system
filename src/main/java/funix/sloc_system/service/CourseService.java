@@ -1,12 +1,9 @@
 package funix.sloc_system.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import funix.sloc_system.dao.CourseDao;
-import funix.sloc_system.dao.UserDao;
-import funix.sloc_system.entity.Course;
-import funix.sloc_system.entity.CourseChangeTemporary;
-import funix.sloc_system.entity.User;
+import funix.sloc_system.dao.*;
+import funix.sloc_system.dto.CourseDTO;
+import funix.sloc_system.entity.*;
 import funix.sloc_system.enums.CourseChangeAction;
 import funix.sloc_system.enums.CourseStatus;
 import funix.sloc_system.enums.EntityType;
@@ -19,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -30,6 +28,12 @@ public class CourseService {
     private UserDao userDao;
     @Autowired
     private CourseDao courseDao;
+    @Autowired
+    private CategoryDao categoryDao;
+    @Autowired
+    private ChapterDao chapterDao;
+    @Autowired
+    private EnrollmentDao enrollmentDao;
     @Autowired
     private EmailService emailService;
     @Autowired
@@ -73,14 +77,16 @@ public class CourseService {
         courseDao.save(course);
     }
 
-    public void submitForReview(Course course) {
+    public void submitForReview(Long courseId) {
+        Course course = courseDao.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+
         // change course status for reviewing
         if (course.getStatus() == CourseStatus.DRAFT){
             course.setStatus(CourseStatus.PENDING_CREATE);
         } else {
             course.setStatus(CourseStatus.PENDING_EDIT);
         }
-
         courseDao.save(course);
     }
 
@@ -126,13 +132,19 @@ public class CourseService {
     }
 
     @Transactional
-    public void createDraftCourse(Course course, User instructor, MultipartFile file) throws IOException {
+    public CourseDTO createDraftCourse(CourseDTO courseDTO, User instructor, MultipartFile file) throws IOException {
+        Course course = reconvertToEntity(courseDTO);
         course.getInstructors().add(instructor);
         course.setCreatedAt(LocalDate.now());
         course.setCreatedBy(instructor);
+
+        String thumbnailUrl = saveThumbnail(file);
+        if (thumbnailUrl != null && !thumbnailUrl.isBlank()){
+            course.setThumbnailUrl(thumbnailUrl);
+        }
+
         courseDao.save(course);
-        saveCourseThumbnail(course, file);
-        courseDao.save(course);
+        return convertToDTO(course);
     }
 
     /**
@@ -140,49 +152,168 @@ public class CourseService {
      * else update to temp table.
      */
     @Transactional
-    public String updateCourse(Course course, User instructor, MultipartFile file) throws IOException {
-        course.getInstructors().add(instructor);
-        saveCourseThumbnail(course, file);
-
-        String returnMessage;
-        if (course.getStatus() == CourseStatus.DRAFT){
-            // save update draft to main table
-            course.setUpdatedAt(LocalDate.now());
-            course.setLastUpdatedBy(instructor);
-            courseDao.save(course);
-            returnMessage = "The course general has been updated.";
-        } else {
-            // save update course not draft to temp table for later review
-            courseChangeTemporaryService.saveEditingCourse(
-                    course,
-                    CourseChangeAction.UPDATE,
-                    instructor);
-            returnMessage = "The course general has been updated.";
+    public void saveUpdateCourse(CourseDTO courseDTO, Long instructorId, MultipartFile file) throws IOException {
+        courseDTO.getInstructors().add(instructorId);
+        String thumbnailUrl = saveThumbnail(file);
+        if (thumbnailUrl != null && !thumbnailUrl.isBlank()){
+            courseDTO.setThumbnailUrl(thumbnailUrl);
         }
-        return returnMessage;
+        courseDTO.setUpdatedAt(LocalDate.now());
+        courseDTO.setLastUpdatedBy(instructorId);
+
+        if (CourseStatus.valueOf(courseDTO.getStatus()) == CourseStatus.DRAFT){
+            // save update to main table
+            Course course = reconvertToEntity(courseDTO);
+            courseDao.save(course);
+        } else {
+            // save update to temp table for later review
+            courseChangeTemporaryService.saveEditingCourse(
+                    courseDTO,
+                    CourseChangeAction.UPDATE,
+                    instructorId);
+        }
     }
 
     @Transactional
-    public Course getEditingCourse(Long id) throws JsonProcessingException {
+    public CourseDTO getEditingCourseDTO(Long id) throws Exception {
+        Course course = findById(id);
         CourseChangeTemporary changeTemporary = courseChangeTemporaryService.getCourseEditing(
                 EntityType.COURSE,
                 id).orElse(null);
         if (changeTemporary == null) {
-            return courseDao.findById(id).orElse(null);
+            return convertToDTO(course);
         } else {
-            String courseContext = changeTemporary.getChanges();
-            return objectMapper.readValue(courseContext, Course.class);
+            String changeContext = changeTemporary.getChanges();
+            return objectMapper.readValue(changeContext, CourseDTO.class);
         }
     }
 
-    private void saveCourseThumbnail(Course course, MultipartFile file) throws IOException {
+    @Transactional
+    private String saveThumbnail(MultipartFile file) throws IOException {
         String uuid = UUID.randomUUID().toString();
         if (!file.isEmpty()) {
-            String fileName = String.format("thumbnail-%d-%s.jpg",course.getId(), uuid);
-            String absolutePath = Paths.get("").toAbsolutePath().toString() + "/src/main/resources/static/img/";
+            String fileName = String.format("thumbnail-%s.jpg", uuid);
+            String absolutePath = Paths.get("").toAbsolutePath() + "/src/main/resources/static/img/";
             File saveFile = new File(absolutePath + fileName);
             file.transferTo(saveFile);
-            course.setThumbnailUrl("/img/" + fileName);
+            return "/img/" + fileName;
+        } else {
+            return null;
         }
+    }
+
+    /**
+     * Courvert Course to CourseDTO
+     * @param course
+     * @return CourseDTO
+     */
+    public CourseDTO convertToDTO(Course course) {
+        if (course == null){
+            return null;
+        }
+
+        Set<Long> chapters = new HashSet<>();
+        Set<Long> enrollments = new HashSet<>();
+        Set<Long> instructors = new HashSet<>();
+
+        for (Chapter chapter : course.getChapters()){
+            chapters.add(chapter.getId());
+        }
+
+        for (Enrollment enrollment: course.getEnrollments()){
+            enrollments.add(enrollment.getId());
+        }
+
+        for (User instructor : course.getInstructors()){
+            instructors.add(instructor.getId());
+        }
+
+        return new CourseDTO(
+                course.getId(),
+                course.getTitle(),
+                course.getDescription(),
+                course.getThumbnailUrl(),
+                course.getCategory() != null ? course.getCategory().getId() : null,
+                course.getCreatedBy() != null ? course.getCreatedBy().getId() : null,
+                course.getLastUpdatedBy() != null ? course.getLastUpdatedBy().getId() : null,
+                course.getStartDate(),
+                course.getEndDate(),
+                course.getStatus().name(),
+                course.getRejectReason(),
+                course.getCreatedAt(),
+                course.getUpdatedAt(),
+                chapters,
+                enrollments,
+                instructors
+        );
+    }
+
+    /**
+     * Courvert CourseDTO to Course entity
+     * @param courseDTO
+     * @return Course
+     */
+    public Course reconvertToEntity(CourseDTO courseDTO) {
+        if (courseDTO == null){
+            return null;
+        }
+
+        Set<Chapter> chapters = new HashSet<>();
+        Set<Enrollment> enrollments = new HashSet<>();
+        Set<User> instructors = new HashSet<>();
+        for (Long chapterId : courseDTO.getChapters()){
+            Chapter chapter = chapterDao.findById(chapterId).orElse(null);
+            if (chapter != null) {
+                chapters.add(chapter);
+            }
+        }
+
+        for (Long enrollmentId: courseDTO.getEnrollments()){
+            Enrollment enrollment = enrollmentDao.findById(enrollmentId).orElse(null);
+            if (enrollment != null) {
+                enrollments.add(enrollment);
+            }
+        }
+
+        for (Long instructorId : courseDTO.getInstructors()){
+            User instructor = userDao.findById(instructorId).orElse(null);
+            if (instructor != null) {
+                instructors.add(instructor);
+            }
+        }
+
+        Course course = new Course();
+        course.setId(courseDTO.getId());
+        course.setTitle(courseDTO.getTitle());
+        course.setDescription(courseDTO.getDescription());
+        course.setThumbnailUrl(courseDTO.getThumbnailUrl());
+
+        course.setCategory(courseDTO.getCategory() != null ?
+                categoryDao.findById(courseDTO.getCategory()).orElse(null) : null);
+
+        course.setCreatedBy(courseDTO.getCreatedBy() != null ?
+                userDao.findById(courseDTO.getCreatedBy()).orElse(null) : null);
+
+        course.setLastUpdatedBy(courseDTO.getLastUpdatedBy() != null ?
+                userDao.findById(courseDTO.getLastUpdatedBy()).orElse(null) : null);
+
+        course.setStartDate(courseDTO.getStartDate());
+        course.setEndDate(courseDTO.getEndDate());
+
+        course.setStatus(courseDTO.getStatus() != null ?
+                CourseStatus.valueOf(courseDTO.getStatus()) : CourseStatus.DRAFT);
+
+        course.setRejectReason(courseDTO.getRejectReason());
+        course.setCreatedAt(courseDTO.getCreatedAt());
+        course.setUpdatedAt(courseDTO.getUpdatedAt());
+        course.setChapters(chapters);
+        course.setEnrollments(enrollments);
+        course.setInstructors(instructors);
+
+        return course;
+    }
+
+    public boolean courseExists(Long courseId) {
+        return courseDao.existsById(courseId);
     }
 }

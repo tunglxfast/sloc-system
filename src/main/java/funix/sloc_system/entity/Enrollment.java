@@ -1,6 +1,5 @@
 package funix.sloc_system.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -13,12 +12,10 @@ public class Enrollment {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonBackReference
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "course_id")
-    @JsonBackReference
     private Course course;
 
     private LocalDate enrollmentDate; // Ngày đăng ký khóa học

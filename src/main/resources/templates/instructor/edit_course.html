@@ -15,16 +15,11 @@
     <p th:text="${successMessage}" style="color: blue;"></p>
 </div>
 
-<form th:action="@{/instructor/course/edit/submit}" th:object="${course}" method="post" enctype="multipart/form-data">
+<form th:action="@{/instructor/course/edit/{id}/submit(id=${course.id})}"
+      th:object="${course}" method="post" enctype="multipart/form-data">
     <input type="hidden" th:field="*{id}"/>
-<!--    <input type="hidden" th:field="*{thumbnailUrl}"/>-->
-<!--    <input type="hidden" th:field="*{createdBy}"/>-->
-<!--    <input type="hidden" th:field="*{instructors}"/>-->
-<!--    <input type="hidden" th:field="*{lastUpdatedBy}"/>-->
-<!--    <input type="hidden" th:field="*{rejectReason}"/>-->
-<!--    <input type="hidden" th:field="*{status}"/>-->
-<!--    <input type="hidden" th:field="*{createdAt}"/>-->
-<!--    <input type="hidden" th:field="*{updatedAt}"/>-->
+    <input type="hidden" th:field="*{status}"/>
+    <input type="hidden" th:field="*{createdAt}"/>
 
     <label for="title">Title:</label><br>
     <input type="text" id="title" th:field="*{title}" required/><br><br>

@@ -11,7 +11,7 @@
     <p th:text="${errorMessage}" style="color: red;"></p>
 </div>
 
-<form th:action="@{/instructor/course/create_submit}" th:object="${course}" method="post" enctype="multipart/form-data">
+<form th:action="@{/instructor/course/create}" th:object="${course}" method="post" enctype="multipart/form-data">
     <label for="title">Course title:</label>
     <input type="text" id="title" th:field="*{title}" required>
     <br>

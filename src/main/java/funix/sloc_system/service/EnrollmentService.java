@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 @Service
 public class EnrollmentService {
@@ -55,7 +55,8 @@ public class EnrollmentService {
         return "Register successfully";
     }
 
-    public List<Enrollment> getEnrollmentsByUser(User user) {
+    public Set<Enrollment> getEnrollmentsByUserId(Long userId) {
+        User user = userDao.findById(userId).orElse(null);
         return enrollmentDAO.findByUser(user);
     }
 
@@ -63,7 +64,8 @@ public class EnrollmentService {
         return enrollmentDAO.existsByUserAndCourse(user, course);
     }
 
-    public List<Enrollment> getEnrollmentsByCourse(Course course) {
+    public Set<Enrollment> getEnrollmentsByCourseId(Long courseId) {
+        Course course = courseDao.findById(courseId).orElse(null);
         return enrollmentDAO.findByCourse(course);
     }
 }

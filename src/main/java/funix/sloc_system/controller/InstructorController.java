@@ -27,7 +27,7 @@ public class InstructorController {
 
     @GetMapping(value = {"","/","/courses"})
     public String showInstructorManageList(@AuthenticationPrincipal SecurityUser securityUser, Model model){
-        User user = userService.findById(securityUser.getUser().getId());
+        User user = userService.findById(securityUser.getUserId());
         List<Course> courseList;
         if (user.getStringRoles().contains(RoleType.MODERATOR.name())) {
             courseList = courseService.getAllCourses();

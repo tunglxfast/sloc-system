@@ -1,7 +1,10 @@
 package funix.sloc_system.util;
 
+import funix.sloc_system.dao.CategoryDao;
+import funix.sloc_system.dao.ChapterDao;
 import funix.sloc_system.dao.CourseDao;
 import funix.sloc_system.dao.TopicDao;
+import funix.sloc_system.entity.Category;
 import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Topic;
@@ -18,6 +21,10 @@ public class ApplicationUtil {
     private TopicDao topicDao;
     @Autowired
     private CourseDao courseDao;
+    @Autowired
+    private ChapterDao chapterDao;
+    @Autowired
+    private CategoryDao categoryDao;
 
     public Topic findNextTopic(Long topicId){
         Topic currentTopic = topicDao.findById(topicId)
@@ -37,7 +44,7 @@ public class ApplicationUtil {
         int nextChapterSequence = currentChapter.getSequence() + 1;
         Course currentCourse = currentChapter.getCourse();
 
-        List<Chapter> chapters = currentCourse.getChapters();
+        List<Chapter> chapters = chapterDao.findByCourseIdOrderBySequence(currentCourse.getId());
         for (Chapter chapter: chapters) {
             if (chapter.getSequence() == nextChapterSequence) {
                 return chapter.getTopics().get(0);
@@ -58,5 +65,9 @@ public class ApplicationUtil {
             return false;
         }
         return true;
+    }
+
+    public Category getCategoryById(Long id) {
+        return categoryDao.findById(id).orElse(null);
     }
 }

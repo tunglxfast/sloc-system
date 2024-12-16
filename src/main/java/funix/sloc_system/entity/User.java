@@ -1,5 +1,6 @@
 package funix.sloc_system.entity;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -12,6 +13,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonValue
     private Long id;
 
     @Column(nullable = false, unique = true)

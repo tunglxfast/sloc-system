@@ -64,7 +64,7 @@ public class CourseLearningController {
         }
 
         Course course = courseService.findById(id);
-        User user = userService.findById(securityUser.getUser().getId());
+        User user = userService.findById(securityUser.getUserId());
         if (course != null && user != null) {
             boolean isEnrolled = enrollmentService.isEnrolled(user, course);
             model.addAttribute("course", course);
@@ -82,7 +82,7 @@ public class CourseLearningController {
         }
 
         Course course = courseService.findById(courseId);
-        User user = userService.findById(securityUser.getUser().getId());
+        User user = userService.findById(securityUser.getUserId());
         if (course != null && user != null) {
             String response  = enrollmentService.enrollCourse(user, course);
             if (response.equalsIgnoreCase("Register successfully")) {
@@ -106,7 +106,7 @@ public class CourseLearningController {
             return "redirect:/courses";
         }
 
-        User user = userService.findById(securityUser.getUser().getId());
+        User user = userService.findById(securityUser.getUserId());
         Course course = courseService.findById(courseId);
         if (course == null || user == null ) {
             return "redirect:/courses";
@@ -149,7 +149,7 @@ public class CourseLearningController {
             return "redirect:/courses";
         }
 
-        TestResult result = testResultService.calculateScore(securityUser.getUser().getId(), quizId, answers);
+        TestResult result = testResultService.calculateScore(securityUser.getUserId(), quizId, answers);
         Topic topic = topicService.findById(quizId);
 
         if (topic != null) {
@@ -175,7 +175,7 @@ public class CourseLearningController {
             return "redirect:/courses";
         }
 
-        TestResult result = testResultService.calculateScore(securityUser.getUser().getId(), examId, answers);
+        TestResult result = testResultService.calculateScore(securityUser.getUserId(), examId, answers);
         Topic exam = topicService.findById(examId);
 
         if (exam != null) {

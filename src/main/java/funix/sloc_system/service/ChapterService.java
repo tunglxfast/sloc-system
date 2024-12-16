@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ChapterService {
@@ -22,7 +23,7 @@ public class ChapterService {
         return chapterDao.findById(id).orElse(null);
     }
 
-    public List<Chapter> getChaptersByCourse(Long courseId) {
+    public Set<Chapter> getChaptersByCourse(Long courseId) {
         return chapterDao.findByCourseId(courseId);
     }
 
