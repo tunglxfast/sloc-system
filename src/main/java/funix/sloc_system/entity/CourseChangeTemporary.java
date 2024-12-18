@@ -5,10 +5,18 @@ import funix.sloc_system.enums.CourseStatus;
 import funix.sloc_system.enums.EntityType;
 import jakarta.persistence.*;
 import jakarta.persistence.GenerationType;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "course_change_temporary")
 public class CourseChangeTemporary {
     @Id
@@ -36,69 +44,4 @@ public class CourseChangeTemporary {
 
     @Column(nullable = false)
     private LocalDateTime changeTime;
-
-    // Getters and setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public EntityType getEntityType() {
-        return entityType;
-    }
-
-    public void setEntityType(EntityType entityType) {
-        this.entityType = entityType;
-    }
-
-    public Long getEntityId() {
-        return entityId;
-    }
-
-    public void setEntityId(Long entityId) {
-        this.entityId = entityId;
-    }
-
-    public CourseChangeAction getAction() {
-        return action;
-    }
-
-    public void setAction(CourseChangeAction action) {
-        this.action = action;
-    }
-
-    public String getChanges() {
-        return changes;
-    }
-
-    public void setChanges(String changes) {
-        this.changes = changes;
-    }
-
-    public LocalDateTime getChangeTime() {
-        return changeTime;
-    }
-
-    public void setChangeTime(LocalDateTime changeTime) {
-        this.changeTime = changeTime;
-    }
-
-    public User getUpdatedBy() {
-        return updatedBy;
-    }
-
-    public void setUpdatedBy(User updatedBy) {
-        this.updatedBy = updatedBy;
-    }
-
-    public CourseStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(CourseStatus status) {
-        this.status = status;
-    }
 }

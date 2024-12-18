@@ -2,7 +2,7 @@ package funix.sloc_system.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import funix.sloc_system.dao.*;
-import funix.sloc_system.dto.CourseDTO;
+import funix.sloc_system.dto.*;
 import funix.sloc_system.entity.*;
 import funix.sloc_system.enums.CourseChangeAction;
 import funix.sloc_system.enums.CourseStatus;
@@ -133,9 +133,10 @@ public class CourseService {
 
     @Transactional
     public CourseDTO createDraftCourse(CourseDTO courseDTO, Long instructorId, MultipartFile file) throws IOException {
-        courseDTO.getInstructors().add(instructorId);
+        User instructor = userDao.findById(instructorId).orElse(null);
+        courseDTO.setInstructor(instructor);
         courseDTO.setCreatedAt(LocalDate.now());
-        courseDTO.setCreatedBy(instructorId);
+        courseDTO.setCreatedBy(instructor);
 
         String thumbnailUrl = saveThumbnail(file);
         if (thumbnailUrl != null && !thumbnailUrl.isBlank()){
@@ -153,13 +154,14 @@ public class CourseService {
      */
     @Transactional
     public void saveUpdateCourse(CourseDTO courseDTO, Long instructorId, MultipartFile file) throws IOException {
-        courseDTO.getInstructors().add(instructorId);
+        User instructor = userDao.findById(instructorId).orElse(null);
+        courseDTO.setInstructor(instructor);
         String thumbnailUrl = saveThumbnail(file);
         if (thumbnailUrl != null && !thumbnailUrl.isBlank()){
             courseDTO.setThumbnailUrl(thumbnailUrl);
         }
         courseDTO.setUpdatedAt(LocalDate.now());
-        courseDTO.setLastUpdatedBy(instructorId);
+        courseDTO.setLastUpdatedBy(instructor);
 
         if (CourseStatus.valueOf(courseDTO.getStatus()) == CourseStatus.DRAFT){
             // save update to main table
@@ -214,7 +216,6 @@ public class CourseService {
 
         Set<Long> chapters = new HashSet<>();
         Set<Long> enrollments = new HashSet<>();
-        Set<Long> instructors = new HashSet<>();
 
         for (Chapter chapter : course.getChapters()){
             chapters.add(chapter.getId());
@@ -224,18 +225,21 @@ public class CourseService {
             enrollments.add(enrollment.getId());
         }
 
-        for (User instructor : course.getInstructors()){
-            instructors.add(instructor.getId());
-        }
+        CategoryDTO categoryDTO = CategoryService.convertToDTO(course.getCategory());
+        UserDTO instructor = UserService.convertToDTO(course.getInstructor());
+        UserDTO createdBy = UserService.convertToDTO(course.getCreatedBy());
+        UserDTO lastUpdatedBy = UserService.convertToDTO(course.getLastUpdatedBy());
+        List<ChapterDTO> chapters = ChapterService.convertToDTO(course.getChapters());
+        Set<EnrollmentDTO> enrollments = EnrollmentService.convertToDTO(course.getEnrollments());
 
         return new CourseDTO(
                 course.getId(),
                 course.getTitle(),
                 course.getDescription(),
                 course.getThumbnailUrl(),
-                course.getCategory() != null ? course.getCategory().getId() : null,
-                course.getCreatedBy() != null ? course.getCreatedBy().getId() : null,
-                course.getLastUpdatedBy() != null ? course.getLastUpdatedBy().getId() : null,
+                categoryDTO,
+                createdBy,
+                lastUpdatedBy,
                 course.getStartDate(),
                 course.getEndDate(),
                 course.getStatus().name(),
@@ -244,7 +248,7 @@ public class CourseService {
                 course.getUpdatedAt(),
                 chapters,
                 enrollments,
-                instructors
+                instructor
         );
     }
 

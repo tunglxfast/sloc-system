@@ -1,5 +1,4 @@
 -- Drop tables in reverse order of dependency to avoid foreign key issues
-DROP TABLE IF EXISTS instructor_course;
 DROP TABLE IF EXISTS enrollment;
 DROP TABLE IF EXISTS test_result;
 DROP TABLE IF EXISTS course_change_temporary;
@@ -52,6 +51,7 @@ CREATE TABLE course (
     description TEXT,
     thumbnail_url VARCHAR(255),
     category_id BIGINT,
+    instructor_id BIGINT,
     created_by BIGINT,
     last_updated_by BIGINT,
     start_date DATE,
@@ -61,6 +61,7 @@ CREATE TABLE course (
     created_at DATE,
     updated_at DATE,
     FOREIGN KEY (category_id) REFERENCES category(id),
+    FOREIGN KEY (instructor_id) REFERENCES users(id),
     FOREIGN KEY (created_by) REFERENCES users(id),
     FOREIGN KEY (last_updated_by) REFERENCES users(id)
 );
@@ -130,14 +131,6 @@ CREATE TABLE enrollment (
     FOREIGN KEY (course_id) REFERENCES course(id)
 );
 
-CREATE TABLE instructor_course (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT,
-    course_id BIGINT,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (course_id) REFERENCES course(id)
-);
-
 CREATE TABLE test_result (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     highest_score INT NOT NULL,
@@ -183,9 +176,9 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 (4, 4);  -- student_01 is a Student
 
 -- Insert sample courses
-INSERT INTO course (title, description, thumbnail_url, category_id, created_by, last_updated_by, start_date, end_date, status, reject_reason, created_at, updated_at) VALUES
-('Introduction to Web Development', 'Learn the basics of web development including HTML, CSS, and JavaScript.', '/img/thumbnail1.jpg', 1, 3, 3, '2024-01-01', '2026-06-01', 'APPROVED', NULL, '2024-01-01', '2024-01-01'),
-('Data Science for Beginners', 'Learn the fundamentals of data science and machine learning.', '/img/thumbnail2.jpg', 2, 3, 3, '2024-02-01', '2024-07-01', 'APPROVED', NULL, '2024-02-01', '2024-02-01');
+INSERT INTO course (title, description, thumbnail_url, category_id, instructor_id, created_by, last_updated_by, start_date, end_date, status, reject_reason, created_at, updated_at) VALUES
+('Introduction to Web Development', 'Learn the basics of web development including HTML, CSS, and JavaScript.', '/img/thumbnail1.jpg', 1, 3, 3, 3, '2024-01-01', '2026-06-01', 'APPROVED', NULL, '2024-01-01', '2024-01-01'),
+('Data Science for Beginners', 'Learn the fundamentals of data science and machine learning.', '/img/thumbnail2.jpg', 2, 3, 3, 3, '2024-02-01', '2024-07-01', 'APPROVED', NULL, '2024-02-01', '2024-02-01');
 
 -- Insert sample chapters
 INSERT INTO chapter (title, sequence, course_id, status) VALUES
@@ -250,10 +243,3 @@ INSERT INTO answer (content, is_correct, question_id, status) VALUES
 INSERT INTO enrollment (user_id, course_id, enrollment_date) VALUES
 (4, 1, '2024-01-01'),  -- student_01 enrolls in Web Development course
 (4, 2, '2024-02-01');  -- student_01 enrolls in Data Science course
-
--- Insert sample instructor assignments
-INSERT INTO instructor_course (user_id, course_id) VALUES
-(3, 1),  -- instructor_01 teaches Web Development course
-(3, 2);  -- instructor_01 teaches Data Science course
-
-

@@ -1,6 +1,5 @@
-package funix.sloc_system.entity;
+package funix.sloc_system.dto;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,24 +8,14 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
-@Entity
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Enrollment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class EnrollmentDTO {
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "course_id")
-    private Course course;
-
+    private UserDTO user;
+    private Long courseId;
     @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate enrollmentDate;
 }

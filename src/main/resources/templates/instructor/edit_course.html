@@ -34,7 +34,7 @@
     <label for="category">Category:</label><br>
     <select id="category" th:field="*{category}" required>
         <option th:each="category : ${categories}" th:value="${category.id}"
-                th:text="${category.name}" th:selected="${course.category == category.id}">
+                th:text="${category.name}" th:selected="${course.category.id == category.id}">
         </option>
     </select><br><br>
 

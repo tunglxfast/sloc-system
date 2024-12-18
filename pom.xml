@@ -86,6 +86,15 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>2.17.2</version>
 		</dependency>
+
+		<!-- automatic generation of getters, setters -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.30</version>
+			<scope>provided</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
