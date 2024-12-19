@@ -10,6 +10,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -53,7 +54,7 @@ public class Course {
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("sequence ASC")
-    private Set<Chapter> chapters;
+    private List<Chapter> chapters;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.PERSIST)
     private Set<Enrollment> enrollments = new HashSet<>();

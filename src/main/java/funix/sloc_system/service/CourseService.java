@@ -7,6 +7,7 @@ import funix.sloc_system.entity.*;
 import funix.sloc_system.enums.CourseChangeAction;
 import funix.sloc_system.enums.CourseStatus;
 import funix.sloc_system.enums.EntityType;
+import funix.sloc_system.mapper.CourseMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -29,17 +29,13 @@ public class CourseService {
     @Autowired
     private CourseDao courseDao;
     @Autowired
-    private CategoryDao categoryDao;
-    @Autowired
-    private ChapterDao chapterDao;
-    @Autowired
-    private EnrollmentDao enrollmentDao;
-    @Autowired
     private EmailService emailService;
     @Autowired
     private CourseChangeTemporaryService courseChangeTemporaryService;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private CourseMapper courseMapper;
 
     public List<Course> getAllCourses() {
         return courseDao.findAll();
@@ -143,9 +139,9 @@ public class CourseService {
             courseDTO.setThumbnailUrl(thumbnailUrl);
         }
 
-        Course course = reconvertToEntity(courseDTO);
+        Course course = courseMapper.toEntity(courseDTO);
         courseDao.save(course);
-        return convertToDTO(course);
+        return courseMapper.toDTO(course);
     }
 
     /**
@@ -165,7 +161,7 @@ public class CourseService {
 
         if (CourseStatus.valueOf(courseDTO.getStatus()) == CourseStatus.DRAFT){
             // save update to main table
-            Course course = reconvertToEntity(courseDTO);
+            Course course = courseMapper.toEntity(courseDTO);
             courseDao.save(course);
         } else {
             // save update to temp table for later review
@@ -183,7 +179,7 @@ public class CourseService {
                 EntityType.COURSE,
                 id).orElse(null);
         if (changeTemporary == null) {
-            return convertToDTO(course);
+            return courseMapper.toDTO(course);
         } else {
             String changeContext = changeTemporary.getChanges();
             return objectMapper.readValue(changeContext, CourseDTO.class);
@@ -202,119 +198,6 @@ public class CourseService {
         } else {
             return null;
         }
-    }
-
-    /**
-     * Courvert Course to CourseDTO
-     * @param course
-     * @return CourseDTO
-     */
-    public CourseDTO convertToDTO(Course course) {
-        if (course == null){
-            return null;
-        }
-
-        Set<Long> chapters = new HashSet<>();
-        Set<Long> enrollments = new HashSet<>();
-
-        for (Chapter chapter : course.getChapters()){
-            chapters.add(chapter.getId());
-        }
-
-        for (Enrollment enrollment: course.getEnrollments()){
-            enrollments.add(enrollment.getId());
-        }
-
-        CategoryDTO categoryDTO = CategoryService.convertToDTO(course.getCategory());
-        UserDTO instructor = UserService.convertToDTO(course.getInstructor());
-        UserDTO createdBy = UserService.convertToDTO(course.getCreatedBy());
-        UserDTO lastUpdatedBy = UserService.convertToDTO(course.getLastUpdatedBy());
-        List<ChapterDTO> chapters = ChapterService.convertToDTO(course.getChapters());
-        Set<EnrollmentDTO> enrollments = EnrollmentService.convertToDTO(course.getEnrollments());
-
-        return new CourseDTO(
-                course.getId(),
-                course.getTitle(),
-                course.getDescription(),
-                course.getThumbnailUrl(),
-                categoryDTO,
-                createdBy,
-                lastUpdatedBy,
-                course.getStartDate(),
-                course.getEndDate(),
-                course.getStatus().name(),
-                course.getRejectReason(),
-                course.getCreatedAt(),
-                course.getUpdatedAt(),
-                chapters,
-                enrollments,
-                instructor
-        );
-    }
-
-    /**
-     * Courvert CourseDTO to Course entity
-     * @param courseDTO
-     * @return Course
-     */
-    public Course reconvertToEntity(CourseDTO courseDTO) {
-        if (courseDTO == null){
-            return null;
-        }
-
-        Set<Chapter> chapters = new HashSet<>();
-        Set<Enrollment> enrollments = new HashSet<>();
-        Set<User> instructors = new HashSet<>();
-        for (Long chapterId : courseDTO.getChapters()){
-            Chapter chapter = chapterDao.findById(chapterId).orElse(null);
-            if (chapter != null) {
-                chapters.add(chapter);
-            }
-        }
-
-        for (Long enrollmentId: courseDTO.getEnrollments()){
-            Enrollment enrollment = enrollmentDao.findById(enrollmentId).orElse(null);
-            if (enrollment != null) {
-                enrollments.add(enrollment);
-            }
-        }
-
-        for (Long instructorId : courseDTO.getInstructors()){
-            User instructor = userDao.findById(instructorId).orElse(null);
-            if (instructor != null) {
-                instructors.add(instructor);
-            }
-        }
-
-        Course course = new Course();
-        course.setId(courseDTO.getId());
-        course.setTitle(courseDTO.getTitle());
-        course.setDescription(courseDTO.getDescription());
-        course.setThumbnailUrl(courseDTO.getThumbnailUrl());
-
-        course.setCategory(courseDTO.getCategory() != null ?
-                categoryDao.findById(courseDTO.getCategory()).orElse(null) : null);
-
-        course.setCreatedBy(courseDTO.getCreatedBy() != null ?
-                userDao.findById(courseDTO.getCreatedBy()).orElse(null) : null);
-
-        course.setLastUpdatedBy(courseDTO.getLastUpdatedBy() != null ?
-                userDao.findById(courseDTO.getLastUpdatedBy()).orElse(null) : null);
-
-        course.setStartDate(courseDTO.getStartDate());
-        course.setEndDate(courseDTO.getEndDate());
-
-        course.setStatus(courseDTO.getStatus() != null ?
-                CourseStatus.valueOf(courseDTO.getStatus()) : CourseStatus.DRAFT);
-
-        course.setRejectReason(courseDTO.getRejectReason());
-        course.setCreatedAt(courseDTO.getCreatedAt());
-        course.setUpdatedAt(courseDTO.getUpdatedAt());
-        course.setChapters(chapters);
-        course.setEnrollments(enrollments);
-        course.setInstructors(instructors);
-
-        return course;
     }
 
     public boolean courseExists(Long courseId) {

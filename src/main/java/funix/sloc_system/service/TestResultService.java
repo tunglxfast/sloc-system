@@ -1,8 +1,11 @@
 package funix.sloc_system.service;
 
 import funix.sloc_system.dao.*;
+import funix.sloc_system.dto.TestResultDTO;
 import funix.sloc_system.entity.*;
 import funix.sloc_system.enums.TopicType;
+import funix.sloc_system.mapper.TestResultMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,12 +30,16 @@ public class TestResultService {
     @Autowired
     private TestResultDao testResultDao;
 
-    public TestResult findByUserIdAndTopicId(Long userId, Long topicId) {
-        return testResultDao.findByUserIdAndTopicId(userId, topicId).orElse(null);
+    @Autowired
+    private TestResultMapper testResultMapper;
+
+    public TestResultDTO findByUserIdAndTopicId(Long userId, Long topicId) {
+        TestResult result = testResultDao.findByUserIdAndTopicId(userId, topicId).orElse(null);
+        return testResultMapper.toDTO(result);
     }
 
     @Transactional
-    public TestResult calculateScore(Long userId, Long topicId, Map<String, String> answers) {
+    public TestResultDTO calculateScore(Long userId, Long topicId, Map<String, String> answers) {
         User user = userDao.findById(userId).orElse(null);
         Topic topic = topicDao.findById(topicId).orElse(null);
         TopicType topicType = topic.getTopicType();
@@ -85,10 +92,11 @@ public class TestResultService {
             if (testResult.getHighestScore() < totalScore) {
                 testResult.setHighestScore(totalScore);
             }
-            if (!testResult.isPassed()) {
+            if (!testResult.getPassed()) {
                 testResult.setPassed(isPassed);
             }
         }
-        return testResultDao.save(testResult);
+        testResult = testResultDao.save(testResult);
+        return testResultMapper.toDTO(testResult);
     }
 }
