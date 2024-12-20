@@ -10,7 +10,6 @@ import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.CategoryService;
 import funix.sloc_system.service.CourseService;
 import funix.sloc_system.service.UserService;
-import jakarta.servlet.ServletContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -31,8 +30,6 @@ public class CourseManagementController {
     private CategoryService categoryService;
     @Autowired
     private CourseService courseService;
-    @Autowired
-    private ServletContext servletContext;
     @Autowired
     private CategoryMapper categoryMapper;
     @Autowired
@@ -85,13 +82,6 @@ public class CourseManagementController {
             redirectAttributes.addFlashAttribute(
                     "errorMessage",
                     "Course is not exist.");
-            return "redirect:/instructor/courses";
-        }
-
-        if (!courseService.isEditable(courseId)) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    "Course can not be edited yet.");
             return "redirect:/instructor/courses";
         }
 

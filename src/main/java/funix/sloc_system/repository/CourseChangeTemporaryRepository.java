@@ -1,4 +1,4 @@
-package funix.sloc_system.dao;
+package funix.sloc_system.repository;
 
 import funix.sloc_system.entity.CourseChangeTemporary;
 import funix.sloc_system.enums.EntityType;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CourseChangeTemporaryDao extends JpaRepository<CourseChangeTemporary, Long> {
+public interface CourseChangeTemporaryRepository extends JpaRepository<CourseChangeTemporary, Long> {
 
     Optional<CourseChangeTemporary> findByEntityTypeAndEntityId(EntityType entityType, Long entityId);
 

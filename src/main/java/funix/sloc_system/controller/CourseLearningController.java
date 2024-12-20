@@ -30,9 +30,6 @@ public class CourseLearningController {
     private EnrollmentService enrollmentService;
 
     @Autowired
-    private ChapterService chapterService;
-
-    @Autowired
     private TopicService topicService;
 
     @Autowired

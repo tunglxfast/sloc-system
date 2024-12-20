@@ -1,4 +1,4 @@
-package funix.sloc_system.dao;
+package funix.sloc_system.repository;
 
 import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.enums.CourseStatus;
@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public interface ChapterDao extends JpaRepository<Chapter, Long> {
+public interface ChapterRepository extends JpaRepository<Chapter, Long> {
 
     Set<Chapter> findByCourseId(Long courseId);
 

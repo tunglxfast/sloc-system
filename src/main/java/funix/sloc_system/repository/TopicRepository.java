@@ -1,4 +1,4 @@
-package funix.sloc_system.dao;
+package funix.sloc_system.repository;
 
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.enums.CourseStatus;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface TopicDao extends JpaRepository<Topic, Long> {
+public interface TopicRepository extends JpaRepository<Topic, Long> {
 
     List<Topic> findByChapterId(Long chapterId);
 

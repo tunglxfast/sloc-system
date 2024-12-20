@@ -1,9 +1,8 @@
 package funix.sloc_system.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import funix.sloc_system.dao.CategoryDao;
-import funix.sloc_system.dao.CourseDao;
-import funix.sloc_system.dao.UserDao;
+import funix.sloc_system.repository.CourseRepository;
+import funix.sloc_system.repository.UserRepository;
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.entity.Category;
 import funix.sloc_system.entity.Course;
@@ -13,6 +12,7 @@ import funix.sloc_system.enums.CourseChangeAction;
 import funix.sloc_system.enums.CourseStatus;
 import funix.sloc_system.enums.EntityType;
 import funix.sloc_system.mapper.CourseMapper;
+import funix.sloc_system.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,11 +29,11 @@ import java.util.UUID;
 public class CourseService {
 
     @Autowired
-    private UserDao userDao;
+    private UserRepository userRepository;
     @Autowired
-    private CourseDao courseDao;
+    private CourseRepository courseRepository;
     @Autowired
-    private CategoryDao categoryDao;
+    private CategoryRepository categoryRepository;
     @Autowired
     private EmailService emailService;
     @Autowired
@@ -44,31 +44,31 @@ public class CourseService {
     private CourseMapper courseMapper;
 
     public List<Course> getAllCourses() {
-        return courseDao.findAll();
+        return courseRepository.findAll();
     }
 
     public Course findById(Long id) {
-        return courseDao.findById(id).orElse(null);
+        return courseRepository.findById(id).orElse(null);
     }
 
     public List<Course> findByCategoryId(Long categoryId) {
-        return courseDao.findByCategoryId(categoryId);
+        return courseRepository.findByCategoryId(categoryId);
     }
 
     public Course save(Course course) {
-        return courseDao.save(course);
+        return courseRepository.save(course);
     }
 
     public List<Course> findAllByInstructorAndStatus(User instructor, CourseStatus status) {
-        return courseDao.findAllByInstructorAndStatus(instructor, status);
+        return courseRepository.findAllByInstructorAndStatus(instructor, status);
     }
 
     public List<Course> getApprovedOrUpdatingCourses() {
-        return courseDao.findByStatusIn(List.of(CourseStatus.APPROVED, CourseStatus.PENDING_EDIT));
+        return courseRepository.findByStatusIn(List.of(CourseStatus.APPROVED, CourseStatus.PENDING_EDIT));
     }
 
     public void submitForCreatingReview(Long courseId) {
-        Course course = courseDao.findById(courseId)
+        Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
 
         if (course.getChapters().isEmpty()) {
@@ -76,11 +76,11 @@ public class CourseService {
         }
 
         course.setStatus(CourseStatus.PENDING_CREATE);
-        courseDao.save(course);
+        courseRepository.save(course);
     }
 
     public void submitForReview(Long courseId) {
-        Course course = courseDao.findById(courseId)
+        Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
 
         // change course status for reviewing
@@ -89,7 +89,7 @@ public class CourseService {
         } else {
             course.setStatus(CourseStatus.PENDING_EDIT);
         }
-        courseDao.save(course);
+        courseRepository.save(course);
     }
 
     public void sendRejectionEmail(User instructor, Course course, String reason) {
@@ -118,7 +118,7 @@ public class CourseService {
 
     @Transactional
     public List<Course> findByInstructor(User instructor) {
-        return courseDao.findByInstructor(instructor);
+        return courseRepository.findByInstructor(instructor);
     }
 
     @Transactional
@@ -127,8 +127,8 @@ public class CourseService {
                                      MultipartFile file,
                                      Long categoryId) throws IOException {
 
-        User instructor = userDao.findById(instructorId).orElse(null);
-        Category category = categoryDao.findById(categoryId).orElse(null);
+        User instructor = userRepository.findById(instructorId).orElse(null);
+        Category category = categoryRepository.findById(categoryId).orElse(null);
         courseDTO.setStatus(CourseStatus.DRAFT.name());
         courseDTO.setInstructor(instructor);
         courseDTO.setCreatedAt(LocalDate.now());
@@ -141,7 +141,7 @@ public class CourseService {
         }
 
         Course course = courseMapper.toEntity(courseDTO);
-        courseDao.save(course);
+        courseRepository.save(course);
         return courseMapper.toDTO(course);
     }
 
@@ -151,8 +151,8 @@ public class CourseService {
      */
     @Transactional
     public void saveUpdateCourse(CourseDTO courseDTO, Long instructorId, MultipartFile file, Long categoryId) throws IOException {
-        User instructor = userDao.findById(instructorId).orElse(null);
-        Category category = categoryDao.findById(categoryId).orElse(null);
+        User instructor = userRepository.findById(instructorId).orElse(null);
+        Category category = categoryRepository.findById(categoryId).orElse(null);
         courseDTO.setInstructor(instructor);
         courseDTO.setCategory(category);
 
@@ -166,7 +166,7 @@ public class CourseService {
         if (CourseStatus.valueOf(courseDTO.getStatus()) == CourseStatus.DRAFT){
             // save update to main table
             Course course = courseMapper.toEntity(courseDTO);
-            courseDao.save(course);
+            courseRepository.save(course);
         } else {
             // save update to temp table for later review
             courseChangeTemporaryService.saveEditingCourse(
@@ -205,20 +205,6 @@ public class CourseService {
     }
 
     public boolean courseExists(Long courseId) {
-        return courseDao.existsById(courseId);
-    }
-
-    public boolean isEditable(Long courseId){
-        Course course = findById(courseId);
-        if (course == null) {
-            return false;
-        }
-
-        CourseStatus status = course.getStatus();
-        if (status.equals(CourseStatus.PENDING_EDIT) || status.equals(CourseStatus.PENDING_CREATE)) {
-            return false;
-        }
-
-        return true;
+        return courseRepository.existsById(courseId);
     }
 }

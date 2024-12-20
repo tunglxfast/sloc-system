@@ -1,8 +1,6 @@
 package funix.sloc_system.mapper;
 
 import funix.sloc_system.dto.TestResultDTO;
-import funix.sloc_system.dto.TopicDTO;
-import funix.sloc_system.dto.UserDTO;
 import funix.sloc_system.entity.TestResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

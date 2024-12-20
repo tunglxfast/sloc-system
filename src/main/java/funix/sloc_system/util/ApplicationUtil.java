@@ -1,14 +1,15 @@
 package funix.sloc_system.util;
 
-import funix.sloc_system.dao.CategoryDao;
-import funix.sloc_system.dao.ChapterDao;
-import funix.sloc_system.dao.CourseDao;
-import funix.sloc_system.dao.TopicDao;
 import funix.sloc_system.entity.Category;
 import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.enums.CourseStatus;
+import funix.sloc_system.repository.CategoryRepository;
+import funix.sloc_system.repository.ChapterRepository;
+import funix.sloc_system.repository.CourseRepository;
+import funix.sloc_system.repository.TopicRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,16 +19,16 @@ import java.util.List;
 public class ApplicationUtil {
 
     @Autowired
-    private TopicDao topicDao;
+    private TopicRepository topicRepository;
     @Autowired
-    private CourseDao courseDao;
+    private CourseRepository courseRepository;
     @Autowired
-    private ChapterDao chapterDao;
+    private ChapterRepository chapterRepository;
     @Autowired
-    private CategoryDao categoryDao;
+    private CategoryRepository categoryRepository;
 
     public Topic findNextTopic(Long topicId){
-        Topic currentTopic = topicDao.findById(topicId)
+        Topic currentTopic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new RuntimeException("Topic not found"));
 
 
@@ -44,7 +45,7 @@ public class ApplicationUtil {
         int nextChapterSequence = currentChapter.getSequence() + 1;
         Course currentCourse = currentChapter.getCourse();
 
-        List<Chapter> chapters = chapterDao.findByCourseIdOrderBySequence(currentCourse.getId());
+        List<Chapter> chapters = chapterRepository.findByCourseIdOrderBySequence(currentCourse.getId());
         for (Chapter chapter: chapters) {
             if (chapter.getSequence() == nextChapterSequence) {
                 return chapter.getTopics().get(0);
@@ -56,7 +57,7 @@ public class ApplicationUtil {
     }
 
     public boolean isCourseReady(Long courseId) {
-        Course course = courseDao.findById(courseId).orElse(null);
+        Course course = courseRepository.findById(courseId).orElse(null);
         if (course == null) {
             return false;
         }
@@ -68,6 +69,6 @@ public class ApplicationUtil {
     }
 
     public Category getCategoryById(Long id) {
-        return categoryDao.findById(id).orElse(null);
+        return categoryRepository.findById(id).orElse(null);
     }
 }

@@ -2,14 +2,16 @@ package funix.sloc_system.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import funix.sloc_system.dao.CourseChangeTemporaryDao;
-import funix.sloc_system.dao.UserDao;
+
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.entity.CourseChangeTemporary;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.CourseChangeAction;
 import funix.sloc_system.enums.CourseStatus;
 import funix.sloc_system.enums.EntityType;
+import funix.sloc_system.repository.CourseChangeTemporaryRepository;
+import funix.sloc_system.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,11 +23,11 @@ import java.util.Optional;
 public class CourseChangeTemporaryService {
 
     @Autowired
-    private CourseChangeTemporaryDao changeTemporaryDao;
+    private CourseChangeTemporaryRepository changeTemporaryDao;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private UserDao userDao;
+    private UserRepository userRepository;
 
     /**
      * Save course to temp table.
@@ -36,7 +38,7 @@ public class CourseChangeTemporaryService {
      */
     @Transactional
     public void saveEditingCourse(CourseDTO editingCourse, CourseChangeAction action, Long instructorId) throws JsonProcessingException {
-        User instructor = userDao.findById(instructorId).orElse(null);
+        User instructor = userRepository.findById(instructorId).orElse(null);
         String json = objectMapper.writeValueAsString(editingCourse);
         CourseChangeTemporary changeTemporary = changeTemporaryDao
                 .findByEntityTypeAndEntityId(EntityType.COURSE, editingCourse.getId())

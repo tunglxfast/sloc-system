@@ -1,4 +1,4 @@
-package funix.sloc_system.dao;
+package funix.sloc_system.repository;
 
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.User;
@@ -12,7 +12,7 @@ import java.util.List;
 
 
 @Repository
-public interface CourseDao extends JpaRepository<Course, Long> {
+public interface CourseRepository extends JpaRepository<Course, Long> {
     List<Course> findByCategoryId(Long categoryId);
 
     @Query("SELECT c FROM Course c JOIN c.instructor i WHERE i = :instructor AND c.status = :status")

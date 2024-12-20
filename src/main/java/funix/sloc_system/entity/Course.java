@@ -1,5 +1,7 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.enums.ApprovalStatus;
+import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.CourseStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -45,6 +47,10 @@ public class Course {
     private LocalDate endDate;
     @Enumerated(EnumType.STRING)
     private CourseStatus status = CourseStatus.DRAFT;
+    @Enumerated(EnumType.STRING)
+    private ContentStatus contentStatus = ContentStatus.DRAFT;
+    @Enumerated(EnumType.STRING)
+    private ApprovalStatus approvalStatus = ApprovalStatus.NOT_SUBMITTED;
     @Column(nullable = true)
     private String rejectReason;
     @DateTimeFormat(pattern="yyyy-MM-dd")

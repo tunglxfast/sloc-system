@@ -1,6 +1,5 @@
 package funix.sloc_system.controller;
 
-import funix.sloc_system.dao.UserDao;
 import funix.sloc_system.security.SecurityUser;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,11 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
  */
 @Controller
 public class AuthController {
-    private final UserDao userDAO;
-
-    public AuthController(UserDao userDAO) {
-        this.userDAO = userDAO;
-    }
 
     @GetMapping(value={"", "/", "/login"})
     public String login(@AuthenticationPrincipal SecurityUser securityUser) {

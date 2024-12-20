@@ -1,11 +1,11 @@
 package funix.sloc_system.service;
 
-import funix.sloc_system.dao.CourseDao;
-import funix.sloc_system.dao.EnrollmentDao;
-import funix.sloc_system.dao.UserDao;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Enrollment;
 import funix.sloc_system.entity.User;
+import funix.sloc_system.repository.CourseRepository;
+import funix.sloc_system.repository.EnrollmentRepository;
+import funix.sloc_system.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,13 +16,13 @@ import java.util.Set;
 @Service
 public class EnrollmentService {
     @Autowired
-    private EnrollmentDao enrollmentDAO;
+    private EnrollmentRepository enrollmentRepository;
 
     @Autowired
-    private UserDao userDao;
+    private UserRepository userRepository;
 
     @Autowired
-    private CourseDao courseDao;
+    private CourseRepository courseRepository;
 
     @Transactional
     public String enrollCourse(User user, Course course) {
@@ -44,28 +44,28 @@ public class EnrollmentService {
         enrollment.setCourse(course);
         enrollment.setEnrollmentDate(java.time.LocalDate.now());
 
-        enrollmentDAO.save(enrollment);
+        enrollmentRepository.save(enrollment);
 
         // sau khi đăng ký khóa học, cần cập nhật lại thông tin
         user.getEnrollments().add(enrollment);
         course.getEnrollments().add(enrollment);
-        userDao.save(user);
-        courseDao.save(course);
+        userRepository.save(user);
+        courseRepository.save(course);
 
         return "Register successfully";
     }
 
     public Set<Enrollment> getEnrollmentsByUserId(Long userId) {
-        User user = userDao.findById(userId).orElse(null);
-        return enrollmentDAO.findByUser(user);
+        User user = userRepository.findById(userId).orElse(null);
+        return enrollmentRepository.findByUser(user);
     }
 
     public boolean isEnrolled(User user, Course course) {
-        return enrollmentDAO.existsByUserAndCourse(user, course);
+        return enrollmentRepository.existsByUserAndCourse(user, course);
     }
 
     public Set<Enrollment> getEnrollmentsByCourseId(Long courseId) {
-        Course course = courseDao.findById(courseId).orElse(null);
-        return enrollmentDAO.findByCourse(course);
+        Course course = courseRepository.findById(courseId).orElse(null);
+        return enrollmentRepository.findByCourse(course);
     }
 }

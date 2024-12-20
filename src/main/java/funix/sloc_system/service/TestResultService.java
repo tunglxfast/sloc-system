@@ -1,6 +1,6 @@
 package funix.sloc_system.service;
 
-import funix.sloc_system.dao.*;
+import funix.sloc_system.repository.*;
 import funix.sloc_system.dto.TestResultDTO;
 import funix.sloc_system.entity.*;
 import funix.sloc_system.enums.TopicType;
@@ -19,29 +19,29 @@ import java.util.Map;
 public class TestResultService {
 
     @Autowired
-    private TopicDao topicDao;
+    private TopicRepository topicRepository;
 
     @Autowired
-    private UserDao userDao;
+    private UserRepository userRepository;
 
     @Autowired
-    private AnswerDao answerDao;
+    private AnswerRepository answerRepository;
 
     @Autowired
-    private TestResultDao testResultDao;
+    private TestResultRepository testResultRepository;
 
     @Autowired
     private TestResultMapper testResultMapper;
 
     public TestResultDTO findByUserIdAndTopicId(Long userId, Long topicId) {
-        TestResult result = testResultDao.findByUserIdAndTopicId(userId, topicId).orElse(null);
+        TestResult result = testResultRepository.findByUserIdAndTopicId(userId, topicId).orElse(null);
         return testResultMapper.toDTO(result);
     }
 
     @Transactional
     public TestResultDTO calculateScore(Long userId, Long topicId, Map<String, String> answers) {
-        User user = userDao.findById(userId).orElse(null);
-        Topic topic = topicDao.findById(topicId).orElse(null);
+        User user = userRepository.findById(userId).orElse(null);
+        Topic topic = topicRepository.findById(topicId).orElse(null);
         TopicType topicType = topic.getTopicType();
         if (user == null || topic == null) {
             return null;
@@ -67,7 +67,7 @@ public class TestResultService {
                             .filter(entry -> entry.getKey().startsWith("question_" + question.getId()))
                             .map(stringEntry -> stringEntry.getValue()).toList())
             ;
-            correctAnswers.addAll(answerDao.findByQuestionIdAndIsCorrectTrue(question.getId()));
+            correctAnswers.addAll(answerRepository.findByQuestionIdAndIsCorrectTrue(question.getId()));
             correctAnswerIds.addAll(correctAnswers.stream().map(answer -> answer.getId().toString()).toList());
 
             if (new HashSet<>(selectedAnswerIds).containsAll(correctAnswerIds)
@@ -79,7 +79,7 @@ public class TestResultService {
         int passScore = topic.getPassScore();
         boolean isPassed = totalScore >= passScore;
 
-        TestResult testResult = testResultDao.findByUserIdAndTopicId(userId, topicId).orElse(null);
+        TestResult testResult = testResultRepository.findByUserIdAndTopicId(userId, topicId).orElse(null);
         if (testResult == null){
             testResult = new TestResult(totalScore, totalScore, isPassed, 1, topicType, user, topic);
         } else {
@@ -96,7 +96,7 @@ public class TestResultService {
                 testResult.setPassed(isPassed);
             }
         }
-        testResult = testResultDao.save(testResult);
+        testResult = testResultRepository.save(testResult);
         return testResultMapper.toDTO(testResult);
     }
 }
