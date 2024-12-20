@@ -37,7 +37,7 @@ public class CourseService {
     @Autowired
     private EmailService emailService;
     @Autowired
-    private CourseChangeTemporaryService courseChangeTemporaryService;
+    private ContentChangeService contentChangeService;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -169,7 +169,7 @@ public class CourseService {
             courseRepository.save(course);
         } else {
             // save update to temp table for later review
-            courseChangeTemporaryService.saveEditingCourse(
+            contentChangeService.saveEditingCourse(
                     courseDTO,
                     CourseChangeAction.UPDATE,
                     instructorId);
@@ -179,7 +179,7 @@ public class CourseService {
     @Transactional
     public CourseDTO getEditingCourseDTO(Long id) throws Exception {
         Course course = findById(id);
-        CourseChangeTemporary changeTemporary = courseChangeTemporaryService.getCourseEditing(
+        CourseChangeTemporary changeTemporary = contentChangeService.getCourseEditing(
                 EntityType.COURSE,
                 id).orElse(null);
         if (changeTemporary == null) {

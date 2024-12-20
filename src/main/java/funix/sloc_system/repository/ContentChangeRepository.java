@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CourseChangeTemporaryRepository extends JpaRepository<CourseChangeTemporary, Long> {
+public interface ContentChangeRepository extends JpaRepository<CourseChangeTemporary, Long> {
 
     Optional<CourseChangeTemporary> findByEntityTypeAndEntityId(EntityType entityType, Long entityId);
 

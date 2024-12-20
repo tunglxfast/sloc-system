@@ -9,7 +9,7 @@ import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.CourseChangeAction;
 import funix.sloc_system.enums.CourseStatus;
 import funix.sloc_system.enums.EntityType;
-import funix.sloc_system.repository.CourseChangeTemporaryRepository;
+import funix.sloc_system.repository.ContentChangeRepository;
 import funix.sloc_system.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +20,10 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
-public class CourseChangeTemporaryService {
+public class ContentChangeService {
 
     @Autowired
-    private CourseChangeTemporaryRepository changeTemporaryDao;
+    private ContentChangeRepository changeTemporaryDao;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
