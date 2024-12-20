@@ -45,16 +45,19 @@ public class Course {
     private LocalDate startDate;
     @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate endDate;
-    @Enumerated(EnumType.STRING)
-    private CourseStatus status = CourseStatus.DRAFT;
+
     @Enumerated(EnumType.STRING)
     private ContentStatus contentStatus = ContentStatus.DRAFT;
+
     @Enumerated(EnumType.STRING)
     private ApprovalStatus approvalStatus = ApprovalStatus.NOT_SUBMITTED;
+
     @Column(nullable = true)
     private String rejectReason;
+
     @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate createdAt;
+
     @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate updatedAt;
 
