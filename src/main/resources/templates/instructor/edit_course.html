@@ -32,7 +32,7 @@
     <input type="file" id="thumbnailFile" name="thumbnailFile" accept=".jpg,.jpeg,.png"/><br>
 
     <label for="category">Category:</label><br>
-    <select id="category" th:field="*{category}" required>
+    <select id="category" name="categoryId" required>
         <option th:each="category : ${categories}" th:value="${category.id}"
                 th:text="${category.name}" th:selected="${course.category.id == category.id}">
         </option>

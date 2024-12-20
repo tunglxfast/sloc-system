@@ -15,10 +15,10 @@ import java.util.List;
 public interface CourseDao extends JpaRepository<Course, Long> {
     List<Course> findByCategoryId(Long categoryId);
 
-    @Query("SELECT c FROM Course c JOIN c.instructors i WHERE i = :instructor AND c.status = :status")
+    @Query("SELECT c FROM Course c JOIN c.instructor i WHERE i = :instructor AND c.status = :status")
     List<Course> findAllByInstructorAndStatus(@Param("instructor") User instructor, @Param("status") CourseStatus status);
 
-    List<Course> findByInstructors(User instructor);
+    List<Course> findByInstructor(User instructor);
 
     List<Course> findByStatusIn(List<CourseStatus> statuses);
 

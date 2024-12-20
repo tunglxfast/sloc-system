@@ -4,6 +4,8 @@ import funix.sloc_system.dto.CategoryDTO;
 import funix.sloc_system.entity.Category;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class CategoryMapper {
     
@@ -29,5 +31,13 @@ public class CategoryMapper {
         category.setName(dto.getName());
         
         return category;
+    }
+
+    public List<CategoryDTO> toDTO(List<Category> categories) {
+        return categories.stream().map(this::toDTO).toList();
+    }
+
+    public List<Category> toEntity(List<CategoryDTO> categoryDTOList) {
+        return categoryDTOList.stream().map(this::toEntity).toList();
     }
 } 

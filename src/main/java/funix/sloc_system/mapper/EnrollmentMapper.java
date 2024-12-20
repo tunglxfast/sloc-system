@@ -5,6 +5,9 @@ import funix.sloc_system.entity.Enrollment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Component
 public class EnrollmentMapper {
     
@@ -37,5 +40,13 @@ public class EnrollmentMapper {
         enrollment.setEnrollmentDate(dto.getEnrollmentDate());
         
         return enrollment;
+    }
+
+    public Set<EnrollmentDTO> toDTO(Set<Enrollment> enrollments) {
+        return enrollments.stream().map(this::toDTO).collect(Collectors.toSet());
+    }
+
+    public Set<Enrollment> toEntity(Set<EnrollmentDTO> enrollmentDTOList) {
+        return enrollmentDTOList.stream().map(this::toEntity).collect(Collectors.toSet());
     }
 } 

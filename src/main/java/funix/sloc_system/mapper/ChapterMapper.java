@@ -3,9 +3,10 @@ package funix.sloc_system.mapper;
 import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.enums.CourseStatus;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class ChapterMapper {
@@ -25,9 +26,7 @@ public class ChapterMapper {
         dto.setSequence(chapter.getSequence());
         
         // Map topics
-        dto.setTopics(chapter.getTopics().stream()
-                .map(topicMapper::toDTO)
-                .toList());
+        dto.setTopics(topicMapper.toDTO(chapter.getTopics()));
         
         return dto;
     }
@@ -45,11 +44,17 @@ public class ChapterMapper {
         
         // Map topics if present
         if (dto.getTopics() != null) {
-            chapter.setTopics(dto.getTopics().stream()
-                    .map(topicMapper::toEntity)
-                    .toList());
+            chapter.setTopics(topicMapper.toEntity(dto.getTopics()));
         }
         
         return chapter;
+    }
+
+    public List<ChapterDTO> toDTO(List<Chapter> chapters) {
+        return chapters.stream().map(this::toDTO).toList();
+    }
+
+    public List<Chapter> toEntity(List<ChapterDTO> chapterDTOList) {
+        return chapterDTOList.stream().map(this::toEntity).toList();
     }
 } 

@@ -4,6 +4,9 @@ import funix.sloc_system.dto.RoleDTO;
 import funix.sloc_system.entity.Role;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Component
 public class RoleMapper {
     
@@ -29,5 +32,13 @@ public class RoleMapper {
         role.setName(dto.getName());
         
         return role;
+    }
+
+    public Set<RoleDTO> toDTO(Set<Role> roles) {
+        return roles.stream().map(this::toDTO).collect(Collectors.toSet());
+    }
+
+    public Set<Role> toEntity(Set<RoleDTO> roleDTOSet) {
+        return roleDTOSet.stream().map(this::toEntity).collect(Collectors.toSet());
     }
 } 

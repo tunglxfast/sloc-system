@@ -3,11 +3,11 @@ package funix.sloc_system.mapper;
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.enums.TopicType;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class TopicMapper {
@@ -27,9 +27,7 @@ public class TopicMapper {
         dto.setSequence(topic.getSequence());
         
         // Map questions
-        dto.setQuestions(topic.getQuestions().stream()
-                .map(questionMapper::toDTO)
-                .toList());
+        dto.setQuestions(questionMapper.toDTO(topic.getQuestions()));
         
         return dto;
     }
@@ -51,13 +49,19 @@ public class TopicMapper {
         
         // Map questions if present
         if (dto.getQuestions() != null) {
-            topic.setQuestions(dto.getQuestions().stream()
-                    .map(questionMapper::toEntity)
-                    .toList());
+            topic.setQuestions(questionMapper.toEntity(dto.getQuestions()));
         } else {
             topic.setQuestions(new ArrayList<>());
         }
         
         return topic;
+    }
+
+    public List<TopicDTO> toDTO(List<Topic> topics) {
+        return topics.stream().map(this::toDTO).toList();
+    }
+
+    public List<Topic> toEntity(List<TopicDTO> topicDTOList) {
+        return topicDTOList.stream().map(this::toEntity).toList();
     }
 } 

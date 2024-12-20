@@ -5,8 +5,6 @@ import funix.sloc_system.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.stream.Collectors;
-
 @Component
 public class UserMapper {
     
@@ -21,11 +19,10 @@ public class UserMapper {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
+        dto.setFullName(user.getFullName());
         
         // Map roles
-        dto.setRoles(user.getRoles().stream()
-                .map(roleMapper::toDTO)
-                .collect(Collectors.toSet()));
+        dto.setRoles(roleMapper.toDTO(user.getRoles()));
         
         return dto;
     }
@@ -38,12 +35,11 @@ public class UserMapper {
         User user = new User();
         user.setId(dto.getId());
         user.setUsername(dto.getUsername());
+        user.setFullName(dto.getFullName());
         
         // Map roles if present
         if (dto.getRoles() != null) {
-            user.setRoles(dto.getRoles().stream()
-                    .map(roleMapper::toEntity)
-                    .collect(Collectors.toSet()));
+            user.setRoles(roleMapper.toEntity(dto.getRoles()));
         }
         
         return user;

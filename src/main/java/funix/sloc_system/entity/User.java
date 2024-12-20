@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Setter
@@ -30,7 +31,8 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    private String name;
+    @Column(name = "full_name")
+    private String fullName;
 
     @Column(nullable = false)
     private String password;
@@ -47,6 +49,10 @@ public class User {
             cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<Enrollment> enrollments = new HashSet<>();
 
-    @ManyToMany(mappedBy = "instructors")
+    @ManyToMany(mappedBy = "instructor")
     private Set<Course> courses = new HashSet<>();
+
+    public Set<String> getStringRoles() {
+        return this.roles.stream().map(Role::getName).collect(Collectors.toSet());
+    }
 }

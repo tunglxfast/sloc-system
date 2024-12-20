@@ -4,7 +4,7 @@
     <title>Create course</title>
 </head>
 <body>
-<h2 th:text="'Welcome ' + ${user.name}">Welcome anonymous</h2>
+<h2 th:text="'Welcome ' + ${user.fullName}">Welcome anonymous</h2>
 <h1>Create new course</h1>
 
 <div th:if="${errorMessage}">
@@ -25,7 +25,7 @@
     <br>
 
     <label for="category">Category:</label>
-    <select id="category" th:field="*{category}" required>
+    <select id="category" name="categoryId" required>
         <option th:each="category : ${categories}"
                 th:value="${category.id}"
                 th:text="${category.name}"></option>

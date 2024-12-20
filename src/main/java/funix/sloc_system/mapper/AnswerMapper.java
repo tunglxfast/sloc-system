@@ -4,6 +4,8 @@ import funix.sloc_system.dto.AnswerDTO;
 import funix.sloc_system.entity.Answer;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class AnswerMapper {
     
@@ -31,5 +33,13 @@ public class AnswerMapper {
         answer.setCorrect(dto.isCorrect());
         
         return answer;
+    }
+
+    public List<AnswerDTO> toDTO(List<Answer> answers) {
+        return answers.stream().map(this::toDTO).toList();
+    }
+
+    public List<Answer> toEntity(List<AnswerDTO> answerDTOList) {
+        return answerDTOList.stream().map(this::toEntity).toList();
     }
 } 

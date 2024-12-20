@@ -6,8 +6,6 @@ import funix.sloc_system.enums.CourseStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.stream.Collectors;
-
 @Component
 public class CourseMapper {
     
@@ -33,23 +31,30 @@ public class CourseMapper {
         dto.setTitle(course.getTitle());
         dto.setDescription(course.getDescription());
         dto.setThumbnailUrl(course.getThumbnailUrl());
-        dto.setCategory(categoryMapper.toDTO(course.getCategory()));
-        dto.setCreatedBy(userMapper.toDTO(course.getCreatedBy()));
-        dto.setLastUpdatedBy(userMapper.toDTO(course.getLastUpdatedBy()));
+        if (course.getCategory() != null) {
+            dto.setCategory(categoryMapper.toDTO(course.getCategory()));
+        }
+        if (course.getCreatedBy() != null) {
+            dto.setCreatedBy(userMapper.toDTO(course.getCreatedBy()));
+        }
+        if (course.getLastUpdatedBy() != null) {
+            dto.setLastUpdatedBy(userMapper.toDTO(course.getLastUpdatedBy()));
+        }
         dto.setStartDate(course.getStartDate());
         dto.setEndDate(course.getEndDate());
         dto.setStatus(course.getStatus().name());
         dto.setRejectReason(course.getRejectReason());
         dto.setCreatedAt(course.getCreatedAt());
         dto.setUpdatedAt(course.getUpdatedAt());
-        dto.setChapters(course.getChapters().stream()
-                .map(chapterMapper::toDTO)
-                .toList());
-        dto.setEnrollments(course.getEnrollments().stream()
-                .map(enrollmentMapper::toDTO)
-                .collect(Collectors.toSet()));
-        dto.setInstructor(userMapper.toDTO(course.getInstructor()));
-        
+        if (course.getChapters() != null) {
+            dto.setChapters(chapterMapper.toDTO(course.getChapters()));
+        }
+        if (course.getEnrollments() != null) {
+            dto.setEnrollments(enrollmentMapper.toDTO(course.getEnrollments()));
+        }
+        if (course.getInstructor() != null) {
+            dto.setInstructor(userMapper.toDTO(course.getInstructor()));
+        }
         return dto;
     }
 
@@ -63,9 +68,15 @@ public class CourseMapper {
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
         course.setThumbnailUrl(dto.getThumbnailUrl());
-        course.setCategory(categoryMapper.toEntity(dto.getCategory()));
-        course.setCreatedBy(userMapper.toEntity(dto.getCreatedBy()));
-        course.setLastUpdatedBy(userMapper.toEntity(dto.getLastUpdatedBy()));
+        if (dto.getCategory() != null) {
+            course.setCategory(categoryMapper.toEntity(dto.getCategory()));
+        }
+        if (dto.getCreatedBy() != null) {
+            course.setCreatedBy(userMapper.toEntity(dto.getCreatedBy()));
+        }
+        if (dto.getLastUpdatedBy() != null) {
+            course.setLastUpdatedBy(userMapper.toEntity(dto.getLastUpdatedBy()));
+        }
         course.setStartDate(dto.getStartDate());
         course.setEndDate(dto.getEndDate());
         course.setStatus(CourseStatus.valueOf(dto.getStatus()));
@@ -74,18 +85,16 @@ public class CourseMapper {
         course.setUpdatedAt(dto.getUpdatedAt());
         
         if (dto.getChapters() != null) {
-            course.setChapters(dto.getChapters().stream()
-                    .map(chapterMapper::toEntity)
-                    .toList());
+            course.setChapters(chapterMapper.toEntity(dto.getChapters()));
         }
         
         if (dto.getEnrollments() != null) {
-            course.setEnrollments(dto.getEnrollments().stream()
-                    .map(enrollmentMapper::toEntity)
-                    .collect(Collectors.toSet()));
+            course.setEnrollments(enrollmentMapper.toEntity(dto.getEnrollments()));
         }
-        
-        course.setInstructor(userMapper.toEntity(dto.getInstructor()));
+
+        if (dto.getInstructor() != null) {
+            course.setInstructor(userMapper.toEntity(dto.getInstructor()));
+        }
         
         return course;
     }

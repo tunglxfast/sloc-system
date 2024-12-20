@@ -1,5 +1,6 @@
 package funix.sloc_system.dto;
 
+import funix.sloc_system.entity.Category;
 import funix.sloc_system.entity.Role;
 import funix.sloc_system.entity.User;
 import lombok.AllArgsConstructor;
@@ -93,7 +94,7 @@ public class CourseDTO {
             for (Role role: user.getRoles()){
                 roles.add(new RoleDTO(role.getId(), role.getName()));
             }
-            UserDTO userDTO = new UserDTO(user.getId(), user.getUsername(), roles);
+            UserDTO userDTO = new UserDTO(user.getId(), user.getUsername(), user.getFullName(), roles);
             this.setCreatedBy(userDTO);
         }
     }
@@ -108,7 +109,7 @@ public class CourseDTO {
             for (Role role: user.getRoles()){
                 roles.add(new RoleDTO(role.getId(), role.getName()));
             }
-            UserDTO userDTO = new UserDTO(user.getId(), user.getUsername(), roles);
+            UserDTO userDTO = new UserDTO(user.getId(), user.getUsername(), user.getFullName(), roles);
             this.setLastUpdatedBy(userDTO);
         }
     }
@@ -123,10 +124,19 @@ public class CourseDTO {
             for (Role role: user.getRoles()){
                 roles.add(new RoleDTO(role.getId(), role.getName()));
             }
-            UserDTO userDTO = new UserDTO(user.getId(), user.getUsername(), roles);
+            UserDTO userDTO = new UserDTO(user.getId(), user.getUsername(), user.getFullName(), roles);
             this.setInstructor(userDTO);
         }
     }
 
+    public void setCategory(CategoryDTO categoryDTO) {
+        this.category = categoryDTO;
+    }
 
+    public void setCategory(Category category) {
+        if (category != null) {
+            CategoryDTO categoryDTO = new CategoryDTO(category.getId(), category.getName());
+            this.setCategory(categoryDTO);
+        }
+    }
 }

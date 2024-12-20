@@ -27,7 +27,7 @@ public class ModeratorController {
         course.setRejectReason(null);
         courseService.save(course);
         // Gửi thông báo (thêm logic gửi email)
-        courseService.sendApproveEmail(course.getInstructors(), course);
+        courseService.sendApproveEmail(course.getInstructor(), course);
         return "redirect:/moderator/courses";
     }
 
@@ -41,7 +41,7 @@ public class ModeratorController {
         course.setRejectReason(reason);
         courseService.save(course);
         // Gửi thông báo qua email và UI
-        courseService.sendRejectionEmail(course.getInstructors(), course, reason);
+        courseService.sendRejectionEmail(course.getInstructor(), course, reason);
         return "redirect:/moderator/courses";
     }
 

@@ -1,9 +1,14 @@
 package funix.sloc_system.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import funix.sloc_system.dao.*;
-import funix.sloc_system.dto.*;
-import funix.sloc_system.entity.*;
+import funix.sloc_system.dao.CategoryDao;
+import funix.sloc_system.dao.CourseDao;
+import funix.sloc_system.dao.UserDao;
+import funix.sloc_system.dto.CourseDTO;
+import funix.sloc_system.entity.Category;
+import funix.sloc_system.entity.Course;
+import funix.sloc_system.entity.CourseChangeTemporary;
+import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.CourseChangeAction;
 import funix.sloc_system.enums.CourseStatus;
 import funix.sloc_system.enums.EntityType;
@@ -18,7 +23,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -28,6 +32,8 @@ public class CourseService {
     private UserDao userDao;
     @Autowired
     private CourseDao courseDao;
+    @Autowired
+    private CategoryDao categoryDao;
     @Autowired
     private EmailService emailService;
     @Autowired
@@ -86,12 +92,6 @@ public class CourseService {
         courseDao.save(course);
     }
 
-    public void sendRejectionEmail(Set<User> instructors, Course course, String reason) {
-        for (User instructor: instructors){
-            sendRejectionEmail(instructor, course, reason);
-        }
-    }
-
     public void sendRejectionEmail(User instructor, Course course, String reason) {
         String subject = String.format("Course Rejected: %s", course.getTitle());
         String body = String.format(
@@ -100,15 +100,9 @@ public class CourseService {
                 + "Reason: %s %n%n"
                 + "Please review and make necessary changes.%n"
                 + "Thank you.",
-                instructor.getName(), course.getTitle(), reason
+                instructor.getFullName(), course.getTitle(), reason
         );
         emailService.sendEmail(instructor.getEmail(), subject, body);
-    }
-
-    public void sendApproveEmail(Set<User> instructors, Course course) {
-        for (User instructor: instructors){
-            sendApproveEmail(instructor, course);
-        }
     }
 
     public void sendApproveEmail(User instructor, Course course) {
@@ -118,21 +112,28 @@ public class CourseService {
                 + "Your course '%s'"
                 + "has been approved.%n"
                 + "Thank you.",
-                instructor.getName(), course.getTitle());
+                instructor.getFullName(), course.getTitle());
         emailService.sendEmail(instructor.getEmail(), subject, body);
     }
 
     @Transactional
     public List<Course> findByInstructor(User instructor) {
-        return courseDao.findByInstructors(instructor);
+        return courseDao.findByInstructor(instructor);
     }
 
     @Transactional
-    public CourseDTO createDraftCourse(CourseDTO courseDTO, Long instructorId, MultipartFile file) throws IOException {
+    public CourseDTO createNewCourse(CourseDTO courseDTO,
+                                     Long instructorId,
+                                     MultipartFile file,
+                                     Long categoryId) throws IOException {
+
         User instructor = userDao.findById(instructorId).orElse(null);
+        Category category = categoryDao.findById(categoryId).orElse(null);
+        courseDTO.setStatus(CourseStatus.DRAFT.name());
         courseDTO.setInstructor(instructor);
         courseDTO.setCreatedAt(LocalDate.now());
         courseDTO.setCreatedBy(instructor);
+        courseDTO.setCategory(category);
 
         String thumbnailUrl = saveThumbnail(file);
         if (thumbnailUrl != null && !thumbnailUrl.isBlank()){
@@ -149,9 +150,12 @@ public class CourseService {
      * else update to temp table.
      */
     @Transactional
-    public void saveUpdateCourse(CourseDTO courseDTO, Long instructorId, MultipartFile file) throws IOException {
+    public void saveUpdateCourse(CourseDTO courseDTO, Long instructorId, MultipartFile file, Long categoryId) throws IOException {
         User instructor = userDao.findById(instructorId).orElse(null);
+        Category category = categoryDao.findById(categoryId).orElse(null);
         courseDTO.setInstructor(instructor);
+        courseDTO.setCategory(category);
+
         String thumbnailUrl = saveThumbnail(file);
         if (thumbnailUrl != null && !thumbnailUrl.isBlank()){
             courseDTO.setThumbnailUrl(thumbnailUrl);
@@ -187,7 +191,7 @@ public class CourseService {
     }
 
     @Transactional
-    private String saveThumbnail(MultipartFile file) throws IOException {
+    private String saveThumbnail(MultipartFile file) throws NullPointerException, IOException {
         String uuid = UUID.randomUUID().toString();
         if (!file.isEmpty()) {
             String fileName = String.format("thumbnail-%s.jpg", uuid);

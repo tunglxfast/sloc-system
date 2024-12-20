@@ -1,6 +1,9 @@
 package funix.sloc_system.controller;
 
-import funix.sloc_system.entity.*;
+import funix.sloc_system.dto.TestResultDTO;
+import funix.sloc_system.entity.Course;
+import funix.sloc_system.entity.Topic;
+import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.*;
@@ -124,7 +127,7 @@ public class CourseLearningController {
         model.addAttribute("topic", topic);
         model.addAttribute("courseId", courseId);
         model.addAttribute("nextTopic", nextTopic);
-        TestResult testResult = testResultService.findByUserIdAndTopicId(user.getId(), topic.getId());
+        TestResultDTO testResult = testResultService.findByUserIdAndTopicId(user.getId(), topic.getId());
         if (testResult != null) {
             model.addAttribute("result", testResult);
         }
@@ -149,7 +152,7 @@ public class CourseLearningController {
             return "redirect:/courses";
         }
 
-        TestResult result = testResultService.calculateScore(securityUser.getUserId(), quizId, answers);
+        TestResultDTO result = testResultService.calculateScore(securityUser.getUserId(), quizId, answers);
         Topic topic = topicService.findById(quizId);
 
         if (topic != null) {
@@ -175,7 +178,7 @@ public class CourseLearningController {
             return "redirect:/courses";
         }
 
-        TestResult result = testResultService.calculateScore(securityUser.getUserId(), examId, answers);
+        TestResultDTO result = testResultService.calculateScore(securityUser.getUserId(), examId, answers);
         Topic exam = topicService.findById(examId);
 
         if (exam != null) {
