@@ -2,7 +2,6 @@ package funix.sloc_system.entity;
 
 import funix.sloc_system.enums.ApprovalStatus;
 import funix.sloc_system.enums.ContentStatus;
-import funix.sloc_system.enums.CourseStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

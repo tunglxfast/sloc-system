@@ -2,7 +2,8 @@ package funix.sloc_system.mapper;
 
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.entity.Course;
-import funix.sloc_system.enums.CourseStatus;
+import funix.sloc_system.enums.ApprovalStatus;
+import funix.sloc_system.enums.ContentStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +43,8 @@ public class CourseMapper {
         }
         dto.setStartDate(course.getStartDate());
         dto.setEndDate(course.getEndDate());
-        dto.setStatus(course.getStatus().name());
+        dto.setContentStatus(course.getContentStatus().name());
+        dto.setApprovalStatus(course.getApprovalStatus().name());
         dto.setRejectReason(course.getRejectReason());
         dto.setCreatedAt(course.getCreatedAt());
         dto.setUpdatedAt(course.getUpdatedAt());
@@ -79,7 +81,8 @@ public class CourseMapper {
         }
         course.setStartDate(dto.getStartDate());
         course.setEndDate(dto.getEndDate());
-        course.setStatus(CourseStatus.valueOf(dto.getStatus()));
+        course.setContentStatus(ContentStatus.valueOf(dto.getContentStatus()));
+        course.setApprovalStatus(ApprovalStatus.valueOf(dto.getApprovalStatus()));
         course.setRejectReason(dto.getRejectReason());
         course.setCreatedAt(dto.getCreatedAt());
         course.setUpdatedAt(dto.getUpdatedAt());

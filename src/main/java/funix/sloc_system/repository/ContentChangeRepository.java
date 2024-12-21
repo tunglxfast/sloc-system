@@ -1,6 +1,6 @@
 package funix.sloc_system.repository;
 
-import funix.sloc_system.entity.CourseChangeTemporary;
+import funix.sloc_system.entity.ContentChangeTemporary;
 import funix.sloc_system.enums.EntityType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ContentChangeRepository extends JpaRepository<CourseChangeTemporary, Long> {
+public interface ContentChangeRepository extends JpaRepository<ContentChangeTemporary, Long> {
 
-    Optional<CourseChangeTemporary> findByEntityTypeAndEntityId(EntityType entityType, Long entityId);
+    Optional<ContentChangeTemporary> findByEntityTypeAndEntityId(EntityType entityType, Long entityId);
 
-    List<CourseChangeTemporary> findByAction(String action);
+    List<ContentChangeTemporary> findByAction(String action);
 }

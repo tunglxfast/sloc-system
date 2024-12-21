@@ -1,6 +1,6 @@
 package funix.sloc_system.entity;
 
-import funix.sloc_system.enums.CourseStatus;
+import funix.sloc_system.enums.ContentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,5 +26,5 @@ public class Answer {
     private Question question;
 
     @Enumerated(EnumType.STRING)
-    private CourseStatus status = CourseStatus.DRAFT;
+    private ContentStatus status = ContentStatus.DRAFT;
 }

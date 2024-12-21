@@ -16,5 +16,5 @@ public class ChapterDTO {
     private String title;
     private int sequence;
     private List<TopicDTO> topics;
-    private String status;
+    private String contentStatus;
 }

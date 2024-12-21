@@ -2,7 +2,7 @@ package funix.sloc_system.mapper;
 
 import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.entity.Chapter;
-import funix.sloc_system.enums.CourseStatus;
+import funix.sloc_system.enums.ContentStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +22,7 @@ public class ChapterMapper {
         ChapterDTO dto = new ChapterDTO();
         dto.setId(chapter.getId());
         dto.setTitle(chapter.getTitle());
-        dto.setStatus(chapter.getStatus().toString());
+        dto.setContentStatus(chapter.getContentStatus().toString());
         dto.setSequence(chapter.getSequence());
         
         // Map topics
@@ -39,7 +39,7 @@ public class ChapterMapper {
         Chapter chapter = new Chapter();
         chapter.setId(dto.getId());
         chapter.setTitle(dto.getTitle());
-        chapter.setStatus(CourseStatus.valueOf(dto.getStatus()));
+        chapter.setContentStatus(ContentStatus.valueOf(dto.getContentStatus()));
         chapter.setSequence(dto.getSequence());
         
         // Map topics if present

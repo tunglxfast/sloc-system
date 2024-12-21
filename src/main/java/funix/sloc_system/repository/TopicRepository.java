@@ -1,7 +1,7 @@
 package funix.sloc_system.repository;
 
 import funix.sloc_system.entity.Topic;
-import funix.sloc_system.enums.CourseStatus;
+import funix.sloc_system.enums.ContentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,5 +15,5 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
 
     Optional<Topic> findByChapterIdAndSequence(Long chapterId, int sequence);
 
-    List<Topic> findByChapterIdAndStatus(Long chapterId, CourseStatus status);
+    List<Topic> findByChapterIdAndContentStatus(Long chapterId, ContentStatus status);
 }

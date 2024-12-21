@@ -2,16 +2,13 @@ package funix.sloc_system.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import funix.sloc_system.dto.CourseDTO;
-import funix.sloc_system.entity.CourseChangeTemporary;
+import funix.sloc_system.entity.ContentChangeTemporary;
 import funix.sloc_system.entity.User;
-import funix.sloc_system.enums.CourseChangeAction;
-import funix.sloc_system.enums.CourseStatus;
+import funix.sloc_system.enums.ContentAction;
 import funix.sloc_system.enums.EntityType;
 import funix.sloc_system.repository.ContentChangeRepository;
 import funix.sloc_system.repository.UserRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,25 +34,24 @@ public class ContentChangeService {
      * @throws JsonProcessingException
      */
     @Transactional
-    public void saveEditingCourse(CourseDTO editingCourse, CourseChangeAction action, Long instructorId) throws JsonProcessingException {
+    public void saveEditingCourse(CourseDTO editingCourse, ContentAction action, Long instructorId) throws JsonProcessingException {
         User instructor = userRepository.findById(instructorId).orElse(null);
         String json = objectMapper.writeValueAsString(editingCourse);
-        CourseChangeTemporary changeTemporary = changeTemporaryDao
+        ContentChangeTemporary changeTemporary = changeTemporaryDao
                 .findByEntityTypeAndEntityId(EntityType.COURSE, editingCourse.getId())
-                .orElse(new CourseChangeTemporary());
+                .orElse(new ContentChangeTemporary());
 
         changeTemporary.setEntityType(EntityType.COURSE);
         changeTemporary.setEntityId(editingCourse.getId());
         changeTemporary.setAction(action);
         changeTemporary.setChanges(json);
-        changeTemporary.setStatus(CourseStatus.PENDING_EDIT);
         changeTemporary.setUpdatedBy(instructor);
         changeTemporary.setChangeTime(LocalDateTime.now());
         changeTemporaryDao.save(changeTemporary);
     }
 
     @Transactional
-    public Optional<CourseChangeTemporary> getCourseEditing(EntityType entityType, Long entityId) {
+    public Optional<ContentChangeTemporary> getCourseEditing(EntityType entityType, Long entityId) {
         return changeTemporaryDao.findByEntityTypeAndEntityId(entityType, entityId);
     }
 }

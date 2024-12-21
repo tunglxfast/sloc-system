@@ -45,7 +45,7 @@ public class CourseLearningController {
      */
     @GetMapping(value = {"","/"})
     public String listCourses(Model model) {
-        List<Course> courses = courseService.getApprovedOrUpdatingCourses();
+        List<Course> courses = courseService.getAvailableCourses();
         model.addAttribute("courses", courses);
         return "courses";
     }

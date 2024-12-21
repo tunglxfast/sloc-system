@@ -1,15 +1,13 @@
 package funix.sloc_system.util;
 
-import funix.sloc_system.entity.Category;
 import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Topic;
-import funix.sloc_system.enums.CourseStatus;
+import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.repository.CategoryRepository;
 import funix.sloc_system.repository.ChapterRepository;
 import funix.sloc_system.repository.CourseRepository;
 import funix.sloc_system.repository.TopicRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -61,14 +59,7 @@ public class ApplicationUtil {
         if (course == null) {
             return false;
         }
-        CourseStatus courseStatus = course.getStatus();
-        if (courseStatus != CourseStatus.APPROVED && courseStatus != CourseStatus.APPROVED) {
-            return false;
-        }
-        return true;
-    }
-
-    public Category getCategoryById(Long id) {
-        return categoryRepository.findById(id).orElse(null);
+        ContentStatus contentStatus = course.getContentStatus();
+        return contentStatus != ContentStatus.DRAFT && contentStatus != ContentStatus.READY_TO_REVIEW;
     }
 }

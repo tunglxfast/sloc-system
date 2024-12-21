@@ -1,8 +1,6 @@
 package funix.sloc_system.entity;
 
-import funix.sloc_system.enums.CourseChangeAction;
-import funix.sloc_system.enums.CourseStatus;
-import funix.sloc_system.enums.EntityType;
+import funix.sloc_system.enums.*;
 import jakarta.persistence.*;
 import jakarta.persistence.GenerationType;
 import lombok.AllArgsConstructor;
@@ -17,8 +15,8 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "course_change_temporary")
-public class CourseChangeTemporary {
+@Table(name = "content_change_temporary")
+public class ContentChangeTemporary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,20 +24,19 @@ public class CourseChangeTemporary {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EntityType entityType;
+
     @Column(nullable = false)
     private Long entityId;
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private CourseChangeAction action;
-    @Column(length = 5000, nullable = false)
-    private String changes;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CourseStatus status = CourseStatus.PENDING_EDIT; // Only have PENDING_EDIT and REJECTED
+    private ContentAction action;  // 'UPDATE', 'DELETE', 'CREATE'
+
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String changes;  // JSON string containing the changes
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "updated_by", nullable = false)
     private User updatedBy;
 
     @Column(nullable = false)

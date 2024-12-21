@@ -2,7 +2,6 @@ package funix.sloc_system.controller;
 
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.User;
-import funix.sloc_system.enums.CourseStatus;
 import funix.sloc_system.enums.RoleType;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.CourseService;
@@ -42,7 +41,7 @@ public class InstructorController {
     @GetMapping("/notifications")
     public String getNotifications(Principal principal, Model model) {
         User instructor = userService.findByUsername(principal.getName());
-        List<Course> rejectedCourses = courseService.findAllByInstructorAndStatus(instructor, CourseStatus.REJECTED);
+        List<Course> rejectedCourses = courseService.getInstructorRejectedCourses(instructor);
         model.addAttribute("rejectedCourses", rejectedCourses);
         return "instructor/notifications";
     }

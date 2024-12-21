@@ -1,6 +1,6 @@
 package funix.sloc_system.entity;
 
-import funix.sloc_system.enums.CourseStatus;
+import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.TopicType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -38,7 +38,7 @@ public class Topic {
     private Chapter chapter;
 
     @Enumerated(EnumType.STRING)
-    private CourseStatus status = CourseStatus.DRAFT;
+    private ContentStatus contentStatus = ContentStatus.DRAFT;
 
     // Fields for ReadingLesson
     private String fileUrl;

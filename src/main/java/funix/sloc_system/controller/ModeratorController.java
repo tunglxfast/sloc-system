@@ -1,7 +1,8 @@
 package funix.sloc_system.controller;
 
 import funix.sloc_system.entity.Course;
-import funix.sloc_system.enums.CourseStatus;
+import funix.sloc_system.enums.ApprovalStatus;
+import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,7 +24,8 @@ public class ModeratorController {
         if (course == null) {
             return "moderator_courses";
         }
-        course.setStatus(CourseStatus.APPROVED);
+        course.setContentStatus(ContentStatus.PUBLISHED);
+        course.setApprovalStatus(ApprovalStatus.APPROVED);
         course.setRejectReason(null);
         courseService.save(course);
         // Gửi thông báo (thêm logic gửi email)
@@ -31,13 +33,19 @@ public class ModeratorController {
         return "redirect:/moderator/courses";
     }
 
-    @PostMapping("/courses/{id}/reject")
+    @PostMapping("/courses/{id}/reject_all")
     public String rejectCourse(@PathVariable Long id, @RequestParam String reason) {
         Course course = courseService.findById(id);
         if (course == null) {
             return "moderator_courses";
         }
-        course.setStatus(CourseStatus.REJECTED);
+        if (course.getContentStatus() == ContentStatus.READY_TO_REVIEW
+                || course.getContentStatus() == ContentStatus.DRAFT) {
+            course.setContentStatus(ContentStatus.DRAFT);
+        } else {
+            course.setContentStatus(ContentStatus.PUBLISHED);
+        }
+        course.setApprovalStatus(ApprovalStatus.REJECTED);
         course.setRejectReason(reason);
         courseService.save(course);
         // Gửi thông báo qua email và UI

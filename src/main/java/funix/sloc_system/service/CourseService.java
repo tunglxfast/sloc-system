@@ -1,16 +1,14 @@
 package funix.sloc_system.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import funix.sloc_system.enums.*;
 import funix.sloc_system.repository.CourseRepository;
 import funix.sloc_system.repository.UserRepository;
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.entity.Category;
 import funix.sloc_system.entity.Course;
-import funix.sloc_system.entity.CourseChangeTemporary;
+import funix.sloc_system.entity.ContentChangeTemporary;
 import funix.sloc_system.entity.User;
-import funix.sloc_system.enums.CourseChangeAction;
-import funix.sloc_system.enums.CourseStatus;
-import funix.sloc_system.enums.EntityType;
 import funix.sloc_system.mapper.CourseMapper;
 import funix.sloc_system.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,14 +57,19 @@ public class CourseService {
         return courseRepository.save(course);
     }
 
-    public List<Course> findAllByInstructorAndStatus(User instructor, CourseStatus status) {
-        return courseRepository.findAllByInstructorAndStatus(instructor, status);
+    public List<Course> getInstructorRejectedCourses(User instructor) {
+        return courseRepository.findAllByInstructorAndApprovalStatus(instructor, ApprovalStatus.REJECTED);
     }
 
-    public List<Course> getApprovedOrUpdatingCourses() {
-        return courseRepository.findByStatusIn(List.of(CourseStatus.APPROVED, CourseStatus.PENDING_EDIT));
+    public List<Course> getAvailableCourses() {
+        List<ContentStatus> contentStatusList = List.of(
+                ContentStatus.PUBLISHED,
+                ContentStatus.PUBLISHED_EDITING,
+                ContentStatus.ARCHIVED);
+        return courseRepository.findByContentStatusIn(contentStatusList);
     }
 
+    @Transactional
     public void submitForCreatingReview(Long courseId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
@@ -75,21 +78,32 @@ public class CourseService {
             throw new IllegalArgumentException("Course must have at least one chapter before submission.");
         }
 
-        course.setStatus(CourseStatus.PENDING_CREATE);
+        course.setContentStatus(ContentStatus.READY_TO_REVIEW);
+        course.setApprovalStatus(ApprovalStatus.PENDING);
         courseRepository.save(course);
     }
 
+    @Transactional
+    public void submitForEditingReview(Long courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+
+        course.setContentStatus(ContentStatus.PUBLISHED_EDITING);
+        course.setApprovalStatus(ApprovalStatus.PENDING);
+        courseRepository.save(course);
+    }
+
+    @Transactional
     public void submitForReview(Long courseId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
 
         // change course status for reviewing
-        if (course.getStatus() == CourseStatus.DRAFT){
-            course.setStatus(CourseStatus.PENDING_CREATE);
+        if (course.getContentStatus() == ContentStatus.DRAFT){
+            submitForCreatingReview(courseId);
         } else {
-            course.setStatus(CourseStatus.PENDING_EDIT);
+            submitForEditingReview(courseId);
         }
-        courseRepository.save(course);
     }
 
     public void sendRejectionEmail(User instructor, Course course, String reason) {
@@ -129,7 +143,7 @@ public class CourseService {
 
         User instructor = userRepository.findById(instructorId).orElse(null);
         Category category = categoryRepository.findById(categoryId).orElse(null);
-        courseDTO.setStatus(CourseStatus.DRAFT.name());
+        courseDTO.setContentStatus(ContentStatus.DRAFT.name());
         courseDTO.setInstructor(instructor);
         courseDTO.setCreatedAt(LocalDate.now());
         courseDTO.setCreatedBy(instructor);
@@ -146,7 +160,7 @@ public class CourseService {
     }
 
     /**
-     * Update directly to table if CourseStatus is DRAFT
+     * Update directly to table if ContentStatus is DRAFT
      * else update to temp table.
      */
     @Transactional
@@ -163,7 +177,7 @@ public class CourseService {
         courseDTO.setUpdatedAt(LocalDate.now());
         courseDTO.setLastUpdatedBy(instructor);
 
-        if (CourseStatus.valueOf(courseDTO.getStatus()) == CourseStatus.DRAFT){
+        if (ContentStatus.valueOf(courseDTO.getContentStatus()) == ContentStatus.DRAFT){
             // save update to main table
             Course course = courseMapper.toEntity(courseDTO);
             courseRepository.save(course);
@@ -171,7 +185,7 @@ public class CourseService {
             // save update to temp table for later review
             contentChangeService.saveEditingCourse(
                     courseDTO,
-                    CourseChangeAction.UPDATE,
+                    ContentAction.UPDATE,
                     instructorId);
         }
     }
@@ -179,7 +193,7 @@ public class CourseService {
     @Transactional
     public CourseDTO getEditingCourseDTO(Long id) throws Exception {
         Course course = findById(id);
-        CourseChangeTemporary changeTemporary = contentChangeService.getCourseEditing(
+        ContentChangeTemporary changeTemporary = contentChangeService.getCourseEditing(
                 EntityType.COURSE,
                 id).orElse(null);
         if (changeTemporary == null) {

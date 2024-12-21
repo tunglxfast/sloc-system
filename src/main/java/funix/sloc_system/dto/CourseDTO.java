@@ -30,7 +30,8 @@ public class CourseDTO {
     private LocalDate startDate;
     @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate endDate;
-    private String status;
+    private String contentStatus;
+    private String approvalStatus;
     private String rejectReason;
     @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate createdAt;
@@ -76,8 +77,11 @@ public class CourseDTO {
         if (otherCourse.getEndDate() != null) {
             this.setEndDate(otherCourse.getEndDate());
         }
-        if (otherCourse.getStatus() != null) {
-            this.setStatus(otherCourse.getStatus());
+        if (otherCourse.getContentStatus() != null) {
+            this.setContentStatus(otherCourse.getContentStatus());
+        }
+        if (otherCourse.getApprovalStatus() != null) {
+            this.setApprovalStatus(otherCourse.getApprovalStatus());
         }
         if (otherCourse.getRejectReason() != null) {
             this.setRejectReason(otherCourse.getRejectReason());

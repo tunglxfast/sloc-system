@@ -1,7 +1,7 @@
 package funix.sloc_system.repository;
 
 import funix.sloc_system.entity.Chapter;
-import funix.sloc_system.enums.CourseStatus;
+import funix.sloc_system.enums.ContentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -18,5 +18,5 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long> {
 
     List<Chapter> findByCourseIdOrderBySequence(Long courseId);
 
-    List<Chapter> findByCourseIdAndStatus(Long courseId, CourseStatus status);
+    List<Chapter> findByCourseIdAndContentStatus(Long courseId, ContentStatus status);
 }
