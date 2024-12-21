@@ -26,5 +26,5 @@ public class Answer {
     private Question question;
 
     @Enumerated(EnumType.STRING)
-    private ContentStatus status = ContentStatus.DRAFT;
+    private ContentStatus contentStatus = ContentStatus.DRAFT;
 }

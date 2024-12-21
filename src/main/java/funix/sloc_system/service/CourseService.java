@@ -61,12 +61,13 @@ public class CourseService {
         return courseRepository.findAllByInstructorAndApprovalStatus(instructor, ApprovalStatus.REJECTED);
     }
 
-    public List<Course> getAvailableCourses() {
+    public List<CourseDTO> getAvailableCourseDTOList() {
         List<ContentStatus> contentStatusList = List.of(
                 ContentStatus.PUBLISHED,
                 ContentStatus.PUBLISHED_EDITING,
                 ContentStatus.ARCHIVED);
-        return courseRepository.findByContentStatusIn(contentStatusList);
+        List<Course> courses = courseRepository.findByContentStatusIn(contentStatusList);
+        return courseMapper.toDTO(courses);
     }
 
     @Transactional
@@ -98,7 +99,7 @@ public class CourseService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
 
-        // change course status for reviewing
+        // change course content status for reviewing
         if (course.getContentStatus() == ContentStatus.DRAFT){
             submitForCreatingReview(courseId);
         } else {

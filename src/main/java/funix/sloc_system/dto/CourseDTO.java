@@ -1,5 +1,6 @@
 package funix.sloc_system.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import funix.sloc_system.entity.Category;
 import funix.sloc_system.entity.Role;
 import funix.sloc_system.entity.User;
@@ -37,7 +38,9 @@ public class CourseDTO {
     private LocalDate createdAt;
     @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate updatedAt;
+    @JsonIgnore
     private List<ChapterDTO> chapters;
+    @JsonIgnore
     private Set<EnrollmentDTO> enrollments;
     private UserDTO instructor;
 
@@ -62,7 +65,7 @@ public class CourseDTO {
         if (otherCourse.getLastUpdatedBy() != null) {
             this.setLastUpdatedBy(otherCourse.getLastUpdatedBy());
         }
-        if (otherCourse.getChapters() != null) {
+        if (otherCourse.getChapters() != null && !otherCourse.getChapters().isEmpty()) {
             this.setChapters(otherCourse.getChapters());
         }
         if (otherCourse.getEnrollments() != null && !otherCourse.getEnrollments().isEmpty()) {

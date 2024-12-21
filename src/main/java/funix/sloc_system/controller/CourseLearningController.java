@@ -1,5 +1,6 @@
 package funix.sloc_system.controller;
 
+import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.TestResultDTO;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Topic;
@@ -45,8 +46,8 @@ public class CourseLearningController {
      */
     @GetMapping(value = {"","/"})
     public String listCourses(Model model) {
-        List<Course> courses = courseService.getAvailableCourses();
-        model.addAttribute("courses", courses);
+        List<CourseDTO> courseDTOList = courseService.getAvailableCourseDTOList();
+        model.addAttribute("courses", courseDTOList);
         return "courses";
     }
 

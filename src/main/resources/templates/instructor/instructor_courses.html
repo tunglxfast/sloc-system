@@ -34,7 +34,8 @@
                 <th>#</th>
                 <th>Title</th>
                 <th>Category</th>
-                <th>Status</th>
+                <th>Content Status</th>
+                <th>Approval Status</th>
                 <th>Start Date</th>
                 <th>End Date</th>
                 <th>Actions</th>
@@ -46,10 +47,16 @@
                 <td th:text="${course.title}">Course Title</td>
                 <td th:text="${course.category.name}">Category Name</td>
                 <td>
-                    <span th:classappend="${course.status == 'APPROVED' ? 'badge bg-success' :
-                                            course.status == 'REJECTED' ? 'badge bg-danger' :
+                    <span th:classappend="${course.contentStatus == 'PUBLISHED' ? 'badge bg-success' :
+                                            course.contentStatus == 'ARCHIVED' ? 'badge bg-danger' :
                                             'badge bg-warning text-dark'}"
-                          th:text="${course.status}">Status</span>
+                          th:text="${course.contentStatus}">Content Status</span>
+                </td>
+                <td>
+                    <span th:classappend="${course.approvalStatus == 'APPROVED' ? 'badge bg-success' :
+                                            course.approvalStatus == 'REJECTED' ? 'badge bg-danger' :
+                                            'badge bg-warning text-dark'}"
+                          th:text="${course.approvalStatus}">Approval Status</span>
                 </td>
                 <td th:text="${course.startDate}">Start Date</td>
                 <td th:text="${course.endDate}">End Date</td>

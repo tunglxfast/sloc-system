@@ -18,8 +18,6 @@
 <form th:action="@{/instructor/course/edit/{id}/submit(id=${course.id})}"
       th:object="${course}" method="post" enctype="multipart/form-data">
     <input type="hidden" th:field="*{id}"/>
-    <input type="hidden" th:field="*{status}"/>
-    <input type="hidden" th:field="*{createdAt}"/>
 
     <label for="title">Title:</label><br>
     <input type="text" id="title" th:field="*{title}" required/><br><br>

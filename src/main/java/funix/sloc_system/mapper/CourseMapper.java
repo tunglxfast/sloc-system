@@ -7,6 +7,8 @@ import funix.sloc_system.enums.ContentStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class CourseMapper {
     
@@ -100,5 +102,13 @@ public class CourseMapper {
         }
         
         return course;
+    }
+
+    public List<CourseDTO> toDTO(List<Course> courses) {
+        return courses.stream().map(this::toDTO).toList();
+    }
+
+    public List<Course> toEntity(List<CourseDTO> courseDTOList) {
+        return courseDTOList.stream().map(this::toEntity).toList();
     }
 } 

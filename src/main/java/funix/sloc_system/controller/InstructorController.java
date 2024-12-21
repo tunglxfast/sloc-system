@@ -1,8 +1,12 @@
 package funix.sloc_system.controller;
 
+import funix.sloc_system.dto.CourseDTO;
+import funix.sloc_system.dto.UserDTO;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.RoleType;
+import funix.sloc_system.mapper.CourseMapper;
+import funix.sloc_system.mapper.UserMapper;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.CourseService;
 import funix.sloc_system.service.UserService;
@@ -23,18 +27,25 @@ public class InstructorController {
     private UserService userService;
     @Autowired
     private CourseService courseService;
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private CourseMapper courseMapper;
 
     @GetMapping(value = {"","/","/courses"})
     public String showInstructorManageList(@AuthenticationPrincipal SecurityUser securityUser, Model model){
         User user = userService.findById(securityUser.getUserId());
+        UserDTO userDTO = userMapper.toDTO(user);
         List<Course> courseList;
         if (user.getStringRoles().contains(RoleType.MODERATOR.name())) {
             courseList = courseService.getAllCourses();
         } else {
             courseList = courseService.findByInstructor(user);
         }
-        model.addAttribute("user", user);
-        model.addAttribute("courses", courseList);
+
+        List<CourseDTO> courseDTOList = courseMapper.toDTO(courseList);
+        model.addAttribute("user", userDTO);
+        model.addAttribute("courses", courseDTOList);
         return "instructor/instructor_courses";
     }
 
