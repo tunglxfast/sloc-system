@@ -1,6 +1,5 @@
 package funix.sloc_system.controller;
 
-
 import funix.sloc_system.dto.CategoryDTO;
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.UserDTO;
@@ -35,12 +34,6 @@ public class CourseManagementController {
     @Autowired
     private UserMapper userMapper;
 
-    /**
-     * Show create course form
-     * @param securityUser
-     * @param model
-     * @return
-     */
     @GetMapping("/create")
     public String showCreateCourseForm(@AuthenticationPrincipal SecurityUser securityUser, Model model) {
         UserDTO userDTO = userMapper.toDTO(userService.findById(securityUser.getUserId()));
@@ -53,35 +46,27 @@ public class CourseManagementController {
 
     @PostMapping("/create")
     public String createNewCourse(@AuthenticationPrincipal SecurityUser securityUser,
-                                  @ModelAttribute("course") CourseDTO courseDTO,
-                                  @RequestParam("thumbnailFile") MultipartFile file,
-                                  @RequestParam("categoryId") Long categoryId,
-                                  RedirectAttributes redirectAttributes,
-                                  Model model) {
+                                @ModelAttribute("course") CourseDTO courseDTO,
+                                @RequestParam("thumbnailFile") MultipartFile file,
+                                @RequestParam("categoryId") Long categoryId,
+                                RedirectAttributes redirectAttributes) {
         Long instructorId = securityUser.getUserId();
         try {
             CourseDTO newCourseDTO = courseService.createNewCourse(courseDTO, instructorId, file, categoryId);
-            model.addAttribute("course", newCourseDTO);
-            model.addAttribute("successMessage",
-                    "The course general has been created.");
-            return "instructor/create_chapter";
+            redirectAttributes.addFlashAttribute("successMessage", "The course has been created successfully.");
+            return "redirect:/instructor/course/" + newCourseDTO.getId() + "/chapter";
         } catch (IOException e) {
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "An error occurred while creating the course.");
-            return "redirect:/instructor/courses";
+            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred while creating the course.");
+            return "redirect:/instructor";
         }
     }
 
-    @GetMapping("/edit/{courseId}")
+    @GetMapping("/{courseId}/edit")
     public String showEditingCourse(@PathVariable("courseId") Long courseId,
-                                    Model model,
-                                    RedirectAttributes redirectAttributes) {
-
-        boolean isExists = courseService.courseExists(courseId);
-        if (!isExists) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    "Course is not exist.");
+                                Model model,
+                                RedirectAttributes redirectAttributes) {
+        if (!courseService.courseExists(courseId)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Course does not exist.");
             return "redirect:/instructor/courses";
         }
 
@@ -89,64 +74,49 @@ public class CourseManagementController {
             CourseDTO courseDTO = courseService.getEditingCourseDTO(courseId);
             if (courseDTO == null) {
                 return "redirect:/instructor";
-            } else {
-                List<CategoryDTO> categoryDTOS = categoryMapper.toDTO(categoryService.getAllCategories());
-                model.addAttribute("course", courseDTO);
-                model.addAttribute("categories", categoryDTOS);
-                return "instructor/edit_course";
             }
+            
+            List<CategoryDTO> categoryDTOS = categoryMapper.toDTO(categoryService.getAllCategories());
+            model.addAttribute("course", courseDTO);
+            model.addAttribute("categories", categoryDTOS);
+            return "instructor/edit_course";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    "An error occurred, please try again later");
+            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred, please try again later");
             return "redirect:/instructor/courses";
         }
     }
 
-    /**
-     * Create new or update if draft course,
-     * save to temp table if updating course.
-     */
-    @PostMapping("/edit/{courseId}/submit")
+    @PostMapping("/{courseId}/submit")
     public String submitCourse(@PathVariable("courseId") Long courseId,
-                               @ModelAttribute("course") CourseDTO courseUpdateValues,
-                               @AuthenticationPrincipal SecurityUser securityUser,
-                               @RequestParam("thumbnailFile") MultipartFile file,
-                               @RequestParam("categoryId") Long categoryId,
-                               @RequestParam("action") String action,
-                               RedirectAttributes redirectAttributes,
-                               Model model) {
+                            @ModelAttribute("course") CourseDTO courseUpdateValues,
+                            @AuthenticationPrincipal SecurityUser securityUser,
+                            @RequestParam("thumbnailFile") MultipartFile file,
+                            @RequestParam("categoryId") Long categoryId,
+                            @RequestParam("action") String action,
+                            RedirectAttributes redirectAttributes) {
         Long instructorId = securityUser.getUserId();
-        CourseDTO courseDTO;
         try {
-            courseDTO = courseService.getEditingCourseDTO(courseId);
+            // Get current course state
+            CourseDTO courseDTO = courseService.getEditingCourseDTO(courseId);
             courseDTO.updateCourseDTO(courseUpdateValues);
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    "An error occurred, please try again later");
-            return "redirect:/instructor/courses";
-        }
-
-        try {
+            
+            // Save updates
             courseService.saveUpdateCourse(courseDTO, instructorId, file, categoryId);
+            
+            // Handle different actions
             if ("Submit".equals(action)) {
                 courseService.submitForReview(courseId);
-                redirectAttributes.addFlashAttribute(
-                        "successMessage",
-                        "Submit successfully! Please waiting for moderator to review course.");
+                redirectAttributes.addFlashAttribute("successMessage", 
+                    "Course submitted successfully! Please wait for moderator review.");
                 return "redirect:/instructor/courses";
-            } else {
-                model.addAttribute("successMessage", "The course general has been updated.");
+            } else { // Save Draft
+                redirectAttributes.addFlashAttribute("successMessage", "Course draft saved successfully.");
+                return "redirect:/instructor/course/" + courseId + "/edit";
             }
+            
         } catch (Exception e) {
-            model.addAttribute(
-                    "errorMessage",
-                    "An error occurred while editing the course.");
+            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred: " + e.getMessage());
+            return "redirect:/instructor/course/" + courseId + "/edit";
         }
-        List<CategoryDTO> categoryDTOS = categoryMapper.toDTO(categoryService.getAllCategories());
-        model.addAttribute("course", courseDTO);
-        model.addAttribute("categories", categoryDTOS);
-        return "instructor/edit_course";
     }
 }

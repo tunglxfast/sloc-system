@@ -1,31 +1,317 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Add Topic</title>
+    <meta charset="UTF-8">
+    <title th:text="${topic != null ? 'Edit Topic' : 'Create Topic'}"></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 th:text="${topic != null ? 'Edit Topic' : 'Create Topic'}"></h2>
+                        <p class="text-muted">
+                            Course: <span th:text="${course.title}"></span> |
+                            Chapter: <span th:text="${chapter.title}"></span>
+                        </p>
+                    </div>
+                    <div>
+                        <a th:href="@{'/instructor/course/' + ${course.id} + '/chapter/' + ${chapter.id}}" 
+                           class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<h1>Add Topic to Chapter: <span th:text="${chapter.title}"></span></h1>
+        <!-- Alert Messages -->
+        <div id="alertSuccess" class="alert alert-success d-none" role="alert"></div>
+        <div id="alertError" class="alert alert-danger d-none" role="alert"></div>
 
-<form th:action="@{'/instructor/chapter/' + ${chapter.id} + '/topics/add'}" method="post">
-    <label for="type">Topic Type:</label>
-    <select id="type" name="type" required>
-        <option value="READING">Reading</option>
-        <option value="VIDEO">Video</option>
-        <option value="QUIZ">Quiz</option>
-        <option value="EXAM">Exam</option>
-    </select>
+        <!-- Topic Form -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i th:class="${topicType == 'VIDEO' ? 'fas fa-video' : 
+                                         topicType == 'READING' ? 'fas fa-book' :
+                                         topicType == 'QUIZ' ? 'fas fa-question-circle' :
+                                         'fas fa-file'}"></i>
+                            <span th:text="${topicType}"></span> Topic Details
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="topicForm">
+                            <input type="hidden" id="topicId" th:value="${topic?.id}">
+                            <input type="hidden" id="topicType" th:value="${topicType}">
+                            
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Topic Title</label>
+                                <input type="text" class="form-control" id="title" 
+                                       th:value="${topic?.title}" required>
+                            </div>
 
-    <label for="title">Topic Title:</label>
-    <input type="text" id="title" name="title" required>
+                            <div class="mb-3">
+                                <label for="sequence" class="form-label">Sequence</label>
+                                <input type="number" class="form-control" id="sequence" 
+                                       th:value="${topic?.sequence}" required>
+                            </div>
 
-    <label for="content">Content:</label>
-    <textarea id="content" name="content" required></textarea>
+                            <!-- Video Topic Fields -->
+                            <div th:if="${topicType == 'VIDEO'}" class="mb-3">
+                                <label for="videoUrl" class="form-label">Video URL</label>
+                                <input type="url" class="form-control" id="videoUrl" 
+                                       th:value="${topic?.videoUrl}">
+                                <div class="form-text">Enter the URL of the video (YouTube, Vimeo, etc.)</div>
+                            </div>
 
-    <button type="submit">Add Topic</button>
+                            <!-- Reading Topic Fields -->
+                            <div th:if="${topicType == 'READING'}" class="mb-3">
+                                <label for="content" class="form-label">Content</label>
+                                <textarea class="form-control" id="content" rows="10"
+                                          th:text="${topic?.content}"></textarea>
+                            </div>
+
+                            <!-- Quiz/Exam Topic Fields -->
+                            <div th:if="${topicType == 'QUIZ' || topicType == 'EXAM'}" id="questionsContainer">
+                                <h6 class="mb-3">Questions</h6>
+                                <div id="questionsList">
+                                    <!-- Existing questions will be loaded here -->
+                                </div>
+                                <button type="button" class="btn btn-outline-primary mt-3" onclick="addQuestion()">
+                                    <i class="fas fa-plus"></i> Add Question
+                                </button>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary">Save Topic</button>
+                                <button type="button" class="btn btn-secondary" onclick="history.back()">Cancel</button>
+                            </div>
 </form>
+                    </div>
+                </div>
+            </div>
 
-<a th:href="@{'/instructor/course/' + ${chapter.course.id} + '/chapters'}">Back to Chapters</a>
+            <!-- Status Card -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <strong>Content Status:</strong>
+                            <span th:if="${topic?.contentStatus?.name() == 'PUBLISHED'}" class="badge bg-success">Published</span>
+                            <span th:if="${topic?.contentStatus?.name() == 'DRAFT'}" class="badge bg-warning">Draft</span>
+                            <span th:if="${topic?.contentStatus?.name() == 'PUBLISHED_EDITING'}" class="badge bg-info">Editing</span>
+                        </div>
+                        <div th:if="${topic != null}" class="mb-2">
+                            <strong>Last Updated:</strong>
+                            <span th:text="${topic.updatedAt}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Question Template -->
+    <template id="questionTemplate">
+        <div class="card mb-3 question-item">
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <h6 class="mb-0">Question <span class="question-number"></span></h6>
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeQuestion(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Question Text</label>
+                    <textarea class="form-control question-text" rows="2" required></textarea>
+                </div>
+                <div class="answers-container">
+                    <label class="form-label">Answers</label>
+                    <div class="answer-list">
+                        <!-- Answer items will be added here -->
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm mt-2" onclick="addAnswer(this)">
+                        <i class="fas fa-plus"></i> Add Answer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Answer Template -->
+    <template id="answerTemplate">
+        <div class="input-group mb-2 answer-item">
+            <div class="input-group-text">
+                <input type="radio" name="correct" class="correct-answer">
+            </div>
+            <input type="text" class="form-control answer-text" placeholder="Answer text" required>
+            <button type="button" class="btn btn-outline-danger" onclick="removeAnswer(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        const courseId = [[${course.id}]];
+        const chapterId = [[${chapter.id}]];
+        const topicType = [[${topicType}]];
+        const existingTopic = [[${topic}]];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (existingTopic && (topicType === 'QUIZ' || topicType === 'EXAM')) {
+                loadExistingQuestions(existingTopic.questions);
+            }
+        });
+
+        document.getElementById('topicForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const topicData = {
+                id: document.getElementById('topicId').value,
+                title: document.getElementById('title').value,
+                sequence: document.getElementById('sequence').value,
+                topicType: document.getElementById('topicType').value
+            };
+
+            // Add type-specific data
+            if (topicType === 'VIDEO') {
+                topicData.videoUrl = document.getElementById('videoUrl').value;
+            } else if (topicType === 'READING') {
+                topicData.content = document.getElementById('content').value;
+            } else if (topicType === 'QUIZ' || topicType === 'EXAM') {
+                topicData.questions = collectQuestions();
+            }
+
+            saveTopic(topicData);
+        });
+
+        function saveTopic(topicData) {
+            fetch(`/instructor/course/${courseId}/topic/save`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(topicData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text) });
+                }
+                showSuccess('Topic saved successfully');
+                setTimeout(() => {
+                    window.location.href = `/instructor/course/${courseId}/chapter/${chapterId}`;
+                }, 1000);
+            })
+            .catch(error => showError(error.message));
+        }
+
+        function addQuestion() {
+            const template = document.getElementById('questionTemplate');
+            const clone = template.content.cloneNode(true);
+            const container = document.getElementById('questionsList');
+            container.appendChild(clone);
+            updateQuestionNumbers();
+            addAnswer(container.lastElementChild.querySelector('.answer-list'));
+        }
+
+        function removeQuestion(button) {
+            button.closest('.question-item').remove();
+            updateQuestionNumbers();
+        }
+
+        function addAnswer(container) {
+            const template = document.getElementById('answerTemplate');
+            const clone = template.content.cloneNode(true);
+            const answerList = container.closest('.answers-container').querySelector('.answer-list');
+            answerList.appendChild(clone);
+            updateAnswerRadioGroups();
+        }
+
+        function removeAnswer(button) {
+            const answerItem = button.closest('.answer-item');
+            const answerList = answerItem.closest('.answer-list');
+            if (answerList.children.length > 1) {
+                answerItem.remove();
+                updateAnswerRadioGroups();
+            } else {
+                showError('Each question must have at least one answer');
+            }
+        }
+
+        function updateQuestionNumbers() {
+            document.querySelectorAll('.question-number').forEach((span, index) => {
+                span.textContent = index + 1;
+            });
+        }
+
+        function updateAnswerRadioGroups() {
+            document.querySelectorAll('.question-item').forEach((question, qIndex) => {
+                question.querySelectorAll('.correct-answer').forEach(radio => {
+                    radio.name = `correct_${qIndex}`;
+                });
+            });
+        }
+
+        function collectQuestions() {
+            const questions = [];
+            document.querySelectorAll('.question-item').forEach(questionEl => {
+                const question = {
+                    text: questionEl.querySelector('.question-text').value,
+                    answers: []
+                };
+
+                questionEl.querySelectorAll('.answer-item').forEach(answerEl => {
+                    question.answers.push({
+                        text: answerEl.querySelector('.answer-text').value,
+                        isCorrect: answerEl.querySelector('.correct-answer').checked
+                    });
+                });
+
+                questions.push(question);
+            });
+            return questions;
+        }
+
+        function loadExistingQuestions(questions) {
+            questions.forEach(question => {
+                addQuestion();
+                const questionEl = document.querySelector('.question-item:last-child');
+                questionEl.querySelector('.question-text').value = question.text;
+                
+                const answerList = questionEl.querySelector('.answer-list');
+                answerList.innerHTML = ''; // Clear default answer
+                
+                question.answers.forEach(answer => {
+                    addAnswer(answerList);
+                    const answerEl = answerList.querySelector('.answer-item:last-child');
+                    answerEl.querySelector('.answer-text').value = answer.text;
+                    answerEl.querySelector('.correct-answer').checked = answer.isCorrect;
+                });
+            });
+        }
+
+        function showSuccess(message) {
+            const alert = document.getElementById('alertSuccess');
+            alert.textContent = message;
+            alert.classList.remove('d-none');
+            setTimeout(() => alert.classList.add('d-none'), 3000);
+        }
+
+        function showError(message) {
+            const alert = document.getElementById('alertError');
+            alert.textContent = message;
+            alert.classList.remove('d-none');
+            setTimeout(() => alert.classList.add('d-none'), 3000);
+        }
+    </script>
 </body>
 </html>

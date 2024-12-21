@@ -4,7 +4,6 @@ import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.enums.ContentStatus;
-import funix.sloc_system.repository.CategoryRepository;
 import funix.sloc_system.repository.ChapterRepository;
 import funix.sloc_system.repository.CourseRepository;
 import funix.sloc_system.repository.TopicRepository;
@@ -22,8 +21,6 @@ public class ApplicationUtil {
     private CourseRepository courseRepository;
     @Autowired
     private ChapterRepository chapterRepository;
-    @Autowired
-    private CategoryRepository categoryRepository;
 
     public Topic findNextTopic(Long topicId){
         Topic currentTopic = topicRepository.findById(topicId)

@@ -15,7 +15,7 @@
     <p th:text="${successMessage}" style="color: blue;"></p>
 </div>
 
-<form th:action="@{/instructor/course/edit/{id}/submit(id=${course.id})}"
+<form th:action="@{/instructor/course/{id}/submit(id=${course.id})}"
       th:object="${course}" method="post" enctype="multipart/form-data">
     <input type="hidden" th:field="*{id}"/>
 

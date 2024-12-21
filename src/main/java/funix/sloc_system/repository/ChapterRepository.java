@@ -19,4 +19,6 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long> {
     List<Chapter> findByCourseIdOrderBySequence(Long courseId);
 
     List<Chapter> findByCourseIdAndContentStatus(Long courseId, ContentStatus status);
+
+    Optional<Chapter> findByTopicsId(Long topicId);
 }
