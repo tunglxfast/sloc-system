@@ -16,6 +16,7 @@ public class ChapterDTO {
     private Long id;
     private String title;
     private int sequence;
+    private Long courseId;
     @JsonIgnore
     private List<TopicDTO> topics;
     private String contentStatus;

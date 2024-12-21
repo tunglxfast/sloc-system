@@ -83,8 +83,12 @@ public class CourseMapper {
         }
         course.setStartDate(dto.getStartDate());
         course.setEndDate(dto.getEndDate());
-        course.setContentStatus(ContentStatus.valueOf(dto.getContentStatus()));
-        course.setApprovalStatus(ApprovalStatus.valueOf(dto.getApprovalStatus()));
+        if (dto.getContentStatus() != null) {
+            course.setContentStatus(ContentStatus.valueOf(dto.getContentStatus()));
+        }
+        if (dto.getApprovalStatus() != null) {
+            course.setApprovalStatus(ApprovalStatus.valueOf(dto.getApprovalStatus()));
+        }
         course.setRejectReason(dto.getRejectReason());
         course.setCreatedAt(dto.getCreatedAt());
         course.setUpdatedAt(dto.getUpdatedAt());
