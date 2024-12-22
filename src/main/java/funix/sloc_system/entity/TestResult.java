@@ -26,7 +26,7 @@ public class TestResult {
 
     private Integer participationCount;
     @Column(nullable = false)
-    private String testType;
+    private String testType; // Exam or Quiz
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -52,5 +52,29 @@ public class TestResult {
         this.testType = testType.toString();
         this.user = user;
         this.topic = topic;
+    }
+
+    public void updateWithOtherTestResult(TestResult updatedTestResult) {
+        if (updatedTestResult.getHighestScore() != null) {
+            this.highestScore = updatedTestResult.getHighestScore();
+        }
+        if (updatedTestResult.getLatestScore() != null) {
+            this.latestScore = updatedTestResult.getLatestScore();
+        }
+        if (updatedTestResult.getPassed() != null) {
+            this.passed = updatedTestResult.getPassed();
+        }
+        if (updatedTestResult.getParticipationCount() != null) {
+            this.participationCount = updatedTestResult.getParticipationCount();
+        }
+        if (updatedTestResult.getTestType() != null) {
+            this.testType = updatedTestResult.getTestType();
+        }
+        if (updatedTestResult.getUser() != null) {
+            this.user = updatedTestResult.getUser();
+        }
+        if (updatedTestResult.getTopic() != null) {
+            this.topic = updatedTestResult.getTopic();
+        }
     }
 }

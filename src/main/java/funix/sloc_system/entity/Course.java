@@ -1,5 +1,6 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.enums.ApprovalStatus;
 import funix.sloc_system.enums.ContentStatus;
 import jakarta.persistence.*;
@@ -66,5 +67,56 @@ public class Course {
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.PERSIST)
     private Set<Enrollment> enrollments = new HashSet<>();
+
+    public void updateWithOtherCourse(Course updatedCourse) {
+        if (updatedCourse.getTitle() != null) {
+            this.title = updatedCourse.getTitle();
+        }
+        if (updatedCourse.getDescription() != null) {
+            this.description = updatedCourse.getDescription();
+        }
+        if (updatedCourse.getThumbnailUrl() != null) {
+            this.thumbnailUrl = updatedCourse.getThumbnailUrl();
+        }
+        if (updatedCourse.getCategory() != null) {
+            this.category = updatedCourse.getCategory();
+        }
+        if (updatedCourse.getInstructor() != null) {
+            this.instructor = updatedCourse.getInstructor();
+        }
+        if (updatedCourse.getCreatedBy() != null) {
+            this.createdBy = updatedCourse.getCreatedBy();
+        }
+        if (updatedCourse.getLastUpdatedBy() != null) {
+            this.lastUpdatedBy = updatedCourse.getLastUpdatedBy();
+        }
+        if (updatedCourse.getStartDate() != null) {
+            this.startDate = updatedCourse.getStartDate();
+        }
+        if (updatedCourse.getEndDate() != null) {
+            this.endDate = updatedCourse.getEndDate();
+        }
+        if (updatedCourse.getContentStatus() != null) {
+            this.contentStatus = updatedCourse.getContentStatus();
+        }
+        if (updatedCourse.getApprovalStatus() != null) {
+            this.approvalStatus = updatedCourse.getApprovalStatus();
+        }
+        if (updatedCourse.getRejectReason() != null) {
+            this.rejectReason = updatedCourse.getRejectReason();
+        }
+        if (updatedCourse.getCreatedAt() != null) {
+            this.createdAt = updatedCourse.getCreatedAt();
+        }
+        if (updatedCourse.getUpdatedAt() != null) {
+            this.updatedAt = updatedCourse.getUpdatedAt();
+        }
+        if (updatedCourse.getChapters() != null) {
+            this.chapters = updatedCourse.getChapters();
+        }
+        if (updatedCourse.getEnrollments() != null) {
+            this.enrollments = updatedCourse.getEnrollments();
+        }
+    }
 
 }

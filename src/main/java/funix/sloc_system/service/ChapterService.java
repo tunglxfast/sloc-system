@@ -141,16 +141,25 @@ public class ChapterService {
     public void saveChapterChanges(ChapterDTO chapterDTO, Long instructorId) throws IOException {
         Chapter chapter = chapterRepository.findById(chapterDTO.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Chapter not found"));
-        
         Course course = chapter.getCourse();
-        if (course.getContentStatus() == ContentStatus.DRAFT) {
-            // Save directly to main table
+        if (chapter.getContentStatus() == ContentStatus.DRAFT) {
+            int oldChapterSequence = chapter.getSequence();
+            // Update chapter using entity method
             Chapter updatedChapter = chapterMapper.toEntity(chapterDTO);
-            updatedChapter.setCourse(course);
-            chapterRepository.save(updatedChapter);
+            chapter.updateWithOtherChapter(updatedChapter);
+            // Handle sequence change if needed
+            if (oldChapterSequence != chapterDTO.getSequence()) {
+                // Validate new sequence
+                int maxSequence = chapterRepository.findByCourseId(course.getId()).size();
+                int newSequence = Math.max(1, Math.min(chapterDTO.getSequence(), maxSequence));
+                
+                // Reorder chapters if sequence changed
+                reorderChapters(course.getId(), chapter, newSequence);
+            }
+            chapterRepository.save(chapter);
         } else {
             // Save to temporary table
-            contentChangeService.saveEditingChapter(chapterDTO, ContentAction.UPDATE, instructorId);
+            contentChangeService.saveEditingChapter(chapter, chapterDTO, ContentAction.UPDATE, instructorId);
         }
     }
 
@@ -161,6 +170,16 @@ public class ChapterService {
     public ChapterDTO addTopic(Long chapterId, TopicDTO topicDTO) {
         Chapter chapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new IllegalArgumentException("Chapter not found"));
+        
+        // Set sequence to last + 1
+        List<Topic> existingTopics = chapter.getTopics();
+        int nextSequence = existingTopics.isEmpty() ? 1 : 
+            existingTopics.stream()
+                .mapToInt(Topic::getSequence)
+                .max()
+                .getAsInt() + 1;
+        
+        topicDTO.setSequence(nextSequence);
         
         Topic newTopic = topicMapper.toEntity(topicDTO);
         newTopic.setChapter(chapter);
@@ -176,5 +195,43 @@ public class ChapterService {
     public List<ChapterDTO> getChaptersByCourseIdAsDTO(Long courseId) {
         List<Chapter> chapters = chapterRepository.findByCourseIdOrderBySequence(courseId);
         return chapterMapper.toDTO(chapters);
+    }
+
+    /**
+     * Reorder chapters after sequence change
+     */
+    @Transactional
+    private void reorderChapters(Long courseId, Chapter modifiedChapter, int newSequence) {
+        int oldSequence = modifiedChapter.getSequence();
+        
+        // Temporarily move chapter to a sequence outside the range (total chapters + 1)
+        int tempSequence = chapterRepository.findByCourseId(courseId).size() + 1;
+        modifiedChapter.setSequence(tempSequence);
+        chapterRepository.save(modifiedChapter);
+        
+        // Get all chapters that need to be shifted
+        List<Chapter> chapters = chapterRepository.findByCourseId(courseId);
+        
+        if (newSequence < oldSequence) {
+            // Moving up: shift chapters between new and old position down
+            chapters.stream()
+                .filter(c -> c.getSequence() >= newSequence && c.getSequence() < oldSequence)
+                .forEach(c -> {
+                    c.setSequence(c.getSequence() + 1);
+                    chapterRepository.save(c);
+                });
+        } else {
+            // Moving down: shift chapters between old and new position up
+            chapters.stream()
+                .filter(c -> c.getSequence() > oldSequence && c.getSequence() <= newSequence)
+                .forEach(c -> {
+                    c.setSequence(c.getSequence() - 1);
+                    chapterRepository.save(c);
+                });
+        }
+        
+        // Set the modified chapter to its new sequence
+        modifiedChapter.setSequence(newSequence);
+        chapterRepository.save(modifiedChapter);
     }
 }

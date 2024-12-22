@@ -55,4 +55,22 @@ public class User {
     public Set<String> getStringRoles() {
         return this.roles.stream().map(Role::getName).collect(Collectors.toSet());
     }
+
+    public void updateWithOtherUser(User updatedUser) {
+        if (updatedUser.getUsername() != null) {
+            this.username = updatedUser.getUsername();
+        }
+        if (updatedUser.getEmail() != null) {
+            this.email = updatedUser.getEmail();
+        }
+        if (updatedUser.getFullName() != null) {
+            this.fullName = updatedUser.getFullName();
+        }
+        if (updatedUser.getPassword() != null) {
+            this.password = updatedUser.getPassword();
+        }
+        if (updatedUser.getRoles() != null) {
+            this.roles = updatedUser.getRoles();
+        }
+    }
 }

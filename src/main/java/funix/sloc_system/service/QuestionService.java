@@ -62,20 +62,63 @@ public class QuestionService {
         Question question = questionRepository.findById(questionDTO.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Question not found"));
         
-        Course course = question.getTopic().getChapter().getCourse();
-        if (course.getContentStatus() == ContentStatus.DRAFT) {
-            // Save directly to main table
+        if (question.getContentStatus() == ContentStatus.DRAFT) {
+            int oldQuestionSequence = question.getSequence();
+            // Update question using entity method
             Question updatedQuestion = questionMapper.toEntity(questionDTO);
-            updatedQuestion.setTopic(question.getTopic());
-            // Set question reference for answers
-            if (updatedQuestion.getAnswers() != null) {
-                updatedQuestion.getAnswers().forEach(answer -> answer.setQuestion(updatedQuestion));
+            question.updateWithOtherQuestion(updatedQuestion);
+            // Handle sequence change if needed
+            if (oldQuestionSequence != questionDTO.getSequence()) {
+                // Validate new sequence
+                int maxSequence = questionRepository.findByTopicId(question.getTopic().getId()).size();
+                int newSequence = Math.max(1, Math.min(questionDTO.getSequence(), maxSequence));
+                
+                // Reorder questions if sequence changed
+                reorderQuestions(question.getTopic().getId(), question, newSequence);
             }
-            questionRepository.save(updatedQuestion);
+            questionRepository.save(question);
         } else {
             // Save to temporary table
-            contentChangeService.saveEditingQuestion(questionDTO, ContentAction.UPDATE, instructorId);
+            contentChangeService.saveEditingQuestion(question, questionDTO, ContentAction.UPDATE, instructorId);
         }
+    }
+
+    /**
+     * Reorder questions after sequence change
+     */
+    @Transactional
+    private void reorderQuestions(Long topicId, Question modifiedQuestion, int newSequence) {
+        int oldSequence = modifiedQuestion.getSequence();
+        
+        // Temporarily move question to a sequence outside the range (total questions + 1)
+        int tempSequence = questionRepository.findByTopicId(topicId).size() + 1;
+        modifiedQuestion.setSequence(tempSequence);
+        questionRepository.save(modifiedQuestion);
+        
+        // Get all questions that need to be shifted
+        List<Question> questions = questionRepository.findByTopicId(topicId);
+        
+        if (newSequence < oldSequence) {
+            // Moving up: shift questions between new and old position down
+            questions.stream()
+                .filter(q -> q.getSequence() >= newSequence && q.getSequence() < oldSequence)
+                .forEach(q -> {
+                    q.setSequence(q.getSequence() + 1);
+                    questionRepository.save(q);
+                });
+        } else {
+            // Moving down: shift questions between old and new position up
+            questions.stream()
+                .filter(q -> q.getSequence() > oldSequence && q.getSequence() <= newSequence)
+                .forEach(q -> {
+                    q.setSequence(q.getSequence() - 1);
+                    questionRepository.save(q);
+                });
+        }
+        
+        // Set the modified question to its new sequence
+        modifiedQuestion.setSequence(newSequence);
+        questionRepository.save(modifiedQuestion);
     }
 }
 

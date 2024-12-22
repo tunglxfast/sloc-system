@@ -1,5 +1,7 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.dto.QuestionDTO;
+import funix.sloc_system.dto.AnswerDTO;
 import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.QuestionType;
 import jakarta.persistence.*;
@@ -23,7 +25,7 @@ public class Question {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    private QuestionType questionType; // MULTIPLE_CHOICE, TRUE_FALSE
+    private QuestionType questionType; // CHOICE_MANY, CHOICE_ONE
 
     private int sequence;
 
@@ -36,4 +38,25 @@ public class Question {
 
     @Enumerated(EnumType.STRING)
     private ContentStatus contentStatus = ContentStatus.DRAFT;
+
+    public void updateWithOtherQuestion(Question updatedQuestion) {
+        if (updatedQuestion.getContent() != null) {
+            this.content = updatedQuestion.getContent();
+        }
+        if (updatedQuestion.getQuestionType() != null) {
+            this.questionType = updatedQuestion.getQuestionType();
+        }
+        if (updatedQuestion.getSequence() != 0) {
+            this.sequence = updatedQuestion.getSequence();
+        }
+        if (updatedQuestion.getTopic() != null) {
+            this.topic = updatedQuestion.getTopic();
+        }
+        if (updatedQuestion.getAnswers() != null) {
+            this.answers = updatedQuestion.getAnswers();
+        }
+        if (updatedQuestion.getContentStatus() != null) {
+            this.contentStatus = updatedQuestion.getContentStatus();
+        }
+    }
 }

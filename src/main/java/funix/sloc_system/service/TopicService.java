@@ -4,11 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.entity.Course;
+import funix.sloc_system.entity.Question;
+import funix.sloc_system.entity.Answer;
 import funix.sloc_system.dto.TopicDTO;
+import funix.sloc_system.dto.QuestionDTO;
+import funix.sloc_system.dto.AnswerDTO;
 import funix.sloc_system.mapper.TopicMapper;
 import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.ContentAction;
 import funix.sloc_system.enums.EntityType;
+import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.repository.ChapterRepository;
 import funix.sloc_system.repository.TopicRepository;
 
@@ -78,6 +83,44 @@ public class TopicService {
     }
 
     /**
+     * Reorder topics after sequence change
+     */
+    @Transactional
+    private void reorderTopics(Long chapterId, Topic modifiedTopic, int newSequence) {
+        int oldSequence = modifiedTopic.getSequence();
+        
+        // Temporarily move topic to a sequence outside the range (total topics + 1)
+        int tempSequence = topicRepository.findByChapterId(chapterId).size() + 1;
+        modifiedTopic.setSequence(tempSequence);
+        topicRepository.save(modifiedTopic);
+        
+        // Get all topics that need to be shifted
+        List<Topic> topics = topicRepository.findByChapterId(chapterId);
+        
+        if (newSequence < oldSequence) {
+            // Moving up: shift topics between new and old position down
+            topics.stream()
+                .filter(t -> t.getSequence() >= newSequence && t.getSequence() < oldSequence)
+                .forEach(t -> {
+                    t.setSequence(t.getSequence() + 1);
+                    topicRepository.save(t);
+                });
+        } else {
+            // Moving down: shift topics between old and new position up
+            topics.stream()
+                .filter(t -> t.getSequence() > oldSequence && t.getSequence() <= newSequence)
+                .forEach(t -> {
+                    t.setSequence(t.getSequence() - 1);
+                    topicRepository.save(t);
+                });
+        }
+        
+        // Set the modified topic to its new sequence
+        modifiedTopic.setSequence(newSequence);
+        topicRepository.save(modifiedTopic);
+    }
+
+    /**
      * Save topic changes based on course status
      */
     @Transactional
@@ -85,15 +128,24 @@ public class TopicService {
         Topic topic = topicRepository.findById(topicDTO.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Topic not found"));
         
-        Course course = topic.getChapter().getCourse();
-        if (course.getContentStatus() == ContentStatus.DRAFT) {
-            // Save directly to main table
+        if (topic.getContentStatus() == ContentStatus.DRAFT) {
+            int oldTopicSequence = topic.getSequence();
+            // Update topic using entity method
             Topic updatedTopic = topicMapper.toEntity(topicDTO);
-            updatedTopic.setChapter(topic.getChapter());
-            topicRepository.save(updatedTopic);
+            topic.updateWithOtherTopic(updatedTopic);
+            // Handle sequence change if needed
+            if (oldTopicSequence != topicDTO.getSequence()) {
+                // Validate new sequence
+                int maxSequence = topicRepository.findByChapterId(topic.getChapter().getId()).size();
+                int newSequence = Math.max(1, Math.min(topicDTO.getSequence(), maxSequence));
+                
+                // Reorder topics if sequence changed
+                reorderTopics(topic.getChapter().getId(), topic, newSequence);
+            }            
+            topicRepository.save(topic);
         } else {
             // Save to temporary table
-            contentChangeService.saveEditingTopic(topicDTO, ContentAction.UPDATE, instructorId);
+            contentChangeService.saveEditingTopic(topic, topicDTO, ContentAction.UPDATE, instructorId);
         }
     }
 }

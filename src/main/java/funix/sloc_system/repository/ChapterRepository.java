@@ -7,12 +7,11 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Repository
 public interface ChapterRepository extends JpaRepository<Chapter, Long> {
 
-    Set<Chapter> findByCourseId(Long courseId);
+    List<Chapter> findByCourseId(Long courseId);
 
     Optional<Chapter> findByCourseIdAndSequence(Long courseId, int sequence);
 

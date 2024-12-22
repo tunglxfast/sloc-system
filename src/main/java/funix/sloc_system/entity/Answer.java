@@ -1,5 +1,6 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.dto.AnswerDTO;
 import funix.sloc_system.enums.ContentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,4 +28,17 @@ public class Answer {
 
     @Enumerated(EnumType.STRING)
     private ContentStatus contentStatus = ContentStatus.DRAFT;
+
+    public void updateWithOtherAnswer(Answer updatedAnswer) {
+        if (updatedAnswer.getContent() != null) {
+            this.content = updatedAnswer.getContent();
+        }
+        if (updatedAnswer.getQuestion() != null) {
+            this.question = updatedAnswer.getQuestion();
+        }
+        if (updatedAnswer.getContentStatus() != null) {
+            this.contentStatus = updatedAnswer.getContentStatus();
+        }
+        this.isCorrect = updatedAnswer.isCorrect();
+    }
 }

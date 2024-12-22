@@ -53,4 +53,45 @@ public class Topic {
 
     @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Question> questions;
+
+
+    public void updateWithOtherTopic(Topic updatedTopic) {
+        if (updatedTopic.getTitle() != null) {
+            this.title = updatedTopic.getTitle();
+        }
+        if (updatedTopic.getDescription() != null) {
+            this.description = updatedTopic.getDescription();
+        }
+        if (updatedTopic.getTopicType() != null) {
+            this.topicType = updatedTopic.getTopicType();
+        }
+        if (updatedTopic.getSequence() != 0) {
+            this.sequence = updatedTopic.getSequence();
+        }
+        if (updatedTopic.getChapter() != null) {
+            this.chapter = updatedTopic.getChapter();
+        }
+        if (updatedTopic.getContentStatus() != null) {
+            this.contentStatus = updatedTopic.getContentStatus();
+        }
+        if (updatedTopic.getFileUrl() != null) {
+            this.fileUrl = updatedTopic.getFileUrl();
+        }
+        if (updatedTopic.getVideoUrl() != null) {
+            this.videoUrl = updatedTopic.getVideoUrl();
+        }
+        if (updatedTopic.getPassScore() != null) {
+            this.passScore = updatedTopic.getPassScore();
+        }
+        if (updatedTopic.getTotalScore() != null) {
+            this.totalScore = updatedTopic.getTotalScore();
+        }
+        if (updatedTopic.getTimeLimit() != null) {
+            this.timeLimit = updatedTopic.getTimeLimit();
+        }
+        if (updatedTopic.getQuestions() != null) {
+            this.questions = updatedTopic.getQuestions();
+        }
+    }
+        
 }

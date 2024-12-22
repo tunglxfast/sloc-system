@@ -91,7 +91,8 @@ CREATE TABLE topic (
     pass_score INT,
     total_score INT,
     time_limit INT,
-    FOREIGN KEY (chapter_id) REFERENCES chapter(id)
+    FOREIGN KEY (chapter_id) REFERENCES chapter(id),
+    UNIQUE KEY uk_chapter_sequence (chapter_id, sequence)
 );
 
 CREATE TABLE question (

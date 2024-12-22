@@ -2,7 +2,9 @@ package funix.sloc_system.mapper;
 
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.Topic;
+import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.TopicType;
+import funix.sloc_system.repository.ChapterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +16,8 @@ public class TopicMapper {
     
     @Autowired
     private QuestionMapper questionMapper;
+    @Autowired
+    private ChapterRepository chapterRepository;
 
     public TopicDTO toDTO(Topic topic) {
         if (topic == null) {
@@ -23,11 +27,33 @@ public class TopicMapper {
         TopicDTO dto = new TopicDTO();
         dto.setId(topic.getId());
         dto.setTitle(topic.getTitle());
+        dto.setDescription(topic.getDescription());
         dto.setTopicType(topic.getTopicType().toString());
         dto.setSequence(topic.getSequence());
+        dto.setChapterId(topic.getChapter() != null ? topic.getChapter().getId() : null);
+        dto.setContentStatus(topic.getContentStatus().toString());
         
-        // Map questions
-        dto.setQuestions(questionMapper.toDTO(topic.getQuestions()));
+        // Map type-specific fields
+        switch (topic.getTopicType()) {
+            case VIDEO:
+                dto.setVideoUrl(topic.getVideoUrl());
+                break;
+            case READING:
+                dto.setFileUrl(topic.getFileUrl());
+                break;
+            case QUIZ:
+            case EXAM:
+                dto.setPassScore(topic.getPassScore());
+                dto.setTotalScore(topic.getTotalScore());
+                if (topic.getTopicType() == TopicType.EXAM) {
+                    dto.setTimeLimit(topic.getTimeLimit());
+                }
+                // Map questions
+                if (topic.getQuestions() != null) {
+                    dto.setQuestions(questionMapper.toDTO(topic.getQuestions()));
+                }
+                break;
+        }
         
         return dto;
     }
@@ -40,13 +66,28 @@ public class TopicMapper {
         Topic topic = new Topic();
         topic.setId(dto.getId());
         topic.setTitle(dto.getTitle());
-        topic.setSequence(dto.getSequence());
+        topic.setDescription(dto.getDescription());
         
-        // Convert string topicType to enum
         if (dto.getTopicType() != null) {
             topic.setTopicType(TopicType.valueOf(dto.getTopicType()));
         }
         
+        topic.setSequence(dto.getSequence());
+
+        if (dto.getChapterId() != null) {
+            topic.setChapter(chapterRepository.findById(dto.getChapterId()).orElse(null));
+        }
+
+        if (dto.getContentStatus() != null) {
+            topic.setContentStatus(ContentStatus.valueOf(dto.getContentStatus()));
+        }
+
+        topic.setFileUrl(dto.getFileUrl());
+        topic.setVideoUrl(dto.getVideoUrl());
+        topic.setPassScore(dto.getPassScore());
+        topic.setTotalScore(dto.getTotalScore());
+        topic.setTimeLimit(dto.getTimeLimit());
+
         // Map questions if present
         if (dto.getQuestions() != null) {
             topic.setQuestions(questionMapper.toEntity(dto.getQuestions()));

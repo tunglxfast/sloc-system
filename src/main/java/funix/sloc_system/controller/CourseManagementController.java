@@ -101,7 +101,7 @@ public class CourseManagementController {
             courseDTO.updateCourseDTO(courseUpdateValues);
             
             // Save updates
-            courseService.saveUpdateCourse(courseDTO, instructorId, file, categoryId);
+            courseService.saveUpdateCourse(courseId, courseDTO, instructorId, file, categoryId);
             
             // Handle different actions
             if ("Submit".equals(action)) {

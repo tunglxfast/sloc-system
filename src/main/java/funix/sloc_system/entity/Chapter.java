@@ -1,5 +1,6 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.enums.ContentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -33,5 +34,22 @@ public class Chapter {
 
     @Enumerated(EnumType.STRING)
     private ContentStatus contentStatus = ContentStatus.DRAFT;
-}
 
+    public void updateWithOtherChapter(Chapter updatedChapter) {
+        if (updatedChapter.getTitle() != null) {
+            this.title = updatedChapter.getTitle();
+        }
+        if (updatedChapter.getSequence() != 0) {
+            this.sequence = updatedChapter.getSequence();
+        }
+        if (updatedChapter.getCourse() != null) {
+            this.course = updatedChapter.getCourse();
+        }
+        if (updatedChapter.getTopics() != null) {
+            this.topics = updatedChapter.getTopics();
+        }
+        if (updatedChapter.getContentStatus() != null) {
+            this.contentStatus = updatedChapter.getContentStatus();
+        }
+    }
+}

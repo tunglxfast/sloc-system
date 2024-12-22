@@ -2,6 +2,9 @@ package funix.sloc_system.mapper;
 
 import funix.sloc_system.dto.EnrollmentDTO;
 import funix.sloc_system.entity.Enrollment;
+import funix.sloc_system.repository.CourseRepository;
+import funix.sloc_system.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +16,10 @@ public class EnrollmentMapper {
     
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private CourseRepository courseRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     public EnrollmentDTO toDTO(Enrollment enrollment) {
         if (enrollment == null) {
@@ -35,8 +42,8 @@ public class EnrollmentMapper {
 
         Enrollment enrollment = new Enrollment();
         enrollment.setId(dto.getId());
-        enrollment.setUser(userMapper.toEntity(dto.getUser()));
-        // Note: Course should be set separately as we only have the ID
+        enrollment.setUser(userRepository.findById(dto.getUser().getId()).orElse(null));
+        enrollment.setCourse(courseRepository.findById(dto.getCourseId()).orElse(null));
         enrollment.setEnrollmentDate(dto.getEnrollmentDate());
         
         return enrollment;

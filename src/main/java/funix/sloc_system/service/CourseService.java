@@ -17,8 +17,6 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.Optional;
 
 @Service
@@ -89,8 +87,27 @@ public class CourseService {
             throw new IllegalArgumentException("Course must have at least one chapter before submission.");
         }
 
+        // Update course status
         course.setContentStatus(ContentStatus.READY_TO_REVIEW);
         course.setApprovalStatus(ApprovalStatus.PENDING);
+
+        // Update child entities status
+        for (Chapter chapter : course.getChapters()) {
+            chapter.setContentStatus(ContentStatus.READY_TO_REVIEW);
+            for (Topic topic : chapter.getTopics()) {
+                topic.setContentStatus(ContentStatus.READY_TO_REVIEW);
+                if (topic.getQuestions() != null) {
+                    for (Question question : topic.getQuestions()) {
+                        question.setContentStatus(ContentStatus.READY_TO_REVIEW);
+                        if (question.getAnswers() != null) {
+                            question.getAnswers().forEach(answer -> 
+                                answer.setContentStatus(ContentStatus.READY_TO_REVIEW));
+                        }
+                    }
+                }
+            }
+        }
+
         courseRepository.save(course);
     }
 
@@ -99,8 +116,75 @@ public class CourseService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
 
+        // Update course status
         course.setContentStatus(ContentStatus.PUBLISHED_EDITING);
         course.setApprovalStatus(ApprovalStatus.PENDING);
+
+        // Get all changes from temporary table
+        List<ContentChangeTemporary> allChanges = contentChangeService.getAllCourseChanges(course);
+
+        // Update child entities status based on their change action
+        for (Chapter chapter : course.getChapters()) {
+            Optional<ContentChangeTemporary> chapterChange = allChanges.stream()
+                .filter(change -> change.getEntityType() == EntityType.CHAPTER 
+                    && change.getEntityId().equals(chapter.getId()))
+                .findFirst();
+
+            if (chapterChange.isPresent()) {
+                ContentAction action = chapterChange.get().getAction();
+                if (action == ContentAction.CREATE) {
+                    chapter.setContentStatus(ContentStatus.READY_TO_REVIEW);
+                } else {
+                    // Both UPDATE and DELETE should change to PUBLISHED_EDITING
+                    chapter.setContentStatus(ContentStatus.PUBLISHED_EDITING);
+                }
+            }
+
+            for (Topic topic : chapter.getTopics()) {
+                Optional<ContentChangeTemporary> topicChange = allChanges.stream()
+                    .filter(change -> change.getEntityType() == EntityType.TOPIC 
+                        && change.getEntityId().equals(topic.getId()))
+                    .findFirst();
+
+                if (topicChange.isPresent()) {
+                    ContentAction action = topicChange.get().getAction();
+                    if (action == ContentAction.CREATE) {
+                        topic.setContentStatus(ContentStatus.READY_TO_REVIEW);
+                    } else {
+                        // Both UPDATE and DELETE should change to PUBLISHED_EDITING
+                        topic.setContentStatus(ContentStatus.PUBLISHED_EDITING);
+                    }
+                }
+
+                if (topic.getQuestions() != null) {
+                    for (Question question : topic.getQuestions()) {
+                        Optional<ContentChangeTemporary> questionChange = allChanges.stream()
+                            .filter(change -> change.getEntityType() == EntityType.QUESTION 
+                                && change.getEntityId().equals(question.getId()))
+                            .findFirst();
+
+                        if (questionChange.isPresent()) {
+                            ContentAction action = questionChange.get().getAction();
+                            if (action == ContentAction.CREATE) {
+                                question.setContentStatus(ContentStatus.READY_TO_REVIEW);
+                                if (question.getAnswers() != null) {
+                                    question.getAnswers().forEach(answer -> 
+                                        answer.setContentStatus(ContentStatus.READY_TO_REVIEW));
+                                }
+                            } else {
+                                // Both UPDATE and DELETE should change to PUBLISHED_EDITING
+                                question.setContentStatus(ContentStatus.PUBLISHED_EDITING);
+                                if (question.getAnswers() != null) {
+                                    question.getAnswers().forEach(answer -> 
+                                        answer.setContentStatus(ContentStatus.PUBLISHED_EDITING));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         courseRepository.save(course);
     }
 
@@ -124,11 +208,13 @@ public class CourseService {
 
         // If this is a new course or editing an existing course
         if (course.getContentStatus() == ContentStatus.READY_TO_REVIEW) {
-            course.setContentStatus(ContentStatus.PUBLISHED);
+            // Update course and all child entities to PUBLISHED
+            updateContentStatusRecursively(course, ContentStatus.PUBLISHED);
         } else if (course.getContentStatus() == ContentStatus.PUBLISHED_EDITING) {
             // Apply changes from temporary table to main table
             applyTemporaryChanges(course);
-            course.setContentStatus(ContentStatus.PUBLISHED);
+            // Update course and modified child entities to PUBLISHED
+            updateContentStatusRecursively(course, ContentStatus.PUBLISHED);
         }
 
         course.setApprovalStatus(ApprovalStatus.APPROVED);
@@ -148,9 +234,11 @@ public class CourseService {
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
 
         if (course.getContentStatus() == ContentStatus.READY_TO_REVIEW) {
-            course.setContentStatus(ContentStatus.DRAFT);
+            // Update course and all child entities to DRAFT
+            updateContentStatusRecursively(course, ContentStatus.DRAFT);
         } else if (course.getContentStatus() == ContentStatus.PUBLISHED_EDITING) {
-            course.setContentStatus(ContentStatus.PUBLISHED);
+            // Update course and modified child entities to PUBLISHED
+            updateContentStatusRecursively(course, ContentStatus.PUBLISHED);
         }
 
         course.setApprovalStatus(ApprovalStatus.REJECTED);
@@ -162,82 +250,125 @@ public class CourseService {
     }
 
     /**
-     * Apply changes from temporary table to main entities
+     * Recursively update content status of course and its child entities
      */
-    private void applyTemporaryChanges(Course course) {
-        // Apply course changes
-        Optional<ContentChangeTemporary> courseChanges = contentChangeService.getEntityEditing(
-                EntityType.COURSE, course.getId());
+    private void updateContentStatusRecursively(Course course, ContentStatus newStatus) {
+        course.setContentStatus(newStatus);
         
-        if (courseChanges.isPresent()) {
-            try {
-                CourseDTO courseDTO = objectMapper.readValue(courseChanges.get().getChanges(), CourseDTO.class);
-                Course updatedCourse = courseMapper.toEntity(courseDTO);
-                // Maintain relationships
-                updatedCourse.setInstructor(course.getInstructor());
-                updatedCourse.setCreatedBy(course.getCreatedBy());
-                courseRepository.save(updatedCourse);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to apply course changes", e);
-            }
-        }
-
-        // Apply chapter changes
         for (Chapter chapter : course.getChapters()) {
-            Optional<ContentChangeTemporary> chapterChanges = contentChangeService.getEntityEditing(
-                    EntityType.CHAPTER, chapter.getId());
-            
-            if (chapterChanges.isPresent()) {
-                try {
-                    ChapterDTO chapterDTO = objectMapper.readValue(chapterChanges.get().getChanges(), ChapterDTO.class);
-                    Chapter updatedChapter = chapterMapper.toEntity(chapterDTO);
-                    // Maintain relationship with course
-                    updatedChapter.setCourse(course);
-                    chapterRepository.save(updatedChapter);
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to apply chapter changes", e);
+            // For PUBLISHED_EDITING, only update entities that have changes
+            if (newStatus == ContentStatus.PUBLISHED && course.getContentStatus() == ContentStatus.PUBLISHED_EDITING) {
+                if (contentChangeService.getEntityEditing(EntityType.CHAPTER, chapter.getId()).isPresent()) {
+                    chapter.setContentStatus(newStatus);
                 }
+            } else {
+                chapter.setContentStatus(newStatus);
             }
 
-            // Apply topic changes
             for (Topic topic : chapter.getTopics()) {
-                Optional<ContentChangeTemporary> topicChanges = contentChangeService.getEntityEditing(
-                        EntityType.TOPIC, topic.getId());
-                
-                if (topicChanges.isPresent()) {
-                    try {
-                        TopicDTO topicDTO = objectMapper.readValue(topicChanges.get().getChanges(), TopicDTO.class);
-                        Topic updatedTopic = topicMapper.toEntity(topicDTO);
-                        // Maintain relationship with chapter
-                        updatedTopic.setChapter(chapter);
-                        topicRepository.save(updatedTopic);
-                    } catch (Exception e) {
-                        throw new RuntimeException("Failed to apply topic changes", e);
+                if (newStatus == ContentStatus.PUBLISHED && course.getContentStatus() == ContentStatus.PUBLISHED_EDITING) {
+                    if (contentChangeService.getEntityEditing(EntityType.TOPIC, topic.getId()).isPresent()) {
+                        topic.setContentStatus(newStatus);
                     }
+                } else {
+                    topic.setContentStatus(newStatus);
                 }
 
-                // Apply question changes (including answers)
                 if (topic.getQuestions() != null) {
                     for (Question question : topic.getQuestions()) {
-                        Optional<ContentChangeTemporary> questionChanges = contentChangeService.getEntityEditing(
-                                EntityType.QUESTION, question.getId());
-                        
-                        if (questionChanges.isPresent()) {
-                            try {
-                                QuestionDTO questionDTO = objectMapper.readValue(questionChanges.get().getChanges(), QuestionDTO.class);
-                                Question updatedQuestion = questionMapper.toEntity(questionDTO);
-                                // Maintain relationship with topic
-                                updatedQuestion.setTopic(topic);
-                                // Maintain relationships for answers
-                                if (updatedQuestion.getAnswers() != null) {
-                                    updatedQuestion.getAnswers().forEach(answer -> answer.setQuestion(updatedQuestion));
+                        if (newStatus == ContentStatus.PUBLISHED && course.getContentStatus() == ContentStatus.PUBLISHED_EDITING) {
+                            if (contentChangeService.getEntityEditing(EntityType.QUESTION, question.getId()).isPresent()) {
+                                question.setContentStatus(newStatus);
+                                if (question.getAnswers() != null) {
+                                    question.getAnswers().forEach(answer -> answer.setContentStatus(newStatus));
                                 }
-                                questionRepository.save(updatedQuestion);
-                            } catch (Exception e) {
-                                throw new RuntimeException("Failed to apply question changes", e);
+                            }
+                        } else {
+                            question.setContentStatus(newStatus);
+                            if (question.getAnswers() != null) {
+                                question.getAnswers().forEach(answer -> answer.setContentStatus(newStatus));
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     * Apply changes from temporary table to main entities
+     */
+    private void applyTemporaryChanges(Course course) {
+        // Get all changes for this course and its child entities
+        List<ContentChangeTemporary> allChanges = contentChangeService.getAllCourseChanges(course);
+
+        // First handle deletions to avoid foreign key conflicts
+        for (ContentChangeTemporary change : allChanges) {
+            if (change.getAction() == ContentAction.DELETE) {
+                switch (change.getEntityType()) {
+                    case CHAPTER:
+                        chapterRepository.deleteById(change.getEntityId());
+                        break;
+                    case TOPIC:
+                        topicRepository.deleteById(change.getEntityId());
+                        break;
+                    case QUESTION:
+                        questionRepository.deleteById(change.getEntityId());
+                        break;
+                }
+            }
+        }
+
+        // Then handle updates and creations
+        for (ContentChangeTemporary change : allChanges) {
+            if (change.getAction() != ContentAction.DELETE) {
+                try {
+                    switch (change.getEntityType()) {
+                        case COURSE:
+                            CourseDTO courseDTO = objectMapper.readValue(change.getChanges(), CourseDTO.class);
+                            Course updatedCourse = courseMapper.toEntity(courseDTO);
+                            // Maintain relationships
+                            updatedCourse.setInstructor(course.getInstructor());
+                            updatedCourse.setCreatedBy(course.getCreatedBy());
+                            courseRepository.save(updatedCourse);
+                            break;
+
+                        case CHAPTER:
+                            ChapterDTO chapterDTO = objectMapper.readValue(change.getChanges(), ChapterDTO.class);
+                            Chapter updatedChapter = chapterMapper.toEntity(chapterDTO);
+                            // Maintain relationship with course
+                            updatedChapter.setCourse(course);
+                            chapterRepository.save(updatedChapter);
+                            break;
+
+                        case TOPIC:
+                            TopicDTO topicDTO = objectMapper.readValue(change.getChanges(), TopicDTO.class);
+                            Topic updatedTopic = topicMapper.toEntity(topicDTO);
+                            // Find parent chapter from DTO
+                            Chapter parentChapter = chapterRepository.findById(topicDTO.getChapterId())
+                                .orElseThrow(() -> new RuntimeException("Parent chapter not found"));
+                            // Maintain relationship with chapter
+                            updatedTopic.setChapter(parentChapter);
+                            topicRepository.save(updatedTopic);
+                            break;
+
+                        case QUESTION:
+                            QuestionDTO questionDTO = objectMapper.readValue(change.getChanges(), QuestionDTO.class);
+                            Question updatedQuestion = questionMapper.toEntity(questionDTO);
+                            // Find parent topic from DTO
+                            Topic parentTopic = topicRepository.findById(questionDTO.getTopicId())
+                                .orElseThrow(() -> new RuntimeException("Parent topic not found"));
+                            // Maintain relationship with topic
+                            updatedQuestion.setTopic(parentTopic);
+                            // Maintain relationships for answers
+                            if (updatedQuestion.getAnswers() != null) {
+                                updatedQuestion.getAnswers().forEach(answer -> answer.setQuestion(updatedQuestion));
+                            }
+                            questionRepository.save(updatedQuestion);
+                            break;
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to apply changes for " + change.getEntityType(), e);
                 }
             }
         }
@@ -321,94 +452,37 @@ public class CourseService {
 
     /**
      * Update course based on content status:
-     * - If course is not published (DRAFT) or new chapters/topics are added to published course: save directly to main table
+     * - If course is not published (DRAFT): save directly to main table
      * - If course is published and editing existing content: save to temp table
      */
     @Transactional
-    public void saveUpdateCourse(CourseDTO courseDTO, Long instructorId, MultipartFile file, Long categoryId) throws IOException {
+    public void saveUpdateCourse(Long courseId, CourseDTO courseDTO, Long instructorId, MultipartFile file, Long categoryId) throws IOException {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+        
         User instructor = userRepository.findById(instructorId).orElse(null);
         Category category = categoryRepository.findById(categoryId).orElse(null);
         courseDTO.setInstructor(instructor);
         courseDTO.setCategory(category);
-
-        String thumbnailUrl = saveThumbnail(file);
-        if (thumbnailUrl != null && !thumbnailUrl.isBlank()){
-            courseDTO.setThumbnailUrl(thumbnailUrl);
-        }
         courseDTO.setUpdatedAt(LocalDate.now());
         courseDTO.setLastUpdatedBy(instructor);
-
-        Course existingCourse = findById(courseDTO.getId());
-        ContentStatus currentStatus = existingCourse != null ? existingCourse.getContentStatus() : ContentStatus.DRAFT;
-
-        // Save directly to main table if:
+        courseDTO.setCategory(category);
+        // Handle thumbnail update if provided
+        if (file != null && !file.isEmpty()) {
+            String thumbnailPath = saveThumbnail(file);
+            courseDTO.setThumbnailUrl(thumbnailPath);
+        }
+        
+        ContentStatus currentStatus = course.getContentStatus();
         // 1. Course is in DRAFT state (not published yet)
-        // 2. New chapters/topics are being added to a published course
         if (currentStatus == ContentStatus.DRAFT) {
-            Course course = courseMapper.toEntity(courseDTO);
+            // Update course using entity method
+            Course updatedCourse = courseMapper.toEntity(courseDTO);
+            course.updateWithOtherCourse(updatedCourse);
             courseRepository.save(course);
         } else {
-            // For published courses, check if we're adding new content or modifying existing
-            boolean hasNewContent = hasNewChaptersOrTopics(courseDTO, existingCourse);
-            
-            if (hasNewContent) {
-                // New chapters/topics go directly to main table
-                Course course = courseMapper.toEntity(courseDTO);
-                courseRepository.save(course);
-            } else {
-                // Modifications to existing content go to temp table
-                contentChangeService.saveEditingCourse(
-                        courseDTO,
-                        ContentAction.UPDATE,
-                        instructorId);
-            }
+            contentChangeService.saveEditingCourse(course, courseDTO, ContentAction.UPDATE, instructorId);
         }
-    }
-
-    /**
-     * Check if the courseDTO contains new chapters or topics compared to existing course
-     */
-    private boolean hasNewChaptersOrTopics(CourseDTO courseDTO, Course existingCourse) {
-        if (courseDTO.getChapters() == null) {
-            return false;
-        }
-
-        // Check for new chapters
-        Set<Long> existingChapterIds = existingCourse.getChapters().stream()
-                .map(Chapter::getId)
-                .collect(Collectors.toSet());
-
-        boolean hasNewChapters = courseDTO.getChapters().stream()
-                .anyMatch(chapterDTO -> chapterDTO.getId() == null || !existingChapterIds.contains(chapterDTO.getId()));
-
-        if (hasNewChapters) {
-            return true;
-        }
-
-        // Check for new topics in existing chapters
-        for (ChapterDTO chapterDTO : courseDTO.getChapters()) {
-            if (chapterDTO.getId() != null) {
-                Chapter existingChapter = existingCourse.getChapters().stream()
-                        .filter(ch -> ch.getId().equals(chapterDTO.getId()))
-                        .findFirst()
-                        .orElse(null);
-
-                if (existingChapter != null && chapterDTO.getTopics() != null) {
-                    Set<Long> existingTopicIds = existingChapter.getTopics().stream()
-                            .map(Topic::getId)
-                            .collect(Collectors.toSet());
-
-                    boolean hasNewTopics = chapterDTO.getTopics().stream()
-                            .anyMatch(topicDTO -> topicDTO.getId() == null || !existingTopicIds.contains(topicDTO.getId()));
-
-                    if (hasNewTopics) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
     }
 
     @Transactional

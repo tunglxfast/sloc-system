@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Create Topic</title>
+    <title>Edit Topic</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -13,7 +13,7 @@
             <div class="col">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h2>Create Topic</h2>
+                        <h2>Edit Topic</h2>
                         <p class="text-muted">
                             Course: <span th:text="${course.title}"></span> |
                             Chapter: <span th:text="${chapter.title}"></span>
@@ -39,66 +39,50 @@
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0">
-                            <i th:class="${topicType == 'VIDEO' ? 'fas fa-video' : 
-                                         topicType == 'READING' ? 'fas fa-book' :
-                                         topicType == 'QUIZ' ? 'fas fa-question-circle' :
+                            <i th:class="${topic.topicType == 'VIDEO' ? 'fas fa-video' : 
+                                         topic.topicType == 'READING' ? 'fas fa-book' :
+                                         topic.topicType == 'QUIZ' ? 'fas fa-question-circle' :
                                          'fas fa-file'}"></i>
-                            <span th:text="${topicType}"></span> Topic Details
+                            <span th:text="${topic.topicType}"></span> Topic Details
                         </h5>
                     </div>
                     <div class="card-body">
-                        <form id="topicForm" method="post" 
-                              th:action="@{'/instructor/course/' + ${course.id} + '/chapter/' + ${chapter.id} + '/topic/add'}"
-                              enctype="multipart/form-data">
-                            <input type="hidden" id="topicType" name="topicType" th:value="${topicType}">
+                        <form id="topicForm">
+                            <input type="hidden" id="topicId" th:value="${topic.id}">
+                            <input type="hidden" id="topicType" th:value="${topic.topicType}">
                             
                             <div class="mb-3">
                                 <label for="title" class="form-label">Topic Title</label>
-                                <input type="text" class="form-control" id="title" name="title" required>
+                                <input type="text" class="form-control" id="title" 
+                                       th:value="${topic.title}" required>
                             </div>
 
                             <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
-                                <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                                <label for="sequence" class="form-label">Sequence</label>
+                                <input type="number" class="form-control" id="sequence" 
+                                       th:value="${topic.sequence}" 
+                                       th:min="1" 
+                                       th:max="${chapter.topics.size()}" required>
+                                <div class="form-text">Enter a number between 1 and the total number of topics in this chapter</div>
                             </div>
 
                             <!-- Video Topic Fields -->
-                            <div th:if="${topicType == 'VIDEO'}" class="mb-3">
+                            <div th:if="${topic.topicType == 'VIDEO'}" class="mb-3">
                                 <label for="videoUrl" class="form-label">Video URL</label>
-                                <input type="url" class="form-control" id="videoUrl" name="videoUrl" required>
+                                <input type="url" class="form-control" id="videoUrl" 
+                                       th:value="${topic.videoUrl}">
                                 <div class="form-text">Enter the URL of the video (YouTube, Vimeo, etc.)</div>
                             </div>
 
                             <!-- Reading Topic Fields -->
-                            <div th:if="${topicType == 'READING'}" class="mb-3">
-                                <label for="content" class="form-label">Reading Material</label>
-                                <input type="file" class="form-control" id="content" name="content" 
-                                       accept=".pdf,.doc,.docx" required>
-                                <div class="form-text">Upload a PDF or Word document (max size: 10MB)</div>
-                            </div>
-
-                            <!-- Quiz/Exam Common Fields -->
-                            <div th:if="${topicType == 'QUIZ' || topicType == 'EXAM'}" class="mb-3">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label for="passScore" class="form-label">Pass Score</label>
-                                        <input type="number" class="form-control" id="passScore" name="passScore" 
-                                               min="0" max="100" required>
-                                        <div class="form-text">Minimum score required to pass (0-100)</div>
-                                    </div>
-                                    
-                                    <!-- Exam-specific Field -->
-                                    <div class="col-md-6" th:if="${topicType == 'EXAM'}">
-                                        <label for="timeLimit" class="form-label">Time Limit (minutes)</label>
-                                        <input type="number" class="form-control" id="timeLimit" name="timeLimit" 
-                                               min="1" required>
-                                        <div class="form-text">Time allowed for the exam in minutes</div>
-                                    </div>
-                                </div>
+                            <div th:if="${topic.topicType == 'READING'}" class="mb-3">
+                                <label for="content" class="form-label">Content</label>
+                                <textarea class="form-control" id="content" rows="10"
+                                          th:text="${topic.content}"></textarea>
                             </div>
 
                             <!-- Quiz/Exam Questions -->
-                            <div th:if="${topicType == 'QUIZ' || topicType == 'EXAM'}" id="questionsContainer">
+                            <div th:if="${topic.topicType == 'QUIZ' || topic.topicType == 'EXAM'}" id="questionsContainer">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h6 class="mb-0">Questions</h6>
                                     <button type="button" class="btn btn-outline-primary btn-sm" onclick="addQuestion()">
@@ -106,15 +90,36 @@
                                     </button>
                                 </div>
                                 <div id="questionsList" class="mb-3">
-                                    <!-- Questions will be added here -->
+                                    <!-- Questions will be loaded here -->
                                 </div>
                             </div>
 
                             <div class="mt-4">
-                                <button type="submit" class="btn btn-primary">Create Topic</button>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
                                 <button type="button" class="btn btn-secondary" onclick="history.back()">Cancel</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Card -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <strong>Content Status:</strong>
+                            <span th:if="${topic.contentStatus?.name() == 'PUBLISHED'}" class="badge bg-success">Published</span>
+                            <span th:if="${topic.contentStatus?.name() == 'DRAFT'}" class="badge bg-warning">Draft</span>
+                            <span th:if="${topic.contentStatus?.name() == 'PUBLISHED_EDITING'}" class="badge bg-info">Editing</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Last Updated:</strong>
+                            <span th:text="${topic.updatedAt}"></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -190,22 +195,40 @@
     <script th:inline="javascript">
         const courseId = /*[[${course.id}]]*/ null;
         const chapterId = /*[[${chapter.id}]]*/ null;
-        const topicType = /*[[${topicType}]]*/ null;
+        const topicType = /*[[${topic.topicType}]]*/ null;
+        const existingTopic = /*[[${topic}]]*/ null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (existingTopic && (topicType === 'QUIZ' || topicType === 'EXAM')) {
+                loadExistingQuestions(existingTopic.questions);
+            }
+        });
 
         document.getElementById('topicForm').addEventListener('submit', function(e) {
+            e.preventDefault();
             if (topicType === 'QUIZ' || topicType === 'EXAM') {
-                e.preventDefault();
                 if (!validateQuestions()) {
                     return;
                 }
-                const questions = collectQuestions();
-                const questionsInput = document.createElement('input');
-                questionsInput.type = 'hidden';
-                questionsInput.name = 'questions';
-                questionsInput.value = JSON.stringify(questions);
-                this.appendChild(questionsInput);
-                this.submit();
             }
+            
+            const topicData = {
+                id: document.getElementById('topicId').value,
+                title: document.getElementById('title').value,
+                sequence: document.getElementById('sequence').value,
+                topicType: document.getElementById('topicType').value
+            };
+
+            // Add type-specific data
+            if (topicType === 'VIDEO') {
+                topicData.videoUrl = document.getElementById('videoUrl').value;
+            } else if (topicType === 'READING') {
+                topicData.content = document.getElementById('content').value;
+            } else if (topicType === 'QUIZ' || topicType === 'EXAM') {
+                topicData.questions = collectQuestions();
+            }
+
+            saveTopic(topicData);
         });
 
         function addQuestion() {
@@ -215,6 +238,7 @@
             container.appendChild(clone);
             updateQuestionNumbers();
             addAnswer(container.lastElementChild.querySelector('.answer-list'));
+            addAnswer(container.lastElementChild.querySelector('.answer-list')); // Add two answers by default
         }
 
         function removeQuestion(button) {
@@ -318,6 +342,7 @@
             const questions = [];
             document.querySelectorAll('.question-item').forEach((questionEl, index) => {
                 const question = {
+                    id: questionEl.getAttribute('data-question-id'),
                     content: questionEl.querySelector('.question-text').value,
                     questionType: questionEl.querySelector('.question-type').value,
                     sequence: index + 1,
@@ -326,6 +351,7 @@
 
                 questionEl.querySelectorAll('.answer-item').forEach(answerEl => {
                     question.answers.push({
+                        id: answerEl.getAttribute('data-answer-id'),
                         content: answerEl.querySelector('.answer-text').value,
                         isCorrect: answerEl.querySelector('.correct-answer').checked
                     });
@@ -340,6 +366,7 @@
             questions.forEach(question => {
                 addQuestion();
                 const questionEl = document.querySelector('.question-item:last-child');
+                questionEl.setAttribute('data-question-id', question.id);
                 questionEl.querySelector('.question-text').value = question.content;
                 questionEl.querySelector('.question-type').value = question.questionType;
                 
@@ -349,10 +376,29 @@
                 question.answers.forEach(answer => {
                     addAnswer(answerList);
                     const answerEl = answerList.querySelector('.answer-item:last-child');
+                    answerEl.setAttribute('data-answer-id', answer.id);
                     answerEl.querySelector('.answer-text').value = answer.content;
                     answerEl.querySelector('.correct-answer').checked = answer.isCorrect;
                 });
             });
+        }
+
+        function saveTopic(topicData) {
+            fetch(`/instructor/course/${courseId}/chapter/${chapterId}/topic/save`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(topicData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text) });
+                }
+                showSuccess('Changes saved successfully');
+                setTimeout(() => {
+                    window.location.href = `/instructor/course/${courseId}/chapter/${chapterId}`;
+                }, 1000);
+            })
+            .catch(error => showError(error.message));
         }
 
         function showSuccess(message) {
@@ -367,11 +413,6 @@
             alert.textContent = message;
             alert.classList.remove('d-none');
             setTimeout(() => alert.classList.add('d-none'), 3000);
-        }
-
-        // Add initial question if it's a quiz/exam
-        if (topicType === 'QUIZ' || topicType === 'EXAM') {
-            addQuestion();
         }
     </script>
 </body>

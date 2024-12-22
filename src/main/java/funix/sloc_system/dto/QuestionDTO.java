@@ -1,5 +1,6 @@
 package funix.sloc_system.dto;
 
+import funix.sloc_system.enums.QuestionType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,9 @@ import java.util.List;
 public class QuestionDTO {
     private Long id;
     private String content;
-    private String questionType; // MULTIPLE_CHOICE, TRUE_FALSE
+    
+    private String questionType; // CHOICE_MANY, CHOICE_ONE
     private int sequence;
+    private Long topicId;  // Parent topic ID
     private List<AnswerDTO> answers;
 }
