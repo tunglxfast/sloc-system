@@ -487,7 +487,7 @@ public class CourseService {
             courseRepository.save(course);
         } else {
             // Save course changes to temp table.
-            appUtil.saveEntityChanges(EntityType.COURSE, courseDTO, course, ContentAction.UPDATE, instructorId);
+            appUtil.saveEntityChanges(EntityType.COURSE, courseDTO, course.getId(), ContentAction.UPDATE, instructorId);
         }
     }
 

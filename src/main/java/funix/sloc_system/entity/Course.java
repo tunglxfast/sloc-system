@@ -1,6 +1,5 @@
 package funix.sloc_system.entity;
 
-import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.enums.ApprovalStatus;
 import funix.sloc_system.enums.ContentStatus;
 import jakarta.persistence.*;
@@ -111,10 +110,10 @@ public class Course {
         if (updatedCourse.getUpdatedAt() != null) {
             this.updatedAt = updatedCourse.getUpdatedAt();
         }
-        if (updatedCourse.getChapters() != null) {
+        if (updatedCourse.getChapters() != null || !updatedCourse.getChapters().isEmpty()) {
             this.chapters = updatedCourse.getChapters();
         }
-        if (updatedCourse.getEnrollments() != null) {
+        if (updatedCourse.getEnrollments() != null || !updatedCourse.getEnrollments().isEmpty()) {
             this.enrollments = updatedCourse.getEnrollments();
         }
     }

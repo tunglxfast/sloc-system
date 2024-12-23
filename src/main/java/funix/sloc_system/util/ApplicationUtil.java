@@ -29,6 +29,10 @@ public class ApplicationUtil {
     @Autowired
     private UserRepository userRepository;
     @Autowired
+    private QuestionRepository questionRepository;
+    @Autowired
+    private AnswerRepository answerRepository;
+    @Autowired
     private ContentChangeRepository contentChangeRepository;
     @Autowired
     private ObjectMapper objectMapper;
@@ -87,53 +91,12 @@ public class ApplicationUtil {
      * The changes JSON will contain the complete state of the entity after changes.
      */
     @Transactional
-    public void saveEntityChanges(EntityType entityType, Object editingDTO, Object originalEntity, ContentAction action, Long instructorId) throws JsonProcessingException {
+    public void saveEntityChanges(EntityType entityType, Object editingDTO, Long entityId, ContentAction action, Long instructorId) throws JsonProcessingException {
         User instructor = userRepository.findById(instructorId).orElse(null);
-        Long entityId;
         // Update original entity with changes
-        switch (entityType) {
-            case COURSE:
-                Course course = (Course) originalEntity;
-                entityId = course.getId();
-                Course updatedCourse = courseMapper.toEntity((CourseDTO) editingDTO);
-                course.updateWithOtherCourse(updatedCourse);
-                editingDTO = courseMapper.toDTO(course);
-                break;
-            case CHAPTER:
-                Chapter chapter = (Chapter) originalEntity;
-                entityId = chapter.getId();
-                Chapter updatedChapter = chapterMapper.toEntity((ChapterDTO) editingDTO);
-                chapter.updateWithOtherChapter(updatedChapter);
-                editingDTO = chapterMapper.toDTO(chapter);
-                break;
-            case TOPIC:
-                Topic topic = (Topic) originalEntity;
-                entityId = topic.getId();
-                Topic updatedTopic = topicMapper.toEntity((TopicDTO) editingDTO);
-                topic.updateWithOtherTopic(updatedTopic);
-                editingDTO = topicMapper.toDTO(topic);
-                break;
-            case QUESTION:
-                Question question = (Question) originalEntity;
-                entityId = question.getId();
-                Question updatedQuestion = questionMapper.toEntity((QuestionDTO) editingDTO);
-                question.updateWithOtherQuestion(updatedQuestion);
-                editingDTO = questionMapper.toDTO(question);
-                break;
-            default:
-                Answer answer = (Answer) originalEntity;
-                entityId = answer.getId();
-                Answer updatedAnswer = answerMapper.toEntity((AnswerDTO) editingDTO);
-                answer.updateWithOtherAnswer(updatedAnswer);
-                editingDTO = answerMapper.toDTO(answer);
-                break;
-        }
-
-        // Convert updated entity to JSON
-        String json = objectMapper.writeValueAsString(editingDTO);
+        String json = updateAndConvertDTOToJSON(entityType, editingDTO, entityId);
 
         // Save to temporary table
-        contentChangeRepository.findById(1L);
         Optional<ContentChangeTemporary> temporaryOptional = contentChangeRepository.findByEntityTypeAndEntityId(entityType, entityId);
         ContentChangeTemporary changeTemporary;
         if (temporaryOptional.isPresent()) {
@@ -148,5 +111,43 @@ public class ApplicationUtil {
         changeTemporary.setUpdatedBy(instructor.getId());
         changeTemporary.setChangeTime(LocalDateTime.now());
         contentChangeRepository.save(changeTemporary);
+    }
+
+    private String updateAndConvertDTOToJSON(EntityType entityType, Object editingDTO, Long entityId) throws JsonProcessingException {
+        Object updatedDTO;
+        switch (entityType) {
+            case COURSE:
+                Course course = courseRepository.findById(entityId).orElse(new Course());
+                Course updatedCourse = courseMapper.toEntity((CourseDTO) editingDTO);
+                course.updateWithOtherCourse(updatedCourse);
+                updatedDTO = courseMapper.toDTO(course);
+                break;
+            case CHAPTER:
+                Chapter chapter = chapterRepository.findById(entityId).orElse(new Chapter());
+                Chapter updatedChapter = chapterMapper.toEntity((ChapterDTO) editingDTO);
+                chapter.updateWithOtherChapter(updatedChapter);
+                updatedDTO = chapterMapper.toDTO(chapter);
+                break;
+            case TOPIC:
+                Topic topic = topicRepository.findById(entityId).orElse(new Topic());
+                Topic updatedTopic = topicMapper.toEntity((TopicDTO) editingDTO);
+                topic.updateWithOtherTopic(updatedTopic);
+                updatedDTO = topicMapper.toDTO(topic);
+                break;
+            case QUESTION:
+                Question question = questionRepository.findById(entityId).orElse(new Question());
+                Question updatedQuestion = questionMapper.toEntity((QuestionDTO) editingDTO);
+                question.updateWithOtherQuestion(updatedQuestion);
+                updatedDTO = questionMapper.toDTO(question);
+                break;
+            default:
+                Answer answer = answerRepository.findById(entityId).orElse(new Answer());
+                Answer updatedAnswer = answerMapper.toEntity((AnswerDTO) editingDTO);
+                answer.updateWithOtherAnswer(updatedAnswer);
+                updatedDTO = answerMapper.toDTO(answer);
+                break;
+        }
+        // Convert updated entity to JSON
+        return objectMapper.writeValueAsString(updatedDTO);
     }
 }

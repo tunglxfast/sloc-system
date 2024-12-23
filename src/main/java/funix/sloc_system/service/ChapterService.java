@@ -164,7 +164,7 @@ public class ChapterService {
             chapterRepository.save(chapter);
         } else {
             // Save chapter changes to temp table.
-            appUtil.saveEntityChanges(EntityType.CHAPTER, chapterDTO, chapter, ContentAction.UPDATE, instructorId);
+            appUtil.saveEntityChanges(EntityType.CHAPTER, chapterDTO, chapter.getId(), ContentAction.UPDATE, instructorId);
         }
     }
 

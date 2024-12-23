@@ -82,7 +82,7 @@ public class QuestionService {
             // Save question changes to temp table.
             // This includes both the question and its answers as a single unit.
             // The QuestionDTO should include the complete list of answers.
-            appUtil.saveEntityChanges(EntityType.QUESTION, questionDTO, question, ContentAction.UPDATE, instructorId);
+            appUtil.saveEntityChanges(EntityType.QUESTION, questionDTO, question.getId(), ContentAction.UPDATE, instructorId);
         }
     }
 

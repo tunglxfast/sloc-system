@@ -142,7 +142,7 @@ public class TopicService {
             topicRepository.save(topic);
         } else {
             // Save to temporary table
-            appUtil.saveEntityChanges(EntityType.TOPIC, topicDTO, topic, ContentAction.UPDATE, instructorId);
+            appUtil.saveEntityChanges(EntityType.TOPIC, topicDTO, topic.getId(), ContentAction.UPDATE, instructorId);
         }
     }
 }
