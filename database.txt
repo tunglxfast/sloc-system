@@ -144,8 +144,7 @@ CREATE TABLE content_change_temporary (
     action VARCHAR(20) NOT NULL,
     changes TEXT NOT NULL,
     updated_by BIGINT NOT NULL,
-    change_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (updated_by) REFERENCES users(id)
+    change_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Insert sample data

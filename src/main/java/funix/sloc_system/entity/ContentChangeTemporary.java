@@ -1,8 +1,8 @@
 package funix.sloc_system.entity;
 
-import funix.sloc_system.enums.*;
+import funix.sloc_system.enums.ContentAction;
+import funix.sloc_system.enums.EntityType;
 import jakarta.persistence.*;
-import jakarta.persistence.GenerationType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,10 +22,10 @@ public class ContentChangeTemporary {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "entity_type", nullable = false)
     private EntityType entityType;
 
-    @Column(nullable = false)
+    @Column(name = "entity_id", nullable = false)
     private Long entityId;
 
     @Enumerated(EnumType.STRING)
@@ -35,9 +35,8 @@ public class ContentChangeTemporary {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String changes;  // JSON string containing the changes
 
-    @ManyToOne
-    @JoinColumn(name = "updated_by", nullable = false)
-    private User updatedBy;
+    @Column(name = "updated_by", nullable = false)
+    private Long updatedBy;  // User id
 
     @Column(nullable = false)
     private LocalDateTime changeTime;

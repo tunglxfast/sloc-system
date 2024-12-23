@@ -61,35 +61,40 @@ public class ContentChangeService {
     @Transactional
     public void saveEntityChanges(EntityType entityType, Object editingDTO, Object originalEntity, ContentAction action, Long instructorId) throws JsonProcessingException {
         User instructor = userRepository.findById(instructorId).orElse(null);
-        Long entityId = ((Course) originalEntity).getId();
+        Long entityId = null;
         // Update original entity with changes
         switch (entityType) {
             case COURSE:
                 Course course = (Course) originalEntity;
+                entityId = course.getId();
                 Course updatedCourse = courseMapper.toEntity((CourseDTO) editingDTO);
                 course.updateWithOtherCourse(updatedCourse);
                 editingDTO = courseMapper.toDTO(course);
                 break;
             case CHAPTER:
                 Chapter chapter = (Chapter) originalEntity;
+                entityId = chapter.getId();
                 Chapter updatedChapter = chapterMapper.toEntity((ChapterDTO) editingDTO);
                 chapter.updateWithOtherChapter(updatedChapter);
                 editingDTO = chapterMapper.toDTO(chapter);
                 break;
             case TOPIC:
                 Topic topic = (Topic) originalEntity;
+                entityId = topic.getId();
                 Topic updatedTopic = topicMapper.toEntity((TopicDTO) editingDTO);
                 topic.updateWithOtherTopic(updatedTopic);
                 editingDTO = topicMapper.toDTO(topic);
                 break;
             case QUESTION:
                 Question question = (Question) originalEntity;
+                entityId = question.getId();
                 Question updatedQuestion = questionMapper.toEntity((QuestionDTO) editingDTO);
                 question.updateWithOtherQuestion(updatedQuestion);
                 editingDTO = questionMapper.toDTO(question);
                 break;
             case ANSWER:
                 Answer answer = (Answer) originalEntity;
+                entityId = answer.getId();
                 Answer updatedAnswer = answerMapper.toEntity((AnswerDTO) editingDTO);
                 answer.updateWithOtherAnswer(updatedAnswer);
                 editingDTO = answerMapper.toDTO(answer);
@@ -108,7 +113,7 @@ public class ContentChangeService {
         changeTemporary.setEntityId(entityId);
         changeTemporary.setAction(action);
         changeTemporary.setChanges(json);
-        changeTemporary.setUpdatedBy(instructor);
+        changeTemporary.setUpdatedBy(instructor.getId());
         changeTemporary.setChangeTime(LocalDateTime.now());
         changeTemporaryDao.save(changeTemporary);
     }
