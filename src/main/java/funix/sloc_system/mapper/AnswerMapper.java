@@ -5,6 +5,7 @@ import funix.sloc_system.entity.Answer;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class AnswerMapper {
@@ -36,10 +37,10 @@ public class AnswerMapper {
     }
 
     public List<AnswerDTO> toDTO(List<Answer> answers) {
-        return answers.stream().map(this::toDTO).toList();
+        return answers.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     public List<Answer> toEntity(List<AnswerDTO> answerDTOList) {
-        return answerDTOList.stream().map(this::toEntity).toList();
+        return answerDTOList.stream().map(this::toEntity).collect(Collectors.toList());
     }
 } 

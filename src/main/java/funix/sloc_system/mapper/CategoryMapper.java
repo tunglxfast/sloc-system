@@ -5,6 +5,7 @@ import funix.sloc_system.entity.Category;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class CategoryMapper {
@@ -34,10 +35,10 @@ public class CategoryMapper {
     }
 
     public List<CategoryDTO> toDTO(List<Category> categories) {
-        return categories.stream().map(this::toDTO).toList();
+        return categories.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     public List<Category> toEntity(List<CategoryDTO> categoryDTOList) {
-        return categoryDTOList.stream().map(this::toEntity).toList();
+        return categoryDTOList.stream().map(this::toEntity).collect(Collectors.toList());
     }
 } 

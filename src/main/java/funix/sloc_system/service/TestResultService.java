@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class TestResultService {
@@ -65,10 +66,10 @@ public class TestResultService {
             selectedAnswerIds.addAll(
                     answers.entrySet().stream()
                             .filter(entry -> entry.getKey().startsWith("question_" + question.getId()))
-                            .map(stringEntry -> stringEntry.getValue()).toList())
+                            .map(stringEntry -> stringEntry.getValue()).collect(Collectors.toList()))
             ;
             correctAnswers.addAll(answerRepository.findByQuestionIdAndIsCorrectTrue(question.getId()));
-            correctAnswerIds.addAll(correctAnswers.stream().map(answer -> answer.getId().toString()).toList());
+            correctAnswerIds.addAll(correctAnswers.stream().map(answer -> answer.getId().toString()).collect(Collectors.toList()));
 
             if (new HashSet<>(selectedAnswerIds).containsAll(correctAnswerIds)
                     && new HashSet<>(correctAnswerIds).containsAll(selectedAnswerIds)) {

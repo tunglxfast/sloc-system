@@ -1,22 +1,17 @@
 package funix.sloc_system.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.entity.Topic;
-import funix.sloc_system.entity.Course;
-import funix.sloc_system.entity.Question;
-import funix.sloc_system.entity.Answer;
-import funix.sloc_system.dto.TopicDTO;
-import funix.sloc_system.dto.QuestionDTO;
-import funix.sloc_system.dto.AnswerDTO;
-import funix.sloc_system.mapper.TopicMapper;
-import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.ContentAction;
+import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.EntityType;
-import funix.sloc_system.enums.TopicType;
+import funix.sloc_system.mapper.TopicMapper;
 import funix.sloc_system.repository.ChapterRepository;
+import funix.sloc_system.repository.ContentChangeRepository;
 import funix.sloc_system.repository.TopicRepository;
-
+import funix.sloc_system.util.ApplicationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,10 +32,12 @@ public class TopicService {
     private TopicMapper topicMapper;
     
     @Autowired
-    private ContentChangeService contentChangeService;
+    private ContentChangeRepository contentChangeRepository;
     
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private ApplicationUtil appUtil;
 
     public Topic findById(Long id) {
         return topicRepository.findById(id).orElse(null);
@@ -72,7 +69,7 @@ public class TopicService {
         Topic topic = topicRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Topic not found"));
         
-        Optional<String> editingChanges = contentChangeService.getEntityEditing(EntityType.TOPIC, id)
+        Optional<String> editingChanges = contentChangeRepository.findByEntityTypeAndEntityId(EntityType.TOPIC, id)
                 .map(change -> change.getChanges());
         
         if (editingChanges.isPresent()) {
@@ -145,7 +142,7 @@ public class TopicService {
             topicRepository.save(topic);
         } else {
             // Save to temporary table
-            contentChangeService.saveEditingTopic(topic, topicDTO, ContentAction.UPDATE, instructorId);
+            appUtil.saveEntityChanges(EntityType.TOPIC, topicDTO, topic, ContentAction.UPDATE, instructorId);
         }
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ChapterMapper {
@@ -58,10 +59,10 @@ public class ChapterMapper {
     }
 
     public List<ChapterDTO> toDTO(List<Chapter> chapters) {
-        return chapters.stream().map(this::toDTO).toList();
+        return chapters.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     public List<Chapter> toEntity(List<ChapterDTO> chapterDTOList) {
-        return chapterDTOList.stream().map(this::toEntity).toList();
+        return chapterDTOList.stream().map(this::toEntity).collect(Collectors.toList());
     }
 } 

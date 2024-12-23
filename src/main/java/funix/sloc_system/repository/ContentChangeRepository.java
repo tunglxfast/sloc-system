@@ -5,6 +5,8 @@ import funix.sloc_system.enums.ContentAction;
 import funix.sloc_system.enums.EntityType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,5 +23,8 @@ public interface ContentChangeRepository extends JpaRepository<ContentChangeTemp
     List<ContentChangeTemporary> findByAction(ContentAction action);
     
     @Modifying
-    void deleteByEntityTypeAndEntityId(EntityType entityType, Long entityId);
+    @Query("DELETE FROM ContentChangeTemporary c WHERE c.entityType = :entityType AND c.entityId = :entityId")
+    void deleteByEntityTypeAndEntityId(
+            @Param("entityType") EntityType entityType, 
+            @Param("entityId") Long entityId);
 }

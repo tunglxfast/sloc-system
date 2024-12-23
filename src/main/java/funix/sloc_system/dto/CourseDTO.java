@@ -1,6 +1,7 @@
 package funix.sloc_system.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import funix.sloc_system.entity.Category;
 import funix.sloc_system.entity.Role;
 import funix.sloc_system.entity.User;
@@ -91,6 +92,7 @@ public class CourseDTO {
         }
     }
 
+    @JsonSetter("createdBy")
     public void setCreatedBy(UserDTO userDTO) {
         this.createdBy = userDTO;
     }
@@ -106,6 +108,7 @@ public class CourseDTO {
         }
     }
 
+    @JsonSetter("lastUpdatedBy")
     public void setLastUpdatedBy(UserDTO userDTO) {
         this.lastUpdatedBy = userDTO;
     }
@@ -121,6 +124,7 @@ public class CourseDTO {
         }
     }
 
+    @JsonSetter("instructor")
     public void setInstructor(UserDTO userDTO) {
         this.instructor = userDTO;
     }
@@ -136,6 +140,7 @@ public class CourseDTO {
         }
     }
 
+    @JsonSetter("category")
     public void setCategory(CategoryDTO categoryDTO) {
         this.category = categoryDTO;
     }

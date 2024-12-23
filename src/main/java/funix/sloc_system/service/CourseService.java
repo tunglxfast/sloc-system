@@ -6,6 +6,7 @@ import funix.sloc_system.repository.*;
 import funix.sloc_system.dto.*;
 import funix.sloc_system.entity.*;
 import funix.sloc_system.mapper.*;
+import funix.sloc_system.util.ApplicationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.Optional;
@@ -35,7 +37,7 @@ public class CourseService {
     @Autowired
     private EmailService emailService;
     @Autowired
-    private ContentChangeService contentChangeService;
+    private ContentChangeRepository contentChangeRepository;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -48,6 +50,9 @@ public class CourseService {
     private QuestionMapper questionMapper;
     @Autowired
     private QuestionRepository questionRepository;
+
+    @Autowired
+    private ApplicationUtil appUtil;
 
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
@@ -121,7 +126,7 @@ public class CourseService {
         course.setApprovalStatus(ApprovalStatus.PENDING);
 
         // Get all changes from temporary table
-        List<ContentChangeTemporary> allChanges = contentChangeService.getAllCourseChanges(course);
+        List<ContentChangeTemporary> allChanges = getAllCourseChanges(course);
 
         // Update child entities status based on their change action
         for (Chapter chapter : course.getChapters()) {
@@ -222,7 +227,7 @@ public class CourseService {
         courseRepository.save(course);
 
         // Clean up temporary changes
-        contentChangeService.deleteAllCourseChanges(course);
+        deleteAllCourseChanges(course);
 
         // Send notification
         sendApproveEmail(course.getInstructor(), course);
@@ -258,7 +263,7 @@ public class CourseService {
         for (Chapter chapter : course.getChapters()) {
             // For PUBLISHED_EDITING, only update entities that have changes
             if (newStatus == ContentStatus.PUBLISHED && course.getContentStatus() == ContentStatus.PUBLISHED_EDITING) {
-                if (contentChangeService.getEntityEditing(EntityType.CHAPTER, chapter.getId()).isPresent()) {
+                if (contentChangeRepository.findByEntityTypeAndEntityId(EntityType.CHAPTER, chapter.getId()).isPresent()) {
                     chapter.setContentStatus(newStatus);
                 }
             } else {
@@ -267,7 +272,7 @@ public class CourseService {
 
             for (Topic topic : chapter.getTopics()) {
                 if (newStatus == ContentStatus.PUBLISHED && course.getContentStatus() == ContentStatus.PUBLISHED_EDITING) {
-                    if (contentChangeService.getEntityEditing(EntityType.TOPIC, topic.getId()).isPresent()) {
+                    if (contentChangeRepository.findByEntityTypeAndEntityId(EntityType.TOPIC, topic.getId()).isPresent()) {
                         topic.setContentStatus(newStatus);
                     }
                 } else {
@@ -277,7 +282,7 @@ public class CourseService {
                 if (topic.getQuestions() != null) {
                     for (Question question : topic.getQuestions()) {
                         if (newStatus == ContentStatus.PUBLISHED && course.getContentStatus() == ContentStatus.PUBLISHED_EDITING) {
-                            if (contentChangeService.getEntityEditing(EntityType.QUESTION, question.getId()).isPresent()) {
+                            if (contentChangeRepository.findByEntityTypeAndEntityId(EntityType.QUESTION, question.getId()).isPresent()) {
                                 question.setContentStatus(newStatus);
                                 if (question.getAnswers() != null) {
                                     question.getAnswers().forEach(answer -> answer.setContentStatus(newStatus));
@@ -300,7 +305,7 @@ public class CourseService {
      */
     private void applyTemporaryChanges(Course course) {
         // Get all changes for this course and its child entities
-        List<ContentChangeTemporary> allChanges = contentChangeService.getAllCourseChanges(course);
+        List<ContentChangeTemporary> allChanges = getAllCourseChanges(course);
 
         // First handle deletions to avoid foreign key conflicts
         for (ContentChangeTemporary change : allChanges) {
@@ -379,7 +384,7 @@ public class CourseService {
      */
     @Transactional
     public <T> T getEditingEntityDTO(EntityType entityType, Long id, Class<T> dtoClass) throws Exception {
-        ContentChangeTemporary changeTemporary = contentChangeService.getEntityEditing(
+        ContentChangeTemporary changeTemporary = contentChangeRepository.findByEntityTypeAndEntityId(
                 entityType,
                 id).orElse(null);
         if (changeTemporary == null) {
@@ -481,7 +486,8 @@ public class CourseService {
             course.updateWithOtherCourse(updatedCourse);
             courseRepository.save(course);
         } else {
-            contentChangeService.saveEditingCourse(course, courseDTO, ContentAction.UPDATE, instructorId);
+            // Save course changes to temp table.
+            appUtil.saveEntityChanges(EntityType.COURSE, courseDTO, course, ContentAction.UPDATE, instructorId);
         }
     }
 
@@ -521,26 +527,26 @@ public class CourseService {
     @Transactional
     public boolean hasPendingChanges(Course course) {
         // Check course changes
-        if (contentChangeService.getEntityEditing(EntityType.COURSE, course.getId()).isPresent()) {
+        if (contentChangeRepository.findByEntityTypeAndEntityId(EntityType.COURSE, course.getId()).isPresent()) {
             return true;
         }
 
         // Check chapter changes
         for (Chapter chapter : course.getChapters()) {
-            if (contentChangeService.getEntityEditing(EntityType.CHAPTER, chapter.getId()).isPresent()) {
+            if (contentChangeRepository.findByEntityTypeAndEntityId(EntityType.CHAPTER, chapter.getId()).isPresent()) {
                 return true;
             }
 
             // Check topic changes
             for (Topic topic : chapter.getTopics()) {
-                if (contentChangeService.getEntityEditing(EntityType.TOPIC, topic.getId()).isPresent()) {
+                if (contentChangeRepository.findByEntityTypeAndEntityId(EntityType.TOPIC, topic.getId()).isPresent()) {
                     return true;
                 }
 
                 // Check question changes
                 if (topic.getQuestions() != null) {
                     for (Question question : topic.getQuestions()) {
-                        if (contentChangeService.getEntityEditing(EntityType.QUESTION, question.getId()).isPresent()) {
+                        if (contentChangeRepository.findByEntityTypeAndEntityId(EntityType.QUESTION, question.getId()).isPresent()) {
                             return true;
                         }
                     }
@@ -548,5 +554,66 @@ public class CourseService {
             }
         }
         return false;
+    }
+
+    /**
+     * Get all changes for a course and its child entities
+     */
+    @Transactional
+    public List<ContentChangeTemporary> getAllCourseChanges(Course course) {
+        List<ContentChangeTemporary> allChanges = new ArrayList<>();
+
+        // Get course changes
+        Optional<ContentChangeTemporary> courseChange = contentChangeRepository.findByEntityTypeAndEntityId(EntityType.COURSE, course.getId());
+        courseChange.ifPresent(allChanges::add);
+
+        // Get chapter changes
+        for (Chapter chapter : course.getChapters()) {
+            Optional<ContentChangeTemporary> chapterChange = contentChangeRepository.findByEntityTypeAndEntityId(EntityType.CHAPTER, chapter.getId());
+            chapterChange.ifPresent(allChanges::add);
+
+            // Get topic changes
+            for (Topic topic : chapter.getTopics()) {
+                Optional<ContentChangeTemporary> topicChange = contentChangeRepository.findByEntityTypeAndEntityId(EntityType.TOPIC, topic.getId());
+                topicChange.ifPresent(allChanges::add);
+
+                // Get question changes
+                if (topic.getQuestions() != null) {
+                    for (Question question : topic.getQuestions()) {
+                        Optional<ContentChangeTemporary> questionChange = contentChangeRepository.findByEntityTypeAndEntityId(EntityType.QUESTION, question.getId());
+                        questionChange.ifPresent(allChanges::add);
+                    }
+                }
+            }
+        }
+
+        return allChanges;
+    }
+
+    /**
+     * Delete all changes related to a course when it's approved.
+     * This includes changes to the course itself, chapters, topics, and questions (with their answers).
+     */
+    @Transactional
+    public void deleteAllCourseChanges(Course course) {
+        // Delete course changes
+        contentChangeRepository.deleteByEntityTypeAndEntityId(EntityType.COURSE, course.getId());
+
+        // Delete chapter changes
+        for (Chapter chapter : course.getChapters()) {
+            contentChangeRepository.deleteByEntityTypeAndEntityId(EntityType.CHAPTER, chapter.getId());
+
+            // Delete topic changes
+            for (Topic topic : chapter.getTopics()) {
+                contentChangeRepository.deleteByEntityTypeAndEntityId(EntityType.TOPIC, topic.getId());
+
+                // Delete question changes (answers are included in question JSON)
+                if (topic.getQuestions() != null) {
+                    for (Question question : topic.getQuestions()) {
+                        contentChangeRepository.deleteByEntityTypeAndEntityId(EntityType.QUESTION, question.getId());
+                    }
+                }
+            }
+        }
     }
 }

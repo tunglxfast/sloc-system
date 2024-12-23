@@ -92,7 +92,7 @@ CREATE TABLE topic (
     total_score INT,
     time_limit INT,
     FOREIGN KEY (chapter_id) REFERENCES chapter(id),
-    UNIQUE KEY uk_chapter_sequence (chapter_id, sequence)
+    UNIQUE (chapter_id, sequence)
 );
 
 CREATE TABLE question (
@@ -132,8 +132,8 @@ CREATE TABLE test_result (
     test_type VARCHAR(255) NOT NULL,
     user_id BIGINT NOT NULL,
     topic_id BIGINT NOT NULL,
-    CONSTRAINT fk_test_result_user FOREIGN KEY (user_id) REFERENCES users(id),
-    CONSTRAINT fk_test_result_topic FOREIGN KEY (topic_id) REFERENCES topic(id)
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (topic_id) REFERENCES topic(id)
 );
 
 -- Table for tracking changes to published content
@@ -144,7 +144,9 @@ CREATE TABLE content_change_temporary (
     action VARCHAR(20) NOT NULL,
     changes TEXT NOT NULL,
     updated_by BIGINT NOT NULL,
-    change_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    change_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (updated_by) REFERENCES users(id),
+    UNIQUE (entity_type, entity_id)
 );
 
 -- Insert sample data

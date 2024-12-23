@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class QuestionMapper {
@@ -62,10 +63,10 @@ public class QuestionMapper {
     }
 
     public List<QuestionDTO> toDTO(List<Question> questions) {
-        return questions.stream().map(this::toDTO).toList();
+        return questions.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     public List<Question> toEntity(List<QuestionDTO> questionDTOList) {
-        return questionDTOList.stream().map(this::toEntity).toList();
+        return questionDTOList.stream().map(this::toEntity).collect(Collectors.toList());
     }
 } 

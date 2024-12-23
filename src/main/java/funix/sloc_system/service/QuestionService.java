@@ -1,15 +1,15 @@
 package funix.sloc_system.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import funix.sloc_system.entity.Question;
-import funix.sloc_system.entity.Course;
 import funix.sloc_system.dto.QuestionDTO;
-import funix.sloc_system.mapper.QuestionMapper;
-import funix.sloc_system.enums.ContentStatus;
+import funix.sloc_system.entity.Question;
 import funix.sloc_system.enums.ContentAction;
+import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.EntityType;
+import funix.sloc_system.mapper.QuestionMapper;
+import funix.sloc_system.repository.ContentChangeRepository;
 import funix.sloc_system.repository.QuestionRepository;
-
+import funix.sloc_system.util.ApplicationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +27,9 @@ public class QuestionService {
     private QuestionMapper questionMapper;
     
     @Autowired
-    private ContentChangeService contentChangeService;
-    
+    private ContentChangeRepository contentChangeRepository;
+    @Autowired
+    private ApplicationUtil appUtil;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -44,7 +45,7 @@ public class QuestionService {
         Question question = questionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Question not found"));
         
-        Optional<String> editingChanges = contentChangeService.getEntityEditing(EntityType.QUESTION, id)
+        Optional<String> editingChanges = contentChangeRepository.findByEntityTypeAndEntityId(EntityType.QUESTION, id)
                 .map(change -> change.getChanges());
         
         if (editingChanges.isPresent()) {
@@ -78,8 +79,10 @@ public class QuestionService {
             }
             questionRepository.save(question);
         } else {
-            // Save to temporary table
-            contentChangeService.saveEditingQuestion(question, questionDTO, ContentAction.UPDATE, instructorId);
+            // Save question changes to temp table.
+            // This includes both the question and its answers as a single unit.
+            // The QuestionDTO should include the complete list of answers.
+            appUtil.saveEntityChanges(EntityType.QUESTION, questionDTO, question, ContentAction.UPDATE, instructorId);
         }
     }
 

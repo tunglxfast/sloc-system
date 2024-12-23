@@ -1,6 +1,5 @@
 package funix.sloc_system.entity;
 
-import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.enums.ContentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -30,7 +30,7 @@ public class Chapter {
 
     @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("sequence ASC")
-    private List<Topic> topics;
+    private List<Topic> topics = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private ContentStatus contentStatus = ContentStatus.DRAFT;

@@ -12,8 +12,10 @@ import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.ContentAction;
 import funix.sloc_system.enums.EntityType;
 import funix.sloc_system.repository.ChapterRepository;
+import funix.sloc_system.repository.ContentChangeRepository;
 import funix.sloc_system.repository.CourseRepository;
 
+import funix.sloc_system.util.ApplicationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,10 +39,13 @@ public class ChapterService {
     private TopicMapper topicMapper;
     
     @Autowired
-    private ContentChangeService contentChangeService;
+    private ContentChangeRepository contentChangeRepository;
     
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private ApplicationUtil appUtil;
 
     public Chapter findById(Long id) {
         return chapterRepository.findById(id).orElse(null);
@@ -115,7 +120,7 @@ public class ChapterService {
             return null;
         }
         
-        Optional<String> editingChanges = contentChangeService.getEntityEditing(EntityType.CHAPTER, id)
+        Optional<String> editingChanges = contentChangeRepository.findByEntityTypeAndEntityId(EntityType.CHAPTER, id)
                 .map(change -> change.getChanges());
         
         if (editingChanges.isPresent()) {
@@ -158,8 +163,8 @@ public class ChapterService {
             }
             chapterRepository.save(chapter);
         } else {
-            // Save to temporary table
-            contentChangeService.saveEditingChapter(chapter, chapterDTO, ContentAction.UPDATE, instructorId);
+            // Save chapter changes to temp table.
+            appUtil.saveEntityChanges(EntityType.CHAPTER, chapterDTO, chapter, ContentAction.UPDATE, instructorId);
         }
     }
 

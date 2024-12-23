@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class TopicMapper {
@@ -99,10 +100,10 @@ public class TopicMapper {
     }
 
     public List<TopicDTO> toDTO(List<Topic> topics) {
-        return topics.stream().map(this::toDTO).toList();
+        return topics.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     public List<Topic> toEntity(List<TopicDTO> topicDTOList) {
-        return topicDTOList.stream().map(this::toEntity).toList();
+        return topicDTOList.stream().map(this::toEntity).collect(Collectors.toList());
     }
 } 
