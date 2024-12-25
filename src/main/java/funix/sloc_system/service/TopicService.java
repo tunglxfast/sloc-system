@@ -124,7 +124,7 @@ public class TopicService {
     public void saveTopicChanges(TopicDTO topicDTO, Long instructorId) throws IOException {
         Topic topic = topicRepository.findById(topicDTO.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Topic not found"));
-        
+        // TODO: fix this later, replace updateWithOtherTopic with working with DTO
         if (topic.getContentStatus() == ContentStatus.DRAFT) {
             int oldTopicSequence = topic.getSequence();
             // Update topic using entity method
@@ -142,7 +142,8 @@ public class TopicService {
             topicRepository.save(topic);
         } else {
             // Save to temporary table
-            appUtil.saveEntityChanges(EntityType.TOPIC, topicDTO, topic.getId(), ContentAction.UPDATE, instructorId);
+            String json = objectMapper.writeValueAsString(topicDTO);
+            appUtil.saveEntityChanges(EntityType.TOPIC, json, topic.getId(), ContentAction.UPDATE, instructorId);
         }
     }
 }

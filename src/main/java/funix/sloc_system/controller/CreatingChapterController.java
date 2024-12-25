@@ -3,9 +3,11 @@ package funix.sloc_system.controller;
 import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.mapper.ChapterMapper;
+import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.ChapterService;
 import funix.sloc_system.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -43,8 +45,8 @@ public class CreatingChapterController {
 
     @GetMapping("/{chapterId}")
     public String showChapterDetails(@PathVariable Long courseId, 
-                                   @PathVariable Long chapterId, 
-                                   Model model) {
+                                     @PathVariable Long chapterId,
+                                     Model model) {
         try {
             CourseDTO courseDTO = courseService.getEditingCourseDTO(courseId);
             ChapterDTO selectedChapter = chapterService.getEditingChapterDTO(chapterId);
@@ -58,8 +60,8 @@ public class CreatingChapterController {
 
     @PostMapping("/add")
     public String addChapter(@PathVariable Long courseId,
-                           @RequestParam("title") String title,
-                           RedirectAttributes redirectAttributes) {
+                             @RequestParam("title") String title,
+                             RedirectAttributes redirectAttributes) {
         try {
             chapterService.createChapter(courseId, title);
             redirectAttributes.addFlashAttribute("successMessage", "Chapter created successfully.");
@@ -70,12 +72,16 @@ public class CreatingChapterController {
         }
     }
 
-    @PostMapping("/save")
+    @PostMapping("/{chapterId}/edit")
     public String saveChapter(@PathVariable Long courseId,
-                            @ModelAttribute("chapter") ChapterDTO chapterDTO,
-                            RedirectAttributes redirectAttributes) {
+                              @PathVariable Long chapterId,
+                              @RequestParam("title") String title,
+                              @RequestParam("sequence") int sequence,
+                              @AuthenticationPrincipal SecurityUser securityUser,
+                              RedirectAttributes redirectAttributes) {
+        Long instructorId = securityUser.getUserId();
         try {
-            chapterService.saveChapterChanges(chapterDTO, courseId);
+            chapterService.updateChapter(chapterId, title, sequence, instructorId);
             redirectAttributes.addFlashAttribute("successMessage", "Chapter updated successfully.");
             return "redirect:/instructor/course/" + courseId + "/chapter";
         } catch (Exception e) {

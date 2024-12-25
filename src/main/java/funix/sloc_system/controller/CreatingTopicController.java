@@ -119,7 +119,7 @@ public class CreatingTopicController {
                 Files.write(filePath, content.getBytes());
                 
                 // Save file path to DTO
-                topicDTO.setFileUrl("/reading/" + filename);
+                topicDTO.setFileUrl("/static/reading/" + filename);
             } else if ("VIDEO".equals(topicType) && videoUrl != null) {
                 topicDTO.setVideoUrl(videoUrl);
             } else if (("QUIZ".equals(topicType) || "EXAM".equals(topicType)) && questions != null) {

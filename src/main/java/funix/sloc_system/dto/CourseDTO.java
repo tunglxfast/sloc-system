@@ -26,6 +26,7 @@ public class CourseDTO {
     private String description;
     private String thumbnailUrl;
     private CategoryDTO category;
+    private UserDTO instructor;
     private UserDTO createdBy;
     private UserDTO lastUpdatedBy;
     @DateTimeFormat(pattern="yyyy-MM-dd")
@@ -43,52 +44,21 @@ public class CourseDTO {
     private List<ChapterDTO> chapters;
     @JsonIgnore
     private Set<EnrollmentDTO> enrollments;
-    private UserDTO instructor;
 
     // handy methods
-    // not overwrite id, createAt, updateAt
-    public void updateCourseDTO(CourseDTO otherCourse) {
-        if (otherCourse.getTitle() != null) {
-            this.setTitle(otherCourse.getTitle());
+    // update title, description, start/end date
+    public void updateEditingValues(CourseDTO editingValues) {
+        if (editingValues.getTitle() != null) {
+            this.setTitle(editingValues.getTitle());
         }
-        if (otherCourse.getDescription() != null) {
-            this.setDescription(otherCourse.getDescription());
+        if (editingValues.getDescription() != null) {
+            this.setDescription(editingValues.getDescription());
         }
-        if (otherCourse.getThumbnailUrl() != null) {
-            this.setThumbnailUrl(otherCourse.getThumbnailUrl());
+        if (editingValues.getStartDate() != null) {
+            this.setStartDate(editingValues.getStartDate());
         }
-        if (otherCourse.getCategory() != null) {
-            this.setCategory(otherCourse.getCategory());
-        }
-        if (otherCourse.getCreatedBy() != null) {
-            this.setCreatedBy(otherCourse.getCreatedBy());
-        }
-        if (otherCourse.getLastUpdatedBy() != null) {
-            this.setLastUpdatedBy(otherCourse.getLastUpdatedBy());
-        }
-        if (otherCourse.getChapters() != null && !otherCourse.getChapters().isEmpty()) {
-            this.setChapters(otherCourse.getChapters());
-        }
-        if (otherCourse.getEnrollments() != null && !otherCourse.getEnrollments().isEmpty()) {
-            this.setEnrollments(otherCourse.getEnrollments());
-        }
-        if (otherCourse.getInstructor() != null) {
-            this.setInstructor(otherCourse.getInstructor());
-        }
-        if (otherCourse.getStartDate() != null) {
-            this.setStartDate(otherCourse.getStartDate());
-        }
-        if (otherCourse.getEndDate() != null) {
-            this.setEndDate(otherCourse.getEndDate());
-        }
-        if (otherCourse.getContentStatus() != null) {
-            this.setContentStatus(otherCourse.getContentStatus());
-        }
-        if (otherCourse.getApprovalStatus() != null) {
-            this.setApprovalStatus(otherCourse.getApprovalStatus());
-        }
-        if (otherCourse.getRejectReason() != null) {
-            this.setRejectReason(otherCourse.getRejectReason());
+        if (editingValues.getEndDate() != null) {
+            this.setEndDate(editingValues.getEndDate());
         }
     }
 

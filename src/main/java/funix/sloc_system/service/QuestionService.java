@@ -62,7 +62,7 @@ public class QuestionService {
     public void saveQuestionChanges(QuestionDTO questionDTO, Long instructorId) throws IOException {
         Question question = questionRepository.findById(questionDTO.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Question not found"));
-        
+        // TODO: fix this later, replace updateWithOtherTopic with working with DTO
         if (question.getContentStatus() == ContentStatus.DRAFT) {
             int oldQuestionSequence = question.getSequence();
             // Update question using entity method
@@ -82,7 +82,8 @@ public class QuestionService {
             // Save question changes to temp table.
             // This includes both the question and its answers as a single unit.
             // The QuestionDTO should include the complete list of answers.
-            appUtil.saveEntityChanges(EntityType.QUESTION, questionDTO, question.getId(), ContentAction.UPDATE, instructorId);
+            String json = objectMapper.writeValueAsString(questionDTO);
+            appUtil.saveEntityChanges(EntityType.QUESTION, json, question.getId(), ContentAction.UPDATE, instructorId);
         }
     }
 

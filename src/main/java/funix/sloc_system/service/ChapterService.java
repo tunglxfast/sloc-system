@@ -1,28 +1,26 @@
 package funix.sloc_system.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import funix.sloc_system.entity.Chapter;
-import funix.sloc_system.entity.Course;
-import funix.sloc_system.entity.Topic;
 import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.dto.TopicDTO;
+import funix.sloc_system.entity.Chapter;
+import funix.sloc_system.entity.ContentChangeTemporary;
+import funix.sloc_system.entity.Course;
+import funix.sloc_system.entity.Topic;
+import funix.sloc_system.enums.ContentAction;
+import funix.sloc_system.enums.ContentStatus;
+import funix.sloc_system.enums.EntityType;
 import funix.sloc_system.mapper.ChapterMapper;
 import funix.sloc_system.mapper.TopicMapper;
-import funix.sloc_system.enums.ContentStatus;
-import funix.sloc_system.enums.ContentAction;
-import funix.sloc_system.enums.EntityType;
 import funix.sloc_system.repository.ChapterRepository;
 import funix.sloc_system.repository.ContentChangeRepository;
 import funix.sloc_system.repository.CourseRepository;
-
 import funix.sloc_system.util.ApplicationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ChapterService {
@@ -67,14 +65,13 @@ public class ChapterService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
 
-        // Get next sequence number
-        int nextSequence = chapterRepository.findByCourseIdOrderBySequence(courseId).size() + 1;
+        int newSequence = chapterRepository.findByCourseIdOrderBySequence(courseId).size() + 1;
 
         // Create new chapter
         Chapter newChapter = new Chapter();
         newChapter.setCourse(course);
         newChapter.setTitle(title);
-        newChapter.setSequence(nextSequence);
+        newChapter.setSequence(newSequence);
 
         // Save and return as DTO
         Chapter savedChapter = chapterRepository.save(newChapter);
@@ -111,22 +108,29 @@ public class ChapterService {
     }
 
     /**
-     * Get editing changes for chapter
+     * Find chapter's changes from ContentChangeTemporary
+     * then update with current Chapter.
      */
     @Transactional
     public ChapterDTO getEditingChapterDTO(Long id) throws Exception {
-        Chapter chapter = findById(id);
-        if (chapter == null) {
-            return null;
-        }
-        
-        Optional<String> editingChanges = contentChangeRepository.findByEntityTypeAndEntityId(EntityType.CHAPTER, id)
-                .map(change -> change.getChanges());
-        
-        if (editingChanges.isPresent()) {
-            return objectMapper.readValue(editingChanges.get(), ChapterDTO.class);
+        Chapter chapter = chapterRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Editing chapter not found"));
+        ChapterDTO originalChapterDTO = chapterMapper.toDTO(chapter);
+
+        ContentChangeTemporary editingChanges = contentChangeRepository
+                .findByEntityTypeAndEntityId(EntityType.CHAPTER, id).orElse(null);
+        if (editingChanges != null) {
+            String editingJson = editingChanges.getChanges();
+            try {
+                ChapterDTO editingDTO = objectMapper.readValue(editingJson, ChapterDTO.class);
+                // set topics because this attribute is JsonIgnore
+                editingDTO.setTopics(originalChapterDTO.getTopics());
+                return editingDTO;
+            } catch (Exception e) {
+                throw new Exception("Error when editing chapter: " + chapter.getTitle() + ", please contact support.");
+            }
         } else {
-            return chapterMapper.toDTO(chapter);
+            return originalChapterDTO;
         }
     }
 
@@ -143,11 +147,18 @@ public class ChapterService {
      * Save chapter changes based on course status
      */
     @Transactional
-    public void saveChapterChanges(ChapterDTO chapterDTO, Long instructorId) throws IOException {
-        Chapter chapter = chapterRepository.findById(chapterDTO.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Chapter not found"));
-        Course course = chapter.getCourse();
-        if (chapter.getContentStatus() == ContentStatus.DRAFT) {
+    public void updateChapter(Long chapterId, String title, int sequence, Long instructorId) throws Exception {
+        ChapterDTO chapterDTO = getEditingChapterDTO(chapterId);
+        // TODO: edit reorder All needed sequence, and replace updateWithOtherTopic with working with DTO
+        // update title and reorder sequence
+        chapterDTO.setTitle(title);
+        chapterDTO.setSequence(sequence);
+
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new RuntimeException("Chapter not found"));
+
+        if (ContentStatus.DRAFT.name().equals(chapterDTO.getContentStatus())) {
+            Long courseId = chapter.getCourse().getId();
             int oldChapterSequence = chapter.getSequence();
             // Update chapter using entity method
             Chapter updatedChapter = chapterMapper.toEntity(chapterDTO);
@@ -155,16 +166,17 @@ public class ChapterService {
             // Handle sequence change if needed
             if (oldChapterSequence != chapterDTO.getSequence()) {
                 // Validate new sequence
-                int maxSequence = chapterRepository.findByCourseId(course.getId()).size();
+                int maxSequence = chapterRepository.findByCourseId(courseId).size();
                 int newSequence = Math.max(1, Math.min(chapterDTO.getSequence(), maxSequence));
                 
                 // Reorder chapters if sequence changed
-                reorderChapters(course.getId(), chapter, newSequence);
+                reorderChapters(courseId, chapter, newSequence);
             }
             chapterRepository.save(chapter);
         } else {
             // Save chapter changes to temp table.
-            appUtil.saveEntityChanges(EntityType.CHAPTER, chapterDTO, chapter.getId(), ContentAction.UPDATE, instructorId);
+            String json = objectMapper.writeValueAsString(chapterDTO);
+            appUtil.saveEntityChanges(EntityType.CHAPTER, json, chapter.getId(), ContentAction.UPDATE, instructorId);
         }
     }
 

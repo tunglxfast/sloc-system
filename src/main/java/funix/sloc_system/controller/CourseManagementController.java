@@ -88,7 +88,7 @@ public class CourseManagementController {
 
     @PostMapping("/{courseId}/submit")
     public String submitCourse(@PathVariable("courseId") Long courseId,
-                            @ModelAttribute("course") CourseDTO courseUpdateValues,
+                            @ModelAttribute("course") CourseDTO editingValues,
                             @AuthenticationPrincipal SecurityUser securityUser,
                             @RequestParam("thumbnailFile") MultipartFile file,
                             @RequestParam("categoryId") Long categoryId,
@@ -96,12 +96,8 @@ public class CourseManagementController {
                             RedirectAttributes redirectAttributes) {
         Long instructorId = securityUser.getUserId();
         try {
-            // Get current course state
-            CourseDTO courseDTO = courseService.getEditingCourseDTO(courseId);
-            courseDTO.updateCourseDTO(courseUpdateValues);
-            
-            // Save updates
-            courseService.saveUpdateCourse(courseId, courseDTO, instructorId, file, categoryId);
+            // Save update course based on content status
+            courseService.updateCourse(courseId, editingValues, instructorId, file, categoryId);
             
             // Handle different actions
             if ("Submit".equals(action)) {
@@ -115,7 +111,7 @@ public class CourseManagementController {
             }
             
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred while updating, please contact support!");
             return "redirect:/instructor/course/" + courseId + "/edit";
         }
     }

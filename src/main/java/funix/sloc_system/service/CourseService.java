@@ -380,26 +380,44 @@ public class CourseService {
     }
 
     /**
-     * Get editing changes for any entity type
+     * Get editing changes for ContentChangeTemporary
      */
-    @Transactional
-    public <T> T getEditingEntityDTO(EntityType entityType, Long id, Class<T> dtoClass) throws Exception {
+    public String getEditingJson(EntityType entityType, Long id) {
         ContentChangeTemporary changeTemporary = contentChangeRepository.findByEntityTypeAndEntityId(
                 entityType,
                 id).orElse(null);
         if (changeTemporary == null) {
             return null;
         } else {
-            String changeContext = changeTemporary.getChanges();
-            return objectMapper.readValue(changeContext, dtoClass);
+            return changeTemporary.getChanges();
         }
     }
 
-    @Transactional
+    /**
+     * Find course's changes from ContentChangeTemporary
+     * then update with current Course.
+     * @param id
+     * @return
+     * @throws Exception
+     */
     public CourseDTO getEditingCourseDTO(Long id) throws Exception {
-        Course course = findById(id);
-        CourseDTO editingCourse = getEditingEntityDTO(EntityType.COURSE, id, CourseDTO.class);
-        return editingCourse != null ? editingCourse : courseMapper.toDTO(course);
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Editing course not found"));
+        CourseDTO originalCourseDTO = courseMapper.toDTO(course);
+        String editingJson = getEditingJson(EntityType.COURSE, id);
+        if (editingJson != null) {
+            try {
+                CourseDTO editingDTO = objectMapper.readValue(editingJson, CourseDTO.class);
+                // set chapters and enrollments because those attributes are JsonIgnore
+                editingDTO.setChapters(originalCourseDTO.getChapters());
+                editingDTO.setEnrollments(originalCourseDTO.getEnrollments());
+                return editingDTO;
+            } catch (Exception e) {
+                throw new Exception("Error when editing course: " + course.getTitle() + ", please contact support.");
+            }
+        } else {
+            return originalCourseDTO;
+        }
     }
 
     public void sendRejectionEmail(User instructor, Course course, String reason) {
@@ -461,33 +479,34 @@ public class CourseService {
      * - If course is published and editing existing content: save to temp table
      */
     @Transactional
-    public void saveUpdateCourse(Long courseId, CourseDTO courseDTO, Long instructorId, MultipartFile file, Long categoryId) throws IOException {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
-        
+    public void updateCourse(Long courseId, CourseDTO editingValues, Long instructorId, MultipartFile file, Long categoryId) throws Exception {
+        CourseDTO courseDTO = getEditingCourseDTO(courseId);
         User instructor = userRepository.findById(instructorId).orElse(null);
         Category category = categoryRepository.findById(categoryId).orElse(null);
+
+        // update title, description, start/end date
+        courseDTO.updateEditingValues(editingValues);
+        // update other attributes
         courseDTO.setInstructor(instructor);
         courseDTO.setCategory(category);
         courseDTO.setUpdatedAt(LocalDate.now());
         courseDTO.setLastUpdatedBy(instructor);
+
         courseDTO.setCategory(category);
         // Handle thumbnail update if provided
         if (file != null && !file.isEmpty()) {
             String thumbnailPath = saveThumbnail(file);
             courseDTO.setThumbnailUrl(thumbnailPath);
         }
-        
-        ContentStatus currentStatus = course.getContentStatus();
+        String currentStatus = courseDTO.getContentStatus();
         // 1. Course is in DRAFT state (not published yet)
-        if (currentStatus == ContentStatus.DRAFT) {
+        if (ContentStatus.DRAFT.name().equals(currentStatus)) {
             // Update course using entity method
-            Course updatedCourse = courseMapper.toEntity(courseDTO);
-            course.updateWithOtherCourse(updatedCourse);
-            courseRepository.save(course);
+            courseRepository.save(courseMapper.toEntity(courseDTO));
         } else {
             // Save course changes to temp table.
-            appUtil.saveEntityChanges(EntityType.COURSE, courseDTO, course.getId(), ContentAction.UPDATE, instructorId);
+            String json = objectMapper.writeValueAsString(courseDTO);
+            appUtil.saveEntityChanges(EntityType.COURSE, json, courseId, ContentAction.UPDATE, instructorId);
         }
     }
 
