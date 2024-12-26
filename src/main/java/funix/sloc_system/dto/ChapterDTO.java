@@ -1,6 +1,5 @@
 package funix.sloc_system.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +16,6 @@ public class ChapterDTO {
     private String title;
     private int sequence;
     private Long courseId;
-    @JsonIgnore
     private List<TopicDTO> topics;
     private String contentStatus;
 }

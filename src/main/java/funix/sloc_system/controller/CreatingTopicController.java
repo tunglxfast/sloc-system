@@ -5,10 +5,13 @@ import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.QuestionDTO;
 import funix.sloc_system.dto.TopicDTO;
+import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.ChapterService;
 import funix.sloc_system.service.CourseService;
 import funix.sloc_system.service.TopicService;
+import funix.sloc_system.util.AppUtil;
+import funix.sloc_system.util.RedirectUrlHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,63 +29,83 @@ import java.util.List;
 import java.util.UUID;
 
 @Controller
-@RequestMapping("/instructor/course/{courseId}/chapter/{chapterId}/topic")
+@RequestMapping("/instructor/course/{courseId}/edit/topic")
 public class CreatingTopicController {
 
     @Value("${app.upload.dir:src/main/resources/reading}")
-    private String uploadDir;
-
+    private String uploadReadingDir;
     @Autowired
     private ChapterService chapterService;
-    
     @Autowired
     private CourseService courseService;
-    
     @Autowired
     private TopicService topicService;
+    @Autowired
+    private AppUtil appUtil;
 
     @GetMapping("/create")
-    public String showCreateTopic(@PathVariable Long courseId,
-                                @PathVariable Long chapterId,
-                                @RequestParam String type,
-                                Model model) {
+    public String showCreateTopicForm(@PathVariable Long courseId,
+                              @RequestParam("chapterId") Long chapterId,
+                              @RequestParam String topicType,
+                              Model model) {
+        if (chapterId == null ) {
+            return RedirectUrlHelper.buildRedirectErrorUrl(courseId, "Chapter info not found");
+        }
+
         try {
-            CourseDTO courseDTO = courseService.getEditingCourseDTO(courseId);
-            ChapterDTO chapterDTO = chapterService.getEditingChapterDTO(chapterId);
-            model.addAttribute("course", courseDTO);
-            model.addAttribute("chapter", chapterDTO);
-            model.addAttribute("topicType", type);
-            model.addAttribute("newTopic", new TopicDTO());
+            CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
+            ChapterDTO chapterDTO = AppUtil.getSelectChapterDTO(courseDTO, chapterId);
+
+
+            model.addAttribute("courseId", courseDTO.getId());
+            model.addAttribute("courseTitle", courseDTO.getTitle());
+            model.addAttribute("chapterId", chapterDTO.getId());
+            model.addAttribute("chapterTitle", chapterDTO.getTitle());
+            model.addAttribute("topicType", topicType);
+            model.addAttribute("topic", new TopicDTO());
+
             return "instructor/create_topic";
         } catch (Exception e) {
-            return "redirect:/instructor/course/" + courseId + "/chapter/" + chapterId + "?error=" + e.getMessage();
+            return RedirectUrlHelper.buildRedirectErrorUrl(courseId, e.getMessage());
         }
     }
 
-    @GetMapping("/{topicId}")
-    public String showEditTopic(@PathVariable Long courseId,
-                              @PathVariable Long chapterId,
-                              @PathVariable Long topicId,
-                              Model model) {
+    @GetMapping(value = {"","/"})
+    public String showEditTopicForm(@PathVariable Long courseId,
+                                    @RequestParam("chapterId") Long chapterId,
+                                    @RequestParam("topicId") Long topicId,
+                                    Model model) {
+        if (chapterId == null || topicId == null ) {
+            return RedirectUrlHelper.buildRedirectErrorUrl(courseId, "Chapter or topic info not found");
+        }
+
         try {
-            CourseDTO courseDTO = courseService.getEditingCourseDTO(courseId);
-            ChapterDTO chapterDTO = chapterService.getEditingChapterDTO(chapterId);
-            TopicDTO topicDTO = topicService.getEditingTopicDTO(topicId);
-            
-            model.addAttribute("course", courseDTO);
-            model.addAttribute("chapter", chapterDTO);
+            CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
+            ChapterDTO chapterDTO = AppUtil.getSelectChapterDTO(courseDTO, chapterId);
+            TopicDTO topicDTO = AppUtil.getSelectTopicDTO(chapterDTO, topicId);
+            String topicType = topicDTO.getTopicType();
+
+            model.addAttribute("courseId", courseDTO.getId());
+            model.addAttribute("courseTitle", courseDTO.getTitle());
+            model.addAttribute("chapterId", chapterDTO.getId());
+            model.addAttribute("chapterTitle", chapterDTO.getTitle());
+            model.addAttribute("topicType", topicType);
             model.addAttribute("topic", topicDTO);
-            model.addAttribute("topicType", topicDTO.getTopicType());
-            
-            return "instructor/edit_topic";
+
+            if (topicType.equals(TopicType.READING.name())
+                    || topicType.equals(TopicType.VIDEO.name())) {
+                return "instructor/edit_lesson_topic";
+            } else {
+                return "instructor/edit_test_topic";
+            }
         } catch (Exception e) {
-            return "redirect:/instructor/course/" + courseId + "/chapter/" + chapterId + "?error=" + e.getMessage();
+            return RedirectUrlHelper.buildRedirectErrorUrl(courseId, e.getMessage());
         }
     }
 
     @PostMapping("/add")
     public String addTopic(@PathVariable Long courseId,
-                          @PathVariable Long chapterId,
+                          @RequestParam Long chapterId,
                           @RequestParam String title,
                           @RequestParam String description,
                           @RequestParam String topicType,
@@ -92,6 +115,7 @@ public class CreatingTopicController {
                           @RequestParam(required = false) Integer passScore,
                           @RequestParam(required = false) Integer timeLimit,
                           RedirectAttributes redirectAttributes) {
+        // TODO: đang làm, cần chia nhỏ ra thành lesson và test cho dễ quản lý
         try {
             TopicDTO topicDTO = new TopicDTO();
             topicDTO.setTitle(title);
@@ -101,7 +125,7 @@ public class CreatingTopicController {
             // Handle different topic types
             if ("READING".equals(topicType) && content != null && !content.isEmpty()) {
                 // Create upload directory if it doesn't exist
-                File directory = new File(uploadDir);
+                File directory = new File(uploadReadingDir);
                 if (!directory.exists()) {
                     directory.mkdirs();
                 }
@@ -115,7 +139,7 @@ public class CreatingTopicController {
                 String filename = UUID.randomUUID().toString() + extension;
                 
                 // Save file
-                Path filePath = Paths.get(uploadDir, filename);
+                Path filePath = Paths.get(uploadReadingDir, filename);
                 Files.write(filePath, content.getBytes());
                 
                 // Save file path to DTO
@@ -142,8 +166,7 @@ public class CreatingTopicController {
             redirectAttributes.addFlashAttribute("successMessage", "Topic created successfully.");
             return "redirect:/instructor/course/" + courseId + "/chapter/" + chapterId;
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/instructor/course/" + courseId + "/chapter/" + chapterId;
+            return RedirectUrlHelper.buildRedirectErrorUrl(courseId, e.getMessage());
         }
     }
 
@@ -155,11 +178,9 @@ public class CreatingTopicController {
                           RedirectAttributes redirectAttributes) {
         try {
             topicService.saveTopicChanges(topicDTO, securityUser.getUserId());
-            redirectAttributes.addFlashAttribute("successMessage", "Topic updated successfully.");
-            return "redirect:/instructor/course/" + courseId + "/chapter/" + chapterId;
+            return RedirectUrlHelper.buildRedirectSuccessUrl(courseId, "Topic updated successfully.");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/instructor/course/" + courseId + "/chapter/" + chapterId;
+            return RedirectUrlHelper.buildRedirectErrorUrl(courseId, e.getMessage());
         }
     }
 }

@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,13 +61,14 @@ public class Course {
     @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate updatedAt;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @OrderBy("sequence ASC")
-    private List<Chapter> chapters;
+    private List<Chapter> chapters = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.PERSIST)
     private Set<Enrollment> enrollments = new HashSet<>();
 
+    // Helper method
     public void updateWithOtherCourse(Course updatedCourse) {
         if (updatedCourse.getTitle() != null) {
             this.title = updatedCourse.getTitle();

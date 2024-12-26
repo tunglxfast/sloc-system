@@ -3,13 +3,12 @@ package funix.sloc_system.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import funix.sloc_system.dto.QuestionDTO;
 import funix.sloc_system.entity.Question;
-import funix.sloc_system.enums.ContentAction;
 import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.EntityType;
 import funix.sloc_system.mapper.QuestionMapper;
 import funix.sloc_system.repository.ContentChangeRepository;
 import funix.sloc_system.repository.QuestionRepository;
-import funix.sloc_system.util.ApplicationUtil;
+import funix.sloc_system.util.AppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +28,7 @@ public class QuestionService {
     @Autowired
     private ContentChangeRepository contentChangeRepository;
     @Autowired
-    private ApplicationUtil appUtil;
+    private AppUtil appUtil;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -83,7 +82,7 @@ public class QuestionService {
             // This includes both the question and its answers as a single unit.
             // The QuestionDTO should include the complete list of answers.
             String json = objectMapper.writeValueAsString(questionDTO);
-            appUtil.saveEntityChanges(EntityType.QUESTION, json, question.getId(), ContentAction.UPDATE, instructorId);
+            appUtil.saveContentChange(json, question.getId(), instructorId);
         }
     }
 

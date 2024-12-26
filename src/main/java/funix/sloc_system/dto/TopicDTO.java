@@ -1,15 +1,11 @@
 package funix.sloc_system.dto;
 
-import funix.sloc_system.enums.ContentStatus;
-import funix.sloc_system.enums.TopicType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Getter
 @Setter
@@ -21,7 +17,6 @@ public class TopicDTO {
     private String description;
     private String topicType;
     private int sequence;
-    @JsonIgnore
     private Long chapterId;
     private String contentStatus;
     

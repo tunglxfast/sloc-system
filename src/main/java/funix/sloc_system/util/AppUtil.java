@@ -1,7 +1,9 @@
 package funix.sloc_system.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import funix.sloc_system.dto.ChapterDTO;
+import funix.sloc_system.dto.CourseDTO;
+import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.entity.ContentChangeTemporary;
 import funix.sloc_system.entity.Course;
@@ -19,7 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
-public class ApplicationUtil {
+public class AppUtil {
 
     @Autowired
     private TopicRepository topicRepository;
@@ -47,6 +49,8 @@ public class ApplicationUtil {
     private QuestionMapper questionMapper;
     @Autowired
     private AnswerMapper answerMapper;
+    @Autowired
+    private EnrollmentMapper enrollmentMapper;
 
     public Topic findNextTopic(Long topicId){
         Topic currentTopic = topicRepository.findById(topicId)
@@ -97,17 +101,86 @@ public class ApplicationUtil {
      * The changes JSON will contain the complete state of the entity after changes.
      */
     @Transactional
-    public void saveEntityChanges(EntityType entityType, String json, Long entityId, ContentAction action, Long instructorId) throws JsonProcessingException {
+    public void saveContentChange(String json, Long entityId) {
+        this.saveContentChange(json, entityId, null);
+    }
+
+    @Transactional
+    public void saveContentChange(String json, Long entityId, Long instructorId) {
         ContentChangeTemporary changeTemporary = contentChangeRepository
-                .findByEntityTypeAndEntityId(entityType, entityId)
+                .findByEntityTypeAndEntityId(EntityType.COURSE, entityId)
                 .orElse(new ContentChangeTemporary());
 
-        changeTemporary.setEntityType(entityType);
+        changeTemporary.setEntityType(EntityType.COURSE);
         changeTemporary.setEntityId(entityId);
-        changeTemporary.setAction(action);
+        changeTemporary.setAction(ContentAction.UPDATE);
         changeTemporary.setChanges(json);
-        changeTemporary.setUpdatedBy(instructorId);
         changeTemporary.setChangeTime(LocalDateTime.now());
+
+        if (instructorId != null) {
+            changeTemporary.setUpdatedBy(instructorId);
+        }
+
         contentChangeRepository.save(changeTemporary);
+    }
+
+    /**
+     * Find course's changes from ContentChangeTemporary
+     * then update with current Course.
+     * @param id Course Id
+     */
+    public CourseDTO getEditingCourseDTO(Long id) throws Exception {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Editing course not found"));
+        String editingJson = getEditingJson(EntityType.COURSE, id);
+
+        if (course.getContentStatus().equals(ContentStatus.DRAFT) || editingJson == null) {
+            return courseMapper.toDTO(course);
+        } else {
+            try {
+                CourseDTO editingDTO = objectMapper.readValue(editingJson, CourseDTO.class);
+                // set enrollments because this attribute is JsonIgnore
+                editingDTO.setEnrollments(enrollmentMapper.toDTO(course.getEnrollments()));
+                return editingDTO;
+            } catch (Exception e) {
+                throw new Exception("Error while get editing course: " + course.getTitle()
+                        + ", please contact support center.");
+            }
+        }
+    }
+
+    /**
+     * Get editing changes for ContentChangeTemporary
+     */
+    public String getEditingJson(EntityType entityType, Long id) {
+        ContentChangeTemporary changeTemporary = contentChangeRepository.findByEntityTypeAndEntityId(
+                entityType,
+                id).orElse(null);
+        if (changeTemporary == null) {
+            return null;
+        } else {
+            return changeTemporary.getChanges();
+        }
+    }
+
+
+    public static ChapterDTO getSelectChapterDTO(CourseDTO courseDTO, Long chapterId) {
+        for (ChapterDTO chapterDTO : courseDTO.getChapters()) {
+            if (chapterDTO.getId().equals(chapterId)) {
+                return chapterDTO;
+            }
+        }
+        // throw exeption if not found any match with chapterId
+        throw new IllegalArgumentException(String.format("Chapter with id: %d not found", chapterId));
+    }
+
+    public static TopicDTO getSelectTopicDTO(ChapterDTO chapterDTO, Long topicId) {
+        for (TopicDTO topicDTO : chapterDTO.getTopics()) {
+            if (topicDTO.getId().equals(topicDTO)) {
+                return topicDTO;
+            }
+        }
+        // throw exeption if not found any match with chapterId
+        throw new IllegalArgumentException(String.format("Topic with id: %d not found", topicId));
     }
 }

@@ -6,7 +6,7 @@ import funix.sloc_system.repository.*;
 import funix.sloc_system.dto.*;
 import funix.sloc_system.entity.*;
 import funix.sloc_system.mapper.*;
-import funix.sloc_system.util.ApplicationUtil;
+import funix.sloc_system.util.AppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +23,8 @@ import java.util.Optional;
 
 @Service
 public class CourseService {
+
+    public final String THUMBNAIL_LOCAL = "/img/courses/thumbnails/";
 
     @Autowired
     private UserRepository userRepository;
@@ -49,10 +51,12 @@ public class CourseService {
     @Autowired
     private QuestionMapper questionMapper;
     @Autowired
+    private EnrollmentMapper enrollmentMapper;
+    @Autowired
     private QuestionRepository questionRepository;
 
     @Autowired
-    private ApplicationUtil appUtil;
+    private AppUtil appUtil;
 
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
@@ -83,127 +87,27 @@ public class CourseService {
         return courseMapper.toDTO(courses);
     }
 
-    @Transactional
-    public void submitForCreatingReview(Long courseId) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
 
-        if (course.getChapters().isEmpty()) {
-            throw new IllegalArgumentException("Course must have at least one chapter before submission.");
-        }
-
-        // Update course status
-        course.setContentStatus(ContentStatus.READY_TO_REVIEW);
-        course.setApprovalStatus(ApprovalStatus.PENDING);
-
-        // Update child entities status
-        for (Chapter chapter : course.getChapters()) {
-            chapter.setContentStatus(ContentStatus.READY_TO_REVIEW);
-            for (Topic topic : chapter.getTopics()) {
-                topic.setContentStatus(ContentStatus.READY_TO_REVIEW);
-                if (topic.getQuestions() != null) {
-                    for (Question question : topic.getQuestions()) {
-                        question.setContentStatus(ContentStatus.READY_TO_REVIEW);
-                        if (question.getAnswers() != null) {
-                            question.getAnswers().forEach(answer -> 
-                                answer.setContentStatus(ContentStatus.READY_TO_REVIEW));
-                        }
-                    }
-                }
-            }
-        }
-
-        courseRepository.save(course);
-    }
 
     @Transactional
-    public void submitForEditingReview(Long courseId) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
-
-        // Update course status
-        course.setContentStatus(ContentStatus.PUBLISHED_EDITING);
-        course.setApprovalStatus(ApprovalStatus.PENDING);
-
-        // Get all changes from temporary table
-        List<ContentChangeTemporary> allChanges = getAllCourseChanges(course);
-
-        // Update child entities status based on their change action
-        for (Chapter chapter : course.getChapters()) {
-            Optional<ContentChangeTemporary> chapterChange = allChanges.stream()
-                .filter(change -> change.getEntityType() == EntityType.CHAPTER 
-                    && change.getEntityId().equals(chapter.getId()))
-                .findFirst();
-
-            if (chapterChange.isPresent()) {
-                ContentAction action = chapterChange.get().getAction();
-                if (action == ContentAction.CREATE) {
-                    chapter.setContentStatus(ContentStatus.READY_TO_REVIEW);
-                } else {
-                    // Both UPDATE and DELETE should change to PUBLISHED_EDITING
-                    chapter.setContentStatus(ContentStatus.PUBLISHED_EDITING);
-                }
-            }
-
-            for (Topic topic : chapter.getTopics()) {
-                Optional<ContentChangeTemporary> topicChange = allChanges.stream()
-                    .filter(change -> change.getEntityType() == EntityType.TOPIC 
-                        && change.getEntityId().equals(topic.getId()))
-                    .findFirst();
-
-                if (topicChange.isPresent()) {
-                    ContentAction action = topicChange.get().getAction();
-                    if (action == ContentAction.CREATE) {
-                        topic.setContentStatus(ContentStatus.READY_TO_REVIEW);
-                    } else {
-                        // Both UPDATE and DELETE should change to PUBLISHED_EDITING
-                        topic.setContentStatus(ContentStatus.PUBLISHED_EDITING);
-                    }
-                }
-
-                if (topic.getQuestions() != null) {
-                    for (Question question : topic.getQuestions()) {
-                        Optional<ContentChangeTemporary> questionChange = allChanges.stream()
-                            .filter(change -> change.getEntityType() == EntityType.QUESTION 
-                                && change.getEntityId().equals(question.getId()))
-                            .findFirst();
-
-                        if (questionChange.isPresent()) {
-                            ContentAction action = questionChange.get().getAction();
-                            if (action == ContentAction.CREATE) {
-                                question.setContentStatus(ContentStatus.READY_TO_REVIEW);
-                                if (question.getAnswers() != null) {
-                                    question.getAnswers().forEach(answer -> 
-                                        answer.setContentStatus(ContentStatus.READY_TO_REVIEW));
-                                }
-                            } else {
-                                // Both UPDATE and DELETE should change to PUBLISHED_EDITING
-                                question.setContentStatus(ContentStatus.PUBLISHED_EDITING);
-                                if (question.getAnswers() != null) {
-                                    question.getAnswers().forEach(answer -> 
-                                        answer.setContentStatus(ContentStatus.PUBLISHED_EDITING));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        courseRepository.save(course);
-    }
-
-    @Transactional
-    public void submitForReview(Long courseId) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+    public void submitForReview(Long courseId) throws IllegalArgumentException {
+        Course course = findById(courseId);
 
         // change course content status for reviewing
-        if (course.getContentStatus() == ContentStatus.DRAFT){
-            submitForCreatingReview(courseId);
-        } else {
-            submitForEditingReview(courseId);
+        if (course == null) {
+            throw new IllegalArgumentException("Course not found!");
+        } else if (course.getChapters().isEmpty()) {
+            throw new IllegalArgumentException("Course must have at least one chapter before submit for review.");
         }
+
+        if (course.getContentStatus() == ContentStatus.DRAFT){
+            course.setContentStatus(ContentStatus.READY_TO_REVIEW);
+            course.setApprovalStatus(ApprovalStatus.PENDING);
+        } else {
+            course.setContentStatus(ContentStatus.PUBLISHED_EDITING);
+            course.setApprovalStatus(ApprovalStatus.PENDING);
+        }
+        courseRepository.save(course);
     }
 
     @Transactional
@@ -379,47 +283,6 @@ public class CourseService {
         }
     }
 
-    /**
-     * Get editing changes for ContentChangeTemporary
-     */
-    public String getEditingJson(EntityType entityType, Long id) {
-        ContentChangeTemporary changeTemporary = contentChangeRepository.findByEntityTypeAndEntityId(
-                entityType,
-                id).orElse(null);
-        if (changeTemporary == null) {
-            return null;
-        } else {
-            return changeTemporary.getChanges();
-        }
-    }
-
-    /**
-     * Find course's changes from ContentChangeTemporary
-     * then update with current Course.
-     * @param id
-     * @return
-     * @throws Exception
-     */
-    public CourseDTO getEditingCourseDTO(Long id) throws Exception {
-        Course course = courseRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Editing course not found"));
-        CourseDTO originalCourseDTO = courseMapper.toDTO(course);
-        String editingJson = getEditingJson(EntityType.COURSE, id);
-        if (editingJson != null) {
-            try {
-                CourseDTO editingDTO = objectMapper.readValue(editingJson, CourseDTO.class);
-                // set chapters and enrollments because those attributes are JsonIgnore
-                editingDTO.setChapters(originalCourseDTO.getChapters());
-                editingDTO.setEnrollments(originalCourseDTO.getEnrollments());
-                return editingDTO;
-            } catch (Exception e) {
-                throw new Exception("Error when editing course: " + course.getTitle() + ", please contact support.");
-            }
-        } else {
-            return originalCourseDTO;
-        }
-    }
-
     public void sendRejectionEmail(User instructor, Course course, String reason) {
         String subject = String.format("Course Rejected: %s", course.getTitle());
         String body = String.format(
@@ -449,14 +312,26 @@ public class CourseService {
         return courseRepository.findByInstructor(instructor);
     }
 
+    /**
+     * Save course basic datas to database.
+     * @param courseDTO
+     * @param instructorId
+     * @param file
+     * @param categoryId
+     * @return
+     * @throws IOException
+     */
     @Transactional
     public CourseDTO createNewCourse(CourseDTO courseDTO,
                                      Long instructorId,
                                      MultipartFile file,
                                      Long categoryId) throws IOException {
 
-        User instructor = userRepository.findById(instructorId).orElse(null);
-        Category category = categoryRepository.findById(categoryId).orElse(null);
+        User instructor = userRepository.findById(instructorId)
+                .orElseThrow(() -> new RuntimeException("Missing user information, please login again."));
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new RuntimeException("Category information error, please contact support center."));
+
         courseDTO.setContentStatus(ContentStatus.DRAFT.name());
         courseDTO.setInstructor(instructor);
         courseDTO.setCreatedAt(LocalDate.now());
@@ -480,51 +355,45 @@ public class CourseService {
      */
     @Transactional
     public void updateCourse(Long courseId, CourseDTO editingValues, Long instructorId, MultipartFile file, Long categoryId) throws Exception {
-        CourseDTO courseDTO = getEditingCourseDTO(courseId);
+        CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
         User instructor = userRepository.findById(instructorId).orElse(null);
         Category category = categoryRepository.findById(categoryId).orElse(null);
 
-        // update title, description, start/end date
-        courseDTO.updateEditingValues(editingValues);
-        // update other attributes
-        courseDTO.setInstructor(instructor);
-        courseDTO.setCategory(category);
-        courseDTO.setUpdatedAt(LocalDate.now());
-        courseDTO.setLastUpdatedBy(instructor);
+        // update title, description, category, start/end date, update time and updater
+        courseDTO.updateEditingValues(editingValues, category, instructor);
 
-        courseDTO.setCategory(category);
-        // Handle thumbnail update if provided
+        // Update thumbnail if provided
         if (file != null && !file.isEmpty()) {
             String thumbnailPath = saveThumbnail(file);
             courseDTO.setThumbnailUrl(thumbnailPath);
         }
+
         String currentStatus = courseDTO.getContentStatus();
         // 1. Course is in DRAFT state (not published yet)
         if (ContentStatus.DRAFT.name().equals(currentStatus)) {
-            // Update course using entity method
+            // save direct to table
             courseRepository.save(courseMapper.toEntity(courseDTO));
         } else {
-            // Save course changes to temp table.
+            // Save course changes (json type) to temp table.
             String json = objectMapper.writeValueAsString(courseDTO);
-            appUtil.saveEntityChanges(EntityType.COURSE, json, courseId, ContentAction.UPDATE, instructorId);
+            appUtil.saveContentChange(json, courseId, instructorId);
         }
     }
 
-    @Transactional
     private String saveThumbnail(MultipartFile file) throws NullPointerException, IOException {
         String uuid = UUID.randomUUID().toString();
         if (!file.isEmpty()) {
             String fileName = String.format("thumbnail-%s.jpg", uuid);
-            String absolutePath = Paths.get("").toAbsolutePath() + "/src/main/resources/static/img/";
+            String absolutePath = Paths.get("").toAbsolutePath() + "/src/main/resources/static" + THUMBNAIL_LOCAL;
             File saveFile = new File(absolutePath + fileName);
             file.transferTo(saveFile);
-            return "/img/" + fileName;
+            return "/img/courses/thumbnails/" + fileName;
         } else {
             return null;
         }
     }
 
-    public boolean courseExists(Long courseId) {
+    public boolean checkCourseExists(Long courseId) {
         return courseRepository.existsById(courseId);
     }
 

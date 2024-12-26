@@ -9,6 +9,8 @@ import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.CategoryService;
 import funix.sloc_system.service.CourseService;
 import funix.sloc_system.service.UserService;
+import funix.sloc_system.util.AppUtil;
+import funix.sloc_system.util.RedirectUrlHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -33,6 +35,8 @@ public class CourseManagementController {
     private CategoryMapper categoryMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private AppUtil appUtil;
 
     @GetMapping("/create")
     public String showCreateCourseForm(@AuthenticationPrincipal SecurityUser securityUser, Model model) {
@@ -53,10 +57,12 @@ public class CourseManagementController {
         Long instructorId = securityUser.getUserId();
         try {
             CourseDTO newCourseDTO = courseService.createNewCourse(courseDTO, instructorId, file, categoryId);
-            redirectAttributes.addFlashAttribute("successMessage", "The course has been created successfully.");
-            return "redirect:/instructor/course/" + newCourseDTO.getId() + "/chapter";
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "The course has been created successfully.");
+            return String.format("redirect:/instructor/course/%d/chapter", newCourseDTO.getId());
         } catch (IOException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred while creating the course.");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "An error occurred while creating the course.");
             return "redirect:/instructor";
         }
     }
@@ -65,13 +71,13 @@ public class CourseManagementController {
     public String showEditingCourse(@PathVariable("courseId") Long courseId,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
-        if (!courseService.courseExists(courseId)) {
+        if (!courseService.checkCourseExists(courseId)) {
             redirectAttributes.addFlashAttribute("errorMessage", "Course does not exist.");
-            return "redirect:/instructor/courses";
+            return RedirectUrlHelper.REDIRECT_INSTRUCTOR_COURSES;
         }
 
         try {
-            CourseDTO courseDTO = courseService.getEditingCourseDTO(courseId);
+            CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
             if (courseDTO == null) {
                 return "redirect:/instructor";
             }
@@ -81,8 +87,9 @@ public class CourseManagementController {
             model.addAttribute("categories", categoryDTOS);
             return "instructor/edit_course";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred, please try again later");
-            return "redirect:/instructor/courses";
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "An error occurred, please try again later");
+            return RedirectUrlHelper.REDIRECT_INSTRUCTOR_COURSES;
         }
     }
 
@@ -98,20 +105,27 @@ public class CourseManagementController {
         try {
             // Save update course based on content status
             courseService.updateCourse(courseId, editingValues, instructorId, file, categoryId);
-            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "An error occurred while updating, please contact support!");
+            return String.format("redirect:/instructor/course/%d/edit", courseId);
+        }
+
+        try {
             // Handle different actions
             if ("Submit".equals(action)) {
                 courseService.submitForReview(courseId);
-                redirectAttributes.addFlashAttribute("successMessage", 
-                    "Course submitted successfully! Please wait for moderator review.");
-                return "redirect:/instructor/courses";
-            } else { // Save Draft
-                redirectAttributes.addFlashAttribute("successMessage", "Course draft saved successfully.");
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Course submitted successfully! Please wait for moderator review.");
+                return RedirectUrlHelper.REDIRECT_INSTRUCTOR_COURSES;
+            } else {
+                // Save Draft
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Course draft saved successfully.");
                 return "redirect:/instructor/course/" + courseId + "/edit";
             }
-            
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred while updating, please contact support!");
+            redirectAttributes.addFlashAttribute("errorMessage", e);
             return "redirect:/instructor/course/" + courseId + "/edit";
         }
     }

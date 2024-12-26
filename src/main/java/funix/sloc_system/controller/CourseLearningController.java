@@ -8,7 +8,7 @@ import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.*;
-import funix.sloc_system.util.ApplicationUtil;
+import funix.sloc_system.util.AppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -34,7 +34,7 @@ public class CourseLearningController {
     private TopicService topicService;
 
     @Autowired
-    private ApplicationUtil appUtil;
+    private AppUtil appUtil;
 
     @Autowired
     private TestResultService testResultService;
@@ -67,7 +67,7 @@ public class CourseLearningController {
         Course course = courseService.findById(id);
         User user = userService.findById(securityUser.getUserId());
         if (course != null && user != null) {
-            boolean isEnrolled = enrollmentService.isEnrolled(user, course);
+            boolean isEnrolled = enrollmentService.checkEnrollment(user, course);
             model.addAttribute("course", course);
             model.addAttribute("isEnrolled", isEnrolled);
             return "course/general";
@@ -115,7 +115,7 @@ public class CourseLearningController {
         // Check topic exist
         Topic topic = topicService.findByChapterAndTopicSequence(courseId, chapterNumber, topicNumber);
         // Check already enroll
-        boolean isEnrolled = enrollmentService.isEnrolled(user, course);
+        boolean isEnrolled = enrollmentService.checkEnrollment(user, course);
         if (!isEnrolled || topic == null) {
             return String.format("redirect:/courses/%d", courseId);
         }

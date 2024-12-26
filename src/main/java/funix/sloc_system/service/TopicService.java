@@ -1,17 +1,17 @@
 package funix.sloc_system.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.entity.Topic;
-import funix.sloc_system.enums.ContentAction;
 import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.EntityType;
 import funix.sloc_system.mapper.TopicMapper;
 import funix.sloc_system.repository.ChapterRepository;
 import funix.sloc_system.repository.ContentChangeRepository;
 import funix.sloc_system.repository.TopicRepository;
-import funix.sloc_system.util.ApplicationUtil;
+import funix.sloc_system.util.AppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +37,7 @@ public class TopicService {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private ApplicationUtil appUtil;
+    private AppUtil appUtil;
 
     public Topic findById(Long id) {
         return topicRepository.findById(id).orElse(null);
@@ -65,12 +65,11 @@ public class TopicService {
      * Get editing changes for topic
      */
     @Transactional
-    public TopicDTO getEditingTopicDTO(Long id) throws Exception {
+    public TopicDTO getEditingTopicDTO(ChapterDTO chapterDTO, Long id) throws Exception {
         Topic topic = topicRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Topic not found"));
         
-        Optional<String> editingChanges = contentChangeRepository.findByEntityTypeAndEntityId(EntityType.TOPIC, id)
-                .map(change -> change.getChanges());
+        Topic
         
         if (editingChanges.isPresent()) {
             return objectMapper.readValue(editingChanges.get(), TopicDTO.class);
@@ -143,7 +142,7 @@ public class TopicService {
         } else {
             // Save to temporary table
             String json = objectMapper.writeValueAsString(topicDTO);
-            appUtil.saveEntityChanges(EntityType.TOPIC, json, topic.getId(), ContentAction.UPDATE, instructorId);
+            appUtil.saveContentChange(json, topic.getId(), instructorId);
         }
     }
 }

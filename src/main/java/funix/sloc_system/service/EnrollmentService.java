@@ -32,8 +32,7 @@ public class EnrollmentService {
         }
 
         // Kiểm tra xem người dùng đã đăng ký khóa học chưa
-        boolean isEnrolled = user.getEnrollments().stream()
-                .anyMatch(enroll -> enroll.getCourse().getId().equals(course.getId()));
+        boolean isEnrolled = checkEnrollment(user, course);
         if (isEnrolled) {
             return "User already enrolled this course";
         }
@@ -60,7 +59,7 @@ public class EnrollmentService {
         return enrollmentRepository.findByUser(user);
     }
 
-    public boolean isEnrolled(User user, Course course) {
+    public boolean checkEnrollment(User user, Course course) {
         return enrollmentRepository.existsByUserAndCourse(user, course);
     }
 

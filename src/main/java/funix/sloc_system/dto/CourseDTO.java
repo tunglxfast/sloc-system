@@ -40,14 +40,13 @@ public class CourseDTO {
     private LocalDate createdAt;
     @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate updatedAt;
-    @JsonIgnore
     private List<ChapterDTO> chapters;
     @JsonIgnore
     private Set<EnrollmentDTO> enrollments;
 
     // handy methods
-    // update title, description, start/end date
-    public void updateEditingValues(CourseDTO editingValues) {
+    // update title, description, category, start/end date, update time and updater
+    public void updateEditingValues(CourseDTO editingValues, Category editCategory, User updater) {
         if (editingValues.getTitle() != null) {
             this.setTitle(editingValues.getTitle());
         }
@@ -60,6 +59,14 @@ public class CourseDTO {
         if (editingValues.getEndDate() != null) {
             this.setEndDate(editingValues.getEndDate());
         }
+        if (editCategory != null) {
+            this.setCategory(editCategory);
+        }
+        if (updater != null) {
+            this.setLastUpdatedBy(updater);
+        }
+        this.setUpdatedAt(LocalDate.now());
+
     }
 
     @JsonSetter("createdBy")
@@ -120,5 +127,22 @@ public class CourseDTO {
             CategoryDTO categoryDTO = new CategoryDTO(category.getId(), category.getName());
             this.setCategory(categoryDTO);
         }
+    }
+
+    /**
+     * Get chapter with last sequence.
+     * @return
+     */
+    public ChapterDTO getLastChapter() {
+        if (this.getChapters() != null && !this.getChapters().isEmpty()){
+            ChapterDTO lastChapterDTO = this.getChapters().get(0);
+            for (ChapterDTO chapterDTO : this.getChapters()) {
+                if (chapterDTO.getSequence() > lastChapterDTO.getSequence()) {
+                    lastChapterDTO = chapterDTO;
+                }
+            }
+            return lastChapterDTO;
+        }
+        return null;
     }
 }

@@ -22,20 +22,20 @@ public class ContentChangeTemporary {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "entity_type", nullable = false)
+    @Column(name = "entity_type")
     private EntityType entityType;
 
     @Column(name = "entity_id", nullable = false)
     private Long entityId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column()
     private ContentAction action;  // 'UPDATE', 'DELETE', 'CREATE'
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String changes;  // JSON string containing the changes
 
-    @Column(name = "updated_by", nullable = false)
+    @Column(name = "updated_by")
     private Long updatedBy;  // User id
 
     @Column(nullable = false)
