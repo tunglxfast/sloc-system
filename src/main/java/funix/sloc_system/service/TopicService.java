@@ -2,11 +2,17 @@ package funix.sloc_system.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import funix.sloc_system.dto.ChapterDTO;
+import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.Chapter;
+import funix.sloc_system.entity.Course;
+import funix.sloc_system.entity.Question;
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.EntityType;
+import funix.sloc_system.enums.TopicType;
+import funix.sloc_system.mapper.ChapterMapper;
+import funix.sloc_system.mapper.CourseMapper;
 import funix.sloc_system.mapper.TopicMapper;
 import funix.sloc_system.repository.ChapterRepository;
 import funix.sloc_system.repository.ContentChangeRepository;
@@ -16,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +34,9 @@ public class TopicService {
     private ChapterRepository chapterRepository;
     
     @Autowired
+    private ChapterMapper chapterMapper;
+    
+    @Autowired
     private TopicMapper topicMapper;
     
     @Autowired
@@ -38,6 +46,9 @@ public class TopicService {
     private ObjectMapper objectMapper;
     @Autowired
     private AppUtil appUtil;
+
+    @Autowired
+    private CourseMapper courseMapper;
 
     public Topic findById(Long id) {
         return topicRepository.findById(id).orElse(null);
@@ -65,11 +76,12 @@ public class TopicService {
      * Get editing changes for topic
      */
     @Transactional
-    public TopicDTO getEditingTopicDTO(ChapterDTO chapterDTO, Long id) throws Exception {
+    public TopicDTO getEditingTopicDTO(Long id) throws Exception {
         Topic topic = topicRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Topic not found"));
         
-        Topic
+        Optional<String> editingChanges = contentChangeRepository.findByEntityTypeAndEntityId(EntityType.TOPIC, id)
+                .map(change -> change.getChanges());
         
         if (editingChanges.isPresent()) {
             return objectMapper.readValue(editingChanges.get(), TopicDTO.class);
@@ -79,70 +91,100 @@ public class TopicService {
     }
 
     /**
-     * Reorder topics after sequence change
-     */
-    @Transactional
-    private void reorderTopics(Long chapterId, Topic modifiedTopic, int newSequence) {
-        int oldSequence = modifiedTopic.getSequence();
-        
-        // Temporarily move topic to a sequence outside the range (total topics + 1)
-        int tempSequence = topicRepository.findByChapterId(chapterId).size() + 1;
-        modifiedTopic.setSequence(tempSequence);
-        topicRepository.save(modifiedTopic);
-        
-        // Get all topics that need to be shifted
-        List<Topic> topics = topicRepository.findByChapterId(chapterId);
-        
-        if (newSequence < oldSequence) {
-            // Moving up: shift topics between new and old position down
-            topics.stream()
-                .filter(t -> t.getSequence() >= newSequence && t.getSequence() < oldSequence)
-                .forEach(t -> {
-                    t.setSequence(t.getSequence() + 1);
-                    topicRepository.save(t);
-                });
-        } else {
-            // Moving down: shift topics between old and new position up
-            topics.stream()
-                .filter(t -> t.getSequence() > oldSequence && t.getSequence() <= newSequence)
-                .forEach(t -> {
-                    t.setSequence(t.getSequence() - 1);
-                    topicRepository.save(t);
-                });
-        }
-        
-        // Set the modified topic to its new sequence
-        modifiedTopic.setSequence(newSequence);
-        topicRepository.save(modifiedTopic);
-    }
-
-    /**
      * Save topic changes based on course status
      */
     @Transactional
-    public void saveTopicChanges(TopicDTO topicDTO, Long instructorId) throws IOException {
-        Topic topic = topicRepository.findById(topicDTO.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Topic not found"));
-        // TODO: fix this later, replace updateWithOtherTopic with working with DTO
-        if (topic.getContentStatus() == ContentStatus.DRAFT) {
-            int oldTopicSequence = topic.getSequence();
-            // Update topic using entity method
-            Topic updatedTopic = topicMapper.toEntity(topicDTO);
-            topic.updateWithOtherTopic(updatedTopic);
-            // Handle sequence change if needed
-            if (oldTopicSequence != topicDTO.getSequence()) {
-                // Validate new sequence
-                int maxSequence = topicRepository.findByChapterId(topic.getChapter().getId()).size();
-                int newSequence = Math.max(1, Math.min(topicDTO.getSequence(), maxSequence));
-                
-                // Reorder topics if sequence changed
-                reorderTopics(topic.getChapter().getId(), topic, newSequence);
-            }            
-            topicRepository.save(topic);
-        } else {
-            // Save to temporary table
-            String json = objectMapper.writeValueAsString(topicDTO);
-            appUtil.saveContentChange(json, topic.getId(), instructorId);
+    public void saveTopicChanges(Long courseId, Long chapterId, TopicDTO topicDTO, Long instructorId) throws Exception {
+        Long topicId = topicDTO.getId();
+
+        // Get latest course DTO with any pending changes
+        CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
+                    
+        // Update the topic in courseDTO
+        ChapterDTO chapterDTO = AppUtil.getSelectChapterDTO(courseDTO, chapterId);
+        TopicDTO existingTopicDTO = AppUtil.getSelectTopicDTO(chapterDTO, topicId);
+        // Copy all properties from topicDTO to existingTopicDTO
+        if (topicDTO.getTitle() != null) {
+            existingTopicDTO.setTitle(topicDTO.getTitle());
+        }
+        if (topicDTO.getDescription() != null) {
+            existingTopicDTO.setDescription(topicDTO.getDescription());
+        }
+        if (topicDTO.getSequence() != 0) {
+            existingTopicDTO.setSequence(topicDTO.getSequence());
+        }
+        if (topicDTO.getFileUrl() != null) {
+            existingTopicDTO.setFileUrl(topicDTO.getFileUrl());
+        }
+        if (topicDTO.getVideoUrl() != null) {
+            existingTopicDTO.setVideoUrl(topicDTO.getVideoUrl());
+        }
+        if (topicDTO.getQuestions() != null) {
+            existingTopicDTO.setQuestions(topicDTO.getQuestions());
+        }
+        if (topicDTO.getPassScore() != null) {
+            existingTopicDTO.setPassScore(topicDTO.getPassScore());
+        }
+        if (topicDTO.getTimeLimit() != null) {
+            existingTopicDTO.setTimeLimit(topicDTO.getTimeLimit());
+        }
+        
+        if (courseDTO.getContentStatus().equals(ContentStatus.DRAFT.name())) {
+            Topic updatedTopic = topicMapper.toEntity(existingTopicDTO);       
+            topicRepository.save(updatedTopic);
+        } 
+        else {
+            // Save entire course DTO to temp table
+            String json = objectMapper.writeValueAsString(courseDTO);
+            appUtil.saveContentChange(json, courseId, instructorId);
+        }
+    }
+
+    /**
+     * Create a new topic
+     */
+    @Transactional
+    public void createTopic(Long chapterId, TopicDTO topicDTO, Long instructorId) throws Exception {
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new IllegalArgumentException("Chapter not found"));
+        
+        Course course = chapter.getCourse();
+        CourseDTO courseDTO = courseMapper.toDTO(course);
+        
+        // Set sequence to last + 1
+        List<Topic> existingTopics = chapter.getTopics();
+        int nextSequence = existingTopics.isEmpty() ? 1 : 
+            existingTopics.stream()
+                .mapToInt(Topic::getSequence)
+                .max()
+                .getAsInt() + 1;
+        
+        topicDTO.setSequence(nextSequence);
+        
+        // Always save new topic to main table first
+        Topic newTopic = topicMapper.toEntity(topicDTO);
+        if (newTopic.getTopicType() == TopicType.EXAM || newTopic.getTopicType() == TopicType.QUIZ) {
+            if (newTopic.getQuestions() != null) {
+                for (Question question : newTopic.getQuestions()) {
+                    if (question.getAnswers() != null) {
+                        question.getAnswers().forEach(answer -> answer.setQuestion(question));
+                    }
+                    question.setTopic(newTopic);
+                }
+            }
+        }
+        chapter.addTopic(newTopic);
+        chapterRepository.save(chapter);
+        
+        // If course is not draft, save entire course DTO to temp table
+        if (course.getContentStatus() != ContentStatus.DRAFT) {
+            // Add new topic to course DTO
+            ChapterDTO chapterDTO = AppUtil.getSelectChapterDTO(courseDTO, chapterId);
+            chapterDTO.getTopics().add(topicDTO);
+            
+            // Save to temp table
+            String json = objectMapper.writeValueAsString(courseDTO);
+            appUtil.saveContentChange(json, course.getId(), instructorId);
         }
     }
 }

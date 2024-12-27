@@ -59,7 +59,7 @@ public class CourseManagementController {
             CourseDTO newCourseDTO = courseService.createNewCourse(courseDTO, instructorId, file, categoryId);
             redirectAttributes.addFlashAttribute("successMessage",
                     "The course has been created successfully.");
-            return String.format("redirect:/instructor/course/%d/chapter", newCourseDTO.getId());
+            return String.format("redirect:/instructor/course/%d/edit/chapters", newCourseDTO.getId());
         } catch (IOException e) {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "An error occurred while creating the course.");

@@ -23,17 +23,22 @@
             <strong th:text="${chapter.sequence} + '. ' + ${chapter.title}"></strong>
             <ul th:if="${chapter.topics != null and !chapter.topics.isEmpty()}">
                 <li th:each="topic : ${chapter.topics}">
-                    <span th:text="'- ' + ${topic.title} + ' (' + ${topic.type} + ')'"></span>
+                    <a th:href="@{'/instructor/course/' + ${courseId} + '/edit/topic/edit?chapterId=' + ${chapter.id} + '&topicId=' + ${topic.id}}">
+                        <span th:text="'- ' + ${topic.title} + ' (' + ${topic.topicType} + ')'"></span>
+                    </a>
                 </li>
             </ul>
-            <a th:href="@{'/instructor/course/' + ${courseId} + '/chapter/' + ${chapter.id} + '/topic/create'}">Add Topic</a>
+            <a th:href="@{'/instructor/course/' + ${courseId} + '/edit/topic/create?chapterId=' + ${chapter.id} + '&topicType=READING'}">Add READING</a>  
+            <a th:href="@{'/instructor/course/' + ${courseId} + '/edit/topic/create?chapterId=' + ${chapter.id} + '&topicType=VIDEO'}">Add VIDEO</a>
+            <a th:href="@{'/instructor/course/' + ${courseId} + '/edit/topic/create?chapterId=' + ${chapter.id} + '&topicType=QUIZ'}">Add QUIZ</a> 
+            <a th:href="@{'/instructor/course/' + ${courseId} + '/edit/topic/create?chapterId=' + ${chapter.id} + '&topicType=EXAM'}">Add EXAM</a>
         </li>
     </ul>
 </div>
 
 <!-- Create new chapter form -->
 <h2>Add New Chapter</h2>
-<form th:action="@{'/instructor/course/' + ${course.id} + '/chapter/add'}" method="post">
+<form th:action="@{'/instructor/course/' + ${courseId} + '/edit/chapters/add'}" method="post">
     <label for="title">Chapter Title:</label>
     <input type="text" id="title" name="title" required>
     <button type="submit">Add Chapter</button>

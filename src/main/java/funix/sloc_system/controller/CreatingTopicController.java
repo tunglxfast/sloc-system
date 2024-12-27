@@ -5,15 +5,13 @@ import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.QuestionDTO;
 import funix.sloc_system.dto.TopicDTO;
+import funix.sloc_system.entity.Question;
 import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.security.SecurityUser;
-import funix.sloc_system.service.ChapterService;
-import funix.sloc_system.service.CourseService;
-import funix.sloc_system.service.TopicService;
+import funix.sloc_system.service.*;
 import funix.sloc_system.util.AppUtil;
 import funix.sloc_system.util.RedirectUrlHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,19 +19,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
 
 @Controller
 @RequestMapping("/instructor/course/{courseId}/edit/topic")
 public class CreatingTopicController {
 
-    @Value("${app.upload.dir:src/main/resources/reading}")
-    private String uploadReadingDir;
     @Autowired
     private ChapterService chapterService;
     @Autowired
@@ -41,9 +32,15 @@ public class CreatingTopicController {
     @Autowired
     private TopicService topicService;
     @Autowired
+    private QuestionService questionService;
+    @Autowired
+    private MinioService minioService;
+    @Autowired
     private AppUtil appUtil;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @GetMapping("/create")
+    @GetMapping(value = {"","/","/create"})
     public String showCreateTopicForm(@PathVariable Long courseId,
                               @RequestParam("chapterId") Long chapterId,
                               @RequestParam String topicType,
@@ -56,7 +53,6 @@ public class CreatingTopicController {
             CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
             ChapterDTO chapterDTO = AppUtil.getSelectChapterDTO(courseDTO, chapterId);
 
-
             model.addAttribute("courseId", courseDTO.getId());
             model.addAttribute("courseTitle", courseDTO.getTitle());
             model.addAttribute("chapterId", chapterDTO.getId());
@@ -64,13 +60,102 @@ public class CreatingTopicController {
             model.addAttribute("topicType", topicType);
             model.addAttribute("topic", new TopicDTO());
 
-            return "instructor/create_topic";
+            // Return different templates based on topic type
+            if (topicType.equals("VIDEO") || topicType.equals("READING")) {
+                return "instructor/create_lesson_topic";
+            } else if (topicType.equals("QUIZ") || topicType.equals("EXAM")) {
+                return "instructor/create_test_topic";
+            } else {
+                return RedirectUrlHelper.buildRedirectErrorUrl(courseId, "Invalid topic type");
+            }
         } catch (Exception e) {
             return RedirectUrlHelper.buildRedirectErrorUrl(courseId, e.getMessage());
         }
     }
 
-    @GetMapping(value = {"","/"})
+    @PostMapping("/create")
+    public String addNewTopic(@PathVariable Long courseId,
+                          @RequestParam Long chapterId,
+                          @RequestParam String title,
+                          @RequestParam String description,
+                          @RequestParam String topicType,
+                          @RequestParam(required = false) MultipartFile readingFile,
+                          @RequestParam(required = false) MultipartFile videoFile,
+                          @RequestParam(required = false) String videoUrl,
+                          @RequestParam(required = false) String questions,
+                          @RequestParam(required = false) Integer passScore,
+                          @RequestParam(required = false) Integer timeLimit,
+                          @AuthenticationPrincipal SecurityUser securityUser,
+                          RedirectAttributes redirectAttributes) {
+        try {
+            TopicDTO topicDTO = new TopicDTO();
+            topicDTO.setTitle(title);
+            topicDTO.setDescription(description);
+            topicDTO.setTopicType(topicType);
+
+            // Handle different topic types
+            switch (topicType) {
+                case "READING":
+                    if (readingFile != null && !readingFile.isEmpty()) {
+                        String contentType = readingFile.getContentType();
+                        if (contentType != null 
+                        && (contentType.equals("application/pdf") || 
+                            contentType.equals("application/msword") ||
+                            contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))) {
+                            String fileUrl = minioService.uploadFile(readingFile, contentType);
+                            topicDTO.setFileUrl(fileUrl);
+                        }
+                    }
+                    break;
+
+                case "VIDEO":
+                    if (videoFile != null && !videoFile.isEmpty()) {
+                        String contentType = videoFile.getContentType();
+                        if (contentType != null && contentType.startsWith("video/")) {
+                            String fileUrl = minioService.uploadFile(videoFile, contentType);
+                            topicDTO.setVideoUrl(fileUrl);
+                        }
+                    } else if (videoUrl != null && !videoUrl.isEmpty()) {
+                        topicDTO.setVideoUrl(videoUrl);
+                    }
+                    break;
+
+                case "QUIZ":
+                case "EXAM":
+                    if (questions != null) {
+                        List<QuestionDTO> questionDTOs = objectMapper.readValue(questions,
+                            objectMapper.getTypeFactory().constructCollectionType(List.class, QuestionDTO.class));
+                        topicDTO.setQuestions(questionDTOs);
+                        topicDTO.setPassScore(passScore);
+                        
+                        if ("EXAM".equals(topicType)) {
+                            topicDTO.setTimeLimit(timeLimit);
+                        }
+                    }
+                    break;
+            }
+
+            // Create topic first
+            topicService.createTopic(chapterId, topicDTO, securityUser.getUserId());
+
+            // If it's a quiz/exam, create questions
+            if ((topicType.equals("QUIZ") || topicType.equals("EXAM")) && questions != null) {
+                List<QuestionDTO> questionDTOs = objectMapper.readValue(questions,
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, QuestionDTO.class));
+                
+                for (QuestionDTO questionDTO : questionDTOs) {
+                    questionDTO.setTopicId(topicDTO.getId());
+                    questionService.createQuestion(topicDTO.getId(), questionDTO, securityUser.getUserId());
+                }
+            }
+
+            return RedirectUrlHelper.buildRedirectSuccessUrl(courseId, "Topic created successfully.");
+        } catch (Exception e) {
+            return RedirectUrlHelper.buildRedirectErrorUrl(courseId, e.getMessage());
+        }
+    }
+
+    @GetMapping("/edit")
     public String showEditTopicForm(@PathVariable Long courseId,
                                     @RequestParam("chapterId") Long chapterId,
                                     @RequestParam("topicId") Long topicId,
@@ -103,81 +188,74 @@ public class CreatingTopicController {
         }
     }
 
-    @PostMapping("/add")
-    public String addTopic(@PathVariable Long courseId,
+    @PostMapping("/edit")
+    public String saveEditTopic(@PathVariable Long courseId,
                           @RequestParam Long chapterId,
                           @RequestParam String title,
                           @RequestParam String description,
                           @RequestParam String topicType,
-                          @RequestParam(required = false) MultipartFile content,
+                          @RequestParam(required = false) MultipartFile readingFile,
+                          @RequestParam(required = false) MultipartFile videoFile,
                           @RequestParam(required = false) String videoUrl,
-                          @RequestParam(required = false) String questions,  // JSON string of QuestionDTO
+                          @RequestParam(required = false) String questions,
                           @RequestParam(required = false) Integer passScore,
                           @RequestParam(required = false) Integer timeLimit,
+                          @RequestParam Long topicId,
+                          @AuthenticationPrincipal SecurityUser securityUser,
                           RedirectAttributes redirectAttributes) {
-        // TODO: đang làm, cần chia nhỏ ra thành lesson và test cho dễ quản lý
         try {
             TopicDTO topicDTO = new TopicDTO();
+            topicDTO.setId(topicId);
             topicDTO.setTitle(title);
             topicDTO.setDescription(description);
             topicDTO.setTopicType(topicType);
 
             // Handle different topic types
-            if ("READING".equals(topicType) && content != null && !content.isEmpty()) {
-                // Create upload directory if it doesn't exist
-                File directory = new File(uploadReadingDir);
-                if (!directory.exists()) {
-                    directory.mkdirs();
-                }
+            switch (topicType) {
+                case "READING":
+                    if (readingFile != null && !readingFile.isEmpty()) {
+                        String contentType = readingFile.getContentType();
+                        if (contentType != null 
+                        && (contentType.equals("application/pdf") || 
+                            contentType.equals("application/msword") ||
+                            contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))) {
+                            String fileUrl = minioService.uploadFile(readingFile, contentType);
+                            topicDTO.setFileUrl(fileUrl);
+                        }
+                    }
+                    break;
 
-                // Generate unique filename
-                String originalFilename = content.getOriginalFilename();
-                String extension = "";
-                if (originalFilename != null) {
-                    extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-                }
-                String filename = UUID.randomUUID().toString() + extension;
-                
-                // Save file
-                Path filePath = Paths.get(uploadReadingDir, filename);
-                Files.write(filePath, content.getBytes());
-                
-                // Save file path to DTO
-                topicDTO.setFileUrl("/static/reading/" + filename);
-            } else if ("VIDEO".equals(topicType) && videoUrl != null) {
-                topicDTO.setVideoUrl(videoUrl);
-            } else if (("QUIZ".equals(topicType) || "EXAM".equals(topicType)) && questions != null) {
-                // Parse questions JSON string
-                ObjectMapper objectMapper = new ObjectMapper();
-                List<QuestionDTO> questionDTOs = objectMapper.readValue(questions, 
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, QuestionDTO.class));
-                
-                // Set common fields for Quiz and Exam
-                topicDTO.setPassScore(passScore);
-                topicDTO.setQuestions(questionDTOs);
-                
-                // Set time limit for Exam only
-                if ("EXAM".equals(topicType)) {
-                    topicDTO.setTimeLimit(timeLimit);
-                }
+                case "VIDEO":
+                    if (videoFile != null && !videoFile.isEmpty()) {
+                        String contentType = videoFile.getContentType();
+                        if (contentType != null && contentType.startsWith("video/")) {
+                            String fileUrl = minioService.uploadFile(videoFile, contentType);
+                            topicDTO.setVideoUrl(fileUrl);
+                        }
+                    } else if (videoUrl != null && !videoUrl.isEmpty()) {
+                        topicDTO.setVideoUrl(videoUrl);
+                    }
+                    break;
+
+                case "QUIZ":
+                case "EXAM":
+                    if (questions != null) {
+                        List<QuestionDTO> questionDTOs = objectMapper.readValue(questions,
+                            objectMapper.getTypeFactory().constructCollectionType(List.class, QuestionDTO.class));
+                        topicDTO.setQuestions(questionDTOs);
+                        topicDTO.setPassScore(passScore);
+                        
+                        if ("EXAM".equals(topicType)) {
+                            topicDTO.setTimeLimit(timeLimit);
+                        }
+
+                        // Handle questions in service
+                        questionService.handleTopicQuestions(topicId, questionDTOs, securityUser.getUserId());
+                    }
+                    break;
             }
 
-            chapterService.addTopic(chapterId, topicDTO);
-            redirectAttributes.addFlashAttribute("successMessage", "Topic created successfully.");
-            return "redirect:/instructor/course/" + courseId + "/chapter/" + chapterId;
-        } catch (Exception e) {
-            return RedirectUrlHelper.buildRedirectErrorUrl(courseId, e.getMessage());
-        }
-    }
-
-    @PostMapping("/save")
-    public String saveTopic(@PathVariable Long courseId,
-                          @PathVariable Long chapterId,
-                          @ModelAttribute("topic") TopicDTO topicDTO,
-                          @AuthenticationPrincipal SecurityUser securityUser,
-                          RedirectAttributes redirectAttributes) {
-        try {
-            topicService.saveTopicChanges(topicDTO, securityUser.getUserId());
+            topicService.saveTopicChanges(courseId, chapterId, topicDTO, securityUser.getUserId());
             return RedirectUrlHelper.buildRedirectSuccessUrl(courseId, "Topic updated successfully.");
         } catch (Exception e) {
             return RedirectUrlHelper.buildRedirectErrorUrl(courseId, e.getMessage());

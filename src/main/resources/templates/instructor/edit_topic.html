@@ -20,7 +20,7 @@
                         </p>
                     </div>
                     <div>
-                        <a th:href="@{'/instructor/course/' + ${course.id} + '/chapter/' + ${chapter.id}}" 
+                        <a th:href="@{'/instructor/course/' + ${course.id} + '/chapters/'}" 
                            class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left"></i> Back to Chapter
                         </a>
@@ -384,7 +384,7 @@
         }
 
         function saveTopic(topicData) {
-            fetch(`/instructor/course/${courseId}/chapter/${chapterId}/topic/save`, {
+            fetch(`/instructor/course/${courseId}/edit/topic/edit?chapterId=${chapterId}&topicId=${topicData.id}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(topicData)
@@ -395,7 +395,7 @@
                 }
                 showSuccess('Changes saved successfully');
                 setTimeout(() => {
-                    window.location.href = `/instructor/course/${courseId}/chapter/${chapterId}`;
+                    window.location.href = `/instructor/course/${courseId}/chapters`;
                 }, 1000);
             })
             .catch(error => showError(error.message));

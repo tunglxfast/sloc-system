@@ -1,10 +1,8 @@
 package funix.sloc_system.controller;
 
 import funix.sloc_system.dto.CourseDTO;
-import funix.sloc_system.mapper.ChapterMapper;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.ChapterService;
-import funix.sloc_system.service.CourseService;
 import funix.sloc_system.util.AppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,16 +17,12 @@ public class CreatingChapterController {
     @Autowired
     private ChapterService chapterService;
     @Autowired
-    private CourseService courseService;
-    @Autowired
-    private ChapterMapper chapterMapper;
-    @Autowired
     private AppUtil appUtil;
 
     @GetMapping(value = {"","/"})
     public String showChapterList(@PathVariable Long courseId,
-                                  @RequestParam("errorMessage") String errorMessage,
-                                  @RequestParam("successMessage") String successMessage,
+                                  @RequestParam(value = "errorMessage", required = false) String errorMessage,
+                                  @RequestParam(value = "successMessage", required = false) String successMessage,
                                   Model model) {
         try {
             CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);

@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -51,7 +52,7 @@ public class Topic {
     private Integer totalScore;
     private Integer timeLimit; // Only for Exam
 
-    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Question> questions;
 
 
@@ -71,14 +72,11 @@ public class Topic {
         if (updatedTopic.getChapter() != null) {
             this.chapter = updatedTopic.getChapter();
         }
-        if (updatedTopic.getContentStatus() != null) {
-            this.contentStatus = updatedTopic.getContentStatus();
+        if (updatedTopic.getVideoUrl() != null) {
+            this.videoUrl = updatedTopic.getVideoUrl();
         }
         if (updatedTopic.getFileUrl() != null) {
             this.fileUrl = updatedTopic.getFileUrl();
-        }
-        if (updatedTopic.getVideoUrl() != null) {
-            this.videoUrl = updatedTopic.getVideoUrl();
         }
         if (updatedTopic.getPassScore() != null) {
             this.passScore = updatedTopic.getPassScore();
@@ -89,9 +87,33 @@ public class Topic {
         if (updatedTopic.getTimeLimit() != null) {
             this.timeLimit = updatedTopic.getTimeLimit();
         }
-        if (updatedTopic.getQuestions() != null) {
-            this.questions = updatedTopic.getQuestions();
+        if (updatedTopic.getContentStatus() != null) {
+            this.contentStatus = updatedTopic.getContentStatus();
         }
     }
-        
+
+    // Helper method to add question
+    public void addQuestion(Question question) {
+        if (questions == null) {
+            questions = new ArrayList<>();
+        }
+        if (questions.contains(question)) {
+            return;
+        }
+        questions.add(question);
+        question.setTopic(this);
+    }
+
+    // Helper method to remove question
+    public void removeQuestion(Question question) {
+        if (questions == null) {
+            return;
+        }
+        if (!questions.contains(question)) {
+            return;
+        }
+        questions.remove(question);
+        question.setTopic(null);
+    }
 }
+

@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,13 +28,11 @@ public class Question {
     @Enumerated(EnumType.STRING)
     private QuestionType questionType; // CHOICE_MANY, CHOICE_ONE
 
-    private int sequence;
-
     @ManyToOne
     @JoinColumn(name = "topic_id", nullable = false)
     private Topic topic;
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Answer> answers;
 
     @Enumerated(EnumType.STRING)
@@ -46,17 +45,35 @@ public class Question {
         if (updatedQuestion.getQuestionType() != null) {
             this.questionType = updatedQuestion.getQuestionType();
         }
-        if (updatedQuestion.getSequence() != 0) {
-            this.sequence = updatedQuestion.getSequence();
-        }
         if (updatedQuestion.getTopic() != null) {
             this.topic = updatedQuestion.getTopic();
-        }
-        if (updatedQuestion.getAnswers() != null) {
-            this.answers = updatedQuestion.getAnswers();
         }
         if (updatedQuestion.getContentStatus() != null) {
             this.contentStatus = updatedQuestion.getContentStatus();
         }
+    }
+
+    // Helper method to add answer
+    public void addAnswer(Answer answer) {
+        if (answers == null) {
+            answers = new ArrayList<>();
+        }
+        if (answers.contains(answer)) {
+            return;
+        }
+        answers.add(answer);
+        answer.setQuestion(this);
+    }
+
+    // Helper method to remove answer
+    public void removeAnswer(Answer answer) {
+        if (answers == null) {
+            return;
+        }
+        if (!answers.contains(answer)) {
+            return;
+        }
+        answers.remove(answer);
+        answer.setQuestion(null);
     }
 }

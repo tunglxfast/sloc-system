@@ -176,7 +176,7 @@ public class AppUtil {
 
     public static TopicDTO getSelectTopicDTO(ChapterDTO chapterDTO, Long topicId) {
         for (TopicDTO topicDTO : chapterDTO.getTopics()) {
-            if (topicDTO.getId().equals(topicDTO)) {
+            if (topicDTO.getId().equals(topicId)) {
                 return topicDTO;
             }
         }

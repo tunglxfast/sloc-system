@@ -86,10 +86,10 @@
 
                     <!-- Loop through the list of questions -->
                     <div th:each="question : ${topic.questions}" class="question">
-                        <h2>
-                            Câu hỏi <span th:text="${question.sequence}"></span>:
-                            <span th:text="${question.content}">Question content</span>
-                        </h2>
+                        <div class="question-content">
+                            Question:
+                            <span th:text="${question.content}"></span>
+                        </div>
 
                         <!-- Loop through the list of answers -->
                         <div th:each="answer : ${question.getAnswers()}">

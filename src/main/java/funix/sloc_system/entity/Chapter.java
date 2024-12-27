@@ -28,9 +28,8 @@ public class Chapter {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @OrderBy("sequence ASC")
-    private List<Topic> topics = new ArrayList<>();
+    @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Topic> topics;
 
     @Enumerated(EnumType.STRING)
     private ContentStatus contentStatus = ContentStatus.DRAFT;
@@ -45,11 +44,32 @@ public class Chapter {
         if (updatedChapter.getCourse() != null) {
             this.course = updatedChapter.getCourse();
         }
-        if (updatedChapter.getTopics() != null) {
-            this.topics = updatedChapter.getTopics();
-        }
         if (updatedChapter.getContentStatus() != null) {
             this.contentStatus = updatedChapter.getContentStatus();
         }
+    }
+
+    // Helper method to add topic
+    public void addTopic(Topic topic) {
+        if (topics == null) {
+            topics = new ArrayList<>();
+        }
+        if (topics.contains(topic)) {
+            return;
+        }
+        topics.add(topic);
+        topic.setChapter(this);
+    }
+
+    // Helper method to remove topic
+    public void removeTopic(Topic topic) {
+        if (topics == null) {
+            return;
+        }
+        if (!topics.contains(topic)) {
+            return;
+        }
+        topics.remove(topic);
+        topic.setChapter(null);
     }
 }

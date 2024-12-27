@@ -1,13 +1,22 @@
 package funix.sloc_system.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import funix.sloc_system.dto.ChapterDTO;
+import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.QuestionDTO;
+import funix.sloc_system.dto.TopicDTO;
+import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Question;
+import funix.sloc_system.entity.Topic;
 import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.EntityType;
+import funix.sloc_system.mapper.ChapterMapper;
+import funix.sloc_system.mapper.CourseMapper;
 import funix.sloc_system.mapper.QuestionMapper;
+import funix.sloc_system.mapper.TopicMapper;
 import funix.sloc_system.repository.ContentChangeRepository;
 import funix.sloc_system.repository.QuestionRepository;
+import funix.sloc_system.repository.TopicRepository;
 import funix.sloc_system.util.AppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,105 +32,162 @@ public class QuestionService {
     private QuestionRepository questionRepository;
     
     @Autowired
+    private TopicRepository topicRepository;
+    
+    @Autowired
     private QuestionMapper questionMapper;
     
     @Autowired
     private ContentChangeRepository contentChangeRepository;
+
     @Autowired
     private AppUtil appUtil;
+
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private CourseMapper courseMapper;
+
+    @Autowired
+    private TopicMapper topicMapper;
+
+    @Autowired
+    private ChapterMapper chapterMapper;
 
     public List<Question> getQuestionsByTopic(Long topicId) {
         return questionRepository.findByTopicId(topicId);
     }
 
     /**
-     * Get editing changes for question
-     */
-    @Transactional
-    public QuestionDTO getEditingQuestionDTO(Long id) throws Exception {
-        Question question = questionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Question not found"));
-        
-        Optional<String> editingChanges = contentChangeRepository.findByEntityTypeAndEntityId(EntityType.QUESTION, id)
-                .map(change -> change.getChanges());
-        
-        if (editingChanges.isPresent()) {
-            return objectMapper.readValue(editingChanges.get(), QuestionDTO.class);
-        } else {
-            return questionMapper.toDTO(question);
-        }
-    }
-
-    /**
      * Save question changes based on course status
      */
     @Transactional
-    public void saveQuestionChanges(QuestionDTO questionDTO, Long instructorId) throws IOException {
+    public void saveQuestionChanges(QuestionDTO questionDTO, Long instructorId) throws Exception {
         Question question = questionRepository.findById(questionDTO.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Question not found"));
-        // TODO: fix this later, replace updateWithOtherTopic with working with DTO
-        if (question.getContentStatus() == ContentStatus.DRAFT) {
-            int oldQuestionSequence = question.getSequence();
-            // Update question using entity method
+        
+        Topic topic = question.getTopic();
+        if (topic == null) {
+            throw new IllegalStateException("Question has no associated topic");
+        }
+        
+        Course course = topic.getChapter().getCourse();
+        
+        if (course.getContentStatus() == ContentStatus.DRAFT) {
             Question updatedQuestion = questionMapper.toEntity(questionDTO);
             question.updateWithOtherQuestion(updatedQuestion);
-            // Handle sequence change if needed
-            if (oldQuestionSequence != questionDTO.getSequence()) {
-                // Validate new sequence
-                int maxSequence = questionRepository.findByTopicId(question.getTopic().getId()).size();
-                int newSequence = Math.max(1, Math.min(questionDTO.getSequence(), maxSequence));
-                
-                // Reorder questions if sequence changed
-                reorderQuestions(question.getTopic().getId(), question, newSequence);
-            }
             questionRepository.save(question);
-        } else {
-            // Save question changes to temp table.
-            // This includes both the question and its answers as a single unit.
-            // The QuestionDTO should include the complete list of answers.
-            String json = objectMapper.writeValueAsString(questionDTO);
-            appUtil.saveContentChange(json, question.getId(), instructorId);
+        }    
+        else {
+            // Get latest course DTO with any pending changes
+            CourseDTO courseDTO = appUtil.getEditingCourseDTO(course.getId());
+            
+            // Update the question in courseDTO
+            ChapterDTO chapterDTO = AppUtil.getSelectChapterDTO(courseDTO, topic.getChapter().getId());
+            TopicDTO topicDTO = AppUtil.getSelectTopicDTO(chapterDTO, topic.getId());
+            
+            // Find and update the question in the topic's questions list
+            for (QuestionDTO existingQuestionDTO : topicDTO.getQuestions()) {
+                if (existingQuestionDTO.getId().equals(questionDTO.getId())) {
+                    existingQuestionDTO.setContent(questionDTO.getContent());
+                    existingQuestionDTO.setQuestionType(questionDTO.getQuestionType());
+                    existingQuestionDTO.setAnswers(questionDTO.getAnswers());
+                    break;
+                }
+            }
+            
+            // Save entire course DTO to temp table
+            String json = objectMapper.writeValueAsString(courseDTO);
+            appUtil.saveContentChange(json, course.getId(), instructorId);
         }
     }
 
     /**
-     * Reorder questions after sequence change
+     * Handle batch update of questions for a topic
      */
     @Transactional
-    private void reorderQuestions(Long topicId, Question modifiedQuestion, int newSequence) {
-        int oldSequence = modifiedQuestion.getSequence();
+    public void handleTopicQuestions(Long topicId, List<QuestionDTO> questionDTOs, Long instructorId) throws Exception {
+        Topic topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new IllegalArgumentException("Topic not found"));
         
-        // Temporarily move question to a sequence outside the range (total questions + 1)
-        int tempSequence = questionRepository.findByTopicId(topicId).size() + 1;
-        modifiedQuestion.setSequence(tempSequence);
-        questionRepository.save(modifiedQuestion);
+        Course course = topic.getChapter().getCourse();
         
-        // Get all questions that need to be shifted
-        List<Question> questions = questionRepository.findByTopicId(topicId);
-        
-        if (newSequence < oldSequence) {
-            // Moving up: shift questions between new and old position down
-            questions.stream()
-                .filter(q -> q.getSequence() >= newSequence && q.getSequence() < oldSequence)
-                .forEach(q -> {
-                    q.setSequence(q.getSequence() + 1);
-                    questionRepository.save(q);
-                });
-        } else {
-            // Moving down: shift questions between old and new position up
-            questions.stream()
-                .filter(q -> q.getSequence() > oldSequence && q.getSequence() <= newSequence)
-                .forEach(q -> {
-                    q.setSequence(q.getSequence() - 1);
-                    questionRepository.save(q);
-                });
+        if (course.getContentStatus() == ContentStatus.DRAFT) {
+            // For draft courses, handle each question directly in the database
+            List<Question> existingQuestions = getQuestionsByTopic(topicId);
+            List<Long> updatedQuestionIds = questionDTOs.stream()
+                .map(QuestionDTO::getId)
+                .filter(id -> id != null)
+                .toList();
+
+            // Delete questions not in the new list
+            for (Question existingQuestion : existingQuestions) {
+                if (!updatedQuestionIds.contains(existingQuestion.getId())) {
+                    questionRepository.delete(existingQuestion);
+                }
+            }
+
+            // Update or create questions
+            for (QuestionDTO questionDTO : questionDTOs) {
+                questionDTO.setTopicId(topicId);
+                if (questionDTO.getId() == null) {
+                    createQuestion(topicId, questionDTO, instructorId);
+                } else {
+                    saveQuestionChanges(questionDTO, instructorId);
+                }
+            }
         }
+        else {
+            // Get latest course DTO with any pending changes
+            CourseDTO courseDTO = appUtil.getEditingCourseDTO(course.getId());
+            
+            // Always save new questions to main table first
+            for (QuestionDTO questionDTO : questionDTOs) {
+                if (questionDTO.getId() == null) {
+                    createQuestion(topicId, questionDTO, instructorId);
+                }
+            }
+
+            // Update course DTO with the complete list of questions
+            ChapterDTO chapterDTO = AppUtil.getSelectChapterDTO(courseDTO, topic.getChapter().getId());
+            TopicDTO topicDTO = AppUtil.getSelectTopicDTO(chapterDTO, topicId);
+            topicDTO.setQuestions(questionDTOs);
+            
+            // Save to temp table
+            String json = objectMapper.writeValueAsString(courseDTO);
+            appUtil.saveContentChange(json, course.getId(), instructorId);
+        }
+    }
+
+    /**
+     * Create a new question
+     */
+    @Transactional
+    public void createQuestion(Long topicId, QuestionDTO questionDTO, Long instructorId) throws Exception {
+        Topic topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new IllegalArgumentException("Topic not found"));
         
-        // Set the modified question to its new sequence
-        modifiedQuestion.setSequence(newSequence);
-        questionRepository.save(modifiedQuestion);
+        Course course = topic.getChapter().getCourse();
+        CourseDTO courseDTO = appUtil.getEditingCourseDTO(course.getId());
+        
+        // Always save new question to main table first
+        Question newQuestion = questionMapper.toEntity(questionDTO);
+        newQuestion.setTopic(topic);
+        topic.getQuestions().add(newQuestion);
+        topicRepository.save(topic);
+        
+        // If course is not draft, save entire course DTO to temp table
+        if (course.getContentStatus() != ContentStatus.DRAFT) {
+            // Add new question to course DTO
+            ChapterDTO chapterDTO = AppUtil.getSelectChapterDTO(courseDTO, topic.getChapter().getId());
+            TopicDTO topicDTO = AppUtil.getSelectTopicDTO(chapterDTO, topicId);
+            topicDTO.getQuestions().add(questionDTO);
+            
+            // Save to temp table
+            String json = objectMapper.writeValueAsString(courseDTO);
+            appUtil.saveContentChange(json, course.getId(), instructorId);
+        }
     }
 }
 

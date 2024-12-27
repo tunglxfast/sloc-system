@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Lesson Topic</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="mb-4">Create New Lesson Topic</h1>
+    <div class="card">
+        <div class="card-header">
+            <h3>Course: <span th:text="${courseTitle}"></span></h3>
+            <h4>Chapter: <span th:text="${chapterTitle}"></span></h4>
+        </div>
+        <div class="card-body">
+            <div th:if="${errorMessage}" class="alert alert-danger">
+                <p th:text="${errorMessage}"></p>
+            </div>
+
+            <div th:if="${successMessage}" class="alert alert-success">
+                <p th:text="${successMessage}"></p>
+            </div>
+
+            <form th:action="@{/instructor/course/{courseId}/edit/topic/create(courseId=${courseId})}" 
+                  method="post" 
+                  enctype="multipart/form-data">
+                <input type="hidden" name="chapterId" th:value="${chapterId}">
+                <input type="hidden" name="topicType" th:value="${topicType}">
+
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                </div>
+
+                <!-- Video Topic Fields -->
+                <div th:if="${topicType == 'VIDEO'}" class="mb-3">
+                    <label for="videoUrl" class="form-label">Video URL (Optional)</label>
+                    <input type="text" class="form-control mb-2" id="videoUrl" name="videoUrl" placeholder="Enter video URL if you have one">
+                    <div class="mt-2">
+                        <label for="videoFile" class="form-label">Upload Video File</label>
+                        <input type="file" class="form-control" id="videoFile" name="videoFile" accept="video/*">
+                        <small class="text-muted">Supported formats: MP4, WebM, etc.</small>
+                    </div>
+                </div>
+
+                <!-- Reading Topic Fields -->
+                <div th:if="${topicType == 'READING'}" class="mb-3">
+                    <label for="readingFile" class="form-label">Content File</label>
+                    <input type="file" class="form-control" id="readingFile" name="readingFile" accept=".pdf,.doc,.docx">
+                    <small class="text-muted">Supported formats: PDF, DOC, DOCX</small>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Create Topic</button>
+                    <a th:href="@{/instructor/course/{courseId}/chapters(courseId=${courseId})}" 
+                       class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

@@ -30,7 +30,10 @@ public class ChapterMapper {
             dto.setContentStatus(chapter.getContentStatus().toString());
         }
         dto.setSequence(chapter.getSequence());
-        dto.setCourseId(chapter.getCourse().getId());
+
+        if (chapter.getCourse() != null) {
+            dto.setCourseId(chapter.getCourse().getId());
+        }
         
         // Map topics
         if (chapter.getTopics() != null) {
@@ -50,7 +53,9 @@ public class ChapterMapper {
         chapter.setTitle(dto.getTitle());
         chapter.setSequence(dto.getSequence());
 
-        chapter.setCourse(courseRepository.findById(dto.getCourseId()).orElse(null));
+        if (dto.getCourseId() != null) {
+            chapter.setCourse(courseRepository.findById(dto.getCourseId()).orElse(null));
+        }
 
         if (dto.getContentStatus() != null && !dto.getContentStatus().isBlank()){
             chapter.setContentStatus(ContentStatus.valueOf(dto.getContentStatus()));

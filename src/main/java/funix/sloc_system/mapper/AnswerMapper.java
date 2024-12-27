@@ -22,7 +22,11 @@ public class AnswerMapper {
         AnswerDTO dto = new AnswerDTO();
         dto.setId(answer.getId());
         dto.setContent(answer.getContent());
-        dto.setQuestionId(answer.getQuestion().getId());
+
+        if (answer.getQuestion() != null) { 
+            dto.setQuestionId(answer.getQuestion().getId());
+        }
+
         dto.setCorrect(answer.isCorrect());
         
         return dto;
@@ -36,7 +40,11 @@ public class AnswerMapper {
         Answer answer = new Answer();
         answer.setId(dto.getId());
         answer.setContent(dto.getContent());
-        answer.setQuestion(questionRepository.findById(dto.getQuestionId()).orElse(null));
+
+        if (dto.getQuestionId() != null) {
+            answer.setQuestion(questionRepository.findById(dto.getQuestionId()).orElse(null));
+        }
+
         answer.setCorrect(dto.isCorrect());
         
         return answer;

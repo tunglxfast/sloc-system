@@ -51,7 +51,7 @@ CREATE TABLE course (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255),
     description TEXT,
-    thumbnail_url VARCHAR(255),
+    thumbnail_url VARCHAR(1000),
     category_id BIGINT,
     instructor_id BIGINT,
     created_by BIGINT,
@@ -86,8 +86,8 @@ CREATE TABLE topic (
     sequence INT,
     chapter_id BIGINT,
     content_status VARCHAR(50) DEFAULT 'DRAFT',
-    video_url VARCHAR(255),
-    file_url VARCHAR(255),
+    video_url VARCHAR(1000),
+    file_url VARCHAR(1000),
     pass_score INT,
     total_score INT,
     time_limit INT,
@@ -97,11 +97,10 @@ CREATE TABLE topic (
 
 CREATE TABLE question (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    content TEXT,
+    content VARCHAR(255),
     question_type VARCHAR(255),
-    sequence INT,
-    topic_id BIGINT,
-    content_status VARCHAR(50) DEFAULT 'DRAFT',
+    topic_id BIGINT NOT NULL,
+    content_status VARCHAR(255) DEFAULT 'DRAFT',
     FOREIGN KEY (topic_id) REFERENCES topic(id)
 );
 
@@ -202,13 +201,13 @@ INSERT INTO topic (title, description, topic_type, sequence, chapter_id, content
 
 
 -- Insert sample questions
-INSERT INTO question (content, question_type, sequence, topic_id, content_status) VALUES
-('What is HTML?', 'CHOICE_ONE', 1, 4, 'PUBLISHED'),
-('What is a CSS Selector?', 'CHOICE_ONE', 1, 5, 'PUBLISHED'),
-('What is Data Science?', 'CHOICE_ONE', 1, 6, 'PUBLISHED'),
-('What does the `<title>` tag do?', 'CHOICE_ONE', 2, 4, 'PUBLISHED'),
-('Which tag is used to create a hyperlink?', 'CHOICE_ONE', 3, 4, 'PUBLISHED'),
-('Which of the following are valid HTML tags?', 'CHOICE_MANY', 4, 4, 'PUBLISHED');
+INSERT INTO question (content, question_type, topic_id, content_status) VALUES
+('What is HTML?', 'CHOICE_ONE', 4, 'PUBLISHED'),
+('What is a CSS Selector?', 'CHOICE_ONE', 5, 'PUBLISHED'),
+('What is Data Science?', 'CHOICE_ONE', 6, 'PUBLISHED'),
+('What does the `<title>` tag do?', 'CHOICE_ONE', 4, 'PUBLISHED'),
+('Which tag is used to create a hyperlink?', 'CHOICE_ONE', 4, 'PUBLISHED'),
+('Which of the following are valid HTML tags?', 'CHOICE_MANY', 4, 'PUBLISHED');
 
 
 -- Insert sample answers

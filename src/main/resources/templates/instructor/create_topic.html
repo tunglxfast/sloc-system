@@ -20,7 +20,7 @@
                         </p>
                     </div>
                     <div>
-                        <a th:href="@{'/instructor/course/' + ${course.id} + '/chapter/' + ${chapter.id}}" 
+                        <a th:href="@{'/instructor/course/' + ${course.id} + '/chapters/'}" 
                            class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left"></i> Back to Chapter
                         </a>
@@ -48,7 +48,7 @@
                     </div>
                     <div class="card-body">
                         <form id="topicForm" method="post" 
-                              th:action="@{'/instructor/course/' + ${course.id} + '/chapter/' + ${chapter.id} + '/topic/add'}"
+                              th:action="@{'/instructor/course/' + ${course.id} + '/edit/topic/create?chapterId=' + ${chapter.id}}"
                               enctype="multipart/form-data">
                             <input type="hidden" id="topicType" name="topicType" th:value="${topicType}">
                             

@@ -17,7 +17,6 @@ public class QuestionDTO {
     private String content;
     
     private String questionType; // CHOICE_MANY, CHOICE_ONE
-    private int sequence;
     private Long topicId;  // Parent topic ID
     private List<AnswerDTO> answers;
 }

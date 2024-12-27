@@ -1,6 +1,8 @@
 package funix.sloc_system.mapper;
 
+import funix.sloc_system.dto.AnswerDTO;
 import funix.sloc_system.dto.QuestionDTO;
+import funix.sloc_system.entity.Answer;
 import funix.sloc_system.entity.Question;
 import funix.sloc_system.enums.QuestionType;
 import funix.sloc_system.repository.TopicRepository;
@@ -14,7 +16,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class QuestionMapper {
-    
     @Autowired
     private AnswerMapper answerMapper;
     @Autowired
@@ -28,14 +29,26 @@ public class QuestionMapper {
         QuestionDTO dto = new QuestionDTO();
         dto.setId(question.getId());
         dto.setContent(question.getContent());
-        dto.setQuestionType(question.getQuestionType().toString());
-        dto.setSequence(question.getSequence());
-        dto.setTopicId(question.getTopic() != null ? question.getTopic().getId() : null);
+        dto.setQuestionType(question.getQuestionType().name());
+
+        if (question.getTopic() != null) {
+            dto.setTopicId(question.getTopic().getId());
+        }
         
-        // Map answers
-        dto.setAnswers(answerMapper.toDTO(question.getAnswers()));
-        
+        if (question.getAnswers() != null) {
+            dto.setAnswers(answerMapper.toDTO(question.getAnswers()));
+        }
+
         return dto;
+    }
+
+    public List<QuestionDTO> toDTO(List<Question> questions) {
+        if (questions == null) {
+            return new ArrayList<>();
+        }
+        return questions.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     public Question toEntity(QuestionDTO dto) {
@@ -46,27 +59,29 @@ public class QuestionMapper {
         Question question = new Question();
         question.setId(dto.getId());
         question.setContent(dto.getContent());
-        if (dto.getQuestionType() != null) {
-            question.setQuestionType(QuestionType.valueOf(dto.getQuestionType()));
-        }
-        question.setSequence(dto.getSequence());
-        question.setTopic(topicRepository.findById(dto.getTopicId()).orElse(null));
+        question.setQuestionType(QuestionType.valueOf(dto.getQuestionType()));
 
-        // Map answers if present
-        if (dto.getAnswers() != null) {
-            question.setAnswers(answerMapper.toEntity(dto.getAnswers()));
-        } else {
-            question.setAnswers(new ArrayList<>());
+        // Add Topic setting
+        if (dto.getTopicId() != null) {
+            question.setTopic(topicRepository.findById(dto.getTopicId()).orElse(null));
         }
+
         
+        if (dto.getAnswers() != null) {
+            List<Answer> answers = answerMapper.toEntity(dto.getAnswers());
+            answers.forEach(answer -> answer.setQuestion(question));
+            question.setAnswers(answers);
+        }
+
         return question;
     }
 
-    public List<QuestionDTO> toDTO(List<Question> questions) {
-        return questions.stream().map(this::toDTO).collect(Collectors.toList());
-    }
-
-    public List<Question> toEntity(List<QuestionDTO> questionDTOList) {
-        return questionDTOList.stream().map(this::toEntity).collect(Collectors.toList());
+    public List<Question> toEntity(List<QuestionDTO> dtos) {
+        if (dtos == null) {
+            return new ArrayList<>();
+        }
+        return dtos.stream()
+                .map(this::toEntity)
+                .collect(Collectors.toList());
     }
 } 
