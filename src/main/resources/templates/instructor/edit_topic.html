@@ -353,7 +353,7 @@
                     question.answers.push({
                         id: answerEl.getAttribute('data-answer-id'),
                         content: answerEl.querySelector('.answer-text').value,
-                        isCorrect: answerEl.querySelector('.correct-answer').checked
+                        correct: answerEl.querySelector('.correct-answer').checked
                     });
                 });
 
@@ -378,7 +378,7 @@
                     const answerEl = answerList.querySelector('.answer-item:last-child');
                     answerEl.setAttribute('data-answer-id', answer.id);
                     answerEl.querySelector('.answer-text').value = answer.content;
-                    answerEl.querySelector('.correct-answer').checked = answer.isCorrect;
+                    answerEl.querySelector('.correct-answer').checked = answer.correct;
                 });
             });
         }

@@ -327,7 +327,7 @@
                 questionEl.querySelectorAll('.answer-item').forEach(answerEl => {
                     question.answers.push({
                         content: answerEl.querySelector('.answer-text').value,
-                        isCorrect: answerEl.querySelector('.correct-answer').checked
+                        correct: answerEl.querySelector('.correct-answer').checked
                     });
                 });
 
@@ -350,7 +350,7 @@
                     addAnswer(answerList);
                     const answerEl = answerList.querySelector('.answer-item:last-child');
                     answerEl.querySelector('.answer-text').value = answer.content;
-                    answerEl.querySelector('.correct-answer').checked = answer.isCorrect;
+                    answerEl.querySelector('.correct-answer').checked = answer.correct;
                 });
             });
         }

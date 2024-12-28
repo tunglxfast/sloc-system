@@ -107,7 +107,7 @@ CREATE TABLE question (
 CREATE TABLE answer (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     content TEXT,
-    is_correct BOOLEAN,
+    correct BOOLEAN,
     question_id BIGINT,
     content_status VARCHAR(50) DEFAULT 'DRAFT',
     FOREIGN KEY (question_id) REFERENCES question(id)
@@ -211,7 +211,7 @@ INSERT INTO question (content, question_type, topic_id, content_status) VALUES
 
 
 -- Insert sample answers
-INSERT INTO answer (content, is_correct, question_id, content_status) VALUES
+INSERT INTO answer (content, correct, question_id, content_status) VALUES
 ('A markup language', TRUE, 1, 'PUBLISHED'),
 ('A programming language', FALSE, 1, 'PUBLISHED'),
 ('A mathematical formula', FALSE, 1, 'PUBLISHED'),

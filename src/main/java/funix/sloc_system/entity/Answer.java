@@ -20,7 +20,7 @@ public class Answer {
 
     private String content;
 
-    private boolean isCorrect;
+    private boolean correct;
 
     @ManyToOne
     @JoinColumn(name = "question_id", nullable = false)
@@ -39,6 +39,6 @@ public class Answer {
         if (updatedAnswer.getContentStatus() != null) {
             this.contentStatus = updatedAnswer.getContentStatus();
         }
-        this.isCorrect = updatedAnswer.isCorrect();
+        this.correct = updatedAnswer.isCorrect();
     }
 }

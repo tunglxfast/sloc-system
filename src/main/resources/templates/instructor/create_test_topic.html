@@ -98,14 +98,14 @@ function addQuestion() {
             </div>
             <div class="mb-3">
                 <label class="form-label">Question Type</label>
-                <select class="form-control question-type" required>
+                <select class="form-control question-type" onchange="handleQuestionTypeChange(this)" required>
                     <option value="CHOICE_ONE">Single Choice</option>
                     <option value="CHOICE_MANY">Multiple Choice</option>
                 </select>
             </div>
             <div class="answers-container">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <label class="form-label">Answers</label>
+                    <label class="form-label">Answers <small class="text-muted">(minimum 2 answers required, at least 1 must be correct)</small></label>
                     <button type="button" class="btn btn-info btn-sm" onclick="addAnswer(${questionCounter})">Add Answer</button>
                 </div>
                 <div class="answers" id="answers-${questionCounter}">
@@ -116,8 +116,11 @@ function addQuestion() {
     `;
     
     container.appendChild(questionDiv);
-    addAnswer(questionCounter); // Add first answer by default
-    addAnswer(questionCounter); // Add second answer by default
+    
+    // Add default answers
+    addAnswer(questionCounter); // First answer (will be checked by default)
+    addAnswer(questionCounter); // Second answer
+    
     questionCounter++;
 }
 
@@ -139,37 +142,138 @@ function addAnswer(questionId) {
     const answerDiv = document.createElement('div');
     answerDiv.className = 'input-group mb-2';
     
+    // Get question type
+    const questionType = document.querySelector(`#question-${questionId} .question-type`).value;
+    const inputType = questionType === 'CHOICE_ONE' ? 'radio' : 'checkbox';
+    
+    // For new answers in single choice, check if any answer is already selected
+    const hasSelectedAnswer = questionType === 'CHOICE_ONE' && 
+        document.querySelectorAll(`#answers-${questionId} .answer-correct:checked`).length > 0;
+    
+    // For the first answer of a new question, check it by default
+    const isFirstAnswer = answersContainer.children.length === 0;
+    
     answerDiv.innerHTML = `
         <div class="input-group-text">
-            <input class="form-check-input answer-correct" type="checkbox">
+            <input class="form-check-input answer-correct" type="${inputType}" 
+                   name="question-${questionId}-correct" ${isFirstAnswer && !hasSelectedAnswer ? 'checked' : ''}>
         </div>
         <input type="text" class="form-control answer-content" placeholder="Answer content" required>
-        <button class="btn btn-outline-danger" type="button" onclick="this.parentElement.remove()">Remove</button>
+        <button type="button" class="btn btn-outline-danger" onclick="removeAnswer(this, ${questionId})">Remove</button>
     `;
     
     answersContainer.appendChild(answerDiv);
 }
 
+function handleQuestionTypeChange(selectElement) {
+    const questionId = selectElement.closest('.card').id.split('-')[1];
+    const questionType = selectElement.value;
+    const answerInputs = document.querySelectorAll(`#answers-${questionId} .answer-correct`);
+    
+    // Update input type for all answers
+    answerInputs.forEach(input => {
+        input.type = questionType === 'CHOICE_ONE' ? 'radio' : 'checkbox';
+        input.name = `question-${questionId}-correct`;
+    });
+    
+    // For single choice, ensure exactly one answer is selected
+    if (questionType === 'CHOICE_ONE') {
+        const checkedInputs = Array.from(answerInputs).filter(inp => inp.checked);
+        if (checkedInputs.length === 0 && answerInputs.length > 0) {
+            // If no answer is selected, select the first one
+            answerInputs[0].checked = true;
+        } else if (checkedInputs.length > 1) {
+            // If multiple answers are selected, keep only the first one
+            checkedInputs.slice(1).forEach(inp => inp.checked = false);
+        }
+    }
+}
+
+function removeAnswer(button, questionId) {
+    const answersContainer = document.getElementById(`answers-${questionId}`);
+    const answerCount = answersContainer.children.length;
+    
+    if (answerCount <= 2) {
+        alert('Each question must have at least 2 answers');
+        return;
+    }
+    
+    const answerDiv = button.parentElement;
+    const wasChecked = answerDiv.querySelector('.answer-correct').checked;
+    answerDiv.remove();
+    
+    // If we removed a checked answer in single choice mode, select the first remaining answer
+    if (wasChecked) {
+        const questionType = document.querySelector(`#question-${questionId} .question-type`).value;
+        if (questionType === 'CHOICE_ONE') {
+            const firstAnswer = answersContainer.querySelector('.answer-correct');
+            if (firstAnswer) {
+                firstAnswer.checked = true;
+            }
+        }
+    }
+}
+
 function prepareSubmit(event) {
     event.preventDefault();
     
+    // Validate questions
+    const questionCards = document.querySelectorAll('#questionsContainer .card');
+    let hasError = false;
+    let errorMessage = '';
+    
+    questionCards.forEach((questionCard) => {
+        const answers = questionCard.querySelectorAll('.answers .input-group');
+        const checkedAnswers = questionCard.querySelectorAll('.answer-correct:checked');
+        const questionNumber = questionCard.querySelector('h6').textContent;
+        const questionType = questionCard.querySelector('.question-type').value;
+        
+        // Check minimum 2 answers
+        if (answers.length < 2) {
+            hasError = true;
+            errorMessage += `${questionNumber} must have at least 2 answers.\n`;
+        }
+        
+        // Check at least 1 answer is selected as correct
+        if (checkedAnswers.length === 0) {
+            hasError = true;
+            errorMessage += `${questionNumber} must have at least 1 correct answer.\n`;
+        }
+        
+        // For single choice, ensure exactly one answer is selected
+        if (questionType === 'CHOICE_ONE' && checkedAnswers.length > 1) {
+            hasError = true;
+            errorMessage += `${questionNumber} is single choice but has multiple correct answers selected.\n`;
+        }
+    });
+    
+    if (hasError) {
+        alert(errorMessage);
+        return;
+    }
+    
     const questions = [];
-    document.querySelectorAll('#questionsContainer .card').forEach((questionCard, index) => {
+    questionCards.forEach((questionCard) => {
         const answers = [];
+        
+        // Get all answers for this question
         questionCard.querySelectorAll('.answers .input-group').forEach((answerGroup) => {
+            const isChecked = answerGroup.querySelector('.answer-correct').checked;
             answers.push({
                 content: answerGroup.querySelector('.answer-content').value,
-                isCorrect: answerGroup.querySelector('.answer-correct').checked
+                correct: isChecked // This will be true for selected answers, false for unselected
             });
         });
         
         questions.push({
             content: questionCard.querySelector('.question-content').value,
             questionType: questionCard.querySelector('.question-type').value,
-            sequence: index + 1,
             answers: answers
         });
     });
+    
+    // Log the data being sent to verify correct values
+    console.log('Submitting questions:', questions);
     
     document.getElementById('questionsJson').value = JSON.stringify(questions);
     document.getElementById('testTopicForm').submit();

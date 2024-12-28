@@ -13,7 +13,7 @@ public class AnswerService {
     @Autowired
     private AnswerRepository answerRepository;
 
-    public List<Answer> findByQuestionIdAndIsCorrectTrue(Long questionId) {
-        return answerRepository.findByQuestionIdAndIsCorrectTrue(questionId);
+    public List<Answer> findByQuestionIdAndCorrectTrue(Long questionId) {
+        return answerRepository.findByQuestionIdAndCorrectTrue(questionId);
     }
 }

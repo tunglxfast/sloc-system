@@ -68,7 +68,7 @@ public class TestResultService {
                             .filter(entry -> entry.getKey().startsWith("question_" + question.getId()))
                             .map(stringEntry -> stringEntry.getValue()).collect(Collectors.toList()))
             ;
-            correctAnswers.addAll(answerRepository.findByQuestionIdAndIsCorrectTrue(question.getId()));
+            correctAnswers.addAll(answerRepository.findByQuestionIdAndCorrectTrue(question.getId()));
             correctAnswerIds.addAll(correctAnswers.stream().map(answer -> answer.getId().toString()).collect(Collectors.toList()));
 
             if (new HashSet<>(selectedAnswerIds).containsAll(correctAnswerIds)

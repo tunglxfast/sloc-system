@@ -1,5 +1,6 @@
 package funix.sloc_system.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.dto.CourseDTO;
@@ -240,8 +241,7 @@ public class CreatingTopicController {
                 case "QUIZ":
                 case "EXAM":
                     if (questions != null) {
-                        List<QuestionDTO> questionDTOs = objectMapper.readValue(questions,
-                            objectMapper.getTypeFactory().constructCollectionType(List.class, QuestionDTO.class));
+                        List<QuestionDTO> questionDTOs = objectMapper.readValue(questions, new TypeReference<List<QuestionDTO>>() {});
                         topicDTO.setQuestions(questionDTOs);
                         topicDTO.setPassScore(passScore);
                         
