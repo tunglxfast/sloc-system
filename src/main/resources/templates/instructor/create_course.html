@@ -1,48 +1,222 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <title>Create course</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Courses</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.0.0/mdb.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Laila';
+        }
+
+        .nav-link {
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background-color: #007bff;
+            /* MDB Primary color */
+            color: white;
+        }
+
+        .nav-link i {
+            margin-right: 10px;
+        }
+
+        .navbar-nav .nav-link {
+            transition: color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #007bff;
+            /* MDB primary color */
+            background-color: rgba(0, 123, 255, 0.1);
+            /* Light blue background */
+            border-radius: 5px;
+        }
+
+        .btn-outline-danger {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            color: #fff;
+        }
+    </style>
 </head>
+
 <body>
-<h2 th:text="'Welcome ' + ${user.name}">Welcome anonymous</h2>
-<h1>Create new course</h1>
+    <!-- Navbar -->
+    <nav class="sticky-top navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <div class="container-fluid">
+            <!-- Left elements: Logo and Search -->
+            <div class="d-flex align-items-center">
+                <!-- Logo -->
+                <a class="navbar-brand me-3 d-flex align-items-center" href="#">
+                    <img src="https://i.imgur.com/FsIOl6L.png" height="30" alt="SLOC Logo" loading="lazy" />
+                </a>
+                <!-- Search -->
+                <form class="input-group w-auto my-auto d-none d-lg-flex">
+                    <input autocomplete="off" type="search" class="form-control rounded-pill" placeholder="Search"
+                        style="min-width: 350px;" />
+                    <span class="input-group-text border-0 bg-light">
+                        <i class="fas fa-search"></i>
+                    </span>
+                </form>
+            </div>
 
-<div th:if="${errorMessage}">
-    <p th:text="${errorMessage}" style="color: red;"></p>
-</div>
+            <!-- Toggle Button for Mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-<form th:action="@{/instructor/course/create_submit}" th:object="${course}" method="post" enctype="multipart/form-data">
-    <label for="title">Course title:</label>
-    <input type="text" id="title" th:field="*{title}" required>
-    <br>
+            <!-- Navbar Links -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Home -->
+                    <li class="nav-item">
+                        <a class="nav-link text-primary fw-bold" th:href="@{/home}">
+                            <i class="fas fa-home me-2"></i>Home
+                        </a>
+                    </li>
+                    <!-- Courses -->
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" th:href="@{/courses}">
+                            <i class="fas fa-book me-2"></i>Courses
+                        </a>
+                    </li>
+                    <!-- About -->
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="#">
+                            <i class="fas fa-info-circle me-2"></i>About
+                        </a>
+                    </li>
+                    <!-- My Learning -->
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="#">
+                            <i class="fas fa-graduation-cap me-2"></i>My Learning
+                        </a>
+                    </li>
+                    <!-- Create Course (Visible to Instructors Only) -->
+                    <li class="nav-item" th:if="${user.getStringRoles().contains('INSTRUCTOR')}">
+                        <a class="nav-link text-success" th:href="@{/instructor/}">
+                            <i class="fas fa-chalkboard-teacher me-2"></i>Create Course
+                        </a>
+                    </li>
+                    <!-- Logout -->
+                    <li class="nav-item">
+                        <form th:action="@{/logout}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger btn-sm ms-2" style="margin-top: 8px;">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    <label for="description">Description:</label>
-    <textarea id="description" th:field="*{description}" required></textarea>
-    <br>
+    <div class="row" style="margin-right: 20%;">
+        <h4 style="margin-top: 5%; text-align: right; margin-bottom: 3%;">User: <span style="color: rgb(80, 80, 255);"
+                th:text="${user.name}">Instructor</span></h4>
+        <div th:if="${errorMessage}">
+            <p th:text="${errorMessage}" style="color: red;"></p>
+        </div>
+    </div>
+    <h2 style="text-align: center;">Create New Course</h2>
+    <div class="d-flex justify-content-center align-items-center"
+        style="font-family: Arial, Helvetica, sans-serif; margin-bottom: 5%;">
+        <div class="card shadow-3 mt-5" style="width: 100%; max-width: 800px;">
+            <div class="card-body align-items-center" style="max-width: 80%;">
+                <form th:action="@{/instructor/course/create_submit}" th:object="${course}" method="post"
+                    enctype="multipart/form-data" class="needs-validation" novalidate>
+                    <!-- Course Title -->
+                    <div class="mb-4">
+                        <label for="title" class="form-label">Course Title:</label>
+                        <input type="text" id="title" th:field="*{title}" class="form-control"
+                            placeholder="Enter course title" required>
+                        <div class="invalid-feedback">Please enter a course title.</div>
+                    </div>
 
-    <label for="thumbnailFile">Thumbnail:</label>
-    <input type="file" id="thumbnailFile" name="thumbnailFile" accept=".jpg,.jpeg,.png" required/>
-    <br>
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <label for="description" class="form-label">Description:</label>
+                        <textarea id="description" th:field="*{description}" class="form-control"
+                            placeholder="Enter course description" rows="3" required></textarea>
+                        <div class="invalid-feedback">Please enter a description.</div>
+                    </div>
 
-    <label for="category">Category:</label>
-    <select id="category" th:field="*{category}" required>
-        <option th:each="category : ${categories}"
-                th:value="${category.id}"
-                th:text="${category.name}"></option>
-    </select>
-    <br>
+                    <!-- Thumbnail -->
+                    <div class="mb-4">
+                        <label for="thumbnailFile" class="form-label">Thumbnail:</label>
+                        <input type="file" id="thumbnailFile" name="thumbnailFile" class="form-control"
+                            accept=".jpg,.jpeg,.png" required>
+                        <div class="invalid-feedback">Please upload a thumbnail file (JPG, JPEG, or PNG).
+                        </div>
+                        <div id="textExample1" class="form-text">
+                            Please upload a thumbnail file (JPG, JPEG, or PNG) that is less
+                            than 10MB
+                        </div>
+                    </div>
 
-    <label for="startDate">Stat date:</label>
-    <input type="date" id="startDate" th:field="*{startDate}" required>
-    <br>
+                    <!-- Category -->
+                    <div class="mb-4">
+                        <label for="category" class="form-label">Category:</label>
+                        <select id="category" th:field="*{category}" class="form-select" required>
+                            <option th:each="category : ${categories}" th:value="${category.id}"
+                                th:text="${category.name}"></option>
+                        </select>
+                        <div class="invalid-feedback">Please select a category.</div>
+                    </div>
 
-    <label for="endDate">End date:</label>
-    <input type="date" id="endDate" th:field="*{endDate}">
-    <br>
+                    <!-- Start Date -->
+                    <div class="mb-4">
+                        <label for="startDate" class="form-label">Start Date:</label>
+                        <input type="date" id="startDate" th:field="*{startDate}" class="form-control" required>
+                        <div class="invalid-feedback">Please select a start date.</div>
+                    </div>
 
-    <button type="submit">Create</button>
-</form>
+                    <!-- End Date -->
+                    <div class="mb-4">
+                        <label for="endDate" class="form-label">End Date:</label>
+                        <input type="date" id="endDate" th:field="*{endDate}" class="form-control">
+                    </div>
+                    <div style="margin-top: 2%;">
+                        <div style="float: left;">
+                            <a th:href="@{/instructor/}">
+                                <button type="button" class="btn btn-success btn-rounded" data-mdb-ripple-init>
+                                    Return to instructor's courses
+                                </button>
+                            </a>
+                        </div>
 
-<a th:href="@{/instructor/}">Return to instructor's courses</a>
+                        <!-- Submit Button -->
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary btn-rounded">Create</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Initialization for ES Users
+        import { Input, initMDB } from "mdb-ui-kit";
+
+        initMDB({ Input });
+    </script>
 </body>
+
 </html>
