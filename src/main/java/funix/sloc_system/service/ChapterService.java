@@ -64,6 +64,8 @@ public class ChapterService {
      */
     @Transactional
     public void createChapter(Long courseId, String title) throws Exception {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
         CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
 
         int newSequence = chapterRepository.findByCourseIdOrderBySequence(courseId).size() + 1;
@@ -74,7 +76,7 @@ public class ChapterService {
         newChapterDTO.setTitle(title);
         newChapterDTO.setSequence(newSequence);
 
-        Chapter newChapter = chapterMapper.toEntity(newChapterDTO);
+        Chapter newChapter = chapterMapper.toEntity(newChapterDTO, course);
         if (newChapter != null) {
             chapterRepository.save(newChapter);
         } else {
@@ -93,6 +95,8 @@ public class ChapterService {
      */
     @Transactional
     public void updateChapter(Long courseId, Long chapterId, String title, Long instructorId) throws Exception {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
         CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
         ChapterDTO chapterDTO = AppUtil.getSelectChapterDTO(courseDTO, chapterId);
 
@@ -100,7 +104,7 @@ public class ChapterService {
 
         if (ContentStatus.DRAFT.name().equals(courseDTO.getContentStatus())) {
             // Save chapter changes direct to table if course is DRAFT
-            Chapter chapter = chapterMapper.toEntity(chapterDTO);
+            Chapter chapter = chapterMapper.toEntity(chapterDTO, course);
             chapterRepository.save(chapter);
         } else {
             // Save chapter changes to temp table.
@@ -165,9 +169,9 @@ public class ChapterService {
         
         topicDTO.setSequence(nextSequence);
         
-        Topic newTopic = topicMapper.toEntity(topicDTO);
+        Topic newTopic = topicMapper.toEntity(topicDTO, chapter);
         newTopic.setChapter(chapter);
-        chapter.getTopics().add(newTopic);
+        chapter.addTopic(newTopic);
         
         Chapter savedChapter = chapterRepository.save(chapter);
         return chapterMapper.toDTO(savedChapter);

@@ -3,6 +3,7 @@ package funix.sloc_system.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.dto.CourseDTO;
+import funix.sloc_system.dto.QuestionDTO;
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.entity.Course;
@@ -120,7 +121,10 @@ public class TopicService {
             existingTopicDTO.setVideoUrl(topicDTO.getVideoUrl());
         }
         if (topicDTO.getQuestions() != null) {
-            existingTopicDTO.setQuestions(topicDTO.getQuestions());
+            existingTopicDTO.getQuestions().clear();
+            for (QuestionDTO questionDTO : topicDTO.getQuestions()) {
+                existingTopicDTO.addQuestion(questionDTO);
+            }
         }
         if (topicDTO.getPassScore() != null) {
             existingTopicDTO.setPassScore(topicDTO.getPassScore());
@@ -130,7 +134,9 @@ public class TopicService {
         }
         
         if (courseDTO.getContentStatus().equals(ContentStatus.DRAFT.name())) {
-            Topic updatedTopic = topicMapper.toEntity(existingTopicDTO);       
+            Chapter chapter = chapterRepository.findById(chapterId)
+                    .orElseThrow(() -> new IllegalArgumentException("Chapter not found"));
+            Topic updatedTopic = topicMapper.toEntity(existingTopicDTO, chapter);
             topicRepository.save(updatedTopic);
         } 
         else {
@@ -162,7 +168,7 @@ public class TopicService {
         topicDTO.setSequence(nextSequence);
         
         // Always save new topic to main table first
-        Topic newTopic = topicMapper.toEntity(topicDTO);
+        Topic newTopic = topicMapper.toEntity(topicDTO, chapter);
         if (newTopic.getTopicType() == TopicType.EXAM || newTopic.getTopicType() == TopicType.QUIZ) {
             if (newTopic.getQuestions() != null) {
                 for (Question question : newTopic.getQuestions()) {

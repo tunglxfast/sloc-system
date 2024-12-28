@@ -61,7 +61,7 @@
                 <td th:text="${course.startDate}">Start Date</td>
                 <td th:text="${course.endDate}">End Date</td>
                 <td>
-                    <a th:href="@{/instructor/course/{id}/edit(id=${course.id})}" class="btn btn-warning btn-sm">Edit</a>
+                    <a th:href="@{/instructor/course/{id}/edit/chapters(id=${course.id})}" class="btn btn-warning btn-sm">Edit</a>
                     <a th:href="@{/instructor/course/{id}/view(id=${course.id})}" class="btn btn-info btn-sm">View</a>
                     <a th:href="@{/instructor/course/{id}/delete(id=${course.id})}"
                        class="btn btn-danger btn-sm"

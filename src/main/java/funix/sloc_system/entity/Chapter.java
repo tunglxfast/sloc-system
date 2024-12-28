@@ -63,10 +63,7 @@ public class Chapter {
 
     // Helper method to remove topic
     public void removeTopic(Topic topic) {
-        if (topics == null) {
-            return;
-        }
-        if (!topics.contains(topic)) {
+        if (topics == null || !topics.contains(topic)) {
             return;
         }
         topics.remove(topic);

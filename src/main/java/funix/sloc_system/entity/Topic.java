@@ -52,7 +52,7 @@ public class Topic {
     private Integer totalScore;
     private Integer timeLimit; // Only for Exam
 
-    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;
 
 
@@ -106,10 +106,7 @@ public class Topic {
 
     // Helper method to remove question
     public void removeQuestion(Question question) {
-        if (questions == null) {
-            return;
-        }
-        if (!questions.contains(question)) {
+        if (questions == null || !questions.contains(question)) {
             return;
         }
         questions.remove(question);

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Setter
@@ -18,4 +19,16 @@ public class ChapterDTO {
     private Long courseId;
     private List<TopicDTO> topics;
     private String contentStatus;
+
+    // Helper methods
+    public void addTopic(TopicDTO topicDTO) {
+        if (topics == null) {
+            topics = new ArrayList<>();
+        }
+        if (topics.contains(topicDTO)) {
+            return;
+        }
+        topicDTO.setChapterId(id);
+        topics.add(topicDTO);
+    }
 }

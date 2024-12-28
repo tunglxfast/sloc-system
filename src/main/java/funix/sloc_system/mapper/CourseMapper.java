@@ -1,9 +1,13 @@
 package funix.sloc_system.mapper;
 
+import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.dto.CourseDTO;
+import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.entity.Course;
+import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.ApprovalStatus;
 import funix.sloc_system.enums.ContentStatus;
+import funix.sloc_system.repository.CourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +28,9 @@ public class CourseMapper {
     
     @Autowired
     private EnrollmentMapper enrollmentMapper;
+
+    @Autowired
+    private CourseRepository courseRepository;
 
     public CourseDTO toDTO(Course course) {
         if (course == null) {
@@ -52,7 +59,9 @@ public class CourseMapper {
         dto.setCreatedAt(course.getCreatedAt());
         dto.setUpdatedAt(course.getUpdatedAt());
         if (course.getChapters() != null) {
-            dto.setChapters(chapterMapper.toDTO(course.getChapters()));
+            for (Chapter chapter : course.getChapters()) {
+                dto.addChapter(chapterMapper.toDTO(chapter));
+            }
         }
         if (course.getEnrollments() != null) {
             dto.setEnrollments(enrollmentMapper.toDTO(course.getEnrollments()));
@@ -63,13 +72,22 @@ public class CourseMapper {
         return dto;
     }
 
-    public Course toEntity(CourseDTO dto) {
+    public Course toEntity(CourseDTO dto, User instructor) {
         if (dto == null) {
             return null;
         }
 
-        Course course = new Course();
-        course.setId(dto.getId());
+        Course course;
+        if (dto.getId() != null) {
+            course = courseRepository.findById(dto.getId()).orElse(new Course());
+        } else {
+            course = new Course();
+        }
+
+        if (course.getId() == null && dto.getId() != null) {
+            course.setId(dto.getId());
+        }
+
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
         course.setThumbnailUrl(dto.getThumbnailUrl());
@@ -95,25 +113,26 @@ public class CourseMapper {
         course.setUpdatedAt(dto.getUpdatedAt());
         
         if (dto.getChapters() != null) {
-            course.setChapters(chapterMapper.toEntity(dto.getChapters()));
+            course.getChapters().clear();
+            for (ChapterDTO chapterDTO : dto.getChapters()) {
+                course.addChapter(chapterMapper.toEntity(chapterDTO, course));
+            }
         }
         
         if (dto.getEnrollments() != null) {
             course.setEnrollments(enrollmentMapper.toEntity(dto.getEnrollments()));
         }
 
-        if (dto.getInstructor() != null) {
-            course.setInstructor(userMapper.toEntity(dto.getInstructor()));
-        }
+        course.setInstructor(instructor);
         
         return course;
     }
 
     public List<CourseDTO> toDTO(List<Course> courses) {
-        return courses.stream().map(this::toDTO).collect(Collectors.toList());
+        return courses.stream().map(course -> toDTO(course)).collect(Collectors.toList());
     }
 
-    public List<Course> toEntity(List<CourseDTO> courseDTOList) {
-        return courseDTOList.stream().map(this::toEntity).collect(Collectors.toList());
+    public List<Course> toEntity(List<CourseDTO> courseDTOList, User instructor) {
+        return courseDTOList.stream().map(dto -> toEntity(dto, instructor)).collect(Collectors.toList());
     }
 } 

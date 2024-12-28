@@ -12,6 +12,7 @@ import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -145,4 +146,17 @@ public class CourseDTO {
         }
         return null;
     }
+
+    // Helper methods
+    public void addChapter(ChapterDTO chapterDTO) {
+        if (chapters == null) {
+            chapters = new ArrayList<>();
+        }  
+        if (chapters.contains(chapterDTO)) {
+            return;
+        }
+        chapterDTO.setCourseId(id);
+        chapters.add(chapterDTO);
+    }
 }
+

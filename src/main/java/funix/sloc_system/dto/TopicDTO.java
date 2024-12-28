@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -31,4 +32,16 @@ public class TopicDTO {
     private Integer totalScore;
     private Integer timeLimit; // Only for Exam
     private List<QuestionDTO> questions;
+
+    // Helper methods
+    public void addQuestion(QuestionDTO questionDTO) {
+        if (questions == null) {
+            questions = new ArrayList<>();
+        }
+        if (questions.contains(questionDTO)) {
+            return;
+        }
+        questionDTO.setTopicId(id);
+        questions.add(questionDTO);
+    }
 }

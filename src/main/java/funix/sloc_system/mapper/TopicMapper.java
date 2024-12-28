@@ -1,12 +1,17 @@
 package funix.sloc_system.mapper;
 
+import funix.sloc_system.dto.QuestionDTO;
 import funix.sloc_system.dto.TopicDTO;
+import funix.sloc_system.entity.Chapter;
+import funix.sloc_system.entity.Question;
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.repository.ChapterRepository;
+import funix.sloc_system.repository.TopicRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +24,9 @@ public class TopicMapper {
     private QuestionMapper questionMapper;
     @Autowired
     private ChapterRepository chapterRepository;
+    @Autowired
+    private TopicRepository topicRepository;
+
 
     public TopicDTO toDTO(Topic topic) {
         if (topic == null) {
@@ -51,7 +59,10 @@ public class TopicMapper {
                 }
                 // Map questions
                 if (topic.getQuestions() != null) {
-                    dto.setQuestions(questionMapper.toDTO(topic.getQuestions()));
+                    for (Question question : topic.getQuestions()) {
+                        QuestionDTO questionDTO = questionMapper.toDTO(question);
+                        dto.addQuestion(questionDTO);
+                    }
                 }
                 break;
         }
@@ -59,13 +70,23 @@ public class TopicMapper {
         return dto;
     }
 
-    public Topic toEntity(TopicDTO dto) {
+    @Transactional
+    public Topic toEntity(TopicDTO dto, Chapter chapter) {
         if (dto == null) {
             return null;
         }
 
-        Topic topic = new Topic();
-        topic.setId(dto.getId());
+        Topic topic;
+        if (dto.getId() != null) {
+            topic = topicRepository.findById(dto.getId()).orElse(new Topic());
+        } else {
+            topic = new Topic();
+        }
+
+        if (topic.getId() == null && dto.getId() != null) {
+            topic.setId(dto.getId());
+        }
+
         topic.setTitle(dto.getTitle());
         topic.setDescription(dto.getDescription());
         
@@ -75,9 +96,7 @@ public class TopicMapper {
         
         topic.setSequence(dto.getSequence());
 
-        if (dto.getChapterId() != null) {
-            topic.setChapter(chapterRepository.findById(dto.getChapterId()).orElse(null));
-        }
+        topic.setChapter(chapter);
 
         if (dto.getContentStatus() != null) {
             topic.setContentStatus(ContentStatus.valueOf(dto.getContentStatus()));
@@ -91,9 +110,14 @@ public class TopicMapper {
 
         // Map questions if present
         if (dto.getQuestions() != null) {
-            topic.setQuestions(questionMapper.toEntity(dto.getQuestions()));
-        } else {
-            topic.setQuestions(new ArrayList<>());
+            if (topic.getQuestions() != null) {
+                topic.getQuestions().clear();
+            } else {
+                topic.setQuestions(new ArrayList<>());
+            }
+            for (QuestionDTO questionDTO : dto.getQuestions()) {
+                topic.addQuestion(questionMapper.toEntity(questionDTO, topic));
+            }
         }
         
         return topic;
@@ -103,7 +127,7 @@ public class TopicMapper {
         return topics.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
-    public List<Topic> toEntity(List<TopicDTO> topicDTOList) {
-        return topicDTOList.stream().map(this::toEntity).collect(Collectors.toList());
+    public List<Topic> toEntity(List<TopicDTO> topicDTOList, Chapter chapter) {
+        return topicDTOList.stream().map(dto -> toEntity(dto, chapter)).collect(Collectors.toList());
     }
 } 

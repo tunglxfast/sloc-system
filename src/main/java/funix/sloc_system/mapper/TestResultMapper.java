@@ -2,6 +2,8 @@ package funix.sloc_system.mapper;
 
 import funix.sloc_system.dto.TestResultDTO;
 import funix.sloc_system.entity.TestResult;
+import funix.sloc_system.entity.Topic;
+import funix.sloc_system.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +36,7 @@ public class TestResultMapper {
         return dto;
     }
 
-    public TestResult toEntity(TestResultDTO dto) {
+    public TestResult toEntity(TestResultDTO dto, Topic topic, User user) {
         if (dto == null) {
             return null;
         }
@@ -48,8 +50,8 @@ public class TestResultMapper {
         testResult.setTestType(dto.getTestType());
         
         // Map related DTOs
-        testResult.setUser(userMapper.toEntity(dto.getUser()));
-        testResult.setTopic(topicMapper.toEntity(dto.getTopic()));
+        testResult.setUser(user);
+        testResult.setTopic(topic);
         
         return testResult;
     }

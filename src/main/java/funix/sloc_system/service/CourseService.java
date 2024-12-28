@@ -211,74 +211,17 @@ public class CourseService {
         // Get all changes for this course and its child entities
         List<ContentChangeTemporary> allChanges = getAllCourseChanges(course);
 
-        // First handle deletions to avoid foreign key conflicts
+        // Process all changes
         for (ContentChangeTemporary change : allChanges) {
-            if (change.getAction() == ContentAction.DELETE) {
-                switch (change.getEntityType()) {
-                    case CHAPTER:
-                        chapterRepository.deleteById(change.getEntityId());
-                        break;
-                    case TOPIC:
-                        topicRepository.deleteById(change.getEntityId());
-                        break;
-                    case QUESTION:
-                        questionRepository.deleteById(change.getEntityId());
-                        break;
-                }
-            }
-        }
-
-        // Then handle updates and creations
-        for (ContentChangeTemporary change : allChanges) {
-            if (change.getAction() != ContentAction.DELETE) {
-                try {
-                    switch (change.getEntityType()) {
-                        case COURSE:
-                            CourseDTO courseDTO = objectMapper.readValue(change.getChanges(), CourseDTO.class);
-                            Course updatedCourse = courseMapper.toEntity(courseDTO);
-                            // Maintain relationships
-                            updatedCourse.setInstructor(course.getInstructor());
-                            updatedCourse.setCreatedBy(course.getCreatedBy());
-                            courseRepository.save(updatedCourse);
-                            break;
-
-                        case CHAPTER:
-                            ChapterDTO chapterDTO = objectMapper.readValue(change.getChanges(), ChapterDTO.class);
-                            Chapter updatedChapter = chapterMapper.toEntity(chapterDTO);
-                            // Maintain relationship with course
-                            updatedChapter.setCourse(course);
-                            chapterRepository.save(updatedChapter);
-                            break;
-
-                        case TOPIC:
-                            TopicDTO topicDTO = objectMapper.readValue(change.getChanges(), TopicDTO.class);
-                            Topic updatedTopic = topicMapper.toEntity(topicDTO);
-                            // Find parent chapter from DTO
-                            Chapter parentChapter = chapterRepository.findById(topicDTO.getChapterId())
-                                .orElseThrow(() -> new RuntimeException("Parent chapter not found"));
-                            // Maintain relationship with chapter
-                            updatedTopic.setChapter(parentChapter);
-                            topicRepository.save(updatedTopic);
-                            break;
-
-                        case QUESTION:
-                            QuestionDTO questionDTO = objectMapper.readValue(change.getChanges(), QuestionDTO.class);
-                            Question updatedQuestion = questionMapper.toEntity(questionDTO);
-                            // Find parent topic from DTO
-                            Topic parentTopic = topicRepository.findById(questionDTO.getTopicId())
-                                .orElseThrow(() -> new RuntimeException("Parent topic not found"));
-                            // Maintain relationship with topic
-                            updatedQuestion.setTopic(parentTopic);
-                            // Maintain relationships for answers
-                            if (updatedQuestion.getAnswers() != null) {
-                                updatedQuestion.getAnswers().forEach(answer -> answer.setQuestion(updatedQuestion));
-                            }
-                            questionRepository.save(updatedQuestion);
-                            break;
-                    }
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to apply changes for " + change.getEntityType(), e);
-                }
+            try {
+                CourseDTO courseDTO = objectMapper.readValue(change.getChanges(), CourseDTO.class);
+                Course updatedCourse = courseMapper.toEntity(courseDTO, course.getInstructor());
+                // Maintain relationships
+                updatedCourse.setInstructor(course.getInstructor());
+                updatedCourse.setCreatedBy(course.getCreatedBy());
+                courseRepository.save(updatedCourse);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to apply changes for course", e);
             }
         }
     }
@@ -343,7 +286,7 @@ public class CourseService {
             courseDTO.setThumbnailUrl(thumbnailUrl);
         }
 
-        Course course = courseMapper.toEntity(courseDTO);
+        Course course = courseMapper.toEntity(courseDTO, instructor);
         courseRepository.save(course);
         return courseMapper.toDTO(course);
     }
@@ -372,7 +315,7 @@ public class CourseService {
         // 1. Course is in DRAFT state (not published yet)
         if (ContentStatus.DRAFT.name().equals(currentStatus)) {
             // save direct to table
-            courseRepository.save(courseMapper.toEntity(courseDTO));
+            courseRepository.save(courseMapper.toEntity(courseDTO, instructor));
         } else {
             // Save course changes (json type) to temp table.
             String json = objectMapper.writeValueAsString(courseDTO);

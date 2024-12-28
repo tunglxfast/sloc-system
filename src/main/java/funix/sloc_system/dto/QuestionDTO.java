@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Setter
@@ -19,4 +20,16 @@ public class QuestionDTO {
     private String questionType; // CHOICE_MANY, CHOICE_ONE
     private Long topicId;  // Parent topic ID
     private List<AnswerDTO> answers;
+
+    // Helper methods
+    public void addAnswer(AnswerDTO answerDTO) {
+        if (answers == null) {
+            answers = new ArrayList<>();
+        }
+        if (answers.contains(answerDTO)) {
+            return;
+        }
+        answerDTO.setQuestionId(id);
+        answers.add(answerDTO);
+    }
 }

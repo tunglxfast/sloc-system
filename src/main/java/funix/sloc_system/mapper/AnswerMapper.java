@@ -2,7 +2,9 @@ package funix.sloc_system.mapper;
 
 import funix.sloc_system.dto.AnswerDTO;
 import funix.sloc_system.entity.Answer;
+import funix.sloc_system.entity.Question;
 import funix.sloc_system.repository.QuestionRepository;
+import funix.sloc_system.repository.AnswerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +15,9 @@ import java.util.stream.Collectors;
 public class AnswerMapper {
     @Autowired
     private QuestionRepository questionRepository;
+
+    @Autowired
+    private AnswerRepository answerRepository;
     
     public AnswerDTO toDTO(Answer answer) {
         if (answer == null) {
@@ -32,18 +37,25 @@ public class AnswerMapper {
         return dto;
     }
 
-    public Answer toEntity(AnswerDTO dto) {
+    public Answer toEntity(AnswerDTO dto, Question question) {
         if (dto == null) {
             return null;
         }
 
-        Answer answer = new Answer();
-        answer.setId(dto.getId());
+        Answer answer;
+        if (dto.getId() != null) {
+            answer = answerRepository.findById(dto.getId()).orElse(new Answer());
+        } else {
+            answer = new Answer();
+        }
+
+        if (answer.getId() == null && dto.getId() != null) {
+            answer.setId(dto.getId());
+        }
+
         answer.setContent(dto.getContent());
 
-        if (dto.getQuestionId() != null) {
-            answer.setQuestion(questionRepository.findById(dto.getQuestionId()).orElse(null));
-        }
+        answer.setQuestion(question);
 
         answer.setCorrect(dto.isCorrect());
         
@@ -51,10 +63,10 @@ public class AnswerMapper {
     }
 
     public List<AnswerDTO> toDTO(List<Answer> answers) {
-        return answers.stream().map(this::toDTO).collect(Collectors.toList());
+        return answers.stream().map(answer -> toDTO(answer)).collect(Collectors.toList());
     }
 
-    public List<Answer> toEntity(List<AnswerDTO> answerDTOList) {
-        return answerDTOList.stream().map(this::toEntity).collect(Collectors.toList());
+    public List<Answer> toEntity(List<AnswerDTO> answerDTOList, Question question) {
+        return answerDTOList.stream().map(dto -> toEntity(dto, question)).collect(Collectors.toList());
     }
 } 

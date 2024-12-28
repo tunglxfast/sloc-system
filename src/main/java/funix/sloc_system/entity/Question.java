@@ -32,7 +32,7 @@ public class Question {
     @JoinColumn(name = "topic_id", nullable = false)
     private Topic topic;
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Answer> answers;
 
     @Enumerated(EnumType.STRING)
@@ -67,10 +67,7 @@ public class Question {
 
     // Helper method to remove answer
     public void removeAnswer(Answer answer) {
-        if (answers == null) {
-            return;
-        }
-        if (!answers.contains(answer)) {
+        if (answers == null || !answers.contains(answer)) {
             return;
         }
         answers.remove(answer);

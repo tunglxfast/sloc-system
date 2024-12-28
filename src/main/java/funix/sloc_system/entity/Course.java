@@ -61,7 +61,7 @@ public class Course {
     @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate updatedAt;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sequence ASC")
     private List<Chapter> chapters = new ArrayList<>();
 
@@ -119,5 +119,24 @@ public class Course {
             this.enrollments = updatedCourse.getEnrollments();
         }
     }
+
+    // Helper methods
+    public void addChapter(Chapter chapter) {
+        if (chapters == null) {
+            chapters = new ArrayList<>();
+        }
+        if (chapters.contains(chapter)) {
+            return;
+        }
+        chapter.setCourse(this);
+        chapters.add(chapter);
+    }
+
+    public void removeChapter(Chapter chapter) {
+        if (chapters == null || !chapters.contains(chapter)) {
+            return;
+        }
+        chapters.remove(chapter);
+    }  
 
 }

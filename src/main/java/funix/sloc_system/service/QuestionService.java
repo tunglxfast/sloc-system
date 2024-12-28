@@ -75,7 +75,7 @@ public class QuestionService {
         Course course = topic.getChapter().getCourse();
         
         if (course.getContentStatus() == ContentStatus.DRAFT) {
-            Question updatedQuestion = questionMapper.toEntity(questionDTO);
+            Question updatedQuestion = questionMapper.toEntity(questionDTO, topic);
             question.updateWithOtherQuestion(updatedQuestion);
             questionRepository.save(question);
         }    
@@ -172,7 +172,7 @@ public class QuestionService {
         CourseDTO courseDTO = appUtil.getEditingCourseDTO(course.getId());
         
         // Always save new question to main table first
-        Question newQuestion = questionMapper.toEntity(questionDTO);
+        Question newQuestion = questionMapper.toEntity(questionDTO, topic);
         newQuestion.setTopic(topic);
         topic.getQuestions().add(newQuestion);
         topicRepository.save(topic);
