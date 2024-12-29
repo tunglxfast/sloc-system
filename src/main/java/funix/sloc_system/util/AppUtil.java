@@ -188,7 +188,7 @@ public class AppUtil {
         Topic nextTopic = findNextTopic(topicId);
         if (nextTopic != null) {
             return String.format("/courses/%d/%d_%d", courseId, nextTopic.getChapter().getSequence(), nextTopic.getSequence());
-        } 
+        }
         else {
             return String.format("/courses/%d", courseId);
         }

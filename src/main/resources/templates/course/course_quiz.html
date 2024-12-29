@@ -143,12 +143,6 @@
                     <button type="submit" class="btn btn-primary" style="margin-top: 20px;">Submit Quiz</button>
                 </form>
             </div>
-            <a style="margin-left: 5%;"
-                th:href="@{/courses/{courseId}/{chapterNumber}_{topicNumber}
-        (courseId=${courseId}, chapterNumber=${nextTopic.getChapter().getSequence()}, topicNumber=${nextTopic.getSequence()})}">
-                <button type="button" class="btn btn-info btn-rounded" data-mdb-ripple-init style="margin-top: 60px;">Go
-                    to next course</button>
-            </a>
             <!-- Action Button -->
             <div class="row" style="margin-bottom: 5%; margin-left: 4%;">
                 <div class="col-md-6" style="margin-top: 40px;">
@@ -159,9 +153,9 @@
                 </div>
 
                 <div class="col-md-6" style="margin-top: 40px;">
-                    <a th:href="@{/courses}">
+                    <a th:href="@{${nextTopicUrl}}">
                         <button type="button" class="btn btn-danger btn-rounded" data-mdb-ripple-init
-                            style="float: right;">Available Courses</button>
+                            style="float: right;">Go to next course</button>
                     </a>
                 </div>
             </div>

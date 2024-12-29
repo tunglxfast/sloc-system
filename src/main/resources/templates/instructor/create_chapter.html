@@ -131,7 +131,7 @@
 
 <div class="row" style="margin-right: 5%;">
   <h4 style="margin-top: 5%; text-align: right; margin-bottom: 3%;">Create Chapters for Course: <span
-          style="color: rgb(80, 80, 255);" th:text="${course.title}">Course Title</span></h4>
+          style="color: rgb(80, 80, 255);" th:text="${courseTitle}">Course Title</span></h4>
   <div th:if="${errorMessage}">
     <p th:text="${errorMessage}" style="color: red;"></p>
   </div>
@@ -143,18 +143,17 @@
       <div class="d-flex flex-column" style="width: 250px; height: 100vh; position: fixed; margin-left: 2%;">
         <h4 class="mb-4">Navigation</h4>
         <ul class="nav flex-column">
-          <!-- Edit Courses -->
           <li class="nav-item mb-2">
-            <a class="nav-link text-dark">
-              <i class="fas fa-edit"></i> Edit Courses
+            <a class="nav-link text-dark" th:href="@{/instructor/course/{id}/edit(id=${courseId}})}">
+              <i class="fas fa-graduation-cap"></i> Edit Course General
             </a>
           </li>
-          <!-- Back to Courses -->
           <li class="nav-item mb-2">
-            <a class="nav-link text-dark">
-              <i class="fas fa-graduation-cap"></i>Create Courses
+            <a class="nav-link text-dark" href="#">
+              <i class="fas fa-edit"></i> Edit Course Content
             </a>
           </li>
+
         </ul>
 
       </div>
@@ -268,7 +267,7 @@
         </div>
         <!-- Modal Body -->
         <div class="modal-body">
-          <form id="addChapterForm" th:action="@{'/instructor/course/' + ${course.id} + '/chapters/add'}"
+          <form id="addChapterForm" th:action="@{'/instructor/course/' + ${courseId} + '/chapters/add'}"
                 method="post" class="needs-validation" novalidate>
             <!-- Chapter Title Field -->
             <div class="mb-3">
@@ -365,6 +364,6 @@
       }
     </script>
 
-</body>
+  </body>
 
 </html>

@@ -11,8 +11,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class TestResultDTO {
     private Long id;
-    private Integer highestScore;
-    private Integer latestScore;
+    private Double highestScore;
+    private Double latestScore;
     private Boolean passed;
     private Integer participationCount;
     private String testType;

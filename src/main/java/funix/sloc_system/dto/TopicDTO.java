@@ -8,8 +8,6 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-import funix.sloc_system.enums.ContentStatus;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -45,17 +43,5 @@ public class TopicDTO {
         }
         questionDTO.setTopicId(id);
         questions.add(questionDTO);
-    }
-
-    public void removeNotAvailableDetails() {
-        String questionContentStatus;
-        for (QuestionDTO questionDTO : questions) {
-            questionContentStatus = questionDTO.getContentStatus();
-            if (!questionContentStatus.equals(ContentStatus.PUBLISHED.name()) 
-                && !questionContentStatus.equals(ContentStatus.PUBLISHED_EDITING.name())) {
-                questions.remove(questionDTO);
-            }
-            questionDTO.removeNotAvailableDetails();
-        }
     }
 }
