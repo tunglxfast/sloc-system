@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Course Review</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.0.0/mdb.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Laila';
+        }
+        h4 {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="sticky-top navbar navbar-expand-lg navbar-light bg-body-tertiary">
+        <div class="container-fluid justify-content-between">
+            <!-- Left elements -->
+            <div class="d-flex">
+                <a class="navbar-brand me-2 mb-1 d-flex align-items-center" href="#">
+                    <img src="https://i.imgur.com/FsIOl6L.png" height="20" alt="SLOC Logo" loading="lazy"
+                        style="margin-top: 2px;" />
+                </a>
+            </div>
+            <!-- Right elements -->
+            <ul class="navbar-nav flex-row">
+                <li class="nav-item me-3 me-lg-1"><a class="nav-link active" aria-current="page" th:href="@{/home}">Home</a>
+                </li>
+                <li class="nav-item me-3 me-lg-1"> <a class="nav-link" th:href="@{/courses}">Courses</a>
+                </li>
+                <li class="nav-item me-3 me-lg-1"> <a class="nav-link" href="#">About</a>
+                </li>
+                <li class="nav-item me-3 me-lg-1">
+                    <form th:action="@{/logout}" method="POST">
+                        <button type="submit">Logout</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <h1 style="color: rgb(2, 117, 2); font-weight: bold; margin-bottom: 30px;">Course Review</h1>
+        
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <div class="row align-items-start">
+            <div class="col-md-3 text-center">
+                <img th:src="${course.thumbnailUrl}" class="img-fluid rounded shadow-sm" alt="Course Thumbnail" 
+                     style="max-width: 150px; max-height: 150px; object-fit: contain; margin-bottom: 20px;">
+            </div>
+            <div class="col-md-9">
+                <div class="d-flex align-items-center mb-3">
+                    <h2 th:text="${course.title}" style="color: rgb(2, 117, 2); font-weight: bold; margin-bottom: 0; margin-right: 15px;">Course Title</h2>
+                    <span class="badge rounded-pill bg-warning" th:if="${course.contentStatus == 'READY_TO_REVIEW'}" style="font-size: 1rem;">New Course</span>
+                    <span class="badge rounded-pill bg-info" th:if="${course.contentStatus == 'PUBLISHED_EDITING'}" style="font-size: 1rem;">Update Course</span>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-user me-2"></i>
+                            <strong>Instructor:</strong> <span th:text="${course.instructor.fullName}">Instructor Name</span>
+                        </p>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-folder me-2"></i>
+                            <strong>Category:</strong> <span th:text="${course.category.name}">Category Name</span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            <strong>Start Date:</strong> <span th:text="${course.startDate}">Start Date</span>
+                        </p>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            <strong>End Date:</strong> <span th:text="${course.endDate}">End Date</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <h3 style="color: rgb(2, 117, 2);">
+                        <i class="fas fa-info-circle me-2"></i>Course Description
+                    </h3>
+                    <p class="text-muted" th:text="${course.description}">Course description goes here...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Display chapters and topics if available -->
+        <div class="mt-5" th:if="${course.chapters != null and !course.chapters.empty}">
+            <h2 style="color: rgb(2, 117, 2); font-weight: bold; margin-bottom: 20px;">Course Content</h2>
+            <ul class="list-group list-group-light" style="margin-left: 20px;">
+                <li class="list-group-item justify-content-between align-items-center" 
+                    th:each="chapter : ${course.chapters}"
+                    style="max-width: 90%;">
+                    <h4 th:text="${chapter.title}">Chapter Title</h4>
+                    <span class="badge rounded-pill badge-success" style="margin-bottom: 20px;">Chapter</span>
+                    <ul>
+                        <li th:each="topic : ${chapter.topics}" style="margin: 10px 0; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <span th:text="${topic.title}">Topic Title</span>
+                                <span class="badge bg-secondary" th:text="${topic.topicType}">Type</span>
+                            </div>
+                            <a th:href="@{/moderator/course/{courseId}/chapter/{chapterNumber}/topic/{topicNumber}(courseId=${course.id}, chapterNumber=${chapter.sequence}, topicNumber=${topic.sequence})}" 
+                               class="btn btn-outline-success btn-sm">
+                               <i class="fas fa-eye"></i> View
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-md-6 d-grid">
+                <button type="button" class="btn btn-success btn-lg" style="padding: 15px; font-size: 1.2rem;"
+                        data-bs-toggle="modal" data-bs-target="#approveModal">
+                    <i class="fas fa-check-circle me-2"></i> Approve Course
+                </button>
+            </div>
+            <div class="col-md-6 d-grid">
+                <button type="button" class="btn btn-danger btn-lg" style="padding: 15px; font-size: 1.2rem;"
+                        data-bs-toggle="modal" data-bs-target="#rejectModal">
+                    <i class="fas fa-times-circle me-2"></i> Reject Course
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a href="/moderator" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Approve Modal -->
+    <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="approveModalLabel">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Approve Course
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form th:action="@{/moderator/course/{id}/approve(id=${course.id})}" method="post">
+                    <div class="modal-body">
+                        <p>Are you sure you want to approve this course?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check-circle me-2"></i>Confirm Approval
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="rejectModalLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Reject Course
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form th:action="@{/moderator/course/{id}/reject(id=${course.id})}" method="post">
+                    <div class="modal-body">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> The instructor will receive your feedback and will need to address the issues before resubmitting.
+                        </div>
+                        <div class="form-group">
+                            <label for="rejectionReason" class="form-label">Please provide a reason for rejection:</label>
+                            <textarea class="form-control" id="rejectionReason" name="rejectionReason" 
+                                    rows="4" required
+                                    placeholder="Enter detailed feedback for the instructor..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-times-circle me-2"></i>Reject Course
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

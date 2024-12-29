@@ -112,5 +112,12 @@ public class Topic {
         questions.remove(question);
         question.setTopic(null);
     }
+
+    public void setQuestionsContentStatus(ContentStatus status) {
+        for (Question question : questions) {
+            question.setContentStatus(status);
+            question.setAnswersContentStatus(status);
+        }
+    }
 }
 

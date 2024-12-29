@@ -69,4 +69,11 @@ public class Chapter {
         topics.remove(topic);
         topic.setChapter(null);
     }
+
+    public void setTopicsContentStatus(ContentStatus status) {
+        for (Topic topic : topics) {
+            topic.setContentStatus(status);
+            topic.setQuestionsContentStatus(status);
+        }
+    }
 }

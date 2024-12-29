@@ -73,4 +73,10 @@ public class Question {
         answers.remove(answer);
         answer.setQuestion(null);
     }
+
+    public void setAnswersContentStatus(ContentStatus status) {
+        for (Answer answer : answers) {
+            answer.setContentStatus(status);
+        }
+    }
 }

@@ -23,12 +23,13 @@ public class SecurityConfig {
 
         http.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
             .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers("/instructor/**").hasAuthority("INSTRUCTOR")
+                    .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
                     .requestMatchers("/login", "/login_form", "/register", "/register_form").permitAll()
                     .requestMatchers("/h2-console/**").permitAll()
+                    .requestMatchers("/moderator/**").hasAuthority("MODERATOR")
+                    .requestMatchers("/instructor/**").hasAnyAuthority("INSTRUCTOR")
                     .anyRequest().authenticated()
             )
-//            .userDetailsService(applicationUserDetailsService)
             .formLogin(form -> form
                     .loginPage("/login")
                     .loginProcessingUrl("/authenticateTheUser")
@@ -58,6 +59,4 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return NoOpPasswordEncoder.getInstance();
     }
-
-
 }

@@ -63,12 +63,14 @@ public class Course {
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sequence ASC")
-    private List<Chapter> chapters = new ArrayList<>();
+    private List<Chapter> chapters;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.PERSIST)
-    private Set<Enrollment> enrollments = new HashSet<>();
+    private Set<Enrollment> enrollments;
 
     // Helper method
+
+    // Update course with another course except chapters and enrollments
     public void updateWithOtherCourse(Course updatedCourse) {
         if (updatedCourse.getTitle() != null) {
             this.title = updatedCourse.getTitle();
@@ -112,12 +114,6 @@ public class Course {
         if (updatedCourse.getUpdatedAt() != null) {
             this.updatedAt = updatedCourse.getUpdatedAt();
         }
-        if (updatedCourse.getChapters() != null || !updatedCourse.getChapters().isEmpty()) {
-            this.chapters = updatedCourse.getChapters();
-        }
-        if (updatedCourse.getEnrollments() != null || !updatedCourse.getEnrollments().isEmpty()) {
-            this.enrollments = updatedCourse.getEnrollments();
-        }
     }
 
     // Helper methods
@@ -139,4 +135,10 @@ public class Course {
         chapters.remove(chapter);
     }  
 
+    public void setChaptersContentStatus(ContentStatus status) {
+        for (Chapter chapter : chapters) {
+            chapter.setContentStatus(status);
+            chapter.setTopicsContentStatus(status);
+        }
+    }
 }
