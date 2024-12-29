@@ -12,6 +12,7 @@ import lombok.Setter;
 public class AnswerDTO {
     private Long id;
     private String content;
+    private String contentStatus;
     private Long questionId;
     private boolean correct;
 }

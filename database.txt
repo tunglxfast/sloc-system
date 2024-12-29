@@ -124,8 +124,8 @@ CREATE TABLE enrollment (
 
 CREATE TABLE test_result (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    highest_score INT NOT NULL,
-    latest_score INT NOT NULL,
+    highest_score DOUBLE NOT NULL,
+    latest_score DOUBLE NOT NULL,
     passed BOOLEAN NOT NULL,
     participation_count INT,
     test_type VARCHAR(255) NOT NULL,

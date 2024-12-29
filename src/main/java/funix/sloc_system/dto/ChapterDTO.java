@@ -8,6 +8,8 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+import funix.sloc_system.enums.ContentStatus;
+
 @Setter
 @Getter
 @NoArgsConstructor

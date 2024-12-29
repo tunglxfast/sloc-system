@@ -2,13 +2,19 @@ package funix.sloc_system.controller;
 
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.TestResultDTO;
+import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.TopicType;
+import funix.sloc_system.mapper.CourseMapper;
+import funix.sloc_system.mapper.TestResultMapper;
+import funix.sloc_system.mapper.TopicMapper;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.*;
 import funix.sloc_system.util.AppUtil;
+
+import org.checkerframework.checker.units.qual.t;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -34,10 +40,22 @@ public class CourseLearningController {
     private TopicService topicService;
 
     @Autowired
+    private DTOService dtoService;
+
+    @Autowired
     private AppUtil appUtil;
 
     @Autowired
     private TestResultService testResultService;
+
+    @Autowired
+    private CourseMapper courseMapper;
+
+    @Autowired
+    private TopicMapper topicMapper;
+
+    @Autowired
+    private TestResultMapper testResultMapper;
 
     /**
      * list all courses
@@ -46,7 +64,8 @@ public class CourseLearningController {
      */
     @GetMapping(value = {"","/"})
     public String listCourses(Model model) {
-        List<CourseDTO> courseDTOList = courseService.getAvailableCourseDTOList();
+        List<Course> courses = courseService.getAvailableCourses();
+        List<CourseDTO> courseDTOList = courseMapper.toDTO(courses);
         model.addAttribute("courses", courseDTOList);
         return "courses";
     }
@@ -67,8 +86,9 @@ public class CourseLearningController {
         Course course = courseService.findById(id);
         User user = userService.findById(securityUser.getUserId());
         if (course != null && user != null) {
-            boolean isEnrolled = enrollmentService.checkEnrollment(user, course);
-            model.addAttribute("course", course);
+            boolean isEnrolled = enrollmentService.checkEnrollment(user, course);            
+            CourseDTO courseDTO = dtoService.getAvailableCourseDTO(id);
+            model.addAttribute("course", courseDTO);
             model.addAttribute("isEnrolled", isEnrolled);
             return "course/general";
         } else {
@@ -120,11 +140,15 @@ public class CourseLearningController {
             return String.format("redirect:/courses/%d", courseId);
         }
 
-        Topic nextTopic = appUtil.findNextTopic(topic.getId());
+        TopicDTO topicDTO = topicMapper.toDTO(topic);
+        topicDTO.setQuestions(dtoService.getAvailableQuestions(topicDTO));
 
-        model.addAttribute("topic", topic);
+        String nextTopicUrl = appUtil.getNextTopicUrl(topic.getId(), courseId);
+
+        model.addAttribute("topic", topicDTO);
         model.addAttribute("courseId", courseId);
-        model.addAttribute("nextTopic", nextTopic);
+        model.addAttribute("nextTopicUrl", nextTopicUrl);
+        
         TestResultDTO testResult = testResultService.findByUserIdAndTopicId(user.getId(), topic.getId());
         if (testResult != null) {
             model.addAttribute("result", testResult);
@@ -150,16 +174,19 @@ public class CourseLearningController {
             return "redirect:/courses";
         }
 
-        TestResultDTO result = testResultService.calculateScore(securityUser.getUserId(), quizId, answers);
+        TestResultDTO resultDTO = testResultService.calculateScore(securityUser.getUserId(), quizId, answers);
+        
         Topic topic = topicService.findById(quizId);
-
         if (topic != null) {
-            model.addAttribute("result", result);
-            model.addAttribute("topic", topic);
-            model.addAttribute("courseId", courseId);
+            TopicDTO topicDTO = topicMapper.toDTO(topic);
+            topicDTO.setQuestions(dtoService.getAvailableQuestions(topicDTO));
+    
+            String nextTopicUrl = appUtil.getNextTopicUrl(topic.getId(), courseId);
 
-            Topic nextTopic = appUtil.findNextTopic(topic.getId());
-            model.addAttribute("nextTopic", nextTopic);
+            model.addAttribute("result", resultDTO);
+            model.addAttribute("topic", topicDTO);
+            model.addAttribute("courseId", courseId);
+            model.addAttribute("nextTopicUrl", nextTopicUrl);
 
         }
         return "course/course_quiz";
@@ -177,15 +204,20 @@ public class CourseLearningController {
         }
 
         TestResultDTO result = testResultService.calculateScore(securityUser.getUserId(), examId, answers);
+
         Topic exam = topicService.findById(examId);
 
-        if (exam != null) {
-            model.addAttribute("result", result);
-            model.addAttribute("topic", exam);
-            model.addAttribute("courseId", courseId);
 
-            Topic nextTopic = appUtil.findNextTopic(exam.getId());
-            model.addAttribute("nextTopic", nextTopic);
+        if (exam != null) {
+            TopicDTO examDTO = topicMapper.toDTO(exam);
+            examDTO.setQuestions(dtoService.getAvailableQuestions(examDTO));
+
+            String nextTopicUrl = appUtil.getNextTopicUrl(exam.getId(), courseId);
+
+            model.addAttribute("result", result);
+            model.addAttribute("topic", examDTO);
+            model.addAttribute("courseId", courseId);
+            model.addAttribute("nextTopicUrl", nextTopicUrl);
 
         }
         return "course/course_exam";

@@ -78,13 +78,12 @@ public class CourseService {
         return courseRepository.findAllByInstructorAndApprovalStatus(instructor, ApprovalStatus.REJECTED);
     }
 
-    public List<CourseDTO> getAvailableCourseDTOList() {
+    public List<Course> getAvailableCourses() {
         List<ContentStatus> contentStatusList = List.of(
                 ContentStatus.PUBLISHED,
                 ContentStatus.PUBLISHED_EDITING,
                 ContentStatus.ARCHIVED);
-        List<Course> courses = courseRepository.findByContentStatusIn(contentStatusList);
-        return courseMapper.toDTO(courses);
+        return courseRepository.findByContentStatusIn(contentStatusList);
     }
 
 
@@ -108,146 +107,6 @@ public class CourseService {
             course.setApprovalStatus(ApprovalStatus.PENDING);
         }
         courseRepository.save(course);
-    }
-
-    @Transactional
-    public void approveCourse(Long courseId) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
-
-        // If this is a new course or editing an existing course
-        if (course.getContentStatus() == ContentStatus.READY_TO_REVIEW) {
-            // Update course and all child entities to PUBLISHED
-            updateContentStatusRecursively(course, ContentStatus.PUBLISHED);
-        } else if (course.getContentStatus() == ContentStatus.PUBLISHED_EDITING) {
-            // Apply changes from temporary table to main table
-            applyTemporaryChanges(course);
-            // Update course and modified child entities to PUBLISHED
-            updateContentStatusRecursively(course, ContentStatus.PUBLISHED);
-        }
-
-        course.setApprovalStatus(ApprovalStatus.APPROVED);
-        course.setRejectReason(null);
-        courseRepository.save(course);
-
-        // Clean up temporary changes
-        deleteAllCourseChanges(course);
-
-        // Send notification
-        sendApproveEmail(course.getInstructor(), course);
-    }
-
-    @Transactional
-    public void rejectCourse(Long courseId, String reason) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
-
-        if (course.getContentStatus() == ContentStatus.READY_TO_REVIEW) {
-            // Update course and all child entities to DRAFT
-            updateContentStatusRecursively(course, ContentStatus.DRAFT);
-        } else if (course.getContentStatus() == ContentStatus.PUBLISHED_EDITING) {
-            // Update course and modified child entities to PUBLISHED
-            updateContentStatusRecursively(course, ContentStatus.PUBLISHED);
-        }
-
-        course.setApprovalStatus(ApprovalStatus.REJECTED);
-        course.setRejectReason(reason);
-        courseRepository.save(course);
-
-        // Send notification
-        sendRejectionEmail(course.getInstructor(), course, reason);
-    }
-
-    /**
-     * Recursively update content status of course and its child entities
-     */
-    private void updateContentStatusRecursively(Course course, ContentStatus newStatus) {
-        course.setContentStatus(newStatus);
-        
-        for (Chapter chapter : course.getChapters()) {
-            // For PUBLISHED_EDITING, only update entities that have changes
-            if (newStatus == ContentStatus.PUBLISHED && course.getContentStatus() == ContentStatus.PUBLISHED_EDITING) {
-                if (contentChangeRepository.findByEntityTypeAndEntityId(EntityType.CHAPTER, chapter.getId()).isPresent()) {
-                    chapter.setContentStatus(newStatus);
-                }
-            } else {
-                chapter.setContentStatus(newStatus);
-            }
-
-            for (Topic topic : chapter.getTopics()) {
-                if (newStatus == ContentStatus.PUBLISHED && course.getContentStatus() == ContentStatus.PUBLISHED_EDITING) {
-                    if (contentChangeRepository.findByEntityTypeAndEntityId(EntityType.TOPIC, topic.getId()).isPresent()) {
-                        topic.setContentStatus(newStatus);
-                    }
-                } else {
-                    topic.setContentStatus(newStatus);
-                }
-
-                if (topic.getQuestions() != null) {
-                    for (Question question : topic.getQuestions()) {
-                        if (newStatus == ContentStatus.PUBLISHED && course.getContentStatus() == ContentStatus.PUBLISHED_EDITING) {
-                            if (contentChangeRepository.findByEntityTypeAndEntityId(EntityType.QUESTION, question.getId()).isPresent()) {
-                                question.setContentStatus(newStatus);
-                                if (question.getAnswers() != null) {
-                                    question.getAnswers().forEach(answer -> answer.setContentStatus(newStatus));
-                                }
-                            }
-                        } else {
-                            question.setContentStatus(newStatus);
-                            if (question.getAnswers() != null) {
-                                question.getAnswers().forEach(answer -> answer.setContentStatus(newStatus));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Apply changes from temporary table to main entities
-     */
-    private void applyTemporaryChanges(Course course) {
-        // Get all changes for this course and its child entities
-        List<ContentChangeTemporary> allChanges = getAllCourseChanges(course);
-
-        // Process all changes
-        for (ContentChangeTemporary change : allChanges) {
-            try {
-                CourseDTO courseDTO = objectMapper.readValue(change.getChanges(), CourseDTO.class);
-                Course updatedCourse = courseMapper.toEntity(courseDTO, course.getInstructor());
-                // Maintain relationships
-                updatedCourse.setInstructor(course.getInstructor());
-                updatedCourse.setCreatedBy(course.getCreatedBy());
-                courseRepository.save(updatedCourse);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to apply changes for course", e);
-            }
-        }
-    }
-
-    public void sendRejectionEmail(User instructor, Course course, String reason) {
-        String subject = String.format("Course Rejected: %s", course.getTitle());
-        String body = String.format(
-                "Dear %s,%n%n"
-                + "Your course '%s' has been rejected.%n"
-                + "Reason: %s %n%n"
-                + "Please review and make necessary changes.%n"
-                + "Thank you.",
-                instructor.getFullName(), course.getTitle(), reason
-        );
-        emailService.sendEmail(instructor.getEmail(), subject, body);
-    }
-
-    public void sendApproveEmail(User instructor, Course course) {
-        String subject = "Course approve: " + course.getTitle();
-        String body = String.format(
-                "Dear %s,%n%n"
-                + "Your course '%s'"
-                + "has been approved.%n"
-                + "Thank you.",
-                instructor.getFullName(), course.getTitle());
-        emailService.sendEmail(instructor.getEmail(), subject, body);
     }
 
     @Transactional

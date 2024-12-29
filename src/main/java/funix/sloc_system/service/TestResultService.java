@@ -1,11 +1,13 @@
 package funix.sloc_system.service;
 
 import funix.sloc_system.repository.*;
+import funix.sloc_system.dto.QuestionDTO;
 import funix.sloc_system.dto.TestResultDTO;
+import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.*;
 import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.mapper.TestResultMapper;
-
+import funix.sloc_system.mapper.TopicMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +36,13 @@ public class TestResultService {
     @Autowired
     private TestResultMapper testResultMapper;
 
+    @Autowired
+    private TopicMapper topicMapper;
+
+    @Autowired
+    private DTOService dtoService;
+
+
     public TestResultDTO findByUserIdAndTopicId(Long userId, Long topicId) {
         TestResult result = testResultRepository.findByUserIdAndTopicId(userId, topicId).orElse(null);
         return testResultMapper.toDTO(result);
@@ -42,23 +51,29 @@ public class TestResultService {
     @Transactional
     public TestResultDTO calculateScore(Long userId, Long topicId, Map<String, String> answers) {
         User user = userRepository.findById(userId).orElse(null);
-        Topic topic = topicRepository.findById(topicId).orElse(null);
-        TopicType topicType = topic.getTopicType();
-        if (user == null || topic == null) {
+        Topic topicEntity = topicRepository.findById(topicId).orElse(null);
+        if (user == null || topicEntity == null) {
             return null;
         }
 
+        TopicType topicType = topicEntity.getTopicType();
         if (!topicType.equals(TopicType.EXAM) && !topicType.equals(TopicType.QUIZ)) {
             return null;
         }
 
-        int totalScore = 0;
+        TopicDTO topicDTO = topicMapper.toDTO(topicEntity);
+        topicDTO.setQuestions(dtoService.getAvailableQuestions(topicDTO));
+
+        // 0 - 100
+        double totalScore = 0;
+        double countCorrectAnswer = 0;
 
         List<Answer> correctAnswers = new ArrayList<>();
         List<String> correctAnswerIds = new ArrayList<>();
         List<String> selectedAnswerIds = new ArrayList<>();
-        List<Question> questions = topic.getQuestions();
-        for (Question question : questions) {
+        List<QuestionDTO> questions = topicDTO.getQuestions();
+
+        for (QuestionDTO question : questions) {
             correctAnswers.clear();
             correctAnswerIds.clear();
             selectedAnswerIds.clear();
@@ -73,16 +88,18 @@ public class TestResultService {
 
             if (new HashSet<>(selectedAnswerIds).containsAll(correctAnswerIds)
                     && new HashSet<>(correctAnswerIds).containsAll(selectedAnswerIds)) {
-                totalScore += 1;
+                countCorrectAnswer += 1;
             }
         }
 
-        int passScore = topic.getPassScore();
+         // 0 - 100
+        int passScore = topicDTO.getPassScore();
+        totalScore = Math.round(countCorrectAnswer / questions.size() * 100);
         boolean isPassed = totalScore >= passScore;
 
         TestResult testResult = testResultRepository.findByUserIdAndTopicId(userId, topicId).orElse(null);
         if (testResult == null){
-            testResult = new TestResult(totalScore, totalScore, isPassed, 1, topicType, user, topic);
+            testResult = new TestResult(totalScore, totalScore, isPassed, 1, topicType, user, topicEntity);
         } else {
             testResult.setLatestScore(totalScore);
             if (testResult.getParticipationCount() != null) {

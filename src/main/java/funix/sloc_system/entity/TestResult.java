@@ -18,9 +18,9 @@ public class TestResult {
     private Long id;
 
     @Column
-    private Integer highestScore;
+    private Double highestScore;
     @Column
-    private Integer latestScore;
+    private Double latestScore;
     @Column
     private Boolean passed;
 
@@ -34,7 +34,7 @@ public class TestResult {
     @JoinColumn(name = "topic_id", nullable = false)
     private Topic topic;
 
-    public TestResult(int highestScore, int latestScore, boolean passed, Integer participationCount, String testType, User user, Topic topic) {
+    public TestResult(double highestScore, double latestScore, boolean passed, Integer participationCount, String testType, User user, Topic topic) {
         this.highestScore = highestScore;
         this.latestScore = latestScore;
         this.passed = passed;
@@ -44,7 +44,7 @@ public class TestResult {
         this.topic = topic;
     }
 
-    public TestResult(int highestScore, int latestScore, boolean passed, Integer participationCount, TopicType testType, User user, Topic topic) {
+    public TestResult(double highestScore, double latestScore, boolean passed, Integer participationCount, TopicType testType, User user, Topic topic) {
         this.highestScore = highestScore;
         this.latestScore = latestScore;
         this.passed = passed;

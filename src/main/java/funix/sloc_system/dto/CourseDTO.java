@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import funix.sloc_system.entity.Category;
 import funix.sloc_system.entity.Role;
 import funix.sloc_system.entity.User;
+import funix.sloc_system.enums.ContentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

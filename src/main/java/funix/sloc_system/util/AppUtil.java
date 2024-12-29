@@ -183,4 +183,15 @@ public class AppUtil {
         // throw exeption if not found any match with chapterId
         throw new IllegalArgumentException(String.format("Topic with id: %d not found", topicId));
     }
+
+    public String getNextTopicUrl(Long topicId, Long courseId) {
+        Topic nextTopic = findNextTopic(topicId);
+        if (nextTopic != null) {
+            return String.format("/courses/%d/%d_%d", courseId, nextTopic.getChapter().getSequence(), nextTopic.getSequence());
+        } 
+        else {
+            return String.format("/courses/%d", courseId);
+        }
+    }
 }
+
