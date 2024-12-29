@@ -3,6 +3,7 @@ package funix.sloc_system.mapper;
 import funix.sloc_system.dto.AnswerDTO;
 import funix.sloc_system.entity.Answer;
 import funix.sloc_system.entity.Question;
+import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.repository.QuestionRepository;
 import funix.sloc_system.repository.AnswerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ public class AnswerMapper {
         AnswerDTO dto = new AnswerDTO();
         dto.setId(answer.getId());
         dto.setContent(answer.getContent());
+        dto.setContentStatus(answer.getContentStatus().name());
 
         if (answer.getQuestion() != null) { 
             dto.setQuestionId(answer.getQuestion().getId());
@@ -54,9 +56,8 @@ public class AnswerMapper {
         }
 
         answer.setContent(dto.getContent());
-
+        answer.setContentStatus(ContentStatus.valueOf(dto.getContentStatus()));
         answer.setQuestion(question);
-
         answer.setCorrect(dto.isCorrect());
         
         return answer;

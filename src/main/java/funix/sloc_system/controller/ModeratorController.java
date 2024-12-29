@@ -15,7 +15,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/moderator")
-@PreAuthorize("hasAuthority('MODERATOR')")
+@PreAuthorize("hasAnyAuthority('MODERATOR', 'ADMIN')")
 public class ModeratorController {
 
     @Autowired

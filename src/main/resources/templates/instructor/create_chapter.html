@@ -64,254 +64,194 @@
 </head>
 
 <body>
-<!-- Navbar -->
-<nav class="sticky-top navbar navbar-expand-lg navbar-light bg-light shadow-sm">
-  <div class="container-fluid">
-    <!-- Left elements: Logo and Search -->
-    <div class="d-flex align-items-center">
-      <!-- Logo -->
-      <a class="navbar-brand me-3 d-flex align-items-center" href="#">
-        <img src="https://i.imgur.com/FsIOl6L.png" height="30" alt="SLOC Logo" loading="lazy" />
-      </a>
-      <!-- Search -->
-      <form class="input-group w-auto my-auto d-none d-lg-flex">
-        <input autocomplete="off" type="search" class="form-control rounded-pill" placeholder="Search"
-               style="min-width: 350px;" />
-        <span class="input-group-text border-0 bg-light">
-            <i class="fas fa-search"></i>
-          </span>
-      </form>
+    <!-- Include Navbar -->
+    <div th:with="activePage='instructorDashboard'">
+        <div th:replace="/fragments/basic_navbar :: navbarFragment"></div>
     </div>
 
-    <!-- Toggle Button for Mobile -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-            aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <!-- Navbar Links -->
-    <div class="collapse navbar-collapse" id="navbarContent">
-      <ul class="navbar-nav ms-auto">
-        <!-- Home -->
-        <li class="nav-item">
-          <a class="nav-link text-primary fw-bold" th:href="@{/home}">
-            <i class="fas fa-home me-2"></i>Home
-          </a>
-        </li>
-        <!-- Courses -->
-        <li class="nav-item">
-          <a class="nav-link text-dark" th:href="@{/courses}">
-            <i class="fas fa-book me-2"></i>Courses
-          </a>
-        </li>
-        <!-- About -->
-        <li class="nav-item">
-          <a class="nav-link text-dark" href="#">
-            <i class="fas fa-info-circle me-2"></i>About
-          </a>
-        </li>
-        <!-- My Learning -->
-        <li class="nav-item">
-          <a class="nav-link text-dark" href="#">
-            <i class="fas fa-graduation-cap me-2"></i>My Learning
-          </a>
-        </li>
-        <!-- Logout -->
-        <li class="nav-item">
-          <form th:action="@{/logout}" method="POST" class="d-inline">
-            <button type="submit" class="btn btn-outline-danger btn-sm ms-2" style="margin-top: 8px;">
-              <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
-          </form>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
-
-<div class="row" style="margin-right: 5%;">
-  <h4 style="margin-top: 5%; text-align: right; margin-bottom: 3%;">Create Chapters for Course: <span
+    <div class="row" style="margin-right: 5%;">
+        <h4 style="margin-top: 5%; text-align: right; margin-bottom: 3%;">Create Chapters for Course: <span
           style="color: rgb(80, 80, 255);" th:text="${courseTitle}">Course Title</span></h4>
-  <div th:if="${errorMessage}">
-    <p th:text="${errorMessage}" style="color: red;"></p>
-  </div>
-</div>
-
-<div class="row" style="font-family: Arial, Helvetica, sans-serif;">
-  <div class="col-md-3 border-end border-2" style="padding-left: 2%; padding-right: 2%;">
-    <div style="margin-left: 10%;">
-      <div class="d-flex flex-column" style="width: 250px; height: 100vh; position: fixed; margin-left: 2%;">
-        <h4 class="mb-4">Navigation</h4>
-        <ul class="nav flex-column">
-          <li class="nav-item mb-2">
-            <a class="nav-link text-dark" th:href="@{/instructor/course/{id}/edit(id=${courseId}})}">
-              <i class="fas fa-graduation-cap"></i> Edit Course General
-            </a>
-          </li>
-          <li class="nav-item mb-2">
-            <a class="nav-link text-dark" href="#">
-              <i class="fas fa-edit"></i> Edit Course Content
-            </a>
-          </li>
-
-        </ul>
-
+      <div th:if="${errorMessage}">
+        <p th:text="${errorMessage}" style="color: red;"></p>
       </div>
     </div>
 
-  </div>
+  <div class="row" style="font-family: Arial, Helvetica, sans-serif;">
+    <div class="col-md-3 border-end border-2" style="padding-left: 2%; padding-right: 2%;">
+      <div style="margin-left: 10%;">
+        <div class="d-flex flex-column" style="width: 250px; height: 100vh; position: fixed; margin-left: 2%;">
+          <h4 class="mb-4">Navigation</h4>
+          <ul class="nav flex-column">
+            <li class="nav-item mb-2">
+              <a class="nav-link text-dark" th:href="@{/instructor/course/{id}/edit(id=${courseId})}">
+                <i class="fas fa-graduation-cap"></i> Edit Course General
+              </a>
+            </li>
+            <li class="nav-item mb-2">
+              <a class="nav-link text-dark" href="#">
+                <i class="fas fa-edit"></i> Edit Course Content
+              </a>
+            </li>
 
-  <div class="col-md-9">
-    <div style="margin-left: 5%; width: 80%;">
-      <!-- Existing Chapters List -->
-      <h2 class="text-center mb-4">Existing Chapters</h2>
-      <div th:if="${chapters != null}">
-        <div class="accordion" id="chaptersAccordion">
-          <div th:each="chapter : ${chapters}" class="accordion-item">
-            <div class="row align-items-center">
-              <div class="col-md-8">
-                <h2 class="accordion-header" th:attr="id='chapter-heading-' + ${chapter.id}">
-                  <button class="accordion-button collapsed" type="button"
-                          th:attr="data-bs-target='#chapter-collapse-' + ${chapter.id}, aria-controls='chapter-collapse-' + ${chapter.id}"
-                          data-bs-toggle="collapse" aria-expanded="false">
-                    <span th:text="${chapter.sequence} + '. ' + ${chapter.title}"></span>
-                  </button>
-                </h2>
-              </div>
-              <div class="col-md-4 text-end">
-                <!-- Add Topic Dropdown Button -->
-                <div class="btn-group" style="margin-right: 5%;">
-                  <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" id="addTopicDropdown"
-                          data-mdb-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-book"></i> Add Topic
-                  </button>
-                  <ul class="dropdown-menu" aria-labelledby="addTopicDropdown">
-                    <li>
-                      <a class="dropdown-item"
-                         th:href="@{'/instructor/course/' + ${courseId} + '/edit/topic/create?chapterId=' + ${chapter.id} + '&topicType=READING'}">
-                        <i class="fas fa-book-reader me-2"></i> Reading
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item"
-                         th:href="@{'/instructor/course/' + ${courseId} + '/edit/topic/create?chapterId=' + ${chapter.id} + '&topicType=VIDEO'}">
-                        <i class="fas fa-video me-2"></i> Video
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item"
-                         th:href="@{'/instructor/course/' + ${courseId} + '/edit/topic/create?chapterId=' + ${chapter.id} + '&topicType=QUIZ'}">
-                        <i class="fas fa-question-circle me-2"></i> Quiz
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item"
-                         th:href="@{'/instructor/course/' + ${courseId} + '/edit/topic/create?chapterId=' + ${chapter.id} + '&topicType=READING'}">
-                        <i class="fas fa-file-alt me-2"></i> Exam
-                      </a>
-                    </li>
-                  </ul>
+          </ul>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col-md-9">
+      <div style="margin-left: 5%; width: 80%;">
+        <!-- Existing Chapters List -->
+        <h2 class="text-center mb-4">Existing Chapters</h2>
+        <div th:if="${chapters != null}">
+          <div class="accordion" id="chaptersAccordion">
+            <div th:each="chapter : ${chapters}" class="accordion-item">
+              <div class="row align-items-center">
+                <div class="col-md-8">
+                  <h2 class="accordion-header" th:attr="id='chapter-heading-' + ${chapter.id}">
+                    <button class="accordion-button collapsed" type="button"
+                            th:attr="data-bs-target='#chapter-collapse-' + ${chapter.id}, aria-controls='chapter-collapse-' + ${chapter.id}"
+                            data-bs-toggle="collapse" aria-expanded="false">
+                      <span th:text="${chapter.sequence} + '. ' + ${chapter.title}"></span>
+                    </button>
+                  </h2>
                 </div>
-                <!-- Edit Button -->
-                <a class="btn btn-outline-primary btn-sm" href="#"
-                   th:attr="data-id=${chapter.id}, data-title=${chapter.title}" data-mdb-toggle="modal"
-                   data-mdb-target="#editChapterModal" onclick="openEditModal(this)" style="margin-right: 5%;">
-                  <i class="fas fa-edit"></i> Edit
-                </a>
-                <!-- Delete Button -->
-                <a class="btn btn-danger btn-sm" href="#" th:attr="data-id=${chapter.id}"
-                   onclick="confirmDelete(this)" style="margin-right: 5%;">
-                  <i class="fas fa-trash-alt"></i> Delete
-                </a>
-              </div>
-              <div
-                      th:attr="id='chapter-collapse-' + ${chapter.id}, aria-labelledby='chapter-heading-' + ${chapter.id}"
-                      class="accordion-collapse collapse" data-bs-parent="#chaptersAccordion">
-                <div class="accordion-body">
-                  <ul th:if="${chapter.topics != null and !chapter.topics.isEmpty()}" class="list-group">
-                    <li th:each="topic : ${chapter.topics}"
-                        class="list-group-item d-flex justify-content-between align-items-center">
-                      <span th:text="${topic.title} + ' (' + ${topic.type} + ')'"></span>
-                    </li>
-                  </ul>
+                <div class="col-md-4 text-end">
+                  <!-- Add Topic Dropdown Button -->
+                  <div class="btn-group" style="margin-right: 5%;">
+                    <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" id="addTopicDropdown"
+                            data-mdb-toggle="dropdown" aria-expanded="false">
+                      <i class="fas fa-book"></i> Add Topic
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="addTopicDropdown">
+                      <li>
+                        <a class="dropdown-item"
+                           th:href="@{'/instructor/course/' + ${courseId} + '/edit/topic/create?chapterId=' + ${chapter.id} + '&topicType=READING'}">
+                          <i class="fas fa-book-reader me-2"></i> Reading
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item"
+                           th:href="@{'/instructor/course/' + ${courseId} + '/edit/topic/create?chapterId=' + ${chapter.id} + '&topicType=VIDEO'}">
+                          <i class="fas fa-video me-2"></i> Video
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item"
+                           th:href="@{'/instructor/course/' + ${courseId} + '/edit/topic/create?chapterId=' + ${chapter.id} + '&topicType=QUIZ'}">
+                          <i class="fas fa-question-circle me-2"></i> Quiz
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item"
+                           th:href="@{'/instructor/course/' + ${courseId} + '/edit/topic/create?chapterId=' + ${chapter.id} + '&topicType=READING'}">
+                          <i class="fas fa-file-alt me-2"></i> Exam
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                  <!-- Edit Button -->
+                  <a class="btn btn-outline-primary btn-sm" href="#"
+                     th:attr="data-id=${chapter.id}, data-title=${chapter.title}" data-mdb-toggle="modal"
+                     data-mdb-target="#editChapterModal" onclick="openEditModal(this)" style="margin-right: 5%;">
+                    <i class="fas fa-edit"></i> Edit
+                  </a>
+                  <!-- Delete Button -->
+                  <a class="btn btn-danger btn-sm" href="#" th:attr="data-id=${chapter.id}"
+                     onclick="confirmDelete(this)" style="margin-right: 5%;">
+                    <i class="fas fa-trash-alt"></i> Delete
+                  </a>
+                </div>
+                <div th:attr="id='chapter-collapse-' + ${chapter.id}, aria-labelledby='chapter-heading-' + ${chapter.id}"
+                        class="accordion-collapse collapse" data-bs-parent="#chaptersAccordion">
+                  <div class="accordion-body">
+                    <ul th:if="${chapter.topics != null and !chapter.topics.isEmpty()}" class="list-group">
+                      <li th:each="topic : ${chapter.topics}"
+                          class="list-group-item d-flex justify-content-between align-items-center">
+                        <span th:text="${topic.title} + ' (' + ${topic.topicType} + ')'"></span>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
+            </div>
+
+            <!-- Message if Chapters List is Empty -->
+            <div th:if="${chapters == null || chapters.isEmpty()}" class="text-center mt-4">
+              <p class="text-muted">No chapters available. Add a new chapter to get started.</p>
             </div>
           </div>
-
-          <!-- Message if Chapters List is Empty -->
-          <div th:if="${chapters == null || chapters.isEmpty()}" class="text-center mt-4">
-            <p class="text-muted">No chapters available. Add a new chapter to get started.</p>
+          <div class="text-center mt-4">
+            <!-- Add New Chapter Button -->
+            <button id="showFormButton" class="btn btn-primary btn-rounded" data-mdb-toggle="modal"
+                    data-mdb-target="#addChapterModal">
+              <i class="fas fa-plus-circle"></i> Add New Chapter
+            </button>
           </div>
         </div>
-        <div class="text-center mt-4">
-          <!-- Add New Chapter Button -->
-          <button id="showFormButton" class="btn btn-primary btn-rounded" data-mdb-toggle="modal"
-                  data-mdb-target="#addChapterModal">
-            <i class="fas fa-plus-circle"></i> Add New Chapter
-          </button>
+      </div>
+    </div>
+
+    <!-- Add New Chapter Modal -->
+    <div class="modal fade" id="addChapterModal" tabindex="-1" aria-labelledby="addChapterModalLabel"
+         aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" style="font-family: Arial, Helvetica, sans-serif;">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h5 class="modal-title" id="addChapterModalLabel">Add New Chapter</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <form id="addChapterForm" th:action="@{'/instructor/course/' + ${courseId} + '/chapters/add'}"
+                  method="post" class="needs-validation" novalidate>
+              <!-- Chapter Title Field -->
+              <div class="mb-3">
+                <label for="title" class="form-label">Chapter Title:</label>
+                <input type="text" id="title" name="title" class="form-control"
+                       placeholder="Enter a descriptive chapter title" required>
+                <div class="invalid-feedback">Chapter title is required.</div>
+                <input type="hidden" id="chapterId" name="chapterId" value="chapter.id">
+              </div>
+              <!-- Submit Button -->
+              <div class="text-center">
+                <button type="submit" class="btn btn-success btn-rounded px-4 py-2">
+                  <i class="fas fa-plus-circle"></i> Add Chapter
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Add New Chapter Modal -->
-  <div class="modal fade" id="addChapterModal" tabindex="-1" aria-labelledby="addChapterModalLabel"
-       aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="font-family: Arial, Helvetica, sans-serif;">
-      <div class="modal-content">
-        <!-- Modal Header -->
-        <div class="modal-header">
-          <h5 class="modal-title" id="addChapterModalLabel">Add New Chapter</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <!-- Modal Body -->
-        <div class="modal-body">
-          <form id="addChapterForm" th:action="@{'/instructor/course/' + ${courseId} + '/chapters/add'}"
-                method="post" class="needs-validation" novalidate>
-            <!-- Chapter Title Field -->
-            <div class="mb-3">
-              <label for="title" class="form-label">Chapter Title:</label>
-              <input type="text" id="title" name="title" class="form-control"
-                     placeholder="Enter a descriptive chapter title" required>
-              <div class="invalid-feedback">Chapter title is required.</div>
-              <input type="hidden" id="chapterId" name="chapterId" value="chapter.id">
-            </div>
-            <!-- Submit Button -->
-            <div class="text-center">
-              <button type="submit" class="btn btn-success btn-rounded px-4 py-2">
-                <i class="fas fa-plus-circle"></i> Add Chapter
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Edit Chapter Modal -->
-  <div class="modal fade" id="editChapterModal" tabindex="-1" aria-labelledby="editChapterModalLabel"
-       aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="editChapterModalLabel">Edit Chapter</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form id="editChapterForm">
-            <div class="mb-3">
-              <label for="newTitle" class="form-label">New Title</label>
-              <input type="text" class="form-control" id="newTitle" required>
-            </div>
-            <div class="col-auto">
-              <span id="textExample2" class="form-text"> Must be 8-20 characters long. </span>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" onclick="applyEdit()">Apply</button>
+    <!-- Edit Chapter Modal -->
+    <div class="modal fade" id="editChapterModal" tabindex="-1" aria-labelledby="editChapterModalLabel"
+         aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editChapterModalLabel">Edit Chapter</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="editChapterForm">
+              <div class="mb-3">
+                <label for="newTitle" class="form-label">New Title</label>
+                <input type="text" class="form-control" id="newTitle" required>
+              </div>
+              <div class="col-auto">
+                <span id="textExample2" class="form-text"> Must be 8-20 characters long. </span>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="applyEdit()">Apply</button>
+          </div>
         </div>
       </div>
     </div>
@@ -364,6 +304,6 @@
       }
     </script>
 
-  </body>
+</body>
 
 </html>

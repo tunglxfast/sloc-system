@@ -5,6 +5,7 @@ import funix.sloc_system.dto.QuestionDTO;
 import funix.sloc_system.entity.Answer;
 import funix.sloc_system.entity.Question;
 import funix.sloc_system.entity.Topic;
+import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.QuestionType;
 import funix.sloc_system.repository.QuestionRepository;
 import funix.sloc_system.repository.TopicRepository;
@@ -33,6 +34,7 @@ public class QuestionMapper {
         QuestionDTO dto = new QuestionDTO();
         dto.setId(question.getId());
         dto.setContent(question.getContent());
+        dto.setContentStatus(question.getContentStatus().name());
         dto.setQuestionType(question.getQuestionType().name());
 
         if (question.getTopic() != null) {
@@ -74,6 +76,7 @@ public class QuestionMapper {
         }
 
         question.setContent(dto.getContent());
+        question.setContentStatus(ContentStatus.valueOf(dto.getContentStatus()));
         question.setQuestionType(QuestionType.valueOf(dto.getQuestionType()));
 
         // Add Topic setting

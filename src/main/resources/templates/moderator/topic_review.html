@@ -47,32 +47,10 @@
 </head>
 
 <body>
-    <!-- Navbar -->
-    <nav class="sticky-top navbar navbar-expand-lg navbar-light bg-body-tertiary">
-        <div class="container-fluid justify-content-between">
-            <!-- Left elements -->
-            <div class="d-flex">
-                <a class="navbar-brand me-2 mb-1 d-flex align-items-center" href="#">
-                    <img src="https://i.imgur.com/FsIOl6L.png" height="20" alt="SLOC Logo" loading="lazy"
-                        style="margin-top: 2px;" />
-                </a>
-            </div>
-            <!-- Right elements -->
-            <ul class="navbar-nav flex-row">
-                <li class="nav-item me-3 me-lg-1"><a class="nav-link active" aria-current="page" th:href="@{/home}">Home</a>
-                </li>
-                <li class="nav-item me-3 me-lg-1"> <a class="nav-link" th:href="@{/courses}">Courses</a>
-                </li>
-                <li class="nav-item me-3 me-lg-1"> <a class="nav-link" href="#">About</a>
-                </li>
-                <li class="nav-item me-3 me-lg-1">
-                    <form th:action="@{/logout}" method="POST">
-                        <button type="submit">Logout</button>
-                    </form>
-                </li>
-            </ul>
-        </div>
-    </nav>
+    <!-- Include Navbar -->
+    <div th:with="activePage='moderatorDashboard'">
+        <div th:replace="/fragments/basic_navbar :: navbarFragment"></div>
+    </div>
 
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">

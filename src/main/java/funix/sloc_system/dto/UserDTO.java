@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Setter
 @Getter
@@ -16,4 +17,8 @@ public class UserDTO {
     private String username;
     private String fullName;
     private Set<RoleDTO> roles;
+
+    public Set<String> getStringRoles() {
+        return this.roles.stream().map(RoleDTO::getName).collect(Collectors.toSet());
+    }
 }

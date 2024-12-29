@@ -29,7 +29,7 @@ public class CreatingChapterController {
             model.addAttribute("courseTitle", courseDTO.getTitle());
             model.addAttribute("courseId", courseDTO.getId());
             model.addAttribute("chapters", courseDTO.getChapters());
-            return "instructor/edit_course_content";
+            return "instructor/create_chapter";
         } catch (Exception e) {
             return "redirect:/instructor/courses?error=" + e.getMessage();
         }

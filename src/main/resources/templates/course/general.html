@@ -25,70 +25,10 @@
 </head>
 
 <body>
-  <!-- Navbar -->
-  <nav class="sticky-top navbar navbar-expand-lg navbar-light bg-light shadow-sm">
-    <div class="container-fluid">
-      <!-- Logo and Search -->
-      <div class="d-flex align-items-center">
-        <!-- Logo -->
-        <a class="navbar-brand me-3 d-flex align-items-center" href="#">
-          <img src="https://i.imgur.com/FsIOl6L.png" height="30" alt="SLOC Logo" loading="lazy" />
-        </a>
-        <!-- Search -->
-        <form class="input-group w-auto my-auto d-none d-lg-flex">
-          <input autocomplete="off" type="search" class="form-control rounded-pill" placeholder="Search"
-            style="min-width: 350px;" />
-          <span class="input-group-text border-0 bg-light">
-            <i class="fas fa-search"></i>
-          </span>
-        </form>
-      </div>
-
-      <!-- Toggle Button for Mobile -->
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-        aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <!-- Navbar Links -->
-      <div class="collapse navbar-collapse" id="navbarContent">
-        <ul class="navbar-nav ms-auto">
-          <!-- Home -->
-          <li class="nav-item">
-            <a class="nav-link text-primary fw-bold" th:href="@{/home}">
-              <i class="fas fa-home me-2"></i>Home
-            </a>
-          </li>
-          <!-- Courses -->
-          <li class="nav-item">
-            <a class="nav-link text-dark" th:href="@{/courses}">
-              <i class="fas fa-book me-2"></i>Courses
-            </a>
-          </li>
-          <!-- About -->
-          <li class="nav-item">
-            <a class="nav-link text-dark" href="#">
-              <i class="fas fa-info-circle me-2"></i>About
-            </a>
-          </li>
-          <!-- My Learning -->
-          <li class="nav-item">
-            <a class="nav-link text-dark" href="#">
-              <i class="fas fa-graduation-cap me-2"></i>My Learning
-            </a>
-          </li>
-          <!-- Logout -->
-          <li class="nav-item">
-            <form th:action="@{/logout}" method="POST" class="d-inline">
-              <button type="submit" class="btn btn-outline-danger btn-sm ms-2" style="margin-top: 7px;">
-                <i class="fas fa-sign-out-alt"></i> Logout
-              </button>
-            </form>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  <!-- Include Navbar -->
+  <div th:with="activePage='courses'">
+    <div th:replace="/fragments/basic_navbar :: navbarFragment"></div>
+  </div>
 
   <div class="container py-5">
     <div class="row">

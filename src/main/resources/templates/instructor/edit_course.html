@@ -5,45 +5,50 @@
     <title>Edit Course</title>
 </head>
 <body>
-<h2>Edit Course</h2>
+    <!-- Include Navbar -->
+    <div th:with="activePage='instructorDashboard'">
+        <div th:replace="/fragments/basic_navbar :: navbarFragment"></div>
+    </div>
 
-<div th:if="${errorMessage}">
-    <p th:text="${errorMessage}" style="color: red;"></p>
-</div>
+    <h2>Edit Course</h2>
 
-<div th:if="${successMessage}">
-    <p th:text="${successMessage}" style="color: blue;"></p>
-</div>
+    <div th:if="${errorMessage}">
+        <p th:text="${errorMessage}" style="color: red;"></p>
+    </div>
 
-<form th:action="@{/instructor/course/{id}/submit(id=${course.id})}"
-      th:object="${course}" method="post" enctype="multipart/form-data">
-    <input type="hidden" th:field="*{id}"/>
+    <div th:if="${successMessage}">
+        <p th:text="${successMessage}" style="color: blue;"></p>
+    </div>
 
-    <label for="title">Title:</label><br>
-    <input type="text" id="title" th:field="*{title}" required/><br><br>
+    <form th:action="@{/instructor/course/{id}/submit(id=${course.id})}"
+        th:object="${course}" method="post" enctype="multipart/form-data">
+        <input type="hidden" th:field="*{id}"/>
 
-    <label for="description">Description:</label><br>
-    <textarea id="description" th:field="*{description}" rows="4" cols="50" required>
-    </textarea><br><br>
+        <label for="title">Title:</label><br>
+        <input type="text" id="title" th:field="*{title}" required/><br><br>
 
-    <label for="thumbnailFile">Thumbnail:</label><br>
-    <input type="file" id="thumbnailFile" name="thumbnailFile" accept=".jpg,.jpeg,.png"/><br>
+        <label for="description">Description:</label><br>
+        <textarea id="description" th:field="*{description}" rows="4" cols="50" required>
+        </textarea><br><br>
 
-    <label for="category">Category:</label><br>
-    <select id="category" name="categoryId" required>
-        <option th:each="category : ${categories}" th:value="${category.id}"
-                th:text="${category.name}" th:selected="${course.category.id == category.id}">
-        </option>
-    </select><br><br>
+        <label for="thumbnailFile">Thumbnail:</label><br>
+        <input type="file" id="thumbnailFile" name="thumbnailFile" accept=".jpg,.jpeg,.png"/><br>
 
-    <label for="startDate">Start Date:</label><br>
-    <input type="date" id="startDate" th:field="*{startDate}" required/><br><br>
+        <label for="category">Category:</label><br>
+        <select id="category" name="categoryId" required>
+            <option th:each="category : ${categories}" th:value="${category.id}"
+                    th:text="${category.name}" th:selected="${course.category.id == category.id}">
+            </option>
+        </select><br><br>
 
-    <label for="endDate">End Date:</label><br>
-    <input type="date" id="endDate" th:field="*{endDate}"/><br><br>
+        <label for="startDate">Start Date:</label><br>
+        <input type="date" id="startDate" th:field="*{startDate}" required/><br><br>
 
-    <input type="submit" name="action" value="Save Draft"/>
-    <input type="submit" name="action" value="Submit"/>
-</form>
+        <label for="endDate">End Date:</label><br>
+        <input type="date" id="endDate" th:field="*{endDate}"/><br><br>
+
+        <input type="submit" name="action" value="Save Draft"/>
+        <input type="submit" name="action" value="Submit"/>
+    </form>
 </body>
 </html>

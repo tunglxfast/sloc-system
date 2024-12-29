@@ -195,9 +195,9 @@ INSERT INTO topic (title, description, topic_type, sequence, chapter_id, content
 ('HTML Syntax', 'Learn the basic syntax of HTML', 'VIDEO', 1, 1, 'PUBLISHED', 'https://www.youtube.com/embed/9r_hbFzA8ho?si=pyTUZYtQjuOYk2Uh', NULL, NULL, NULL, NULL),
 ('CSS Selectors', 'Learn about different CSS selectors and how to use them', 'VIDEO', 1, 2, 'PUBLISHED', 'https://www.youtube.com/embed/l1mER1bV0N0?si=Lhp6M1Tzl5La5BQ-', NULL, NULL, NULL, NULL),
 ('What is Data Science?', 'Introduction to Data Science concepts', 'READING', 1, 3, 'PUBLISHED', NULL, '/reading/intro_data_science.pdf', NULL, NULL, NULL),
-('HTML Syntax Quiz', 'HTML Syntax Quiz', 'QUIZ', 2, 1, 'PUBLISHED', NULL, NULL, 3, 4, NULL),
-('CSS Selectors Quiz', 'CSS Selectors Quiz', 'QUIZ', 2, 2, 'PUBLISHED', NULL, NULL, 1, 1, NULL),
-('Final Exam for Data Science', 'Final Exam for Data Science', 'EXAM', 2, 3, 'PUBLISHED', NULL, NULL, 1, 1, 120);
+('HTML Syntax Quiz', 'HTML Syntax Quiz', 'QUIZ', 2, 1, 'PUBLISHED', NULL, NULL, 70, 4, NULL),
+('CSS Selectors Quiz', 'CSS Selectors Quiz', 'QUIZ', 2, 2, 'PUBLISHED', NULL, NULL, 70, 1, NULL),
+('Final Exam for Data Science', 'Final Exam for Data Science', 'EXAM', 2, 3, 'PUBLISHED', NULL, NULL, 70, 1, 120);
 
 
 -- Insert sample questions

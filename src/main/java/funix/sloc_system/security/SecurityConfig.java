@@ -26,8 +26,8 @@ public class SecurityConfig {
                     .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
                     .requestMatchers("/login", "/login_form", "/register", "/register_form").permitAll()
                     .requestMatchers("/h2-console/**").permitAll()
-                    .requestMatchers("/moderator/**").hasAuthority("MODERATOR")
-                    .requestMatchers("/instructor/**").hasAnyAuthority("INSTRUCTOR")
+                    .requestMatchers("/moderator/**").hasAnyAuthority("MODERATOR", "ADMIN")
+                    .requestMatchers("/instructor/**").hasAuthority("INSTRUCTOR")
                     .anyRequest().authenticated()
             )
             .formLogin(form -> form
