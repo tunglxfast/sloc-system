@@ -1,378 +1,222 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Topic</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <!-- MDBootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet">
+    <!-- MDBootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Laila';
+        }
+
+        .custom-select-dropdown {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .custom-select-dropdown:focus {
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        .nav-link {
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background-color: #007bff;
+            /* MDB Primary color */
+            color: white;
+        }
+
+        .nav-link i {
+            margin-right: 10px;
+        }
+
+        .navbar-nav .nav-link {
+            transition: color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #007bff;
+            /* MDB primary color */
+            background-color: rgba(0, 123, 255, 0.1);
+            /* Light blue background */
+            border-radius: 5px;
+        }
+
+        .btn-outline-danger {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .dropdown-menu .dropdown-item {
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-menu .dropdown-item:hover {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .dropdown-menu .dropdown-item i {
+            margin-right: 8px;
+        }
+    </style>
+    </style>
 </head>
+
 <body>
-    <div class="container mt-4">
-        <!-- Header -->
-        <div class="row mb-4">
-            <div class="col">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h2>Create Topic</h2>
-                        <p class="text-muted">
-                            Course: <span th:text="${course.title}"></span> |
-                            Chapter: <span th:text="${chapter.title}"></span>
-                        </p>
-                    </div>
-                    <div>
-                        <a th:href="@{'/instructor/course/' + ${course.id} + '/chapters/'}" 
-                           class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left"></i> Back to Chapter
+    <!-- Navbar -->
+    <nav class="sticky-top navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <div class="container-fluid">
+            <!-- Logo and Search -->
+            <div class="d-flex align-items-center">
+                <!-- Logo -->
+                <a class="navbar-brand me-3 d-flex align-items-center" href="#">
+                    <img src="https://i.imgur.com/FsIOl6L.png" height="30" alt="SLOC Logo" loading="lazy" />
+                </a>
+                <!-- Search -->
+                <form class="input-group w-auto my-auto d-none d-lg-flex">
+                    <input autocomplete="off" type="search" class="form-control rounded-pill" placeholder="Search"
+                        style="min-width: 350px;" />
+                    <span class="input-group-text border-0 bg-light">
+                        <i class="fas fa-search"></i>
+                    </span>
+                </form>
+            </div>
+
+            <!-- Toggle Button for Mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navbar Links -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Home -->
+                    <li class="nav-item">
+                        <a class="nav-link text-primary fw-bold" th:href="@{/home}">
+                            <i class="fas fa-home me-2"></i>Home
                         </a>
-                    </div>
-                </div>
+                    </li>
+                    <!-- Courses -->
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" th:href="@{/courses}">
+                            <i class="fas fa-book me-2"></i>Courses
+                        </a>
+                    </li>
+                    <!-- About -->
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="#">
+                            <i class="fas fa-info-circle me-2"></i>About
+                        </a>
+                    </li>
+                    <!-- My Learning -->
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="#">
+                            <i class="fas fa-graduation-cap me-2"></i>My Learning
+                        </a>
+                    </li>
+                    <!-- Logout -->
+                    <li class="nav-item">
+                        <form th:action="@{/logout}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger btn-sm ms-2">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
             </div>
         </div>
+    </nav>
 
-        <!-- Alert Messages -->
-        <div id="alertSuccess" class="alert alert-success d-none" role="alert"></div>
-        <div id="alertError" class="alert alert-danger d-none" role="alert"></div>
 
-        <!-- Topic Form -->
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i th:class="${topicType == 'VIDEO' ? 'fas fa-video' : 
-                                         topicType == 'READING' ? 'fas fa-book' :
-                                         topicType == 'QUIZ' ? 'fas fa-question-circle' :
-                                         'fas fa-file'}"></i>
-                            <span th:text="${topicType}"></span> Topic Details
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="topicForm" method="post" 
-                              th:action="@{'/instructor/course/' + ${course.id} + '/edit/topic/create?chapterId=' + ${chapter.id}}"
-                              enctype="multipart/form-data">
-                            <input type="hidden" id="topicType" name="topicType" th:value="${topicType}">
-                            
-                            <div class="mb-3">
-                                <label for="title" class="form-label">Topic Title</label>
-                                <input type="text" class="form-control" id="title" name="title" required>
-                            </div>
 
-                            <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
-                                <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
-                            </div>
-
-                            <!-- Video Topic Fields -->
-                            <div th:if="${topicType == 'VIDEO'}" class="mb-3">
-                                <label for="videoUrl" class="form-label">Video URL</label>
-                                <input type="url" class="form-control" id="videoUrl" name="videoUrl" required>
-                                <div class="form-text">Enter the URL of the video (YouTube, Vimeo, etc.)</div>
-                            </div>
-
-                            <!-- Reading Topic Fields -->
-                            <div th:if="${topicType == 'READING'}" class="mb-3">
-                                <label for="content" class="form-label">Reading Material</label>
-                                <input type="file" class="form-control" id="content" name="content" 
-                                       accept=".pdf,.doc,.docx" required>
-                                <div class="form-text">Upload a PDF or Word document (max size: 10MB)</div>
-                            </div>
-
-                            <!-- Quiz/Exam Common Fields -->
-                            <div th:if="${topicType == 'QUIZ' || topicType == 'EXAM'}" class="mb-3">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label for="passScore" class="form-label">Pass Score</label>
-                                        <input type="number" class="form-control" id="passScore" name="passScore" 
-                                               min="0" max="100" required>
-                                        <div class="form-text">Minimum score required to pass (0-100)</div>
-                                    </div>
-                                    
-                                    <!-- Exam-specific Field -->
-                                    <div class="col-md-6" th:if="${topicType == 'EXAM'}">
-                                        <label for="timeLimit" class="form-label">Time Limit (minutes)</label>
-                                        <input type="number" class="form-control" id="timeLimit" name="timeLimit" 
-                                               min="1" required>
-                                        <div class="form-text">Time allowed for the exam in minutes</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Quiz/Exam Questions -->
-                            <div th:if="${topicType == 'QUIZ' || topicType == 'EXAM'}" id="questionsContainer">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h6 class="mb-0">Questions</h6>
-                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="addQuestion()">
-                                        <i class="fas fa-plus"></i> Add Question
-                                    </button>
-                                </div>
-                                <div id="questionsList" class="mb-3">
-                                    <!-- Questions will be added here -->
-                                </div>
-                            </div>
-
-                            <div class="mt-4">
-                                <button type="submit" class="btn btn-primary">Create Topic</button>
-                                <button type="button" class="btn btn-secondary" onclick="history.back()">Cancel</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+    <div class="row" style="margin-right: 5%;">
+        <h4 style="margin-top: 5%; text-align: right; margin-bottom: 3%;">Create Topics for Chapter: <span
+                style="color: rgb(80, 80, 255);" th:text="${chapter.title}">Course Title</span></h4>
+        <div th:if="${errorMessage}">
+            <p th:text="${errorMessage}" style="color: red;"></p>
         </div>
     </div>
 
-    <!-- Question Template -->
-    <template id="questionTemplate">
-        <div class="card mb-3 question-item">
-            <div class="card-header bg-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">Question <span class="question-number"></span></h6>
-                    <div>
-                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeQuestion(this)">
-                            <i class="fas fa-trash"></i> Remove
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label">Question Text</label>
-                    <textarea class="form-control question-text" name="questions[][text]" rows="2" required></textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Question Type</label>
-                    <select class="form-select question-type" name="questions[][type]" onchange="handleQuestionTypeChange(this)" required>
-                        <option value="CHOICE_ONE">Single Choice</option>
-                        <option value="CHOICE_MANY">Multiple Choice</option>
+    <div class="row" style="font-family: Arial, Helvetica, sans-serif;">
+        <div class="d-flex flex-column p-3 bg-light"
+            style="width: 250px; height: 100vh; position: fixed; margin-left: 2%;">
+            <h4 class="mb-4">Navigation</h4>
+            <ul class="nav flex-column">
+                <!-- Back to Chapters -->
+                <li class="nav-item mb-2">
+                    <a class="nav-link text-dark"
+                        th:href="@{'/instructor/course/' + ${chapter.course.id} + '/chapters'}">
+                        <i class="fas fa-book"></i> Create Chapters
+                    </a>
+                </li>
+                <!-- Back to Courses -->
+                <li class="nav-item mb-2">
+                    <a class="nav-link text-dark" th:href="@{'/instructor/courses'}">
+                        <i class="fas fa-graduation-cap"></i>Create Courses
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div style="margin-left: 30%; max-width: 60%;">
+            <form th:action="@{'/instructor/chapter/' + ${chapter.id} + '/topics/add'}" method="post"
+                class="needs-validation" novalidate>
+                <!-- Dropdown for Topic Type -->
+                <div class="mb-4">
+                    <label for="type" class="form-label">Topic Type:</label>
+                    <select id="type" name="type" class="form-select custom-select-dropdown" required>
+                        <option value="" disabled selected>Select topic type</option>
+                        <option value="READING">Reading</option>
+                        <option value="VIDEO">Video</option>
+                        <option value="QUIZ">Quiz</option>
+                        <option value="EXAM">Exam</option>
                     </select>
+                    <div class="invalid-feedback">Please select a topic type.</div>
                 </div>
-                <div class="answers-container">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <label class="form-label mb-0">Answers</label>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addAnswer(this)">
-                            <i class="fas fa-plus"></i> Add Answer
-                        </button>
-                    </div>
-                    <div class="answer-list">
-                        <!-- Answer items will be added here -->
-                    </div>
+
+                <div class="mb-4">
+                    <label for="title" class="form-label">Topic Title:</label>
+                    <input type="text" id="title" name="title" class="form-control" placeholder="Enter topic title"
+                        required>
+                    <div class="invalid-feedback">Topic title is required.</div>
                 </div>
-            </div>
+
+                <div class="mb-4">
+                    <label for="content" class="form-label">Content:</label>
+                    <textarea id="content" name="content" class="form-control" rows="5"
+                        placeholder="Enter topic content" required></textarea>
+                    <div class="invalid-feedback">Please provide content for the topic.</div>
+                </div>
+
+                <div class="d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary btn-rounded">
+                        <i class="fas fa-plus-circle"></i> Add Topic
+                    </button>
+                </div>
+            </form>
         </div>
-    </template>
+    </div>
 
-    <!-- Answer Template -->
-    <template id="answerTemplate">
-        <div class="card mb-2 answer-item">
-            <div class="card-body py-2">
-                <div class="row align-items-center">
-                    <div class="col-auto">
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input correct-answer" name="correct">
-                            <label class="form-check-label">Correct</label>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <input type="text" class="form-control answer-text" name="questions[][answers][][text]" 
-                               placeholder="Answer text" required>
-                    </div>
-                    <div class="col-auto">
-                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeAnswer(this)">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script th:inline="javascript">
-        const courseId = /*[[${course.id}]]*/ null;
-        const chapterId = /*[[${chapter.id}]]*/ null;
-        const topicType = /*[[${topicType}]]*/ null;
-
-        document.getElementById('topicForm').addEventListener('submit', function(e) {
-            if (topicType === 'QUIZ' || topicType === 'EXAM') {
-                e.preventDefault();
-                if (!validateQuestions()) {
-                    return;
-                }
-                const questions = collectQuestions();
-                const questionsInput = document.createElement('input');
-                questionsInput.type = 'hidden';
-                questionsInput.name = 'questions';
-                questionsInput.value = JSON.stringify(questions);
-                this.appendChild(questionsInput);
-                this.submit();
-            }
-        });
-
-        function addQuestion() {
-            const template = document.getElementById('questionTemplate');
-            const clone = template.content.cloneNode(true);
-            const container = document.getElementById('questionsList');
-            container.appendChild(clone);
-            updateQuestionNumbers();
-            addAnswer(container.lastElementChild.querySelector('.answer-list'));
-        }
-
-        function removeQuestion(button) {
-            if (document.querySelectorAll('.question-item').length <= 1) {
-                showError('Topic must have at least one question');
-                return;
-            }
-            button.closest('.question-item').remove();
-            updateQuestionNumbers();
-        }
-
-        function addAnswer(container) {
-            const template = document.getElementById('answerTemplate');
-            const clone = template.content.cloneNode(true);
-            const questionItem = container.closest('.question-item');
-            const answerList = questionItem.querySelector('.answer-list');
-            const questionType = questionItem.querySelector('.question-type').value;
-            
-            // Update input type based on question type
-            const correctInput = clone.querySelector('.correct-answer');
-            correctInput.type = questionType === 'CHOICE_ONE' ? 'radio' : 'checkbox';
-            
-            answerList.appendChild(clone);
-            updateAnswerGroups();
-        }
-
-        function removeAnswer(button) {
-            const answerItem = button.closest('.answer-item');
-            const answerList = answerItem.closest('.answer-list');
-            if (answerList.children.length <= 2) {
-                showError('Question must have at least two answers');
-                return;
-            }
-            answerItem.remove();
-            updateAnswerGroups();
-        }
-
-        function handleQuestionTypeChange(select) {
-            const questionItem = select.closest('.question-item');
-            const type = select.value;
-            const correctInputs = questionItem.querySelectorAll('.correct-answer');
-            
-            correctInputs.forEach(input => {
-                input.type = type === 'CHOICE_ONE' ? 'radio' : 'checkbox';
-                if (type === 'CHOICE_ONE') {
-                    input.checked = false;
-                }
-            });
-            
-            updateAnswerGroups();
-        }
-
-        function updateQuestionNumbers() {
-            document.querySelectorAll('.question-number').forEach((span, index) => {
-                span.textContent = index + 1;
-            });
-        }
-
-        function updateAnswerGroups() {
-            document.querySelectorAll('.question-item').forEach((question, qIndex) => {
-                const type = question.querySelector('.question-type').value;
-                question.querySelectorAll('.correct-answer').forEach((input, aIndex) => {
-                    input.name = type === 'CHOICE_ONE' ? 
-                        `correct_${qIndex}` : 
-                        `correct_${qIndex}_${aIndex}`;
-                });
-            });
-        }
-
-        function validateQuestions() {
-            const questions = document.querySelectorAll('.question-item');
-            if (questions.length === 0) {
-                showError('Please add at least one question');
-                return false;
-            }
-
-            for (let question of questions) {
-                const answers = question.querySelectorAll('.answer-item');
-                if (answers.length < 2) {
-                    showError('Each question must have at least two answers');
-                    return false;
-                }
-
-                const correctAnswers = question.querySelectorAll('.correct-answer:checked');
-                if (correctAnswers.length === 0) {
-                    showError('Each question must have at least one correct answer');
-                    return false;
-                }
-
-                const type = question.querySelector('.question-type').value;
-                if (type === 'CHOICE_ONE' && correctAnswers.length > 1) {
-                    showError('Single choice questions can only have one correct answer');
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        function collectQuestions() {
-            const questions = [];
-            document.querySelectorAll('.question-item').forEach((questionEl, index) => {
-                const question = {
-                    content: questionEl.querySelector('.question-text').value,
-                    questionType: questionEl.querySelector('.question-type').value,
-                    sequence: index + 1,
-                    answers: []
-                };
-
-                questionEl.querySelectorAll('.answer-item').forEach(answerEl => {
-                    question.answers.push({
-                        content: answerEl.querySelector('.answer-text').value,
-                        correct: answerEl.querySelector('.correct-answer').checked
-                    });
-                });
-
-                questions.push(question);
-            });
-            return questions;
-        }
-
-        function loadExistingQuestions(questions) {
-            questions.forEach(question => {
-                addQuestion();
-                const questionEl = document.querySelector('.question-item:last-child');
-                questionEl.querySelector('.question-text').value = question.content;
-                questionEl.querySelector('.question-type').value = question.questionType;
-                
-                const answerList = questionEl.querySelector('.answer-list');
-                answerList.innerHTML = ''; // Clear default answers
-                
-                question.answers.forEach(answer => {
-                    addAnswer(answerList);
-                    const answerEl = answerList.querySelector('.answer-item:last-child');
-                    answerEl.querySelector('.answer-text').value = answer.content;
-                    answerEl.querySelector('.correct-answer').checked = answer.correct;
-                });
-            });
-        }
-
-        function showSuccess(message) {
-            const alert = document.getElementById('alertSuccess');
-            alert.textContent = message;
-            alert.classList.remove('d-none');
-            setTimeout(() => alert.classList.add('d-none'), 3000);
-        }
-
-        function showError(message) {
-            const alert = document.getElementById('alertError');
-            alert.textContent = message;
-            alert.classList.remove('d-none');
-            setTimeout(() => alert.classList.add('d-none'), 3000);
-        }
-
-        // Add initial question if it's a quiz/exam
-        if (topicType === 'QUIZ' || topicType === 'EXAM') {
-            addQuestion();
-        }
-    </script>
 </body>
+
 </html>

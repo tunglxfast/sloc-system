@@ -32,7 +32,7 @@ public class InstructorController {
     @Autowired
     private CourseMapper courseMapper;
 
-    @GetMapping(value = {"","/","/courses"})
+    @GetMapping(value = {"", "/", "/courses"})
     public String showInstructorManageList(@AuthenticationPrincipal SecurityUser securityUser, Model model){
         User user = userService.findById(securityUser.getUserId());
         UserDTO userDTO = userMapper.toDTO(user);

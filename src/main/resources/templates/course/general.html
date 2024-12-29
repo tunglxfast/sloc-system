@@ -26,39 +26,70 @@
 
 <body>
   <!-- Navbar -->
-  <nav class="sticky-top navbar navbar-expand-lg navbar-light bg-body-tertiary">
-    <div class="container-fluid justify-content-between">
-      <!-- Left elements -->
-      <div class="d-flex">
-        <a class="navbar-brand me-2 mb-1 d-flex align-items-center" href="#">
-          <img src="https://i.imgur.com/FsIOl6L.png" height="20" alt="SLOC Logo" loading="lazy"
-            style="margin-top: 2px;" />
+  <nav class="sticky-top navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+    <div class="container-fluid">
+      <!-- Logo and Search -->
+      <div class="d-flex align-items-center">
+        <!-- Logo -->
+        <a class="navbar-brand me-3 d-flex align-items-center" href="#">
+          <img src="https://i.imgur.com/FsIOl6L.png" height="30" alt="SLOC Logo" loading="lazy" />
         </a>
-        <form class="input-group w-auto my-auto d-none d-sm-flex">
-          <input autocomplete="off" type="search" class="form-control rounded" placeholder="Search"
+        <!-- Search -->
+        <form class="input-group w-auto my-auto d-none d-lg-flex">
+          <input autocomplete="off" type="search" class="form-control rounded-pill" placeholder="Search"
             style="min-width: 350px;" />
-          <span class="input-group-text border-0 d-none d-lg-flex"><i class="fas fa-search"></i></span>
+          <span class="input-group-text border-0 bg-light">
+            <i class="fas fa-search"></i>
+          </span>
         </form>
       </div>
-      <!-- Right elements -->
-      <ul class="navbar-nav flex-row">
-        <li class="nav-item me-3 me-lg-1"><a class="nav-link active" aria-current="page" th:href="@{/home}">Home</a>
-        </li>
-        <li class="nav-item me-3 me-lg-1"> <a class="nav-link" th:href="@{/courses}">Courses</a>
-        </li>
-        <li class="nav-item me-3 me-lg-1"> <a class="nav-link" href="#">About</a>
-        </li>
-        <li class="nav-item me-3 me-lg-1"> <a class="nav-link" href="#">My Learning</a>
-        </li>
-        <li class="nav-item me-3 me-lg-1">
-          <form th:action="@{/logout}" method="POST">
-            <button type="submit">Logout</button>
-          </form>
-        </li>
-      </ul>
-    </div>
+
+      <!-- Toggle Button for Mobile -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+        aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Navbar Links -->
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav ms-auto">
+          <!-- Home -->
+          <li class="nav-item">
+            <a class="nav-link text-primary fw-bold" th:href="@{/home}">
+              <i class="fas fa-home me-2"></i>Home
+            </a>
+          </li>
+          <!-- Courses -->
+          <li class="nav-item">
+            <a class="nav-link text-dark" th:href="@{/courses}">
+              <i class="fas fa-book me-2"></i>Courses
+            </a>
+          </li>
+          <!-- About -->
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="#">
+              <i class="fas fa-info-circle me-2"></i>About
+            </a>
+          </li>
+          <!-- My Learning -->
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="#">
+              <i class="fas fa-graduation-cap me-2"></i>My Learning
+            </a>
+          </li>
+          <!-- Logout -->
+          <li class="nav-item">
+            <form th:action="@{/logout}" method="POST" class="d-inline">
+              <button type="submit" class="btn btn-outline-danger btn-sm ms-2" style="margin-top: 7px;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </button>
+            </form>
+          </li>
+        </ul>
+      </div>
     </div>
   </nav>
+
   <div class="container py-5">
     <div class="row">
       <div class="col-md-4">
@@ -85,6 +116,7 @@
       </div>
     </div>
   </div>
+
   <!-- Chapter and topic list -->
   <h2 style="color: rgb(2, 117, 2); vertical-align: top; padding-top: 30px; padding-left: 10px; 
     margin-left: 10px; margin-right: 10px; margin-bottom: 20px; font-weight: bold;">Courses Chapters</h2>
@@ -92,7 +124,8 @@
     <li class="list-group-item justify-content-between align-items-center" th:each="chapter : ${course.chapters}"
       style="max-width: 60%;">
       <h4 th:text="${chapter.title}"></h4>
-      <span th:text="${course.title}" class="badge rounded-pill badge-success" style="margin-right: 100px; margin-bottom: 20px;" >Chapters</span>
+      <span th:text="${course.title}" class="badge rounded-pill badge-success"
+        style="margin-right: 100px; margin-bottom: 20px;">Chapters</span>
       <ul>
         <li th:each="topic : ${chapter.topics}">
           <a th:href="@{/courses/{id}/{chapterNumber}_{topicNumber}
