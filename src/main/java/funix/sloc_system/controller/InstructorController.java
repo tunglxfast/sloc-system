@@ -24,8 +24,8 @@ public class InstructorController {
     @Autowired
     private CourseService courseService;
 
-    @GetMapping(value = {"","/","/courses"})
-    public String showInstructorManageList(@AuthenticationPrincipal SecurityUser securityUser, Model model){
+    @GetMapping(value = { "", "/", "/courses" })
+    public String showInstructorManageList(@AuthenticationPrincipal SecurityUser securityUser, Model model) {
         User instructor = userService.findById(securityUser.getUser().getId());
         List<Course> courseList = courseService.findByInstructors(instructor);
         model.addAttribute("user", instructor);
@@ -40,4 +40,5 @@ public class InstructorController {
         model.addAttribute("rejectedCourses", rejectedCourses);
         return "instructor/notifications";
     }
+
 }

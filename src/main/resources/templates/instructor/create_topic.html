@@ -1,31 +1,222 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <title>Add Topic</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Topic</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <!-- MDBootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet">
+    <!-- MDBootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Laila';
+        }
+
+        .custom-select-dropdown {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .custom-select-dropdown:focus {
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        .nav-link {
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background-color: #007bff;
+            /* MDB Primary color */
+            color: white;
+        }
+
+        .nav-link i {
+            margin-right: 10px;
+        }
+
+        .navbar-nav .nav-link {
+            transition: color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #007bff;
+            /* MDB primary color */
+            background-color: rgba(0, 123, 255, 0.1);
+            /* Light blue background */
+            border-radius: 5px;
+        }
+
+        .btn-outline-danger {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .dropdown-menu .dropdown-item {
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-menu .dropdown-item:hover {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .dropdown-menu .dropdown-item i {
+            margin-right: 8px;
+        }
+    </style>
+    </style>
 </head>
+
 <body>
+    <!-- Navbar -->
+    <nav class="sticky-top navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <div class="container-fluid">
+            <!-- Logo and Search -->
+            <div class="d-flex align-items-center">
+                <!-- Logo -->
+                <a class="navbar-brand me-3 d-flex align-items-center" href="#">
+                    <img src="https://i.imgur.com/FsIOl6L.png" height="30" alt="SLOC Logo" loading="lazy" />
+                </a>
+                <!-- Search -->
+                <form class="input-group w-auto my-auto d-none d-lg-flex">
+                    <input autocomplete="off" type="search" class="form-control rounded-pill" placeholder="Search"
+                        style="min-width: 350px;" />
+                    <span class="input-group-text border-0 bg-light">
+                        <i class="fas fa-search"></i>
+                    </span>
+                </form>
+            </div>
 
-<h1>Add Topic to Chapter: <span th:text="${chapter.title}"></span></h1>
+            <!-- Toggle Button for Mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-<form th:action="@{'/instructor/chapter/' + ${chapter.id} + '/topics/add'}" method="post">
-    <label for="type">Topic Type:</label>
-    <select id="type" name="type" required>
-        <option value="READING">Reading</option>
-        <option value="VIDEO">Video</option>
-        <option value="QUIZ">Quiz</option>
-        <option value="EXAM">Exam</option>
-    </select>
+            <!-- Navbar Links -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Home -->
+                    <li class="nav-item">
+                        <a class="nav-link text-primary fw-bold" th:href="@{/home}">
+                            <i class="fas fa-home me-2"></i>Home
+                        </a>
+                    </li>
+                    <!-- Courses -->
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" th:href="@{/courses}">
+                            <i class="fas fa-book me-2"></i>Courses
+                        </a>
+                    </li>
+                    <!-- About -->
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="#">
+                            <i class="fas fa-info-circle me-2"></i>About
+                        </a>
+                    </li>
+                    <!-- My Learning -->
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="#">
+                            <i class="fas fa-graduation-cap me-2"></i>My Learning
+                        </a>
+                    </li>
+                    <!-- Logout -->
+                    <li class="nav-item">
+                        <form th:action="@{/logout}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger btn-sm ms-2">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    <label for="title">Topic Title:</label>
-    <input type="text" id="title" name="title" required>
 
-    <label for="content">Content:</label>
-    <textarea id="content" name="content" required></textarea>
 
-    <button type="submit">Add Topic</button>
-</form>
+    <div class="row" style="margin-right: 5%;">
+        <h4 style="margin-top: 5%; text-align: right; margin-bottom: 3%;">Create Topics for Chapter: <span
+                style="color: rgb(80, 80, 255);" th:text="${chapter.title}">Course Title</span></h4>
+        <div th:if="${errorMessage}">
+            <p th:text="${errorMessage}" style="color: red;"></p>
+        </div>
+    </div>
 
-<a th:href="@{'/instructor/course/' + ${chapter.course.id} + '/chapters'}">Back to Chapters</a>
+    <div class="row" style="font-family: Arial, Helvetica, sans-serif;">
+        <div class="d-flex flex-column p-3 bg-light"
+            style="width: 250px; height: 100vh; position: fixed; margin-left: 2%;">
+            <h4 class="mb-4">Navigation</h4>
+            <ul class="nav flex-column">
+                <!-- Back to Chapters -->
+                <li class="nav-item mb-2">
+                    <a class="nav-link text-dark"
+                        th:href="@{'/instructor/course/' + ${chapter.course.id} + '/chapters'}">
+                        <i class="fas fa-book"></i> Create Chapters
+                    </a>
+                </li>
+                <!-- Back to Courses -->
+                <li class="nav-item mb-2">
+                    <a class="nav-link text-dark" th:href="@{'/instructor/courses'}">
+                        <i class="fas fa-graduation-cap"></i>Create Courses
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div style="margin-left: 30%; max-width: 60%;">
+            <form th:action="@{'/instructor/chapter/' + ${chapter.id} + '/topics/add'}" method="post"
+                class="needs-validation" novalidate>
+                <!-- Dropdown for Topic Type -->
+                <div class="mb-4">
+                    <label for="type" class="form-label">Topic Type:</label>
+                    <select id="type" name="type" class="form-select custom-select-dropdown" required>
+                        <option value="" disabled selected>Select topic type</option>
+                        <option value="READING">Reading</option>
+                        <option value="VIDEO">Video</option>
+                        <option value="QUIZ">Quiz</option>
+                        <option value="EXAM">Exam</option>
+                    </select>
+                    <div class="invalid-feedback">Please select a topic type.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="title" class="form-label">Topic Title:</label>
+                    <input type="text" id="title" name="title" class="form-control" placeholder="Enter topic title"
+                        required>
+                    <div class="invalid-feedback">Topic title is required.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="content" class="form-label">Content:</label>
+                    <textarea id="content" name="content" class="form-control" rows="5"
+                        placeholder="Enter topic content" required></textarea>
+                    <div class="invalid-feedback">Please provide content for the topic.</div>
+                </div>
+
+                <div class="d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary btn-rounded">
+                        <i class="fas fa-plus-circle"></i> Add Topic
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 </body>
+
 </html>
