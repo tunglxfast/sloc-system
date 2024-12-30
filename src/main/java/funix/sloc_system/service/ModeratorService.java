@@ -14,12 +14,16 @@ import funix.sloc_system.mapper.CourseMapper;
 import funix.sloc_system.mapper.ChapterMapper;
 import funix.sloc_system.repository.ContentChangeRepository;
 import funix.sloc_system.repository.CourseRepository;
+import funix.sloc_system.util.ReviewCourseHolder;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -43,13 +47,13 @@ public class ModeratorService {
     @Autowired
     private ChapterMapper chapterMapper;
 
-    public List<CourseDTO> getPendingReviewCourses() {
-        List<CourseDTO> pendingCourses = new ArrayList<>();
+    public List<ReviewCourseHolder> getPendingReviewCourses() {
+        List<ReviewCourseHolder> reviewCourseHolders = new ArrayList<>();
         
         // Get courses that are READY_TO_REVIEW (new courses)
         List<Course> newCourses = courseRepository.findByContentStatus(ContentStatus.READY_TO_REVIEW);
         for (Course course : newCourses) {
-            pendingCourses.add(courseMapper.toDTO(course));
+            reviewCourseHolders.add(new ReviewCourseHolder(courseMapper.toDTO(course), ContentAction.CREATE));  
         }
 
         // Get courses that are PUBLISHED_EDITING (existing courses with updates)
@@ -61,59 +65,71 @@ public class ModeratorService {
             if (contentChange.isPresent()) {
                 ContentChangeTemporary contentChangeEntity = contentChange.get();
                 ContentAction action = contentChangeEntity.getAction();
-                if (ContentAction.UPDATE.equals(action)) {   
+                if (ContentAction.UPDATE.equals(action)) {
                     try {
-                        // Convert JSON content to CourseDTO
                         CourseDTO updatedCourse = objectMapper.readValue(
                             contentChangeEntity.getChanges(), 
                             CourseDTO.class
                         );
-                    pendingCourses.add(updatedCourse);
+                        reviewCourseHolders.add(new ReviewCourseHolder(updatedCourse, contentChangeEntity.getAction()));
                     } catch (Exception e) {
-                        // Log error and skip this course
                         e.printStackTrace();
                     }
                 }
                 else if (ContentAction.DELETE.equals(action)) {
-                    pendingCourses.add(courseMapper.toDTO(course));
+                    reviewCourseHolders.add(new ReviewCourseHolder(courseMapper.toDTO(course)   , contentChangeEntity.getAction()));
                 }
             }
         }
 
-        return pendingCourses;
+        return reviewCourseHolders;
     }
 
-    public CourseDTO getCourseForReview(Long courseId) {
+    public ReviewCourseHolder getCourseForReview(Long courseId) {
         Course course = courseRepository.findById(courseId)
             .orElseThrow(() -> new RuntimeException("Course not found"));
-
-        if (course.getContentStatus() == ContentStatus.PUBLISHED_EDITING) {
-            // Get updated content from temporary table
+        ContentStatus contentStatus = course.getContentStatus();
+        if (ContentStatus.READY_TO_REVIEW.equals(contentStatus)) {
+            return new ReviewCourseHolder(courseMapper.toDTO(course), ContentAction.CREATE);
+        } 
+        else if (ContentStatus.PUBLISHED_EDITING.equals(contentStatus)) {
             Optional<ContentChangeTemporary> contentChange = contentChangeRepository
                 .findByEntityTypeAndEntityId(EntityType.COURSE, courseId);
-            
             if (contentChange.isPresent()) {
-                try {
-                    return objectMapper.readValue(
-                        contentChange.get().getChanges(), 
-                        CourseDTO.class
-                    );
-                } catch (Exception e) {
-                    throw new RuntimeException("Error reading course changes", e);
+                ContentChangeTemporary contentChangeEntity = contentChange.get();
+                ContentAction action = contentChangeEntity.getAction();
+                if (ContentAction.UPDATE.equals(action)) {
+                    try {
+                        CourseDTO updatedCourse = objectMapper.readValue(
+                            contentChangeEntity.getChanges(), 
+                            CourseDTO.class
+                        );
+                        return new ReviewCourseHolder(
+                            updatedCourse, 
+                            contentChangeEntity.getAction()
+                        );
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error reading course changes", e);
+                    }
+                } else if (ContentAction.DELETE.equals(action)) {
+                    return new ReviewCourseHolder(courseMapper.toDTO(course), contentChangeEntity.getAction());
                 }
             }
         }
-
-        // For READY_TO_REVIEW status or if no changes found
-        return courseMapper.toDTO(course);
+        return null;
     }
 
     @Transactional
-    public void approveCourse(Long courseId) {
+    public void approveCourse(Long courseId) throws RuntimeException {
         Course course = courseRepository.findById(courseId)
             .orElseThrow(() -> new RuntimeException("Course not found"));
+        ContentStatus contentStatus = course.getContentStatus();
+        ApprovalStatus approvalStatus = course.getApprovalStatus();
+        if (!ApprovalStatus.PENDING.equals(approvalStatus)) {
+            throw new RuntimeException("Course is not requested for review");  
+        }
 
-        if (course.getContentStatus() == ContentStatus.PUBLISHED_EDITING) {
+        if (ContentStatus.PUBLISHED_EDITING.equals(contentStatus)) {
             // Apply changes from temporary table
             Optional<ContentChangeTemporary> contentChange = contentChangeRepository
                 .findByEntityTypeAndEntityId(EntityType.COURSE, courseId);
@@ -146,13 +162,18 @@ public class ModeratorService {
     }
 
     @Transactional
-    public void rejectCourse(Long courseId, String rejectionReason) {
+    public void rejectCourse(Long courseId, String rejectionReason) throws RuntimeException {
         Course course = courseRepository.findById(courseId)
             .orElseThrow(() -> new RuntimeException("Course not found"));
+        ContentStatus contentStatus = course.getContentStatus();
+        ApprovalStatus approvalStatus = course.getApprovalStatus();
+        if (!ApprovalStatus.PENDING.equals(approvalStatus)) {
+            throw new RuntimeException("Course is not requested for review");  
+        }
 
-        if (course.getContentStatus() == ContentStatus.READY_TO_REVIEW) {
+        if (ContentStatus.READY_TO_REVIEW.equals(contentStatus)) {
             course.setContentStatus(ContentStatus.DRAFT);
-        } else if (course.getContentStatus() == ContentStatus.PUBLISHED_EDITING) {
+        } else if (ContentStatus.PUBLISHED_EDITING.equals(contentStatus)) {
             course.setContentStatus(ContentStatus.PUBLISHED);
         }
 

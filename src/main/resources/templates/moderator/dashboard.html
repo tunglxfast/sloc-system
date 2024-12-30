@@ -42,11 +42,11 @@
 
         <h2 style="color: rgb(2, 117, 2); font-weight: bold; margin-bottom: 20px;">Pending Course Reviews</h2>
         
-        <div th:if="${pendingCourses.empty}" class="alert alert-info">
+        <div th:if="${reviewCourseHolders.empty}" class="alert alert-info">
             No courses pending review.
         </div>
         
-        <div th:if="${!pendingCourses.empty}" class="table-responsive">
+        <div th:if="${!reviewCourseHolders.empty}" class="table-responsive">
             <table class="table table-hover">
                 <thead class="table-success">
                     <tr>
@@ -58,16 +58,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="course : ${pendingCourses}">
-                        <td th:text="${course.title}">Course Title</td>
-                        <td th:text="${course.instructor.fullName}">Instructor Name</td>
-                        <td th:text="${course.category.name}">Category Name</td>
+                    <tr th:each="reviewCourseHolder : ${reviewCourseHolders}">
+                        <td th:text="${reviewCourseHolder.course.title}">Course Title</td>
+                        <td th:text="${reviewCourseHolder.course.instructor.fullName}">Instructor Name</td>
+                        <td th:text="${reviewCourseHolder.course.category.name}">Category Name</td>
                         <td>
-                            <span class="badge rounded-pill bg-warning" th:if="${course.contentStatus == 'READY_TO_REVIEW'}">New Course</span>
-                            <span class="badge rounded-pill bg-info" th:if="${course.contentStatus == 'PUBLISHED_EDITING'}">Updating Course</span>
+                            <span class="badge rounded-pill bg-info" th:if="${reviewCourseHolder.action == 'CREATE'}">Request Create Course</span>
+                            <span class="badge rounded-pill bg-warning" th:if="${reviewCourseHolder.action == 'UPDATE'}">Request Update Course</span>
+                            <span class="badge rounded-pill bg-danger" th:if="${reviewCourseHolder.action == 'DELETE'}">Request Delete Course</span>
                         </td>
                         <td>
-                            <a th:href="@{/moderator/course/{id}/review(id=${course.id})}" 
+                            <a th:href="@{/moderator/course/{id}/review(id=${reviewCourseHolder.course.id})}" 
                                class="btn btn-success btn-sm">Review</a>
                         </td>
                     </tr>

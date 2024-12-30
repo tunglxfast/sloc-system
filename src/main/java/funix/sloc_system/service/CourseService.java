@@ -1,6 +1,5 @@
 package funix.sloc_system.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import funix.sloc_system.enums.*;
 import funix.sloc_system.repository.*;
@@ -9,7 +8,6 @@ import funix.sloc_system.entity.*;
 import funix.sloc_system.mapper.*;
 import funix.sloc_system.util.AppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.json.JsonParseException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -36,27 +33,11 @@ public class CourseService {
     @Autowired
     private CategoryRepository categoryRepository;
     @Autowired
-    private ChapterRepository chapterRepository;
-    @Autowired
-    private TopicRepository topicRepository;
-    @Autowired
-    private EmailService emailService;
-    @Autowired
     private ContentChangeRepository contentChangeRepository;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
     private CourseMapper courseMapper;
-    @Autowired
-    private ChapterMapper chapterMapper;
-    @Autowired
-    private TopicMapper topicMapper;
-    @Autowired
-    private QuestionMapper questionMapper;
-    @Autowired
-    private EnrollmentMapper enrollmentMapper;
-    @Autowired
-    private QuestionRepository questionRepository;
 
     @Autowired
     private AppUtil appUtil;
@@ -222,13 +203,17 @@ public class CourseService {
 
     /**
      * Validate if an entity can be modified
+     * throw exception if not allow modify
      */
-    private void validateEntityModification(Course course) {
+    private void checkCourseAllowModify(Course course, Long instructorId) {
         if (course.getContentStatus() == ContentStatus.ARCHIVED) {
             throw new IllegalStateException("Cannot modify archived course content");
         }
         if (course.getApprovalStatus() == ApprovalStatus.PENDING) {
             throw new IllegalStateException("Cannot modify content while approval is pending");
+        }
+        if (course.getInstructor() != null && course.getInstructor().getId() != instructorId) {
+            throw new IllegalStateException("Only instructor of this course can modify content");
         }
     }
 
@@ -329,19 +314,33 @@ public class CourseService {
     }
 
     @Transactional
-    public String deleteCourse(Long courseId, Long instructorId) {
+    public String deleteCourse(Long courseId, Long instructorId) throws Exception {
         Course course = findById(courseId);
         if (course != null) {
             if (course.getContentStatus() == ContentStatus.DRAFT) {
                 courseRepository.deleteById(courseId);
                 return "Course deleted successfully.";
             } else {
-                String json = "";
+                CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
+                String json = objectMapper.writeValueAsString(courseDTO);
                 appUtil.saveContentChange(json, courseId, instructorId, ContentAction.DELETE);
                 submitForReview(courseId);
                 return "Delete course request is sent, please wait for approval.";
             }
         }
         return "Course not found.";
+    }
+
+    public void resetCourse(Long courseId, Long instructorId) {
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new IllegalArgumentException("Course not found"));
+
+        if (ApprovalStatus.PENDING.equals(course.getApprovalStatus())) {
+            throw new IllegalStateException("Cannot reset course while review is pending");
+        }
+
+        ContentChangeTemporary contentChange = contentChangeRepository.findByEntityTypeAndEntityId(EntityType.COURSE, courseId).orElse(null);
+        if (contentChange != null) {
+            contentChangeRepository.delete(contentChange);
+        }
     }
 }

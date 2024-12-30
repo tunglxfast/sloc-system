@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instructor Courses</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
     <!-- Google Fonts -->
@@ -85,10 +87,14 @@
                                     <th>Start Date</th>
                                     <th>End Date</th>
                                     <th>Actions</th>
+                                    <th>Reject Reason</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:each="course, iterStat : ${courses}">
+                                <tr th:each="courseEditingHolder, iterStat : ${courseEditingHolders}" 
+                                    th:with="course=${courseEditingHolder.course}, 
+                                            isEditing=${courseEditingHolder.isEditing}, 
+                                            isPending=${courseEditingHolder.isPending}">
                                     <td th:text="${iterStat.index + 1}">1</td>
                                     <td th:text="${course.title}">Course Title</td>
                                     <td th:text="${course.category.name}">Category Name</td>
@@ -107,17 +113,35 @@
                                     <td th:text="${course.startDate}">Start Date</td>
                                     <td th:text="${course.endDate}">End Date</td>
                                     <td>
-                                        <a th:href="@{/instructor/course/{id}/edit/chapters(id=${course.id})}"
-                                            class="btn btn-warning btn-sm">Edit</a>
-                                        <br>
                                         <a th:href="@{/instructor/course/{id}/view(id=${course.id})}"
-                                            class="btn btn-info btn-sm">View</a>
+                                            class="btn btn-primary btn-sm">View</a>
                                         <br>
-                                        <a th:href="@{/instructor/course/{id}/delete(id=${course.id})}"
+                                        <a th:if="${!isPending}"
+                                            th:href="@{/instructor/course/{id}/edit/chapters(id=${course.id})}"
+                                            class="btn btn-info btn-sm">Edit</a>
+                                        <br>
+                                        <div th:if="${isEditing && !isPending}">
+                                            <a th:href="@{/instructor/course/{id}/reset(id=${course.id})}"
+                                                class="btn btn-warning btn-sm">Reset_Edit</a>
+                                            <br>
+                                        </div>
+                                        
+                                        <a th:if="${!isPending}"
+                                            th:href="@{/instructor/course/{id}/delete(id=${course.id})}"
                                             class="btn btn-danger btn-sm"
                                             onclick="return confirm('Are you sure you want to delete this course?');">
                                             Delete
                                         </a>
+                                    </td>
+                                    <td>
+                                        <div th:if="${course.rejectReason != null and !course.rejectReason.isEmpty()}">
+                                            <span th:text="${#strings.abbreviate(course.rejectReason, 50)}"></span>
+                                            <i class="bi bi-info-circle" style="cursor: pointer;"
+                                               th:data-bs-toggle="tooltip"
+                                               th:data-bs-placement="top"
+                                               th:title="${course.rejectReason}">
+                                            </i>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -129,6 +153,13 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             const table = document.querySelector('.table tbody');
             const rows = Array.from(table.rows);

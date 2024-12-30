@@ -143,4 +143,18 @@ public class CourseManagementController {
         }
         return "redirect:/instructor/courses";
     }
+
+    @GetMapping("/{courseId}/reset")
+    public String resetCourse(@PathVariable("courseId") Long courseId,
+                            @AuthenticationPrincipal SecurityUser securityUser,
+                            RedirectAttributes redirectAttributes) {
+        Long instructorId = securityUser.getUserId();
+        try {
+            courseService.resetCourse(courseId, instructorId);
+            redirectAttributes.addFlashAttribute("successMessage", "Course reset successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/instructor/courses";
+    }
 }

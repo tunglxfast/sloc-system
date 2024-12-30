@@ -44,8 +44,9 @@
             <div class="col-md-9">
                 <div class="d-flex align-items-center mb-3">
                     <h2 th:text="${course.title}" style="color: rgb(2, 117, 2); font-weight: bold; margin-bottom: 0; margin-right: 15px;">Course Title</h2>
-                    <span class="badge rounded-pill bg-warning" th:if="${course.contentStatus == 'READY_TO_REVIEW'}" style="font-size: 1rem;">New Course</span>
-                    <span class="badge rounded-pill bg-info" th:if="${course.contentStatus == 'PUBLISHED_EDITING'}" style="font-size: 1rem;">Update Course</span>
+                    <span class="badge rounded-pill bg-info" th:if="${action == 'CREATE'}" style="font-size: 1rem;">Request Create Course</span>
+                    <span class="badge rounded-pill bg-warning" th:if="${action == 'UPDATE'}" style="font-size: 1rem;">Request Update Course</span>
+                    <span class="badge rounded-pill bg-danger" th:if="${action == 'DELETE'}" style="font-size: 1rem;">Request Delete Course</span>
                 </div>
 
                 <div class="row mb-3">

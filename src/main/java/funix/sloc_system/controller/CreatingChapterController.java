@@ -23,6 +23,7 @@ public class CreatingChapterController {
     public String showChapterList(@PathVariable Long courseId,
                                   @RequestParam(value = "errorMessage", required = false) String errorMessage,
                                   @RequestParam(value = "successMessage", required = false) String successMessage,
+                                  RedirectAttributes redirectAttributes,
                                   Model model) {
         try {
             CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
@@ -31,7 +32,8 @@ public class CreatingChapterController {
             model.addAttribute("chapters", courseDTO.getChapters());
             return "instructor/edit_course_content";
         } catch (Exception e) {
-            return "redirect:/instructor/courses?error=" + e.getMessage();
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/instructor/courses";
         }
     }
 

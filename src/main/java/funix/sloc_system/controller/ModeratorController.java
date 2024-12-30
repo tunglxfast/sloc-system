@@ -4,6 +4,8 @@ import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.service.ModeratorService;
+import funix.sloc_system.util.ReviewCourseHolder;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -23,15 +25,16 @@ public class ModeratorController {
 
     @GetMapping(value = {"", "/"})
     public String showModeratorDashboard(Model model) {
-        List<CourseDTO> pendingCourses = moderatorService.getPendingReviewCourses();
-        model.addAttribute("pendingCourses", pendingCourses);
+        List<ReviewCourseHolder> reviewCourseHolders = moderatorService.getPendingReviewCourses();
+        model.addAttribute("reviewCourseHolders", reviewCourseHolders);
         return "moderator/dashboard";
     }
 
     @GetMapping("/course/{courseId}/review")
     public String showCourseReview(@PathVariable Long courseId, Model model) {
-        CourseDTO courseDTO = moderatorService.getCourseForReview(courseId);
-        model.addAttribute("course", courseDTO);
+        ReviewCourseHolder reviewCourseHolder = moderatorService.getCourseForReview(courseId);
+        model.addAttribute("course", reviewCourseHolder.getCourse());
+        model.addAttribute("action", reviewCourseHolder.getAction());
         return "moderator/course_review";
     }
 
@@ -69,8 +72,9 @@ public class ModeratorController {
             Model model,
             RedirectAttributes redirectAttributes) {
         try {
-            CourseDTO courseDTO = moderatorService.getCourseForReview(courseId);
-            
+            ReviewCourseHolder reviewCourseHolder = moderatorService.getCourseForReview(courseId);
+            CourseDTO courseDTO = reviewCourseHolder.getCourse();
+
             // Find the chapter and topic using service methods
             ChapterDTO chapterDTO = moderatorService.findChapterBySequence(courseDTO, chapterNumber);
             TopicDTO topicDTO = moderatorService.findTopicBySequence(chapterDTO, topicNumber);

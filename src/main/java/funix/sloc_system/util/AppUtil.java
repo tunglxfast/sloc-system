@@ -8,6 +8,7 @@ import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.entity.ContentChangeTemporary;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Topic;
+import funix.sloc_system.enums.ApprovalStatus;
 import funix.sloc_system.enums.ContentAction;
 import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.EntityType;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -215,6 +217,46 @@ public class AppUtil {
         for (int i = 0; i < topics.size(); i++) {
             topics.get(i).setSequence(i + 1);
         }
+    }
+
+    public boolean checkCourseIsEditing(Long courseId) throws Exception {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Editing course not found"));
+
+        ContentStatus contentStatus = course.getContentStatus();
+        if (contentStatus == ContentStatus.DRAFT) {
+            return true;
+        }
+        ContentChangeTemporary changeTemporary = contentChangeRepository
+            .findByEntityTypeAndEntityId(EntityType.COURSE, courseId).orElse(null);
+        if (changeTemporary == null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public CourseEditingHolder getCourseEditingHolder(Long courseId) throws Exception {
+        CourseDTO courseDTO = getEditingCourseDTO(courseId);
+        boolean isEditing = checkCourseIsEditing(courseId);
+        boolean isPending = courseDTO.getApprovalStatus().equals(ApprovalStatus.PENDING.name());
+        return new CourseEditingHolder(courseDTO, isEditing, isPending);
+    }
+
+    public List<CourseEditingHolder> getCourseEditingHolders(List<CourseDTO> courses) {
+        List<CourseEditingHolder> courseEditingHolders = new ArrayList<>();
+        boolean isEditing = false;
+        boolean isPending = false;
+        for (CourseDTO courseDTO : courses) {
+            try {
+                isEditing = checkCourseIsEditing(courseDTO.getId());
+                isPending = courseDTO.getApprovalStatus().equals(ApprovalStatus.PENDING.name());
+                courseEditingHolders.add(new CourseEditingHolder(courseDTO, isEditing, isPending));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return courseEditingHolders;
     }
 }
 
