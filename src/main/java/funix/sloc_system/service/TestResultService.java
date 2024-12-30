@@ -84,7 +84,12 @@ public class TestResultService {
                             .map(stringEntry -> stringEntry.getValue()).collect(Collectors.toList()))
             ;
             correctAnswers.addAll(answerRepository.findByQuestionIdAndCorrectTrue(question.getId()));
-            correctAnswerIds.addAll(correctAnswers.stream().map(answer -> answer.getId().toString()).collect(Collectors.toList()));
+            for (Answer answer : correctAnswers) {
+                if (answer.getId() == null) {
+                    continue;
+                }
+                correctAnswerIds.add(answer.getId().toString());
+            }
 
             if (new HashSet<>(selectedAnswerIds).containsAll(correctAnswerIds)
                     && new HashSet<>(correctAnswerIds).containsAll(selectedAnswerIds)) {

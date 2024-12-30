@@ -101,11 +101,6 @@ public class AppUtil {
      * The changes JSON will contain the complete state of the entity after changes.
      */
     @Transactional
-    public void saveContentChange(String json, Long entityId) {
-        this.saveContentChange(json, entityId, null);
-    }
-
-    @Transactional
     public void saveContentChange(String json, Long entityId, Long instructorId) {
         ContentChangeTemporary changeTemporary = contentChangeRepository
                 .findByEntityTypeAndEntityId(EntityType.COURSE, entityId)
@@ -117,9 +112,7 @@ public class AppUtil {
         changeTemporary.setChanges(json);
         changeTemporary.setChangeTime(LocalDateTime.now());
 
-        if (instructorId != null) {
-            changeTemporary.setUpdatedBy(instructorId);
-        }
+        changeTemporary.setUpdatedBy(instructorId);
 
         contentChangeRepository.save(changeTemporary);
     }
@@ -166,6 +159,9 @@ public class AppUtil {
 
     public static ChapterDTO getSelectChapterDTO(CourseDTO courseDTO, Long chapterId) {
         for (ChapterDTO chapterDTO : courseDTO.getChapters()) {
+            if (chapterDTO.getId() == null) {
+                continue;
+            }
             if (chapterDTO.getId().equals(chapterId)) {
                 return chapterDTO;
             }
@@ -176,6 +172,9 @@ public class AppUtil {
 
     public static TopicDTO getSelectTopicDTO(ChapterDTO chapterDTO, Long topicId) {
         for (TopicDTO topicDTO : chapterDTO.getTopics()) {
+            if (topicDTO.getId() == null) {
+                continue;
+            }
             if (topicDTO.getId().equals(topicId)) {
                 return topicDTO;
             }

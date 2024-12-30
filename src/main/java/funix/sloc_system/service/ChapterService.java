@@ -63,7 +63,7 @@ public class ChapterService {
      * Create a new chapter for a course
      */
     @Transactional
-    public void createChapter(Long courseId, String title) throws Exception {
+    public void createChapter(Long courseId, String title, Long instructorId) throws Exception {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
         CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
@@ -71,22 +71,22 @@ public class ChapterService {
         int newSequence = chapterRepository.findByCourseIdOrderBySequence(courseId).size() + 1;
 
         // Create new chapter, always save new entity directly to table
-        ChapterDTO newChapterDTO = new ChapterDTO();
-        newChapterDTO.setCourseId(courseId);
-        newChapterDTO.setTitle(title);
-        newChapterDTO.setSequence(newSequence);
-
-        Chapter newChapter = chapterMapper.toEntity(newChapterDTO, course);
-        if (newChapter != null) {
-            chapterRepository.save(newChapter);
-        } else {
-            throw new RuntimeException("Chapter fail to create.");
-        }
+        Chapter newChapter = new Chapter();
+        newChapter.setCourse(course);
+        newChapter.setTitle(title);
+        newChapter.setSequence(newSequence);
+        newChapter.setContentStatus(ContentStatus.DRAFT);
+        chapterRepository.save(newChapter);
 
         if (!ContentStatus.DRAFT.name().equals(courseDTO.getContentStatus())) {
+            ChapterDTO newChapterDTO = chapterMapper.toDTO(newChapter);
             courseDTO.getChapters().add(newChapterDTO);
-            String json = objectMapper.writeValueAsString(courseDTO);
-            appUtil.saveContentChange(json, courseId);
+            try {
+                String json = objectMapper.writeValueAsString(courseDTO);
+                appUtil.saveContentChange(json, courseId, instructorId);
+            } catch (Exception e) {
+                throw new RuntimeException("Chapter fail to create.");// TODO: handle exception
+            }
         }
     }
 

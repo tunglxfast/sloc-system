@@ -38,9 +38,11 @@ public class CreatingChapterController {
     @PostMapping("/add")
     public String addChapter(@PathVariable Long courseId,
                              @RequestParam("title") String title,
+                             @AuthenticationPrincipal SecurityUser securityUser,
                              RedirectAttributes redirectAttributes) {
+        Long instructorId = securityUser.getUserId();
         try {
-            chapterService.createChapter(courseId, title);
+            chapterService.createChapter(courseId, title, instructorId);
             redirectAttributes.addFlashAttribute("successMessage", "Chapter created successfully.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Chapter fail to create.");

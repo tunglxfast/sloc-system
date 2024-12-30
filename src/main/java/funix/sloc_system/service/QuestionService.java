@@ -89,6 +89,9 @@ public class QuestionService {
             
             // Find and update the question in the topic's questions list
             for (QuestionDTO existingQuestionDTO : topicDTO.getQuestions()) {
+                if (existingQuestionDTO.getId() == null) {
+                    continue;
+                }
                 if (existingQuestionDTO.getId().equals(questionDTO.getId())) {
                     existingQuestionDTO.setContent(questionDTO.getContent());
                     existingQuestionDTO.setQuestionType(questionDTO.getQuestionType());
