@@ -16,6 +16,7 @@ public class UserDTO {
     private Long id;
     private String username;
     private String fullName;
+    private boolean locked;
     private Set<RoleDTO> roles;
 
     public Set<String> getStringRoles() {

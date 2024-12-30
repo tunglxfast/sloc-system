@@ -17,6 +17,10 @@ public class SecurityConfig {
 
     @Autowired
     private ApplicationUserDetailsService applicationUserDetailsService;
+    @Autowired
+    private CustomAuthenticationFailureListener failureListener;
+    @Autowired
+    private CustomAuthenticationSuccessHandler successHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -34,6 +38,8 @@ public class SecurityConfig {
                     .loginPage("/login")
                     .loginProcessingUrl("/authenticateTheUser")
                     .defaultSuccessUrl("/home", true)
+                    .failureHandler(failureListener)
+                    .successHandler(successHandler)
                     .permitAll()
             )
             .logout(logout -> logout

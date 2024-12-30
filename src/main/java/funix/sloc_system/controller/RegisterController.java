@@ -35,6 +35,8 @@ public class RegisterController {
 
         if (checkRegistered.equalsIgnoreCase("Pass")) {
             user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+            user.setLocked(false);
+            user.setFailedAttempts(0);
             userRepository.save(user);
             return "redirect:/login";
         } else {

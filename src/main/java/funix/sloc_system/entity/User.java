@@ -37,6 +37,12 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private boolean locked;
+
+    @Column(nullable = false)
+    private int failedAttempts;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
@@ -72,5 +78,6 @@ public class User {
         if (updatedUser.getRoles() != null) {
             this.roles = updatedUser.getRoles();
         }
+        this.locked = updatedUser.isLocked();
     }
 }

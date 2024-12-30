@@ -36,7 +36,9 @@ CREATE TABLE users (
     username VARCHAR(255) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     full_name VARCHAR(255),
-    password VARCHAR(255) NOT NULL
+    password VARCHAR(255) NOT NULL,
+    locked BOOLEAN DEFAULT FALSE,
+    failed_attempts INT DEFAULT 0
 );
 
 CREATE TABLE user_roles (
@@ -165,11 +167,11 @@ INSERT INTO role (name) VALUES
 
 
 -- Insert sample users
-INSERT INTO users (username, email, full_name, password) VALUES
- ('admin', 'admin@example.com', 'Admin', 'adminpassword'),
-('moderator_01', ' moderator 1@example.com', 'Mod One', 'modpassword'),
-('instructor_01', 'instructor1@example.com', 'Instructor One', 'instructorpassword'),
-('student_01', 'student1@example.com', 'Student One', 'studentpassword');
+INSERT INTO users (username, email, full_name, password, locked, failed_attempts) VALUES
+ ('admin', 'admin@example.com', 'Admin', 'adminpassword', false, 0),
+('moderator_01', ' moderator 1@example.com', 'Mod One', 'modpassword', false, 0),
+('instructor_01', 'instructor1@example.com', 'Instructor One', 'instructorpassword', false, 0),
+('student_01', 'student1@example.com', 'Student One', 'studentpassword', false, 0);
 
 -- Assign roles to users
 INSERT INTO user_roles (user_id, role_id) VALUES

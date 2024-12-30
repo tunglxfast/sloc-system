@@ -82,7 +82,7 @@ public class CourseDTO {
             for (Role role: user.getRoles()){
                 roles.add(new RoleDTO(role.getId(), role.getName()));
             }
-            UserDTO userDTO = new UserDTO(user.getId(), user.getUsername(), user.getFullName(), roles);
+            UserDTO userDTO = new UserDTO(user.getId(), user.getUsername(), user.getFullName(), user.isLocked(), roles);
             this.setCreatedBy(userDTO);
         }
     }
@@ -98,7 +98,7 @@ public class CourseDTO {
             for (Role role: user.getRoles()){
                 roles.add(new RoleDTO(role.getId(), role.getName()));
             }
-            UserDTO userDTO = new UserDTO(user.getId(), user.getUsername(), user.getFullName(), roles);
+            UserDTO userDTO = new UserDTO(user.getId(), user.getUsername(), user.getFullName(), user.isLocked(), roles);
             this.setLastUpdatedBy(userDTO);
         }
     }
@@ -114,7 +114,7 @@ public class CourseDTO {
             for (Role role: user.getRoles()){
                 roles.add(new RoleDTO(role.getId(), role.getName()));
             }
-            UserDTO userDTO = new UserDTO(user.getId(), user.getUsername(), user.getFullName(), roles);
+            UserDTO userDTO = new UserDTO(user.getId(), user.getUsername(), user.getFullName(), user.isLocked(), roles);
             this.setInstructor(userDTO);
         }
     }
