@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Component
@@ -101,14 +102,14 @@ public class AppUtil {
      * The changes JSON will contain the complete state of the entity after changes.
      */
     @Transactional
-    public void saveContentChange(String json, Long entityId, Long instructorId) {
+    public void saveContentChange(String json, Long entityId, Long instructorId, ContentAction action) {
         ContentChangeTemporary changeTemporary = contentChangeRepository
                 .findByEntityTypeAndEntityId(EntityType.COURSE, entityId)
                 .orElse(new ContentChangeTemporary());
 
         changeTemporary.setEntityType(EntityType.COURSE);
         changeTemporary.setEntityId(entityId);
-        changeTemporary.setAction(ContentAction.UPDATE);
+        changeTemporary.setAction(action);
         changeTemporary.setChanges(json);
         changeTemporary.setChangeTime(LocalDateTime.now());
 
@@ -116,6 +117,8 @@ public class AppUtil {
 
         contentChangeRepository.save(changeTemporary);
     }
+
+
 
     /**
      * Find course's changes from ContentChangeTemporary
@@ -190,6 +193,27 @@ public class AppUtil {
         }
         else {
             return String.format("/courses/%d", courseId);
+        }
+    }
+
+    /**
+     * Reorder chapters sequence
+     */
+    public static void reorderCourseDTOChapters(CourseDTO courseDTO) {
+        List<ChapterDTO> chapters = courseDTO.getChapters();
+        chapters.sort(Comparator.comparingInt(ChapterDTO::getSequence));
+
+        for (int i = 0; i < chapters.size(); i++) {
+            chapters.get(i).setSequence(i + 1);
+        }
+    }
+
+    public static void reorderChapterDTOTopics(ChapterDTO chapterDTO) {
+        List<TopicDTO> topics = chapterDTO.getTopics();
+        topics.sort(Comparator.comparingInt(TopicDTO::getSequence));
+
+        for (int i = 0; i < topics.size(); i++) {
+            topics.get(i).setSequence(i + 1);
         }
     }
 }

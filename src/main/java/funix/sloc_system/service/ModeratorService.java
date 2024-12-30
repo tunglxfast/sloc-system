@@ -7,6 +7,7 @@ import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.ContentChangeTemporary;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.enums.ApprovalStatus;
+import funix.sloc_system.enums.ContentAction;
 import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.EntityType;
 import funix.sloc_system.mapper.CourseMapper;
@@ -56,18 +57,25 @@ public class ModeratorService {
         for (Course course : editingCourses) {
             Optional<ContentChangeTemporary> contentChange = contentChangeRepository
                 .findByEntityTypeAndEntityId(EntityType.COURSE, course.getId());
-            
+
             if (contentChange.isPresent()) {
-                try {
-                    // Convert JSON content to CourseDTO
-                    CourseDTO updatedCourse = objectMapper.readValue(
-                        contentChange.get().getChanges(), 
-                        CourseDTO.class
-                    );
+                ContentChangeTemporary contentChangeEntity = contentChange.get();
+                ContentAction action = contentChangeEntity.getAction();
+                if (ContentAction.UPDATE.equals(action)) {   
+                    try {
+                        // Convert JSON content to CourseDTO
+                        CourseDTO updatedCourse = objectMapper.readValue(
+                            contentChangeEntity.getChanges(), 
+                            CourseDTO.class
+                        );
                     pendingCourses.add(updatedCourse);
-                } catch (Exception e) {
-                    // Log error and skip this course
-                    e.printStackTrace();
+                    } catch (Exception e) {
+                        // Log error and skip this course
+                        e.printStackTrace();
+                    }
+                }
+                else if (ContentAction.DELETE.equals(action)) {
+                    pendingCourses.add(courseMapper.toDTO(course));
                 }
             }
         }

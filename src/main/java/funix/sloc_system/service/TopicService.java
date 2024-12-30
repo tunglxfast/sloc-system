@@ -9,14 +9,15 @@ import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Question;
 import funix.sloc_system.entity.Topic;
+import funix.sloc_system.enums.ContentAction;
 import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.EntityType;
 import funix.sloc_system.enums.TopicType;
-import funix.sloc_system.mapper.ChapterMapper;
 import funix.sloc_system.mapper.CourseMapper;
 import funix.sloc_system.mapper.TopicMapper;
 import funix.sloc_system.repository.ChapterRepository;
 import funix.sloc_system.repository.ContentChangeRepository;
+import funix.sloc_system.repository.CourseRepository;
 import funix.sloc_system.repository.TopicRepository;
 import funix.sloc_system.util.AppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,16 +31,10 @@ import java.util.Optional;
 public class TopicService {
     @Autowired
     private TopicRepository topicRepository;
-
     @Autowired
-    private ChapterRepository chapterRepository;
-    
+    private ChapterRepository chapterRepository;    
     @Autowired
-    private ChapterMapper chapterMapper;
-    
-    @Autowired
-    private TopicMapper topicMapper;
-    
+    private CourseRepository courseRepository;
     @Autowired
     private ContentChangeRepository contentChangeRepository;
     
@@ -47,9 +42,10 @@ public class TopicService {
     private ObjectMapper objectMapper;
     @Autowired
     private AppUtil appUtil;
-
     @Autowired
     private CourseMapper courseMapper;
+    @Autowired
+    private TopicMapper topicMapper;
 
     public Topic findById(Long id) {
         return topicRepository.findById(id).orElse(null);
@@ -142,7 +138,7 @@ public class TopicService {
         else {
             // Save entire course DTO to temp table
             String json = objectMapper.writeValueAsString(courseDTO);
-            appUtil.saveContentChange(json, courseId, instructorId);
+            appUtil.saveContentChange(json, courseId, instructorId, ContentAction.UPDATE);
         }
     }
 
@@ -190,7 +186,34 @@ public class TopicService {
             
             // Save to temp table
             String json = objectMapper.writeValueAsString(courseDTO);
-            appUtil.saveContentChange(json, course.getId(), instructorId);
+            appUtil.saveContentChange(json, course.getId(), instructorId, ContentAction.UPDATE);
+        }
+    }
+
+    public void deleteTopic(Long courseId, Long chapterId, Long topicId, Long instructorId) throws Exception {
+        Course course = courseRepository.findById(courseId).orElse(null);
+        if (course != null) {
+            if (course.getContentStatus() == ContentStatus.DRAFT) {
+                topicRepository.deleteById(topicId);
+            } else {
+                CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
+                for (ChapterDTO chapterDTO : courseDTO.getChapters()) {
+                    if (chapterDTO.getId() != null) {
+                        if (chapterDTO.getId().equals(chapterId)) {
+                            TopicDTO topicDTO = AppUtil.getSelectTopicDTO(chapterDTO, topicId);
+                            chapterDTO.getTopics().remove(topicDTO);
+                            AppUtil.reorderChapterDTOTopics(chapterDTO);
+                            break;
+                        }
+                    }
+                }
+                try {   
+                    String json = objectMapper.writeValueAsString(courseDTO);
+                    appUtil.saveContentChange(json, course.getId(), instructorId, ContentAction.UPDATE);
+                } catch (Exception e) {
+                    throw new RuntimeException("Topic fail to delete.");
+                }
+            }
         }
     }
 }

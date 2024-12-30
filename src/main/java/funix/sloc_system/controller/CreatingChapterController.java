@@ -65,4 +65,19 @@ public class CreatingChapterController {
         }
         return String.format("redirect:/instructor/course/%d/edit/chapters", courseId);
     }
+
+    @GetMapping("/delete")
+    public String deleteChapter(@PathVariable Long courseId,
+                                @RequestParam("chapterId") Long chapterId,
+                                @AuthenticationPrincipal SecurityUser securityUser,
+                                RedirectAttributes redirectAttributes) {
+        Long instructorId = securityUser.getUserId();
+        try {
+            chapterService.deleteChapter(courseId, chapterId, instructorId);
+            redirectAttributes.addFlashAttribute("successMessage", "Chapter deleted successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error when deleting chapter content");
+        }
+        return "redirect:/instructor/course/" + courseId + "/edit/chapters";
+    }
 }

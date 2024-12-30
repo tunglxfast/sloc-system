@@ -15,12 +15,16 @@
             <img src="https://i.imgur.com/FsIOl6L.png" height="30" alt="SLOC Logo" loading="lazy" />
           </a>
           <!-- Search -->
-          <form class="input-group w-auto my-auto d-none d-lg-flex">
-            <input autocomplete="off" type="search" class="form-control rounded-pill" placeholder="Search"
-                  style="min-width: 350px;" />
-            <span class="input-group-text border-0 bg-light">
+          <form class="input-group w-auto my-auto d-none d-lg-flex" th:action="@{/courses/search}" method="GET">
+            <input autocomplete="off" 
+                type="search" 
+                class="form-control rounded-pill" 
+                placeholder="Search"
+                style="min-width: 350px;" 
+                name="title"/>
+            <button type="submit" class="input-group-text border-0 bg-light">
                 <i class="fas fa-search"></i>
-            </span>
+            </button>
           </form>
         </div>
 

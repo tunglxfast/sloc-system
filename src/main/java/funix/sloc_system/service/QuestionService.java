@@ -8,6 +8,7 @@ import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Question;
 import funix.sloc_system.entity.Topic;
+import funix.sloc_system.enums.ContentAction;
 import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.EntityType;
 import funix.sloc_system.mapper.ChapterMapper;
@@ -102,7 +103,7 @@ public class QuestionService {
             
             // Save entire course DTO to temp table
             String json = objectMapper.writeValueAsString(courseDTO);
-            appUtil.saveContentChange(json, course.getId(), instructorId);
+            appUtil.saveContentChange(json, course.getId(), instructorId, ContentAction.UPDATE);
         }
     }
 
@@ -159,7 +160,7 @@ public class QuestionService {
             
             // Save to temp table
             String json = objectMapper.writeValueAsString(courseDTO);
-            appUtil.saveContentChange(json, course.getId(), instructorId);
+            appUtil.saveContentChange(json, course.getId(), instructorId, ContentAction.UPDATE);
         }
     }
 
@@ -189,7 +190,7 @@ public class QuestionService {
             
             // Save to temp table
             String json = objectMapper.writeValueAsString(courseDTO);
-            appUtil.saveContentChange(json, course.getId(), instructorId);
+            appUtil.saveContentChange(json, course.getId(), instructorId, ContentAction.UPDATE);
         }
     }
 }

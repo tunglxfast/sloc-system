@@ -261,4 +261,20 @@ public class CreatingTopicController {
             return RedirectUrlHelper.buildRedirectErrorUrl(courseId, e.getMessage());
         }
     }
+
+    @GetMapping("/delete")
+    public String deleteTopic(@PathVariable Long courseId,
+                                @RequestParam("chapterId") Long chapterId,
+                                @RequestParam("topicId") Long topicId,
+                                @AuthenticationPrincipal SecurityUser securityUser,
+                                RedirectAttributes redirectAttributes) {
+        Long instructorId = securityUser.getUserId();
+        try {
+            topicService.deleteTopic(courseId, chapterId, topicId, instructorId);
+            redirectAttributes.addFlashAttribute("successMessage", "Topic deleted successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error when deleting topic content");
+        }
+        return "redirect:/instructor/course/" + courseId + "/edit/chapters";
+    }
 }

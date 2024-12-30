@@ -19,7 +19,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -94,6 +96,33 @@ public class CourseLearningController {
             return "redirect:/courses";
         }
     }
+
+    /*
+     * Find course by title
+     */
+    @GetMapping("/search")
+    public String searchCourse(@RequestParam(required = false) String title, 
+                              @RequestParam(required = false) String category,
+                              Model model) {
+        List<CourseDTO> courseDTOList = null;
+        if (title != null && !title.isEmpty() && category != null && !category.isEmpty()) {
+            List<Course> courses = courseService.findCoursesByTitleAndCategory(title, category);
+            courseDTOList = courseMapper.toDTO(courses);           
+        } else if (title != null && !title.isEmpty()) {
+            List<Course> courses = courseService.findCoursesByTitle(title);
+            courseDTOList = courseMapper.toDTO(courses);
+        } else if (category != null && !category.isEmpty()) {
+            List<Course> courses = courseService.findCoursesByCategory(category);
+            courseDTOList = courseMapper.toDTO(courses);
+        }
+
+        if (courseDTOList == null) {
+            courseDTOList = new ArrayList<>();
+        }
+        model.addAttribute("courses", courseDTOList);
+        return "courses";
+    }
+
 
     @GetMapping("/{courseId}/enroll")
     public String enrollCourse(@PathVariable Long courseId, @AuthenticationPrincipal SecurityUser securityUser, Model model) {

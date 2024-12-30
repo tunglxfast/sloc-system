@@ -129,4 +129,18 @@ public class CourseManagementController {
             return "redirect:/instructor/course/" + courseId + "/edit";
         }
     }
+    
+    @GetMapping("/{courseId}/delete")
+    public String deleteCourse(@PathVariable("courseId") Long courseId,
+                            @AuthenticationPrincipal SecurityUser securityUser,
+                            RedirectAttributes redirectAttributes) {
+        Long instructorId = securityUser.getUserId();
+        try {
+            String successMessage = courseService.deleteCourse(courseId, instructorId);
+            redirectAttributes.addFlashAttribute("successMessage", successMessage);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error when deleting course content");
+        }
+        return "redirect:/instructor/courses";
+    }
 }

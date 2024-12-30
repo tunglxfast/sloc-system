@@ -21,7 +21,7 @@ public class ModeratorController {
     @Autowired
     private ModeratorService moderatorService;
 
-    @GetMapping("")
+    @GetMapping(value = {"", "/"})
     public String showModeratorDashboard(Model model) {
         List<CourseDTO> pendingCourses = moderatorService.getPendingReviewCourses();
         model.addAttribute("pendingCourses", pendingCourses);

@@ -5,9 +5,13 @@ import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.Chapter;
+import funix.sloc_system.entity.ContentChangeTemporary;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Topic;
+import funix.sloc_system.enums.ApprovalStatus;
+import funix.sloc_system.enums.ContentAction;
 import funix.sloc_system.enums.ContentStatus;
+import funix.sloc_system.enums.EntityType;
 import funix.sloc_system.mapper.ChapterMapper;
 import funix.sloc_system.mapper.CourseMapper;
 import funix.sloc_system.mapper.TopicMapper;
@@ -19,6 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -68,7 +75,12 @@ public class ChapterService {
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
         CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
 
-        int newSequence = chapterRepository.findByCourseIdOrderBySequence(courseId).size() + 1;
+        List<ChapterDTO> chapters = courseDTO.getChapters();
+        int newSequence = 1;
+        if (chapters != null && !chapters.isEmpty()) {
+            chapters.sort(Comparator.comparingInt(ChapterDTO::getSequence));
+            newSequence = chapters.get(chapters.size() - 1).getSequence() + 1;
+        }
 
         // Create new chapter, always save new entity directly to table
         Chapter newChapter = new Chapter();
@@ -83,7 +95,7 @@ public class ChapterService {
             courseDTO.getChapters().add(newChapterDTO);
             try {
                 String json = objectMapper.writeValueAsString(courseDTO);
-                appUtil.saveContentChange(json, courseId, instructorId);
+                appUtil.saveContentChange(json, courseId, instructorId, ContentAction.UPDATE);
             } catch (Exception e) {
                 throw new RuntimeException("Chapter fail to create.");// TODO: handle exception
             }
@@ -109,7 +121,7 @@ public class ChapterService {
         } else {
             // Save chapter changes to temp table.
             String json = objectMapper.writeValueAsString(courseDTO);
-            appUtil.saveContentChange(json, courseId, instructorId);
+            appUtil.saveContentChange(json, courseId, instructorId, ContentAction.UPDATE);
         }
     }
 
@@ -185,41 +197,30 @@ public class ChapterService {
         return chapterMapper.toDTO(chapters);
     }
 
-    /**
-     * Reorder chapters after sequence change
-     */
-    @Transactional
-    private void reorderChapters(Long courseId, Chapter modifiedChapter, int newSequence) {
-        int oldSequence = modifiedChapter.getSequence();
-        
-        // Temporarily move chapter to a sequence outside the range (total chapters + 1)
-        int tempSequence = chapterRepository.findByCourseId(courseId).size() + 1;
-        modifiedChapter.setSequence(tempSequence);
-        chapterRepository.save(modifiedChapter);
-        
-        // Get all chapters that need to be shifted
-        List<Chapter> chapters = chapterRepository.findByCourseId(courseId);
-        
-        if (newSequence < oldSequence) {
-            // Moving up: shift chapters between new and old position down
-            chapters.stream()
-                .filter(c -> c.getSequence() >= newSequence && c.getSequence() < oldSequence)
-                .forEach(c -> {
-                    c.setSequence(c.getSequence() + 1);
-                    chapterRepository.save(c);
-                });
-        } else {
-            // Moving down: shift chapters between old and new position up
-            chapters.stream()
-                .filter(c -> c.getSequence() > oldSequence && c.getSequence() <= newSequence)
-                .forEach(c -> {
-                    c.setSequence(c.getSequence() - 1);
-                    chapterRepository.save(c);
-                });
+    public void deleteChapter(Long courseId, Long chapterId, Long instructorId) throws Exception {
+        Course course = courseRepository.findById(courseId).orElse(null);
+        if (course != null) {
+            if (course.getContentStatus() == ContentStatus.DRAFT) {
+                chapterRepository.deleteById(chapterId);
+            } else {
+                CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
+                for (ChapterDTO chapterDTO : courseDTO.getChapters()) {
+                    if (chapterDTO.getId() != null) {
+                        if (chapterDTO.getId().equals(chapterId)) {
+                            courseDTO.getChapters().remove(chapterDTO);
+                            AppUtil.reorderCourseDTOChapters(courseDTO);
+                            break;
+                        }
+                    }
+                }
+                try {   
+                    String json = objectMapper.writeValueAsString(courseDTO);
+                    appUtil.saveContentChange(json, course.getId(), instructorId, ContentAction.UPDATE);
+                } catch (Exception e) {
+                    throw new RuntimeException("Chapter fail to delete.");
+                }
+            }
         }
-        
-        // Set the modified chapter to its new sequence
-        modifiedChapter.setSequence(newSequence);
-        chapterRepository.save(modifiedChapter);
     }
+
 }

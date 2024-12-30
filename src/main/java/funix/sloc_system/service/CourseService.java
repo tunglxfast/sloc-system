@@ -1,5 +1,6 @@
 package funix.sloc_system.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import funix.sloc_system.enums.*;
 import funix.sloc_system.repository.*;
@@ -8,6 +9,7 @@ import funix.sloc_system.entity.*;
 import funix.sloc_system.mapper.*;
 import funix.sloc_system.util.AppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.json.JsonParseException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -86,7 +89,25 @@ public class CourseService {
         return courseRepository.findByContentStatusIn(contentStatusList);
     }
 
+    public List<Course> findCoursesByTitle(String title) {
+        return courseRepository.findByTitleContainingIgnoreCase(title);
+    }
 
+    public List<Course> findCoursesByCategory(String category) {
+        Category categoryEntity = categoryRepository.findByNameIgnoreCase(category).orElse(null);
+        if (categoryEntity == null) {
+            return new ArrayList<>();
+        }
+        return courseRepository.findByCategory(categoryEntity);
+    }
+
+    public List<Course> findCoursesByTitleAndCategory(String title, String category) {
+        Category categoryEntity = categoryRepository.findByNameIgnoreCase(category).orElse(null); 
+        if (categoryEntity == null) {
+            return new ArrayList<>();
+        }
+        return courseRepository.findByTitleContainingIgnoreCaseAndCategory(title, categoryEntity);
+    }
 
     @Transactional
     public void submitForReview(Long courseId) throws IllegalArgumentException {
@@ -178,7 +199,7 @@ public class CourseService {
         } else {
             // Save course changes (json type) to temp table.
             String json = objectMapper.writeValueAsString(courseDTO);
-            appUtil.saveContentChange(json, courseId, instructorId);
+            appUtil.saveContentChange(json, courseId, instructorId, ContentAction.UPDATE);
         }
     }
 
@@ -305,5 +326,22 @@ public class CourseService {
                 }
             }
         }
+    }
+
+    @Transactional
+    public String deleteCourse(Long courseId, Long instructorId) {
+        Course course = findById(courseId);
+        if (course != null) {
+            if (course.getContentStatus() == ContentStatus.DRAFT) {
+                courseRepository.deleteById(courseId);
+                return "Course deleted successfully.";
+            } else {
+                String json = "";
+                appUtil.saveContentChange(json, courseId, instructorId, ContentAction.DELETE);
+                submitForReview(courseId);
+                return "Delete course request is sent, please wait for approval.";
+            }
+        }
+        return "Course not found.";
     }
 }
