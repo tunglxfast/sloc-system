@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Moderator Dashboard</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.0.0/mdb.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Laila';
+        }
+        h4 {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Include Navbar -->
+    <div th:with="activePage='moderatorDashboard'">
+        <div th:replace="/fragments/basic_navbar :: navbarFragment"></div>
+    </div>
+
+    <div class="container py-5">
+        <h1 style="color: rgb(2, 117, 2); font-weight: bold; margin-bottom: 30px;">Moderator Dashboard</h1>
+        
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+            <span th:text="${errorMessage}"></span>
+        </div>
+        
+        <div th:if="${successMessage}" class="alert alert-success" role="alert">
+            <span th:text="${successMessage}"></span>
+        </div>
+
+        <h2 style="color: rgb(2, 117, 2); font-weight: bold; margin-bottom: 20px;">Pending Course Reviews</h2>
+        
+        <div th:if="${reviewCourseHolders.empty}" class="alert alert-info">
+            No courses pending review.
+        </div>
+        
+        <div th:if="${!reviewCourseHolders.empty}" class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-success">
+                    <tr>
+                        <th>Course Title</th>
+                        <th>Instructor</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="reviewCourseHolder : ${reviewCourseHolders}">
+                        <td th:text="${reviewCourseHolder.course.title}">Course Title</td>
+                        <td th:text="${reviewCourseHolder.course.instructor.fullName}">Instructor Name</td>
+                        <td th:text="${reviewCourseHolder.course.category.name}">Category Name</td>
+                        <td>
+                            <span class="badge rounded-pill bg-info" th:if="${reviewCourseHolder.action == 'CREATE'}">Request Create Course</span>
+                            <span class="badge rounded-pill bg-warning" th:if="${reviewCourseHolder.action == 'UPDATE'}">Request Update Course</span>
+                            <span class="badge rounded-pill bg-danger" th:if="${reviewCourseHolder.action == 'DELETE'}">Request Delete Course</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/moderator/course/{id}/review(id=${reviewCourseHolder.course.id})}" 
+                               class="btn btn-success btn-sm">Review</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html> 

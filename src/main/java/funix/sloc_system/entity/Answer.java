@@ -1,51 +1,44 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.dto.AnswerDTO;
+import funix.sloc_system.enums.ContentStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Answer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // nội dung câu trả lời
     private String content;
 
-    private boolean isCorrect;
+    private boolean correct;
 
     @ManyToOne
     @JoinColumn(name = "question_id", nullable = false)
     private Question question;
 
-    public Long getId() {
-        return id;
-    }
+    @Enumerated(EnumType.STRING)
+    private ContentStatus contentStatus = ContentStatus.DRAFT;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public boolean isCorrect() {
-        return isCorrect;
-    }
-
-    public void setCorrect(boolean correct) {
-        isCorrect = correct;
-    }
-
-    public Question getQuestion() {
-        return question;
-    }
-
-    public void setQuestion(Question question) {
-        this.question = question;
+    public void updateWithOtherAnswer(Answer updatedAnswer) {
+        if (updatedAnswer.getContent() != null) {
+            this.content = updatedAnswer.getContent();
+        }
+        if (updatedAnswer.getQuestion() != null) {
+            this.question = updatedAnswer.getQuestion();
+        }
+        if (updatedAnswer.getContentStatus() != null) {
+            this.contentStatus = updatedAnswer.getContentStatus();
+        }
+        this.correct = updatedAnswer.isCorrect();
     }
 }

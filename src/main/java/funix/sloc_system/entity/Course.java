@@ -1,203 +1,144 @@
 package funix.sloc_system.entity;
 
-import funix.sloc_system.enums.CourseStatus;
+import funix.sloc_system.enums.ApprovalStatus;
+import funix.sloc_system.enums.ContentStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Entity
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String title;
-
     private String description;
-
-    // course image
     private String thumbnailUrl;
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
-
+    @ManyToOne
+    @JoinColumn(name = "instructor_id",nullable = false)
+    private User instructor;
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
-
     @ManyToOne
     @JoinColumn(name = "last_updated_by", nullable = true)
     private User lastUpdatedBy;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    private LocalDate startDate;
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    private LocalDate endDate;
+
+    @Enumerated(EnumType.STRING)
+    private ContentStatus contentStatus = ContentStatus.DRAFT;
+
+    @Enumerated(EnumType.STRING)
+    private ApprovalStatus approvalStatus = ApprovalStatus.NOT_SUBMITTED;
+
+    @Column(nullable = true)
+    private String rejectReason;
+
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    private LocalDate createdAt;
+
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    private LocalDate updatedAt;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sequence ASC")
     private List<Chapter> chapters;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.PERSIST)
-    private Set<Enrollment> enrollments = new HashSet<>();
+    private Set<Enrollment> enrollments;
 
-    @ManyToMany
-    @JoinTable(
-            name = "instructor_course",
-            joinColumns = @JoinColumn(name = "course_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> instructors = new HashSet<>();
+    // Helper method
 
-    private LocalDate startDate;
-    private LocalDate endDate;
-
-    @Enumerated(EnumType.STRING)
-    private CourseStatus status = CourseStatus.PENDING;
-    @Column(nullable = true)
-    private String rejectReason;
-
-    private LocalDate createdAt;
-    private LocalDate updatedAt;
-
-    @PrePersist
-    public void prePersist() {
-        if (createdAt == null) {
-            createdAt = LocalDate.now();
+    // Update course with another course except chapters and enrollments
+    public void updateWithOtherCourse(Course updatedCourse) {
+        if (updatedCourse.getTitle() != null) {
+            this.title = updatedCourse.getTitle();
+        }
+        if (updatedCourse.getDescription() != null) {
+            this.description = updatedCourse.getDescription();
+        }
+        if (updatedCourse.getThumbnailUrl() != null) {
+            this.thumbnailUrl = updatedCourse.getThumbnailUrl();
+        }
+        if (updatedCourse.getCategory() != null) {
+            this.category = updatedCourse.getCategory();
+        }
+        if (updatedCourse.getInstructor() != null) {
+            this.instructor = updatedCourse.getInstructor();
+        }
+        if (updatedCourse.getCreatedBy() != null) {
+            this.createdBy = updatedCourse.getCreatedBy();
+        }
+        if (updatedCourse.getLastUpdatedBy() != null) {
+            this.lastUpdatedBy = updatedCourse.getLastUpdatedBy();
+        }
+        if (updatedCourse.getStartDate() != null) {
+            this.startDate = updatedCourse.getStartDate();
+        }
+        if (updatedCourse.getEndDate() != null) {
+            this.endDate = updatedCourse.getEndDate();
+        }
+        if (updatedCourse.getContentStatus() != null) {
+            this.contentStatus = updatedCourse.getContentStatus();
+        }
+        if (updatedCourse.getApprovalStatus() != null) {
+            this.approvalStatus = updatedCourse.getApprovalStatus();
+        }
+        if (updatedCourse.getRejectReason() != null) {
+            this.rejectReason = updatedCourse.getRejectReason();
+        }
+        if (updatedCourse.getCreatedAt() != null) {
+            this.createdAt = updatedCourse.getCreatedAt();
+        }
+        if (updatedCourse.getUpdatedAt() != null) {
+            this.updatedAt = updatedCourse.getUpdatedAt();
         }
     }
 
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = LocalDate.now();
+    // Helper methods
+    public void addChapter(Chapter chapter) {
+        if (chapters == null) {
+            chapters = new ArrayList<>();
+        }
+        if (chapters.contains(chapter)) {
+            return;
+        }
+        chapter.setCourse(this);
+        chapters.add(chapter);
     }
 
-    // getter, setter
+    public void removeChapter(Chapter chapter) {
+        if (chapters == null || !chapters.contains(chapter)) {
+            return;
+        }
+        chapters.remove(chapter);
+    }  
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getThumbnailUrl() {
-        return thumbnailUrl;
-    }
-
-    public void setThumbnailUrl(String thumbnailUrl) {
-        this.thumbnailUrl = thumbnailUrl;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
-    public User getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(User createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public User getLastUpdatedBy() {
-        return lastUpdatedBy;
-    }
-
-    public void setLastUpdatedBy(User lastUpdatedBy) {
-        this.lastUpdatedBy = lastUpdatedBy;
-    }
-
-    public List<Chapter> getChapters() {
-        return chapters;
-    }
-
-    public void setChapters(List<Chapter> chapters) {
-        this.chapters = chapters;
-    }
-
-    public Set<Enrollment> getEnrollments() {
-        return enrollments;
-    }
-
-    public void setEnrollments(Set<Enrollment> enrollments) {
-        this.enrollments = enrollments;
-    }
-
-    public Set<User> getInstructors() {
-        return instructors;
-    }
-
-    public void setInstructors(Set<User> instructors) {
-        this.instructors = instructors;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public CourseStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(CourseStatus status) {
-        this.status = status;
-    }
-
-    public String getRejectReason() {
-        return rejectReason;
-    }
-
-    public void setRejectReason(String rejectReason) {
-        this.rejectReason = rejectReason;
-    }
-
-    public LocalDate getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDate createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDate getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDate updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setChaptersContentStatus(ContentStatus status) {
+        for (Chapter chapter : chapters) {
+            chapter.setContentStatus(status);
+            chapter.setTopicsContentStatus(status);
+        }
     }
 }

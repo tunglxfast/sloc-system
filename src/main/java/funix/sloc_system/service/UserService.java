@@ -1,7 +1,11 @@
 package funix.sloc_system.service;
 
-import funix.sloc_system.dao.UserDao;
+import funix.sloc_system.dto.UserDTO;
 import funix.sloc_system.entity.User;
+import funix.sloc_system.repository.UserRepository;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,12 +16,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
     @Autowired
-    private UserDao userDao;
+    private UserRepository userRepository;
 
     public String checkRegistered(User user) {
-        if (userDao.existsByUsername(user.getUsername())) {
+        if (userRepository.existsByUsername(user.getUsername())) {
             return "Username already exists";
-        } else if (userDao.existsByEmail(user.getEmail())) {
+        } else if (userRepository.existsByEmail(user.getEmail())) {
             return "Email already exists";
         } else {
             return "Pass";
@@ -25,18 +29,30 @@ public class UserService {
     }
 
     public User findByUsername(String username) {
-        return userDao.findByUsername(username).orElse(null);
+        return userRepository.findByUsername(username).orElse(null);
     }
 
     public boolean existsByUsername(String username) {
-        return userDao.existsByUsername(username);
+        return userRepository.existsByUsername(username);
     }
 
     public boolean existsByEmail(String email) {
-        return userDao.existsByEmail(email);
+        return userRepository.existsByEmail(email);
     }
 
     public User findById(Long id) {
-        return userDao.findById(id).orElse(null);
+        return userRepository.findById(id).orElse(null);
+    }
+    
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
+    public void updateUser(User user) {
+        userRepository.save(user);
     }
 }

@@ -1,11 +1,21 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.TopicType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Topic {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +38,9 @@ public class Topic {
     @JoinColumn(name = "chapter_id", nullable = false)
     private Chapter chapter;
 
+    @Enumerated(EnumType.STRING)
+    private ContentStatus contentStatus = ContentStatus.DRAFT;
+
     // Fields for ReadingLesson
     private String fileUrl;
 
@@ -39,103 +52,72 @@ public class Topic {
     private Integer totalScore;
     private Integer timeLimit; // Only for Exam
 
-    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;
 
-    // Getters and setters...
-    public Long getId() {
-        return id;
+
+    public void updateWithOtherTopic(Topic updatedTopic) {
+        if (updatedTopic.getTitle() != null) {
+            this.title = updatedTopic.getTitle();
+        }
+        if (updatedTopic.getDescription() != null) {
+            this.description = updatedTopic.getDescription();
+        }
+        if (updatedTopic.getTopicType() != null) {
+            this.topicType = updatedTopic.getTopicType();
+        }
+        if (updatedTopic.getSequence() != 0) {
+            this.sequence = updatedTopic.getSequence();
+        }
+        if (updatedTopic.getChapter() != null) {
+            this.chapter = updatedTopic.getChapter();
+        }
+        if (updatedTopic.getVideoUrl() != null) {
+            this.videoUrl = updatedTopic.getVideoUrl();
+        }
+        if (updatedTopic.getFileUrl() != null) {
+            this.fileUrl = updatedTopic.getFileUrl();
+        }
+        if (updatedTopic.getPassScore() != null) {
+            this.passScore = updatedTopic.getPassScore();
+        }
+        if (updatedTopic.getTotalScore() != null) {
+            this.totalScore = updatedTopic.getTotalScore();
+        }
+        if (updatedTopic.getTimeLimit() != null) {
+            this.timeLimit = updatedTopic.getTimeLimit();
+        }
+        if (updatedTopic.getContentStatus() != null) {
+            this.contentStatus = updatedTopic.getContentStatus();
+        }
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    // Helper method to add question
+    public void addQuestion(Question question) {
+        if (questions == null) {
+            questions = new ArrayList<>();
+        }
+        if (questions.contains(question)) {
+            return;
+        }
+        questions.add(question);
+        question.setTopic(this);
     }
 
-    public String getTitle() {
-        return title;
+    // Helper method to remove question
+    public void removeQuestion(Question question) {
+        if (questions == null || !questions.contains(question)) {
+            return;
+        }
+        questions.remove(question);
+        question.setTopic(null);
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public TopicType getTopicType() {
-        return topicType;
-    }
-
-    public void setTopicType(TopicType topicType) {
-        this.topicType = topicType;
-    }
-
-    public int getSequence() {
-        return sequence;
-    }
-
-    public void setSequence(int sequence) {
-        this.sequence = sequence;
-    }
-
-    public Chapter getChapter() {
-        return chapter;
-    }
-
-    public void setChapter(Chapter chapter) {
-        this.chapter = chapter;
-    }
-
-    public String getFileUrl() {
-        return fileUrl;
-    }
-
-    public void setFileUrl(String fileUrl) {
-        this.fileUrl = fileUrl;
-    }
-
-    public String getVideoUrl() {
-        return videoUrl;
-    }
-
-    public void setVideoUrl(String videoUrl) {
-        this.videoUrl = videoUrl;
-    }
-
-    public Integer getPassScore() {
-        return passScore;
-    }
-
-    public void setPassScore(Integer passScore) {
-        this.passScore = passScore;
-    }
-
-    public Integer getTotalScore() {
-        return totalScore;
-    }
-
-    public void setTotalScore(Integer totalScore) {
-        this.totalScore = totalScore;
-    }
-
-    public Integer getTimeLimit() {
-        return timeLimit;
-    }
-
-    public void setTimeLimit(Integer timeLimit) {
-        this.timeLimit = timeLimit;
-    }
-
-    public List<Question> getQuestions() {
-        return questions;
-    }
-
-    public void setQuestions(List<Question> questions) {
-        this.questions = questions;
+    public void setQuestionsContentStatus(ContentStatus status) {
+        for (Question question : questions) {
+            question.setContentStatus(status);
+            question.setAnswersContentStatus(status);
+        }
     }
 }
+

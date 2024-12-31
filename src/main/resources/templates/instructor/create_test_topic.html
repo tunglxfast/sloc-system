@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Test Topic</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+</head>
+<body>
+    <!-- Include Navbar -->
+    <div th:with="activePage='instructorDashboard'">
+        <div th:replace="/fragments/basic_navbar :: navbarFragment"></div>
+    </div>
+
+    <div class="container mt-5">
+        <h1 class="mb-4">Create New Test Topic</h1>
+        <div class="card">
+            <div class="card-header">
+                <h3>Course: <span th:text="${courseTitle}"></span></h3>
+                <h4>Chapter: <span th:text="${chapterTitle}"></span></h4>
+            </div>
+            <div class="card-body">
+                <div th:if="${errorMessage}" class="alert alert-danger">
+                    <p th:text="${errorMessage}"></p>
+                </div>
+
+                <div th:if="${successMessage}" class="alert alert-success">
+                    <p th:text="${successMessage}"></p>
+                </div>
+
+                <form th:action="@{/instructor/course/{courseId}/edit/topic/create(courseId=${courseId})}" 
+                    method="post" 
+                    id="testTopicForm">
+                    <input type="hidden" name="chapterId" th:value="${chapterId}">
+                    <input type="hidden" name="topicType" th:value="${topicType}">
+                    <input type="hidden" name="questions" id="questionsJson">
+
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="passScore" class="form-label">Pass Score (%)</label>
+                        <input type="number" class="form-control" id="passScore" name="passScore" 
+                            min="0" max="100" required>
+                    </div>
+
+                    <!-- Exam-specific fields -->
+                    <div th:if="${topicType == 'EXAM'}" class="mb-3">
+                        <label for="timeLimit" class="form-label">Time Limit (minutes)</label>
+                        <input type="number" class="form-control" id="timeLimit" name="timeLimit" 
+                            min="1" required>
+                    </div>
+
+                    <!-- Questions Section -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Questions</h5>
+                        </div>
+                        <div class="card-body" id="questionsContainer">
+                            <!-- Questions will be added here dynamically -->
+                        </div>
+                        <div class="card-footer text-center">
+                            <button type="button" class="btn btn-success" onclick="addQuestion()">Add Question</button>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary" onclick="prepareSubmit(event)">Create Topic</button>
+                        <a th:href="@{/instructor/course/{courseId}/edit/chapters(courseId=${courseId})}" 
+                        class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script>
+    let questionCounter = 0;
+
+    function addQuestion() {
+        const container = document.getElementById('questionsContainer');
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'card mb-3';
+        questionDiv.id = `question-${questionCounter}`;
+        
+        questionDiv.innerHTML = `
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Question ${questionCounter + 1}</h6>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeQuestion(${questionCounter})">Remove</button>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Question Content</label>
+                    <textarea class="form-control question-content" rows="2" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Question Type</label>
+                    <select class="form-control question-type" onchange="handleQuestionTypeChange(this)" required>
+                        <option value="CHOICE_ONE">Single Choice</option>
+                        <option value="CHOICE_MANY">Multiple Choice</option>
+                    </select>
+                </div>
+                <div class="answers-container">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label">Answers <small class="text-muted">(minimum 2 answers required, at least 1 must be correct)</small></label>
+                        <button type="button" class="btn btn-info btn-sm" onclick="addAnswer(${questionCounter})">Add Answer</button>
+                    </div>
+                    <div class="answers" id="answers-${questionCounter}">
+                        <!-- Answers will be added here -->
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(questionDiv);
+        
+        // Add default answers
+        addAnswer(questionCounter); // First answer (will be checked by default)
+        addAnswer(questionCounter); // Second answer
+        
+        questionCounter++;
+    }
+
+    function removeQuestion(questionId) {
+        const questionDiv = document.getElementById(`question-${questionId}`);
+        questionDiv.remove();
+        renumberQuestions();
+    }
+
+    function renumberQuestions() {
+        const questions = document.querySelectorAll('#questionsContainer .card');
+        questions.forEach((question, index) => {
+            question.querySelector('h6').textContent = `Question ${index + 1}`;
+        });
+    }
+
+    function addAnswer(questionId) {
+        const answersContainer = document.getElementById(`answers-${questionId}`);
+        const answerDiv = document.createElement('div');
+        answerDiv.className = 'input-group mb-2';
+        
+        // Get question type
+        const questionType = document.querySelector(`#question-${questionId} .question-type`).value;
+        const inputType = questionType === 'CHOICE_ONE' ? 'radio' : 'checkbox';
+        
+        // For new answers in single choice, check if any answer is already selected
+        const hasSelectedAnswer = questionType === 'CHOICE_ONE' && 
+            document.querySelectorAll(`#answers-${questionId} .answer-correct:checked`).length > 0;
+        
+        // For the first answer of a new question, check it by default
+        const isFirstAnswer = answersContainer.children.length === 0;
+        
+        answerDiv.innerHTML = `
+            <div class="input-group-text">
+                <input class="form-check-input answer-correct" type="${inputType}" 
+                    name="question-${questionId}-correct" ${isFirstAnswer && !hasSelectedAnswer ? 'checked' : ''}>
+            </div>
+            <input type="text" class="form-control answer-content" placeholder="Answer content" required>
+            <button type="button" class="btn btn-outline-danger" onclick="removeAnswer(this, ${questionId})">Remove</button>
+        `;
+        
+        answersContainer.appendChild(answerDiv);
+    }
+
+    function handleQuestionTypeChange(selectElement) {
+        const questionId = selectElement.closest('.card').id.split('-')[1];
+        const questionType = selectElement.value;
+        const answerInputs = document.querySelectorAll(`#answers-${questionId} .answer-correct`);
+        
+        // Update input type for all answers
+        answerInputs.forEach(input => {
+            input.type = questionType === 'CHOICE_ONE' ? 'radio' : 'checkbox';
+            input.name = `question-${questionId}-correct`;
+        });
+        
+        // For single choice, ensure exactly one answer is selected
+        if (questionType === 'CHOICE_ONE') {
+            const checkedInputs = Array.from(answerInputs).filter(inp => inp.checked);
+            if (checkedInputs.length === 0 && answerInputs.length > 0) {
+                // If no answer is selected, select the first one
+                answerInputs[0].checked = true;
+            } else if (checkedInputs.length > 1) {
+                // If multiple answers are selected, keep only the first one
+                checkedInputs.slice(1).forEach(inp => inp.checked = false);
+            }
+        }
+    }
+
+    function removeAnswer(button, questionId) {
+        const answersContainer = document.getElementById(`answers-${questionId}`);
+        const answerCount = answersContainer.children.length;
+        
+        if (answerCount <= 2) {
+            alert('Each question must have at least 2 answers');
+            return;
+        }
+        
+        const answerDiv = button.parentElement;
+        const wasChecked = answerDiv.querySelector('.answer-correct').checked;
+        answerDiv.remove();
+        
+        // If we removed a checked answer in single choice mode, select the first remaining answer
+        if (wasChecked) {
+            const questionType = document.querySelector(`#question-${questionId} .question-type`).value;
+            if (questionType === 'CHOICE_ONE') {
+                const firstAnswer = answersContainer.querySelector('.answer-correct');
+                if (firstAnswer) {
+                    firstAnswer.checked = true;
+                }
+            }
+        }
+    }
+
+    function prepareSubmit(event) {
+        event.preventDefault();
+        
+        // Validate questions
+        const questionCards = document.querySelectorAll('#questionsContainer .card');
+        let hasError = false;
+        let errorMessage = '';
+        
+        questionCards.forEach((questionCard) => {
+            const answers = questionCard.querySelectorAll('.answers .input-group');
+            const checkedAnswers = questionCard.querySelectorAll('.answer-correct:checked');
+            const questionNumber = questionCard.querySelector('h6').textContent;
+            const questionType = questionCard.querySelector('.question-type').value;
+            
+            // Check minimum 2 answers
+            if (answers.length < 2) {
+                hasError = true;
+                errorMessage += `${questionNumber} must have at least 2 answers.\n`;
+            }
+            
+            // Check at least 1 answer is selected as correct
+            if (checkedAnswers.length === 0) {
+                hasError = true;
+                errorMessage += `${questionNumber} must have at least 1 correct answer.\n`;
+            }
+            
+            // For single choice, ensure exactly one answer is selected
+            if (questionType === 'CHOICE_ONE' && checkedAnswers.length > 1) {
+                hasError = true;
+                errorMessage += `${questionNumber} is single choice but has multiple correct answers selected.\n`;
+            }
+        });
+        
+        if (hasError) {
+            alert(errorMessage);
+            return;
+        }
+        
+        const questions = [];
+        questionCards.forEach((questionCard) => {
+            const answers = [];
+            
+            // Get all answers for this question
+            questionCard.querySelectorAll('.answers .input-group').forEach((answerGroup) => {
+                const isChecked = answerGroup.querySelector('.answer-correct').checked;
+                answers.push({
+                    content: answerGroup.querySelector('.answer-content').value,
+                    correct: isChecked // This will be true for selected answers, false for unselected
+                });
+            });
+            
+            questions.push({
+                content: questionCard.querySelector('.question-content').value,
+                questionType: questionCard.querySelector('.question-type').value,
+                answers: answers
+            });
+        });
+        
+        // Log the data being sent to verify correct values
+        console.log('Submitting questions:', questions);
+        
+        document.getElementById('questionsJson').value = JSON.stringify(questions);
+        document.getElementById('testTopicForm').submit();
+    }
+
+    // Add first question by default
+    addQuestion();
+    </script>
+</body>
+</html> 

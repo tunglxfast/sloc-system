@@ -1,8 +1,13 @@
 package funix.sloc_system.service;
 
-import funix.sloc_system.dao.*;
+import funix.sloc_system.repository.*;
+import funix.sloc_system.dto.QuestionDTO;
+import funix.sloc_system.dto.TestResultDTO;
+import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.*;
 import funix.sloc_system.enums.TopicType;
+import funix.sloc_system.mapper.TestResultMapper;
+import funix.sloc_system.mapper.TopicMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,46 +16,64 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class TestResultService {
 
     @Autowired
-    private TopicDao topicDao;
+    private TopicRepository topicRepository;
 
     @Autowired
-    private UserDao userDao;
+    private UserRepository userRepository;
 
     @Autowired
-    private AnswerDao answerDao;
+    private AnswerRepository answerRepository;
 
     @Autowired
-    private TestResultDao testResultDao;
+    private TestResultRepository testResultRepository;
 
-    public TestResult findByUserIdAndTopicId(Long userId, Long topicId) {
-        return testResultDao.findByUserIdAndTopicId(userId, topicId).orElse(null);
+    @Autowired
+    private TestResultMapper testResultMapper;
+
+    @Autowired
+    private TopicMapper topicMapper;
+
+    @Autowired
+    private DTOService dtoService;
+
+
+    public TestResultDTO findByUserIdAndTopicId(Long userId, Long topicId) {
+        TestResult result = testResultRepository.findByUserIdAndTopicId(userId, topicId).orElse(null);
+        return testResultMapper.toDTO(result);
     }
 
     @Transactional
-    public TestResult calculateScore(Long userId, Long topicId, Map<String, String> answers) {
-        User user = userDao.findById(userId).orElse(null);
-        Topic topic = topicDao.findById(topicId).orElse(null);
-        TopicType topicType = topic.getTopicType();
-        if (user == null || topic == null) {
+    public TestResultDTO calculateScore(Long userId, Long topicId, Map<String, String> answers) {
+        User user = userRepository.findById(userId).orElse(null);
+        Topic topicEntity = topicRepository.findById(topicId).orElse(null);
+        if (user == null || topicEntity == null) {
             return null;
         }
 
+        TopicType topicType = topicEntity.getTopicType();
         if (!topicType.equals(TopicType.EXAM) && !topicType.equals(TopicType.QUIZ)) {
             return null;
         }
 
-        int totalScore = 0;
+        TopicDTO topicDTO = topicMapper.toDTO(topicEntity);
+        topicDTO.setQuestions(dtoService.getAvailableQuestions(topicDTO));
+
+        // 0 - 100
+        double totalScore = 0;
+        double countCorrectAnswer = 0;
 
         List<Answer> correctAnswers = new ArrayList<>();
         List<String> correctAnswerIds = new ArrayList<>();
         List<String> selectedAnswerIds = new ArrayList<>();
-        List<Question> questions = topic.getQuestions();
-        for (Question question : questions) {
+        List<QuestionDTO> questions = topicDTO.getQuestions();
+
+        for (QuestionDTO question : questions) {
             correctAnswers.clear();
             correctAnswerIds.clear();
             selectedAnswerIds.clear();
@@ -58,23 +81,30 @@ public class TestResultService {
             selectedAnswerIds.addAll(
                     answers.entrySet().stream()
                             .filter(entry -> entry.getKey().startsWith("question_" + question.getId()))
-                            .map(stringEntry -> stringEntry.getValue()).toList())
+                            .map(stringEntry -> stringEntry.getValue()).collect(Collectors.toList()))
             ;
-            correctAnswers.addAll(answerDao.findByQuestionIdAndIsCorrectTrue(question.getId()));
-            correctAnswerIds.addAll(correctAnswers.stream().map(answer -> answer.getId().toString()).toList());
+            correctAnswers.addAll(answerRepository.findByQuestionIdAndCorrectTrue(question.getId()));
+            for (Answer answer : correctAnswers) {
+                if (answer.getId() == null) {
+                    continue;
+                }
+                correctAnswerIds.add(answer.getId().toString());
+            }
 
             if (new HashSet<>(selectedAnswerIds).containsAll(correctAnswerIds)
                     && new HashSet<>(correctAnswerIds).containsAll(selectedAnswerIds)) {
-                totalScore += 1;
+                countCorrectAnswer += 1;
             }
         }
 
-        int passScore = topic.getPassScore();
+         // 0 - 100
+        int passScore = topicDTO.getPassScore();
+        totalScore = Math.round(countCorrectAnswer / questions.size() * 100);
         boolean isPassed = totalScore >= passScore;
 
-        TestResult testResult = testResultDao.findByUserIdAndTopicId(userId, topicId).orElse(null);
+        TestResult testResult = testResultRepository.findByUserIdAndTopicId(userId, topicId).orElse(null);
         if (testResult == null){
-            testResult = new TestResult(totalScore, totalScore, isPassed, 1, topicType, user, topic);
+            testResult = new TestResult(totalScore, totalScore, isPassed, 1, topicType, user, topicEntity);
         } else {
             testResult.setLatestScore(totalScore);
             if (testResult.getParticipationCount() != null) {
@@ -85,10 +115,11 @@ public class TestResultService {
             if (testResult.getHighestScore() < totalScore) {
                 testResult.setHighestScore(totalScore);
             }
-            if (!testResult.isPassed()) {
+            if (!testResult.getPassed()) {
                 testResult.setPassed(isPassed);
             }
         }
-        return testResultDao.save(testResult);
+        testResult = testResultRepository.save(testResult);
+        return testResultMapper.toDTO(testResult);
     }
 }

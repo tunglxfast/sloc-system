@@ -1,28 +1,28 @@
 package funix.sloc_system.service;
 
-import funix.sloc_system.dao.CourseDao;
-import funix.sloc_system.dao.EnrollmentDao;
-import funix.sloc_system.dao.UserDao;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Enrollment;
 import funix.sloc_system.entity.User;
+import funix.sloc_system.repository.CourseRepository;
+import funix.sloc_system.repository.EnrollmentRepository;
+import funix.sloc_system.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 @Service
 public class EnrollmentService {
     @Autowired
-    private EnrollmentDao enrollmentDAO;
+    private EnrollmentRepository enrollmentRepository;
 
     @Autowired
-    private UserDao userDao;
+    private UserRepository userRepository;
 
     @Autowired
-    private CourseDao courseDao;
+    private CourseRepository courseRepository;
 
     @Transactional
     public String enrollCourse(User user, Course course) {
@@ -32,8 +32,7 @@ public class EnrollmentService {
         }
 
         // Kiểm tra xem người dùng đã đăng ký khóa học chưa
-        boolean isEnrolled = user.getEnrollments().stream()
-                .anyMatch(enroll -> enroll.getCourse().getId().equals(course.getId()));
+        boolean isEnrolled = checkEnrollment(user, course);
         if (isEnrolled) {
             return "User already enrolled this course";
         }
@@ -44,26 +43,28 @@ public class EnrollmentService {
         enrollment.setCourse(course);
         enrollment.setEnrollmentDate(java.time.LocalDate.now());
 
-        enrollmentDAO.save(enrollment);
+        enrollmentRepository.save(enrollment);
 
         // sau khi đăng ký khóa học, cần cập nhật lại thông tin
         user.getEnrollments().add(enrollment);
         course.getEnrollments().add(enrollment);
-        userDao.save(user);
-        courseDao.save(course);
+        userRepository.save(user);
+        courseRepository.save(course);
 
         return "Register successfully";
     }
 
-    public List<Enrollment> getEnrollmentsByUser(User user) {
-        return enrollmentDAO.findByUser(user);
+    public Set<Enrollment> getEnrollmentsByUserId(Long userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        return enrollmentRepository.findByUser(user);
     }
 
-    public boolean isEnrolled(User user, Course course) {
-        return enrollmentDAO.existsByUserAndCourse(user, course);
+    public boolean checkEnrollment(User user, Course course) {
+        return enrollmentRepository.existsByUserAndCourse(user, course);
     }
 
-    public List<Enrollment> getEnrollmentsByCourse(Course course) {
-        return enrollmentDAO.findByCourse(course);
+    public Set<Enrollment> getEnrollmentsByCourseId(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElse(null);
+        return enrollmentRepository.findByCourse(course);
     }
 }

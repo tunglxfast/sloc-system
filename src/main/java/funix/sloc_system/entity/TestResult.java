@@ -2,23 +2,31 @@ package funix.sloc_system.entity;
 
 import funix.sloc_system.enums.TopicType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class TestResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private int highestScore;
-    @Column(nullable = false)
-    private int latestScore;
-    @Column(nullable = false)
-    private boolean passed;
+    @Column
+    private Double highestScore;
+    @Column
+    private Double latestScore;
+    @Column
+    private Boolean passed;
 
     private Integer participationCount;
     @Column(nullable = false)
-    private String testType;
+    private String testType; // Exam or Quiz
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -26,10 +34,7 @@ public class TestResult {
     @JoinColumn(name = "topic_id", nullable = false)
     private Topic topic;
 
-    public TestResult() {
-    }
-
-    public TestResult(int highestScore, int latestScore, boolean passed, Integer participationCount, String testType, User user, Topic topic) {
+    public TestResult(double highestScore, double latestScore, boolean passed, Integer participationCount, String testType, User user, Topic topic) {
         this.highestScore = highestScore;
         this.latestScore = latestScore;
         this.passed = passed;
@@ -39,7 +44,7 @@ public class TestResult {
         this.topic = topic;
     }
 
-    public TestResult(int highestScore, int latestScore, boolean passed, Integer participationCount, TopicType testType, User user, Topic topic) {
+    public TestResult(double highestScore, double latestScore, boolean passed, Integer participationCount, TopicType testType, User user, Topic topic) {
         this.highestScore = highestScore;
         this.latestScore = latestScore;
         this.passed = passed;
@@ -49,69 +54,27 @@ public class TestResult {
         this.topic = topic;
     }
 
-    public Long getId() {
-        return id;
+    public void updateWithOtherTestResult(TestResult updatedTestResult) {
+        if (updatedTestResult.getHighestScore() != null) {
+            this.highestScore = updatedTestResult.getHighestScore();
+        }
+        if (updatedTestResult.getLatestScore() != null) {
+            this.latestScore = updatedTestResult.getLatestScore();
+        }
+        if (updatedTestResult.getPassed() != null) {
+            this.passed = updatedTestResult.getPassed();
+        }
+        if (updatedTestResult.getParticipationCount() != null) {
+            this.participationCount = updatedTestResult.getParticipationCount();
+        }
+        if (updatedTestResult.getTestType() != null) {
+            this.testType = updatedTestResult.getTestType();
+        }
+        if (updatedTestResult.getUser() != null) {
+            this.user = updatedTestResult.getUser();
+        }
+        if (updatedTestResult.getTopic() != null) {
+            this.topic = updatedTestResult.getTopic();
+        }
     }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public int getHighestScore() {
-        return highestScore;
-    }
-
-    public void setHighestScore(int highestScore) {
-        this.highestScore = highestScore;
-    }
-
-    public int getLatestScore() {
-        return latestScore;
-    }
-
-    public void setLatestScore(int latestScore) {
-        this.latestScore = latestScore;
-    }
-
-    public boolean isPassed() {
-        return passed;
-    }
-
-    public void setPassed(boolean passed) {
-        this.passed = passed;
-    }
-
-    public Integer getParticipationCount() {
-        return participationCount;
-    }
-
-    public void setParticipationCount(Integer participationCount) {
-        this.participationCount = participationCount;
-    }
-
-    public String getTestType() {
-        return testType;
-    }
-
-    public void setTestType(String testType) {
-        this.testType = testType;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Topic getTopic() {
-        return topic;
-    }
-
-    public void setTopic(Topic topic) {
-        this.topic = topic;
-    }
-
-
 }

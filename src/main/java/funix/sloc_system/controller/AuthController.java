@@ -1,7 +1,5 @@
 package funix.sloc_system.controller;
 
-import funix.sloc_system.dao.UserDao;
-import funix.sloc_system.entity.User;
 import funix.sloc_system.security.SecurityUser;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -11,15 +9,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
- * Điều khiển login, logout.
+ * Control login, logout.
  */
 @Controller
 public class AuthController {
-    private final UserDao userDAO;
-
-    public AuthController(UserDao userDAO) {
-        this.userDAO = userDAO;
-    }
 
     @GetMapping(value={"", "/", "/login"})
     public String login(@AuthenticationPrincipal SecurityUser securityUser) {
@@ -32,12 +25,11 @@ public class AuthController {
 
     @GetMapping("/home")
     public String home(@AuthenticationPrincipal SecurityUser securityUser, Model model) {
-        User user = securityUser.getUser();
-        if (user == null) {
-            return "redirect:/login"; // Chuyển đến trang đăng nhập
+        if (securityUser == null || securityUser.getUserId() == null) {
+            return "redirect:/login";
         }
-        model.addAttribute("user", user);
-        return "home";  // Trang chủ của người dùng sau khi đăng nhập thành công
+        model.addAttribute("username", securityUser.getUsername());
+        return "home";
     }
 
     @GetMapping("/logout")
@@ -46,7 +38,7 @@ public class AuthController {
             session.invalidate();
         }
 
-        // Xóa thông tin bảo mật
+        // Delete security info
         SecurityContextHolder.getContext().setAuthentication(null);
         SecurityContextHolder.clearContext();
 

@@ -23,131 +23,55 @@
         }
     </style>
 </head>
-<!-- Navbar -->
-<nav class="sticky-top navbar navbar-expand-lg navbar-light bg-light shadow-sm">
-    <div class="container-fluid">
-        <!-- Logo and Search -->
-        <div class="d-flex align-items-center">
-            <!-- Logo -->
-            <a class="navbar-brand me-3 d-flex align-items-center" href="#">
-                <img src="https://i.imgur.com/FsIOl6L.png" height="30" alt="SLOC Logo" loading="lazy" />
-            </a>
-            <!-- Search -->
-            <form class="input-group w-auto my-auto d-none d-lg-flex">
-                <input autocomplete="off" type="search" class="form-control rounded-pill" placeholder="Search"
-                    style="min-width: 350px;" />
-                <span class="input-group-text border-0 bg-light">
-                    <i class="fas fa-search"></i>
-                </span>
-            </form>
-        </div>
-
-        <!-- Toggle Button for Mobile -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-            aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <!-- Navbar Links -->
-        <div class="collapse navbar-collapse" id="navbarContent">
-            <ul class="navbar-nav ms-auto">
-                <!-- Home -->
-                <li class="nav-item">
-                    <a class="nav-link text-primary fw-bold" th:href="@{/home}">
-                        <i class="fas fa-home me-2"></i>Home
-                    </a>
-                </li>
-                <!-- Courses -->
-                <li class="nav-item">
-                    <a class="nav-link text-dark" th:href="@{/courses}">
-                        <i class="fas fa-book me-2"></i>Courses
-                    </a>
-                </li>
-                <!-- About -->
-                <li class="nav-item">
-                    <a class="nav-link text-dark" href="#">
-                        <i class="fas fa-info-circle me-2"></i>About
-                    </a>
-                </li>
-                <!-- My Learning -->
-                <li class="nav-item">
-                    <a class="nav-link text-dark" href="#">
-                        <i class="fas fa-graduation-cap me-2"></i>My Learning
-                    </a>
-                </li>
-                <!-- Logout -->
-                <li class="nav-item">
-                    <form th:action="@{/logout}" method="POST" class="d-inline">
-                        <button type="submit" class="btn btn-outline-danger btn-sm ms-2" style="margin-top: 7px;">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </button>
-                    </form>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
-<!-- Course Details -->
-<div class="row">
-    <!-- Course Title and Description -->
-    <div class="col-md-3 border-end border-5" style="vertical-align: top; padding-top: 60px; padding-left: 10px;">
-        <div style="margin-left: 10%;">
-            <h1 th:text="${topic.title}" style="color: rgb(2, 117, 2); font-weight: bold;">Course Title</h1>
-            <h3 style="margin-top: 10%;" th:text="${topic.description}"></h3>
-        </div>
-    </div>
-    <!-- Course Lesson -->
-    <div class="col-md-9" style="padding-right: 10%; vertical-align: top; padding-top: 60px;">
-        <div style="margin-left: 5%;">
-            <div th:if="${topic.getTopicType == T(funix.sloc_system.enums.TopicType).READING}">
-                <p>Reading Material:</p>
-                <iframe th:src="@{${topic.fileUrl}}" style="width: 100%; height: 500px;"></iframe>
-            </div>
-
-            <div th:if="${topic.getTopicType == T(funix.sloc_system.enums.TopicType).VIDEO}">
-                <iframe th:src="${topic.videoUrl}" style="width: 80%; height: 500px;" allowfullscreen></iframe>
-            </div>
-
-            <div th:if="${nextTopic == null}">
-                <a th:href="@{/courses/{courseId}(courseId=${courseId})}">Tới bài tiếp theo</a>
-            </div>
-
-            <div th:if="${nextTopic != null}" style="margin-top: 40px;">
-                <a
-                    th:href="@{/courses/{courseId}/{chapterNumber}_{topicNumber}
-        (courseId=${courseId}, chapterNumber=${nextTopic.getChapter().getSequence()}, topicNumber=${nextTopic.getSequence()})}">
-                    <button type="button" class="btn btn-info btn-rounded" data-mdb-ripple-init>Go to next
-                        course</button>
-                </a>
-            </div>
-        </div>
-
-
-        <!-- Action Button -->
-        <div class="row" style="margin-bottom: 5%; margin-left: 4%;">
-            <div class="col-md-6" style="margin-top: 40px;">
-                <a th:href="@{/courses/{courseId}(courseId=${courseId})}">
-                    <button type="button" class="btn btn-success btn-rounded" data-mdb-ripple-init>Back to current
-                        course</button>
-                </a>
-            </div>
-
-            <div class="col-md-6" style="margin-top: 40px;">
-                <a th:href="@{/courses}">
-                    <button type="button" class="btn btn-danger btn-rounded" data-mdb-ripple-init
-                        style="float: right;">Available Courses</button>
-                </a>
-            </div>
-        </div>
-
-    </div>
-</div>
 
 <body>
+    <!-- Include Navbar -->
+    <div th:with="activePage='courses'">
+        <div th:replace="/fragments/basic_navbar :: navbarFragment"></div>
+    </div>
+
+    <!-- Course Details -->
+    <div class="row">
+        <!-- Course Title and Description -->
+        <div class="col-md-3 border-end border-5" style="vertical-align: top; padding-top: 60px; padding-left: 10px;">
+            <div style="margin-left: 10%;">
+                <h1 th:text="${topic.title}" style="color: rgb(2, 117, 2); font-weight: bold;">Course Title</h1>
+                <h3 style="margin-top: 10%;" th:text="${topic.description}"></h3>
+            </div>
+        </div>
+        <!-- Course Lesson -->
+        <div class="col-md-9" style="padding-right: 10%; vertical-align: top; padding-top: 60px;">
+            <div style="margin-left: 5%;">
+                <div th:if="${topic.getTopicType == 'READING'}">
+                    <p>Reading Material:</p>
+                    <iframe th:src="@{${topic.fileUrl}}" style="width: 100%; height: 500px;"></iframe>
+                </div>
+
+                <div th:if="${topic.getTopicType == 'VIDEO'}">
+                    <iframe th:src="${topic.videoUrl}" style="width: 80%; height: 500px;" allowfullscreen></iframe>
+                </div>
+            </div>
 
 
+            <!-- Action Button -->
+            <div class="row" style="margin-bottom: 5%; margin-left: 4%;">
+                <div class="col-md-6" style="margin-top: 40px;">
+                    <a th:href="@{/courses/{courseId}(courseId=${courseId})}">
+                        <button type="button" class="btn btn-success btn-rounded" data-mdb-ripple-init>Back to current
+                            course</button>
+                    </a>
+                </div>
 
+                <div class="col-md-6" style="margin-top: 40px;">
+                    <a th:href="@{${nextTopicUrl}}">
+                        <button type="button" class="btn btn-info btn-rounded" data-mdb-ripple-init
+                            style="float: right;">Go to next course</button>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
 
 </body>
 

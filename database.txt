@@ -2,6 +2,8 @@
 DROP TABLE IF EXISTS instructor_course;
 DROP TABLE IF EXISTS enrollment;
 DROP TABLE IF EXISTS test_result;
+DROP TABLE IF EXISTS content_change_temporary;
+DROP TABLE IF EXISTS course_change_temporary;
 DROP TABLE IF EXISTS answer;
 DROP TABLE IF EXISTS question;
 DROP TABLE IF EXISTS exam;
@@ -33,8 +35,10 @@ CREATE TABLE users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    name VARCHAR(255),
-    password VARCHAR(255) NOT NULL
+    full_name VARCHAR(255),
+    password VARCHAR(255) NOT NULL,
+    locked BOOLEAN DEFAULT FALSE,
+    failed_attempts INT DEFAULT 0
 );
 
 CREATE TABLE user_roles (
@@ -49,17 +53,20 @@ CREATE TABLE course (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255),
     description TEXT,
-    thumbnail_url VARCHAR(255),
+    thumbnail_url VARCHAR(1000),
     category_id BIGINT,
+    instructor_id BIGINT,
     created_by BIGINT,
     last_updated_by BIGINT,
     start_date DATE,
     end_date DATE,
-    status VARCHAR(50) DEFAULT 'PENDING',
+    content_status VARCHAR(50) DEFAULT 'DRAFT',
+    approval_status VARCHAR(50) DEFAULT 'NOT_SUBMITTED',
     reject_reason TEXT,
     created_at DATE,
     updated_at DATE,
     FOREIGN KEY (category_id) REFERENCES category(id),
+    FOREIGN KEY (instructor_id) REFERENCES users(id),
     FOREIGN KEY (created_by) REFERENCES users(id),
     FOREIGN KEY (last_updated_by) REFERENCES users(id)
 );
@@ -69,6 +76,7 @@ CREATE TABLE chapter (
     title VARCHAR(255),
     sequence INT,
     course_id BIGINT,
+    content_status VARCHAR(50) DEFAULT 'DRAFT',
     FOREIGN KEY (course_id) REFERENCES course(id)
 );
 
@@ -79,28 +87,31 @@ CREATE TABLE topic (
     topic_type VARCHAR(255),
     sequence INT,
     chapter_id BIGINT,
-    video_url VARCHAR(255),
-    file_url VARCHAR(255),
+    content_status VARCHAR(50) DEFAULT 'DRAFT',
+    video_url VARCHAR(1000),
+    file_url VARCHAR(1000),
     pass_score INT,
     total_score INT,
     time_limit INT,
-    FOREIGN KEY (chapter_id) REFERENCES chapter(id)
+    FOREIGN KEY (chapter_id) REFERENCES chapter(id),
+    UNIQUE (chapter_id, sequence)
 );
 
 CREATE TABLE question (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    content TEXT,
+    content VARCHAR(255),
     question_type VARCHAR(255),
-    sequence INT,
-    topic_id BIGINT,
+    topic_id BIGINT NOT NULL,
+    content_status VARCHAR(255) DEFAULT 'DRAFT',
     FOREIGN KEY (topic_id) REFERENCES topic(id)
 );
 
 CREATE TABLE answer (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     content TEXT,
-    is_correct BOOLEAN,
+    correct BOOLEAN,
     question_id BIGINT,
+    content_status VARCHAR(50) DEFAULT 'DRAFT',
     FOREIGN KEY (question_id) REFERENCES question(id)
 );
 
@@ -113,25 +124,30 @@ CREATE TABLE enrollment (
     FOREIGN KEY (course_id) REFERENCES course(id)
 );
 
-CREATE TABLE instructor_course (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT,
-    course_id BIGINT,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (course_id) REFERENCES course(id)
-);
-
 CREATE TABLE test_result (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    highest_score INT NOT NULL,
-    latest_score INT NOT NULL,
+    highest_score DOUBLE NOT NULL,
+    latest_score DOUBLE NOT NULL,
     passed BOOLEAN NOT NULL,
     participation_count INT,
     test_type VARCHAR(255) NOT NULL,
     user_id BIGINT NOT NULL,
     topic_id BIGINT NOT NULL,
-    CONSTRAINT fk_test_result_user FOREIGN KEY (user_id) REFERENCES users(id),
-    CONSTRAINT fk_test_result_topic FOREIGN KEY (topic_id) REFERENCES topic(id)
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (topic_id) REFERENCES topic(id)
+);
+
+-- Table for tracking changes to published content
+CREATE TABLE content_change_temporary (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    entity_type VARCHAR(20) NOT NULL,
+    entity_id BIGINT NOT NULL, 
+    action VARCHAR(20) NOT NULL,
+    changes MEDIUMTEXT NOT NULL,
+    updated_by BIGINT NOT NULL,
+    change_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (updated_by) REFERENCES users(id),
+    UNIQUE (entity_type, entity_id)
 );
 
 -- Insert sample data
@@ -151,11 +167,11 @@ INSERT INTO role (name) VALUES
 
 
 -- Insert sample users
-INSERT INTO users (username, email, name, password) VALUES
- ('admin', 'admin@example.com', 'Admin', 'adminpassword'),
-('moderator_01', ' moderator 1@example.com', 'Mod One', 'modpassword'),
-('instructor_01', 'instructor1@example.com', 'Instructor One', 'instructorpassword'),
-('student_01', 'student1@example.com', 'Student One', 'studentpassword');
+INSERT INTO users (username, email, full_name, password, locked, failed_attempts) VALUES
+ ('admin', 'admin@example.com', 'Admin', 'adminpassword', false, 0),
+('moderator_01', ' moderator 1@example.com', 'Mod One', 'modpassword', false, 0),
+('instructor_01', 'instructor1@example.com', 'Instructor One', 'instructorpassword', false, 0),
+('student_01', 'student1@example.com', 'Student One', 'studentpassword', false, 0);
 
 -- Assign roles to users
 INSERT INTO user_roles (user_id, role_id) VALUES
@@ -166,77 +182,70 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 (4, 4);  -- student_01 is a Student
 
 -- Insert sample courses
-INSERT INTO course (title, description, thumbnail_url, category_id, created_by, last_updated_by, start_date, end_date, status, reject_reason, created_at, updated_at) VALUES
-('Introduction to Web Development', 'Learn the basics of web development including HTML, CSS, and JavaScript.', '/img/thumbnail1.jpg', 1, 3, 3, '2024-01-01', '2026-06-01', 'APPROVED', NULL, '2024-01-01', '2024-01-01'),
-('Data Science for Beginners', 'Learn the fundamentals of data science and machine learning.', '/img/thumbnail2.jpg', 2, 3, 3, '2024-02-01', '2024-07-01', 'APPROVED', NULL, '2024-02-01', '2024-02-01');
+INSERT INTO course (title, description, thumbnail_url, category_id, instructor_id, created_by, last_updated_by, start_date, end_date, content_status, approval_status, reject_reason, created_at, updated_at) VALUES
+('Introduction to Web Development', 'Learn the basics of web development including HTML, CSS, and JavaScript.', '/img/courses/thumbnails/thumbnail1.jpg', 1, 3, 3, 3, '2024-01-01', '2026-06-01', 'PUBLISHED', 'APPROVED', NULL, '2024-01-01', '2024-01-01'),
+('Data Science for Beginners', 'Learn the fundamentals of data science and machine learning.', '/img/courses/thumbnails/thumbnail2.jpg', 2, 3, 3, 3, '2024-02-01', '2024-07-01', 'PUBLISHED', 'APPROVED', NULL, '2024-02-01', '2024-02-01');
 
 -- Insert sample chapters
-INSERT INTO chapter (title, sequence, course_id) VALUES
-('Chapter 1: HTML Basics', 1, 1),
-('Chapter 2: CSS Styling', 2, 1),
-('Chapter 1: Introduction to Data Science', 1, 2);
+INSERT INTO chapter (title, sequence, course_id, content_status) VALUES
+('Chapter 1: HTML Basics', 1, 1, 'PUBLISHED'),
+('Chapter 2: CSS Styling', 2, 1, 'PUBLISHED'),
+('Chapter 1: Introduction to Data Science', 1, 2, 'PUBLISHED');
 
 -- Insert sample topics
-INSERT INTO topic (title, description, topic_type, sequence, chapter_id, video_url, file_url, pass_score, total_score, time_limit) VALUES
-('HTML Syntax', 'Learn the basic syntax of HTML', 'VIDEO', 1, 1, 'https://www.youtube.com/embed/9r_hbFzA8ho?si=pyTUZYtQjuOYk2Uh', NULL, NULL, NULL, NULL),
-('CSS Selectors', 'Learn about different CSS selectors and how to use them', 'VIDEO', 1, 2, 'https://www.youtube.com/embed/l1mER1bV0N0?si=Lhp6M1Tzl5La5BQ-', NULL, NULL, NULL, NULL),
-('What is Data Science?', 'Introduction to Data Science concepts', 'READING', 1, 3, NULL, '/reading/intro_data_science.pdf', NULL, NULL, NULL),
-('HTML Syntax Quiz', 'HTML Syntax Quiz', 'QUIZ', 2, 1, NULL, NULL, 3, 4, NULL),
-('CSS Selectors Quiz', 'CSS Selectors Quiz', 'QUIZ', 2, 2, NULL, NULL, 1, 1, NULL),
-('Final Exam for Data Science', 'Final Exam for Data Science', 'EXAM', 2, 3, NULL, NULL, 1, 1, 120);
+INSERT INTO topic (title, description, topic_type, sequence, chapter_id, content_status, video_url, file_url, pass_score, total_score, time_limit) VALUES
+('HTML Syntax', 'Learn the basic syntax of HTML', 'VIDEO', 1, 1, 'PUBLISHED', 'https://www.youtube.com/embed/9r_hbFzA8ho?si=pyTUZYtQjuOYk2Uh', NULL, NULL, NULL, NULL),
+('CSS Selectors', 'Learn about different CSS selectors and how to use them', 'VIDEO', 1, 2, 'PUBLISHED', 'https://www.youtube.com/embed/l1mER1bV0N0?si=Lhp6M1Tzl5La5BQ-', NULL, NULL, NULL, NULL),
+('What is Data Science?', 'Introduction to Data Science concepts', 'READING', 1, 3, 'PUBLISHED', NULL, '/reading/intro_data_science.pdf', NULL, NULL, NULL),
+('HTML Syntax Quiz', 'HTML Syntax Quiz', 'QUIZ', 2, 1, 'PUBLISHED', NULL, NULL, 70, 4, NULL),
+('CSS Selectors Quiz', 'CSS Selectors Quiz', 'QUIZ', 2, 2, 'PUBLISHED', NULL, NULL, 70, 1, NULL),
+('Final Exam for Data Science', 'Final Exam for Data Science', 'EXAM', 2, 3, 'PUBLISHED', NULL, NULL, 70, 1, 120);
 
 
 -- Insert sample questions
-INSERT INTO question (content, question_type, sequence, topic_id) VALUES
-('What is HTML?', 'CHOICE_ONE', 1, 4),
-('What is a CSS Selector?', 'CHOICE_ONE', 1, 5),
-('What is Data Science?', 'CHOICE_ONE', 1, 6),
-('What does the `<title>` tag do?', 'CHOICE_ONE', 2, 4),
-('Which tag is used to create a hyperlink?', 'CHOICE_ONE', 3, 4),
-('Which of the following are valid HTML tags?', 'CHOICE_MANY', 4, 4);
+INSERT INTO question (content, question_type, topic_id, content_status) VALUES
+('What is HTML?', 'CHOICE_ONE', 4, 'PUBLISHED'),
+('What is a CSS Selector?', 'CHOICE_ONE', 5, 'PUBLISHED'),
+('What is Data Science?', 'CHOICE_ONE', 6, 'PUBLISHED'),
+('What does the `<title>` tag do?', 'CHOICE_ONE', 4, 'PUBLISHED'),
+('Which tag is used to create a hyperlink?', 'CHOICE_ONE', 4, 'PUBLISHED'),
+('Which of the following are valid HTML tags?', 'CHOICE_MANY', 4, 'PUBLISHED');
 
 
 -- Insert sample answers
-INSERT INTO answer (content, is_correct, question_id) VALUES
-('A markup language', TRUE, 1),
-('A programming language', FALSE, 1),
-('A mathematical formula', FALSE, 1),
-('A type of HTML tag', FALSE, 1),
+INSERT INTO answer (content, correct, question_id, content_status) VALUES
+('A markup language', TRUE, 1, 'PUBLISHED'),
+('A programming language', FALSE, 1, 'PUBLISHED'),
+('A mathematical formula', FALSE, 1, 'PUBLISHED'),
+('A type of HTML tag', FALSE, 1, 'PUBLISHED'),
 
-('A way to select HTML elements', TRUE, 2),
-('A CSS property', FALSE, 2),
-('A JavaScript function', FALSE, 2),
-('A data format', FALSE, 2),
+('A way to select HTML elements', TRUE, 2, 'PUBLISHED'),
+('A CSS property', FALSE, 2, 'PUBLISHED'),
+('A JavaScript function', FALSE, 2, 'PUBLISHED'),
+('A data format', FALSE, 2, 'PUBLISHED'),
 
-('An interdisciplinary field', TRUE, 3),
-('A type of software', FALSE, 3),
-('A programming language', FALSE, 3),
-('A database', FALSE, 3),
+('An interdisciplinary field', TRUE, 3, 'PUBLISHED'),
+('A type of software', FALSE, 3, 'PUBLISHED'),
+('A programming language', FALSE, 3, 'PUBLISHED'),
+('A database', FALSE, 3, 'PUBLISHED'),
 
-('Defines the title of the document', TRUE, 4),
-('Adds a link to an image', FALSE, 4),
-('Styles the text in bold', FALSE, 4),
-('Creates a table in HTML', FALSE, 4),
+('Defines the title of the document', TRUE, 4, 'PUBLISHED'),
+('Adds a link to an image', FALSE, 4, 'PUBLISHED'),
+('Styles the text in bold', FALSE, 4, 'PUBLISHED'),
+('Creates a table in HTML', FALSE, 4, 'PUBLISHED'),
 
-('<a>', TRUE, 5),
-('<div>', FALSE, 5),
-('<h1>', FALSE, 5),
-('<img>', FALSE, 5),
+('<a>', TRUE, 5, 'PUBLISHED'),
+('<div>', FALSE, 5, 'PUBLISHED'),
+('<h1>', FALSE, 5, 'PUBLISHED'),
+('<img>', FALSE, 5, 'PUBLISHED'),
 
-('<div>', TRUE, 6),
-('<span>', TRUE, 6),
-('<customtag>', FALSE, 6),
-('<script>', TRUE, 6),
-('<abc>', FALSE, 6);
+('<div>', TRUE, 6, 'PUBLISHED'),
+('<span>', TRUE, 6, 'PUBLISHED'),
+('<customtag>', FALSE, 6, 'PUBLISHED'),
+('<script>', TRUE, 6, 'PUBLISHED'),
+('<abc>', FALSE, 6, 'PUBLISHED');
 
 -- Insert sample enrollment data
 INSERT INTO enrollment (user_id, course_id, enrollment_date) VALUES
 (4, 1, '2024-01-01'),  -- student_01 enrolls in Web Development course
 (4, 2, '2024-02-01');  -- student_01 enrolls in Data Science course
-
--- Insert sample instructor assignments
-INSERT INTO instructor_course (user_id, course_id) VALUES
-(3, 1),  -- instructor_01 teaches Web Development course
-(3, 2);  -- instructor_01 teaches Data Science course
-
-

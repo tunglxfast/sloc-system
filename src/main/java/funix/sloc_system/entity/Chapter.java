@@ -1,10 +1,20 @@
 package funix.sloc_system.entity;
 
+import funix.sloc_system.enums.ContentStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Chapter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,49 +28,52 @@ public class Chapter {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    @OneToMany(mappedBy = "chapter", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-    @OrderBy("sequence ASC")
+    @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Topic> topics;
 
-    // getter & setter
-    public Long getId() {
-        return id;
+    @Enumerated(EnumType.STRING)
+    private ContentStatus contentStatus = ContentStatus.DRAFT;
+
+    public void updateWithOtherChapter(Chapter updatedChapter) {
+        if (updatedChapter.getTitle() != null) {
+            this.title = updatedChapter.getTitle();
+        }
+        if (updatedChapter.getSequence() != 0) {
+            this.sequence = updatedChapter.getSequence();
+        }
+        if (updatedChapter.getCourse() != null) {
+            this.course = updatedChapter.getCourse();
+        }
+        if (updatedChapter.getContentStatus() != null) {
+            this.contentStatus = updatedChapter.getContentStatus();
+        }
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    // Helper method to add topic
+    public void addTopic(Topic topic) {
+        if (topics == null) {
+            topics = new ArrayList<>();
+        }
+        if (topics.contains(topic)) {
+            return;
+        }
+        topics.add(topic);
+        topic.setChapter(this);
     }
 
-    public String getTitle() {
-        return title;
+    // Helper method to remove topic
+    public void removeTopic(Topic topic) {
+        if (topics == null || !topics.contains(topic)) {
+            return;
+        }
+        topics.remove(topic);
+        topic.setChapter(null);
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public int getSequence() {
-        return sequence;
-    }
-
-    public void setSequence(int sequence) {
-        this.sequence = sequence;
-    }
-
-    public Course getCourse() {
-        return course;
-    }
-
-    public void setCourse(Course course) {
-        this.course = course;
-    }
-
-    public List<Topic> getTopics() {
-        return topics;
-    }
-
-    public void setTopics(List<Topic> topics) {
-        this.topics = topics;
+    public void setTopicsContentStatus(ContentStatus status) {
+        for (Topic topic : topics) {
+            topic.setContentStatus(status);
+            topic.setQuestionsContentStatus(status);
+        }
     }
 }
-

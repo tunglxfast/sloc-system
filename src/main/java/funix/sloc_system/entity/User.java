@@ -1,17 +1,28 @@
 package funix.sloc_system.entity;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonValue
     private Long id;
 
     @Column(nullable = false, unique = true)
@@ -20,12 +31,18 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    private String name;
+    @Column(name = "full_name")
+    private String fullName;
 
     @Column(nullable = false)
     private String password;
 
-    // Mỗi user có thể có nhiều Role
+    @Column(nullable = false)
+    private boolean locked;
+
+    @Column(nullable = false)
+    private int failedAttempts;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
@@ -34,84 +51,33 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-    // Mối quan hệ với table enrollment (học viên đăng ký khóa học)
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user",
+            cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<Enrollment> enrollments = new HashSet<>();
 
-    @ManyToMany(mappedBy = "instructors")
+    @ManyToMany(mappedBy = "instructor")
     private Set<Course> courses = new HashSet<>();
 
-    // getter, setter
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
     public Set<String> getStringRoles() {
-        Set<String> stringRoles = new HashSet<>();
-        for (Role role : roles) {
-            stringRoles.add(role.getName());
+        return this.roles.stream().map(Role::getName).collect(Collectors.toSet());
+    }
+
+    public void updateWithOtherUser(User updatedUser) {
+        if (updatedUser.getUsername() != null) {
+            this.username = updatedUser.getUsername();
         }
-        return stringRoles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
-
-    public Set<Enrollment> getEnrollments() {
-        return enrollments;
-    }
-
-    public void setEnrollments(Set<Enrollment> enrollments) {
-        this.enrollments = enrollments;
-    }
-
-    public Set<Course> getCourses() {
-        return courses;
-    }
-
-    public void setCourses(Set<Course> courses) {
-        this.courses = courses;
+        if (updatedUser.getEmail() != null) {
+            this.email = updatedUser.getEmail();
+        }
+        if (updatedUser.getFullName() != null) {
+            this.fullName = updatedUser.getFullName();
+        }
+        if (updatedUser.getPassword() != null) {
+            this.password = updatedUser.getPassword();
+        }
+        if (updatedUser.getRoles() != null) {
+            this.roles = updatedUser.getRoles();
+        }
+        this.locked = updatedUser.isLocked();
     }
 }

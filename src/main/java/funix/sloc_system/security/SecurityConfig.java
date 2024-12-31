@@ -17,22 +17,29 @@ public class SecurityConfig {
 
     @Autowired
     private ApplicationUserDetailsService applicationUserDetailsService;
+    @Autowired
+    private CustomAuthenticationFailureListener failureListener;
+    @Autowired
+    private CustomAuthenticationSuccessHandler successHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
             .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers("/instructor/**").hasAuthority("INSTRUCTOR")
+                    .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
                     .requestMatchers("/login", "/login_form", "/register", "/register_form").permitAll()
                     .requestMatchers("/h2-console/**").permitAll()
+                    .requestMatchers("/moderator/**").hasAnyAuthority("MODERATOR", "ADMIN")
+                    .requestMatchers("/instructor/**").hasAuthority("INSTRUCTOR")
                     .anyRequest().authenticated()
             )
-//            .userDetailsService(applicationUserDetailsService)
             .formLogin(form -> form
                     .loginPage("/login")
                     .loginProcessingUrl("/authenticateTheUser")
                     .defaultSuccessUrl("/home", true)
+                    .failureHandler(failureListener)
+                    .successHandler(successHandler)
                     .permitAll()
             )
             .logout(logout -> logout
@@ -58,6 +65,4 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return NoOpPasswordEncoder.getInstance();
     }
-
-
 }

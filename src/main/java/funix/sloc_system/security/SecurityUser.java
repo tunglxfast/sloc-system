@@ -7,6 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class SecurityUser implements UserDetails {
 
@@ -21,7 +22,7 @@ public class SecurityUser implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -41,7 +42,7 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !user.isLocked();
     }
 
     @Override
@@ -54,8 +55,8 @@ public class SecurityUser implements UserDetails {
         return true;
     }
 
-    public User getUser() {
-        return user;
+    public Long getUserId() {
+        return user.getId();
     }
 }
 
