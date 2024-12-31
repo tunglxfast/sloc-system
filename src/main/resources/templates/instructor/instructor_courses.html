@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instructor Courses</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
@@ -136,10 +135,10 @@
                                     <td>
                                         <div th:if="${course.rejectReason != null and !course.rejectReason.isEmpty()}">
                                             <span th:text="${#strings.abbreviate(course.rejectReason, 50)}"></span>
-                                            <i class="bi bi-info-circle" style="cursor: pointer;"
+                                            <i class="text-danger" style="cursor: pointer;"
                                                th:data-bs-toggle="tooltip"
                                                th:data-bs-placement="top"
-                                               th:title="${course.rejectReason}">
+                                               th:title="${course.rejectReason}">(Hover here)
                                             </i>
                                         </div>
                                     </td>
