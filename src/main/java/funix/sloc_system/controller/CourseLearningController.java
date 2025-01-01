@@ -203,10 +203,12 @@ public class CourseLearningController {
         topicDTO.setQuestions(dtoService.getAvailableQuestions(topicDTO));
 
         String nextTopicUrl = appUtil.getNextTopicUrl(topic.getId(), courseId);
+        String previousTopicUrl = appUtil.getPreviousTopicUrl(topic.getId(), courseId);
 
         model.addAttribute("topic", topicDTO);
         model.addAttribute("courseId", courseId);
         model.addAttribute("nextTopicUrl", nextTopicUrl);
+        model.addAttribute("previousTopicUrl", previousTopicUrl);
         
         TestResultDTO testResult = testResultService.findByUserIdAndTopicId(user.getId(), topic.getId());
         if (testResult != null) {
@@ -244,11 +246,13 @@ public class CourseLearningController {
             topicDTO.setQuestions(dtoService.getAvailableQuestions(topicDTO));
     
             String nextTopicUrl = appUtil.getNextTopicUrl(topic.getId(), courseId);
+            String previousTopicUrl = appUtil.getPreviousTopicUrl(topic.getId(), courseId);
 
             model.addAttribute("result", resultDTO);
             model.addAttribute("topic", topicDTO);
             model.addAttribute("courseId", courseId);
             model.addAttribute("nextTopicUrl", nextTopicUrl);
+            model.addAttribute("previousTopicUrl", previousTopicUrl);
 
         }
         return "course/course_quiz";
@@ -277,11 +281,13 @@ public class CourseLearningController {
             examDTO.setQuestions(dtoService.getAvailableQuestions(examDTO));
 
             String nextTopicUrl = appUtil.getNextTopicUrl(exam.getId(), courseId);
+            String previousTopicUrl = appUtil.getPreviousTopicUrl(exam.getId(), courseId);
 
             model.addAttribute("result", result);
             model.addAttribute("topic", examDTO);
             model.addAttribute("courseId", courseId);
             model.addAttribute("nextTopicUrl", nextTopicUrl);
+            model.addAttribute("previousTopicUrl", previousTopicUrl);
 
         }
         return "course/course_exam";

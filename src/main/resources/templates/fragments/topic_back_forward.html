@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>topic_back_forward</title>
+</head>
+<body>
+    <div th:fragment="topicBackForwardFragment"
+        class="row" style="margin-bottom: 5%; margin-left: 4%;">
+        <div class="col-md-6" style="margin-top: 40px;">
+            <a th:href="@{/courses/{courseId}(courseId=${courseId})}">
+                <button type="button" class="btn btn-success btn-rounded" data-mdb-ripple-init>Back to current
+                    course</button>
+            </a>
+        </div>
+        <div class="col-md-6" style="margin-top: 40px;">
+            <a th:href="@{${previousTopicUrl}}">
+                <button type="button" class="btn btn-secondary btn-rounded" data-mdb-ripple-init
+                    style="float: left;">Back to previous course</button>
+            </a>
+            <a th:href="@{${nextTopicUrl}}">
+                <button type="button" class="btn btn-info btn-rounded" data-mdb-ripple-init
+                    style="float: right;">Go to next course</button>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

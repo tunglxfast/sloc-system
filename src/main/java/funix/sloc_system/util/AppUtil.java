@@ -201,6 +201,38 @@ public class AppUtil {
         }
     }
 
+    public String getPreviousTopicUrl(Long topicId, Long courseId) {
+        Topic topic = topicRepository.findById(topicId).orElse(null);
+        if (topic != null) {
+            Chapter currentChapter = topic.getChapter();
+            int targetTopicSeq = 0;
+            int targetChapterSeq = 0;
+
+            if (topic.getSequence() > 1) {
+                targetTopicSeq = topic.getSequence() - 1;
+                targetChapterSeq = topic.getChapter().getSequence();
+                return String.format("/courses/%d/%d_%d", courseId, targetChapterSeq, targetTopicSeq);
+
+            } else if (currentChapter.getSequence() > 1) {
+                targetChapterSeq = currentChapter.getSequence()-1;
+                Course currentCourse = currentChapter.getCourse();
+                List<Chapter> chapters = chapterRepository.findByCourseIdOrderBySequence(currentCourse.getId());
+                for (Chapter chapter: chapters) {
+                    if (chapter.getSequence() == targetChapterSeq) {
+                        List<Topic> topics = chapter.getTopics();
+                        targetTopicSeq = topics.get(topics.size() - 1).getSequence();
+                        return String.format("/courses/%d/%d_%d", courseId, targetChapterSeq, targetTopicSeq);
+                    }
+                }
+            } else {
+                return String.format("/courses/%d", courseId);
+            }            
+        }
+
+        return String.format("/courses/%d", courseId);
+    }
+
+
     /**
      * Reorder chapters sequence
      */
