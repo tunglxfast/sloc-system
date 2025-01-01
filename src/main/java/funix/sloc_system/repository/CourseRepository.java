@@ -8,7 +8,9 @@ import funix.sloc_system.enums.ContentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 
 @Repository
@@ -34,4 +36,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     // get list of courses by title containing specific text and matching category
     List<Course> findByTitleContainingIgnoreCaseAndCategory(String title, Category category);
+
+    Set<Course> findByEndDateBeforeAndContentStatusNot(LocalDate localDate, ContentStatus contentStatus);
 }

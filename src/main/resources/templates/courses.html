@@ -26,7 +26,7 @@
 <body>
     <!-- Include Navbar -->
     <div th:with="activePage='courses'">
-        <div th:replace="/fragments/basic_navbar :: navbarFragment"></div>
+        <div th:replace="~{/fragments/basic_navbar :: navbarFragment}"></div>
     </div>
 
     <img th:src="@{/img/headerimg.png}" style="max-width: 100%; height: auto;">

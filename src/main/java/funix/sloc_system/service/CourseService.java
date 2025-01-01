@@ -1,13 +1,21 @@
 package funix.sloc_system.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import funix.sloc_system.enums.*;
-import funix.sloc_system.repository.*;
-import funix.sloc_system.dto.*;
+import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.entity.*;
-import funix.sloc_system.mapper.*;
+import funix.sloc_system.enums.ApprovalStatus;
+import funix.sloc_system.enums.ContentAction;
+import funix.sloc_system.enums.ContentStatus;
+import funix.sloc_system.enums.EntityType;
+import funix.sloc_system.mapper.CourseMapper;
+import funix.sloc_system.repository.CategoryRepository;
+import funix.sloc_system.repository.ContentChangeRepository;
+import funix.sloc_system.repository.CourseRepository;
+import funix.sloc_system.repository.UserRepository;
 import funix.sloc_system.util.AppUtil;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,15 +24,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class CourseService {
-
     public final String THUMBNAIL_LOCAL = "/img/courses/thumbnails/";
+    private boolean isCheckedOnStartup = false;
 
     @Autowired
     private UserRepository userRepository;
@@ -38,9 +43,33 @@ public class CourseService {
     private ObjectMapper objectMapper;
     @Autowired
     private CourseMapper courseMapper;
-
     @Autowired
     private AppUtil appUtil;
+
+    /**
+     * Run in midnight and turn course to archived when out of learning time
+     */
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void archiveExpiredCourses() {
+        LocalDate now = LocalDate.now();
+        Set<Course> courses = courseRepository.findByEndDateBeforeAndContentStatusNot(now, ContentStatus.ARCHIVED);
+
+        for (Course course : courses) {
+            course.setContentStatus(ContentStatus.ARCHIVED);
+            courseRepository.save(course);
+        }
+    }
+    /**
+     * Run when start app and turn course to archived when out of learning time
+     */
+    @PostConstruct
+    public void checkExpiredCoursesOnStartup() {
+        // check to make sure not calling second time after startup
+        if (!isCheckedOnStartup) {
+            archiveExpiredCourses();
+            isCheckedOnStartup = true;
+        }
+    }
 
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
@@ -321,9 +350,15 @@ public class CourseService {
                 courseRepository.deleteById(courseId);
                 return "Course deleted successfully.";
             } else {
-                CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
-                String json = objectMapper.writeValueAsString(courseDTO);
+                String json;
+                try {
+                    CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
+                    json = objectMapper.writeValueAsString(courseDTO);
+                } catch (Exception e) {
+                    throw new Exception("Error when deleting course content");
+                }
                 appUtil.saveContentChange(json, courseId, instructorId, ContentAction.DELETE);
+
                 submitForReview(courseId);
                 return "Delete course request is sent, please wait for approval.";
             }

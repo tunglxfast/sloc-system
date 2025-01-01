@@ -42,9 +42,7 @@ public class InstructorViewController {
 
     @GetMapping(value = {"", "/", "/courses"})
     public String showInstructorManageList(@AuthenticationPrincipal SecurityUser securityUser,
-                                        @RequestParam(required = false) String errorMessage,
-                                        Model model, 
-                                        RedirectAttributes redirectAttributes){
+                                        Model model){
         User user = userService.findById(securityUser.getUserId());
         UserDTO userDTO = userMapper.toDTO(user);
         List<Course> courseList;
@@ -59,7 +57,6 @@ public class InstructorViewController {
         model.addAttribute("user", userDTO);
         model.addAttribute("courseEditingHolders", courseEditingHolders);
         model.addAttribute("courses", courseDTOList);
-        model.addAttribute("errorMessage", errorMessage);
         return "instructor/instructor_courses";
     }
 

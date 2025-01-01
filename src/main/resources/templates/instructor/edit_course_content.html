@@ -66,7 +66,7 @@
 <body>
     <!-- Include Navbar -->
     <div th:with="activePage='instructorDashboard'">
-        <div th:replace="/fragments/basic_navbar :: navbarFragment"></div>
+        <div th:replace="~{/fragments/basic_navbar :: navbarFragment}"></div>
     </div>
 
     <div class="row" style="margin-right: 40%;">
@@ -226,7 +226,7 @@
           <!-- Modal Body -->
           <div class="modal-body">
             <form id="addChapterForm" th:action="@{'/instructor/course/' + ${courseId} + '/edit/chapters/add'}"
-                  method="post" class="needs-validation" novalidate>
+                  method="post">
               <!-- Chapter Title Field -->
               <div class="mb-3">
                 <label for="title" class="form-label">Chapter Title:</label>

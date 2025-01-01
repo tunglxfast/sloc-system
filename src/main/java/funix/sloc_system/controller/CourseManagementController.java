@@ -139,7 +139,7 @@ public class CourseManagementController {
             String successMessage = courseService.deleteCourse(courseId, instructorId);
             redirectAttributes.addFlashAttribute("successMessage", successMessage);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error when deleting course content");
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/instructor/courses";
     }

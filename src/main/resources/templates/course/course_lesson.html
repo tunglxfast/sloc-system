@@ -27,7 +27,7 @@
 <body>
     <!-- Include Navbar -->
     <div th:with="activePage='courses'">
-        <div th:replace="/fragments/basic_navbar :: navbarFragment"></div>
+        <div th:replace="~{/fragments/basic_navbar :: navbarFragment}"></div>
     </div>
 
     <!-- Course Details -->
