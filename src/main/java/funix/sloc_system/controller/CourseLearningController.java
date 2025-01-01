@@ -79,8 +79,12 @@ public class CourseLearningController {
      * @return
      */
     @GetMapping(value = {"/{id}" ,"/{id}/general"})
-    public String viewCourseGeneral(@PathVariable Long id, @AuthenticationPrincipal SecurityUser securityUser, Model model) {
+    public String viewCourseGeneral(@PathVariable Long id, 
+                                @AuthenticationPrincipal SecurityUser securityUser, 
+                                RedirectAttributes redirectAttributes,
+                                Model model) {
         if (!appUtil.isCourseReady(id)) {
+            redirectAttributes.addAttribute("errorMessage", "Course not found.");
             return "redirect:/courses";
         }
 
@@ -89,8 +93,16 @@ public class CourseLearningController {
         if (course != null && user != null) {
             boolean isEnrolled = enrollmentService.checkEnrollment(user, course);            
             CourseDTO courseDTO = dtoService.getAvailableCourseDTO(id);
+            Map<String, Object> courseProcessPoint = appUtil.calculateCoursePoint(user.getId(), course.getId());
+            List<TestResultDTO> testResults = (List<TestResultDTO>) courseProcessPoint.get("topicResult");
+            Integer finalScore = (Integer) courseProcessPoint.get("finalScore");
+            Boolean isFinalPassed = (Boolean) courseProcessPoint.get("isPassed");
+
             model.addAttribute("course", courseDTO);
             model.addAttribute("isEnrolled", isEnrolled);
+            model.addAttribute("processes", testResults);
+            model.addAttribute("finalScore", finalScore);
+            model.addAttribute("finalPass", isFinalPassed);
             return "course/general";
         } else {
             return "redirect:/courses";

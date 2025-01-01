@@ -3,15 +3,13 @@ package funix.sloc_system.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.dto.CourseDTO;
+import funix.sloc_system.dto.TestResultDTO;
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.entity.ContentChangeTemporary;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Topic;
-import funix.sloc_system.enums.ApprovalStatus;
-import funix.sloc_system.enums.ContentAction;
-import funix.sloc_system.enums.ContentStatus;
-import funix.sloc_system.enums.EntityType;
+import funix.sloc_system.enums.*;
 import funix.sloc_system.mapper.*;
 import funix.sloc_system.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class AppUtil {
@@ -39,6 +35,8 @@ public class AppUtil {
     @Autowired
     private AnswerRepository answerRepository;
     @Autowired
+    private TestResultRepository testResultRepository;
+    @Autowired
     private ContentChangeRepository contentChangeRepository;
     @Autowired
     private ObjectMapper objectMapper;
@@ -54,6 +52,11 @@ public class AppUtil {
     private AnswerMapper answerMapper;
     @Autowired
     private EnrollmentMapper enrollmentMapper;
+    @Autowired
+    private TestResultMapper testResultMapper;
+
+    private static final String FINAL_SCORE = "finalScore";
+    private static final String IS_PASSED = "isPassed";
 
     public Topic findNextTopic(Long topicId){
         Topic currentTopic = topicRepository.findById(topicId)
@@ -229,11 +232,8 @@ public class AppUtil {
         }
         ContentChangeTemporary changeTemporary = contentChangeRepository
             .findByEntityTypeAndEntityId(EntityType.COURSE, courseId).orElse(null);
-        if (changeTemporary == null) {
-            return false;
-        } else {
-            return true;
-        }
+
+        return changeTemporary != null;
     }
 
     public CourseEditingHolder getCourseEditingHolder(Long courseId) throws Exception {
@@ -257,6 +257,108 @@ public class AppUtil {
             }
         }
         return courseEditingHolders;
+    }
+
+    /**
+     * Get all course marks and calculate final score
+     * @param userId
+     * @param courseId
+     * @return Map of values: 'topicResult' - List<TestResultDTO>,
+     * 'finalScore' - Integer of final score (nullable),
+     * 'isPassed' - Boolean define pass the course or not (nullable).
+     */
+    @Transactional
+    public Map<String, Object> calculateCoursePoint(Long userId, Long courseId) {
+        Map<String, Object> result = new HashMap<>();
+        boolean isCalculateFinal = true;
+        Course course = courseRepository.findById(courseId).orElse(null);
+        List<TestResultDTO> testResults = new ArrayList<>();
+        if (course == null) {
+            result.put("topicResult", testResults);
+            result.put(FINAL_SCORE, null);
+            result.put(IS_PASSED, null);
+            return result;
+        }
+
+        CourseDTO courseDTO = courseMapper.toDTO(course);
+        List<TopicDTO> haveTestTopic = new ArrayList<>();
+
+        String topicType;
+        for (ChapterDTO chapter : courseDTO.getChapters()) {
+            for (TopicDTO topic : chapter.getTopics()) {
+                topicType = topic.getTopicType();
+                if (topicType.equalsIgnoreCase(TopicType.EXAM.name())
+                        || topicType.equalsIgnoreCase(TopicType.QUIZ.name())) {
+                    haveTestTopic.add(topic);
+                }
+            }
+        }
+
+        TestResultDTO testResultDTO;
+        for (TopicDTO topic : haveTestTopic) {
+            testResultDTO = testResultMapper.toDTO(
+                    testResultRepository
+                            .findByUserIdAndTopicId(userId, topic.getId())
+                            .orElse(null)
+            );
+
+            if (testResultDTO == null) {
+                testResultDTO = new TestResultDTO();
+                testResultDTO.setTopic(topic);
+                testResultDTO.setTestType(topic.getTopicType());
+                // when student haven't finished all quizzes and exams, do not calculate final score
+                isCalculateFinal = false;
+            }
+            testResults.add(testResultDTO);
+        }
+
+        // set attributes
+        result.put("topicResult", testResults);
+
+        if (isCalculateFinal) {
+            Map<String, Object> finalCourseResult = calculateFinalScore(testResults);
+            result.put(FINAL_SCORE, finalCourseResult.get(FINAL_SCORE));
+            result.put(IS_PASSED, finalCourseResult.get(IS_PASSED));
+        } else {
+            result.put(FINAL_SCORE, null);
+            result.put(IS_PASSED, null);
+        }
+
+        return result;
+    }
+
+    private Map<String, Object> calculateFinalScore(List<TestResultDTO> testResults) {
+        // Final score = quiz * 0.4 + exam * 0.6
+        Double quizzesScore = 0.0;
+        Double examsScore = 0.0;
+        boolean allTestPass = true;
+        boolean passed;
+
+        for (TestResultDTO testResultDTO : testResults) {
+            if (testResultDTO.getTestType().equalsIgnoreCase(TopicType.QUIZ.name())) {
+                if (testResultDTO.getHighestScore() < 50.0) {
+                    allTestPass = false;
+                }
+                quizzesScore += testResultDTO.getHighestScore();
+            } else if (testResultDTO.getTestType().equalsIgnoreCase(TopicType.EXAM.name())) {
+                if (testResultDTO.getHighestScore() < 50.0) {
+                    allTestPass = false;
+                }
+                examsScore  += testResultDTO.getHighestScore();
+            }
+        }
+
+        int calculatedScore = (int)Math.round((quizzesScore * 0.4) + (examsScore * 0.6));
+
+        if (calculatedScore >= 50 && allTestPass) {
+            passed = true;
+        } else {
+            passed = false;
+        }
+        Map<String, Object> finalResult = new HashMap<>();
+        finalResult.put(FINAL_SCORE, calculatedScore);
+        finalResult.put(IS_PASSED, passed);
+        return finalResult;
     }
 }
 

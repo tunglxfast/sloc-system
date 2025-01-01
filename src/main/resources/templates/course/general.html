@@ -13,15 +13,8 @@
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
   <!-- MDB -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.0.0/mdb.min.css" rel="stylesheet" />
-  <style>
-    body {
-      font-family: 'Laila';
-    }
-
-    h4 {
-      font-weight: bold;
-    }
-  </style>
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/course_general_style.css">
 </head>
 
 <body>
@@ -57,24 +50,81 @@
     </div>
   </div>
 
+  <!-- Tab links -->
+  <div class="tab">
+    <button class="tablinks" th:if="${isEnrolled}" onclick="courseTab(event, 'course')">Course</button>
+    <button class="tablinks" th:if="${isEnrolled}" onclick="courseTab(event, 'process')">Process</button>
+  </div>
+
+  <!-- Tab content -->
+
   <!-- Chapter and topic list -->
-  <h2 style="color: rgb(2, 117, 2); vertical-align: top; padding-top: 30px; padding-left: 10px; 
-    margin-left: 10px; margin-right: 10px; margin-bottom: 20px; font-weight: bold;">Courses Chapters</h2>
-  <ul class="list-group list-group-light" style="margin-left: 60px;">
-    <li class="list-group-item justify-content-between align-items-center" th:each="chapter : ${course.chapters}"
-      style="max-width: 60%;">
-      <h4 th:text="${chapter.title}"></h4>
-      <span th:text="${course.title}" class="badge rounded-pill badge-success"
-        style="margin-right: 100px; margin-bottom: 20px;">Chapters</span>
-      <ul>
-        <li th:each="topic : ${chapter.topics}">
-          <a th:href="@{/courses/{id}/{chapterNumber}_{topicNumber}
-          (id=${course.id}, chapterNumber=${chapter.getSequence()}, topicNumber=${topic.getSequence()})}"
-            th:text="${topic.title}"></a>
-        </li>
-      </ul>
-    </li>
-  </ul>
+  <div id="course" class="tabcontent">
+    <h2 style="color: rgb(2, 117, 2); vertical-align: top; padding-top: 30px; padding-left: 10px; 
+      margin-left: 10px; margin-right: 10px; margin-bottom: 20px; font-weight: bold;">Courses Chapters</h2>
+    <ul class="list-group list-group-light" style="margin-left: 60px;">
+      <li class="list-group-item justify-content-between align-items-center" th:each="chapter : ${course.chapters}"
+        style="max-width: 60%;">
+        <h4 th:text="${chapter.title}"></h4>
+        <span th:text="${course.title}" class="badge rounded-pill badge-success"
+          style="margin-right: 100px; margin-bottom: 20px;">Chapters</span>
+        <ul>
+          <li th:each="topic : ${chapter.topics}">
+            <a th:href="@{/courses/{id}/{chapterNumber}_{topicNumber}
+            (id=${course.id}, chapterNumber=${chapter.getSequence()}, topicNumber=${topic.getSequence()})}"
+              th:text="${topic.title}"></a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <!-- user process -->
+  <div id="process" class="tabcontent">
+    <div style="margin-left: 60px;">
+      <h2>Course Process</h2>
+      <p>Final Score (GPA) = sum (quizzes scores * 0.4) + (exams score * 0.6)</p>
+      <br>
+      <p>Passing conditions:</p>
+      <br>
+      <p>- Final Score >= 50</p>
+      <br>
+      <p>- All quizzes and exams are passed</p>
+      <table class="center_table">
+        <tr>
+          <th>Topic</th>
+          <th>Score</th>
+          <th>Status</th>
+        </tr>
+        <tr th:each="process: ${processes}">
+          <td th:text="${process.topic.title}">Topic</td>
+          <td th:text="${process.highestScore == null ? 'N/A' : process.highestScore}">Score</td>
+          <td th:text="${process.passed == null ? 'N/A' : (process.passed ? 'Pass' : 'Fail')}">Pass/Fail Status</td>
+        </tr>
+        <tr>
+          <td><b>Summary</b></td>
+          <td th:text="${finalScore == null ? 'N/A' : finalScore}">Score</td>
+          <td th:text="${finalPass == null ? 'N/A' : (finalPass ? 'Pass' : 'Fail')}">Pass/Fail Status</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function courseTab(evt, tabName) {
+      var i, tabcontent, tablinks;
+      tabcontent = document.getElementsByClassName("tabcontent");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+      tablinks = document.getElementsByClassName("tablinks");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+  </script>
 </body>
 
 </html>
