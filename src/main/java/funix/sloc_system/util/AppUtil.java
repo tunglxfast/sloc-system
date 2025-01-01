@@ -259,27 +259,14 @@ public class AppUtil {
         return courseEditingHolders;
     }
 
-    /**
-     * Get all course marks and calculate final score
-     * @param userId
-     * @param courseId
-     * @return Map of values: 'topicResult' - List<TestResultDTO>,
-     * 'finalScore' - Integer of final score (nullable),
-     * 'isPassed' - Boolean define pass the course or not (nullable).
-     */
     @Transactional
-    public Map<String, Object> calculateCoursePoint(Long userId, Long courseId) {
-        Map<String, Object> result = new HashMap<>();
-        boolean isCalculateFinal = true;
+    public List<TestResultDTO> getCourseTestsResult(Long userId, Long courseId) {
         Course course = courseRepository.findById(courseId).orElse(null);
-        List<TestResultDTO> testResults = new ArrayList<>();
         if (course == null) {
-            result.put("topicResult", testResults);
-            result.put(FINAL_SCORE, null);
-            result.put(IS_PASSED, null);
-            return result;
+            return new ArrayList<>();
         }
 
+        List<TestResultDTO> testResults = new ArrayList<>();
         CourseDTO courseDTO = courseMapper.toDTO(course);
         List<TopicDTO> haveTestTopic = new ArrayList<>();
 
@@ -303,58 +290,55 @@ public class AppUtil {
             );
 
             if (testResultDTO == null) {
+                // add none score testResult to testResults
                 testResultDTO = new TestResultDTO();
                 testResultDTO.setTopic(topic);
                 testResultDTO.setTestType(topic.getTopicType());
-                // when student haven't finished all quizzes and exams, do not calculate final score
-                isCalculateFinal = false;
             }
             testResults.add(testResultDTO);
         }
 
-        // set attributes
-        result.put("topicResult", testResults);
-
-        if (isCalculateFinal) {
-            Map<String, Object> finalCourseResult = calculateFinalScore(testResults);
-            result.put(FINAL_SCORE, finalCourseResult.get(FINAL_SCORE));
-            result.put(IS_PASSED, finalCourseResult.get(IS_PASSED));
-        } else {
-            result.put(FINAL_SCORE, null);
-            result.put(IS_PASSED, null);
-        }
-
-        return result;
+        return testResults;
     }
 
-    private Map<String, Object> calculateFinalScore(List<TestResultDTO> testResults) {
+    public Map<String, Object> calculateFinalScore(List<TestResultDTO> testResults) {
         // Final score = quiz * 0.4 + exam * 0.6
         Double quizzesScore = 0.0;
         Double examsScore = 0.0;
+        int calculatedScore;
+        int testsCount = testResults.size();
         boolean allTestPass = true;
-        boolean passed;
+        boolean isAllQuiz = true;
+        boolean isAllExam = true;
 
         for (TestResultDTO testResultDTO : testResults) {
             if (testResultDTO.getTestType().equalsIgnoreCase(TopicType.QUIZ.name())) {
-                if (testResultDTO.getHighestScore() < 50.0) {
+                isAllExam = false;
+
+                if (testResultDTO.getPassed() == null || !testResultDTO.getPassed()) {
                     allTestPass = false;
                 }
                 quizzesScore += testResultDTO.getHighestScore();
             } else if (testResultDTO.getTestType().equalsIgnoreCase(TopicType.EXAM.name())) {
-                if (testResultDTO.getHighestScore() < 50.0) {
+                isAllQuiz = false;
+
+                if (testResultDTO.getPassed() == null || !testResultDTO.getPassed()) {
                     allTestPass = false;
                 }
                 examsScore  += testResultDTO.getHighestScore();
             }
         }
 
-        int calculatedScore = (int)Math.round((quizzesScore * 0.4) + (examsScore * 0.6));
 
-        if (calculatedScore >= 50 && allTestPass) {
-            passed = true;
+        if (isAllQuiz) {
+            calculatedScore = (int)Math.round(quizzesScore / testsCount);
+        } else if (isAllExam) {
+            calculatedScore = (int)Math.round(examsScore / testsCount);
         } else {
-            passed = false;
+            calculatedScore = (int)Math.round(((quizzesScore * 0.4) + (examsScore * 0.6))/testsCount);
         }
+
+        boolean passed = calculatedScore >= 50 && allTestPass;
         Map<String, Object> finalResult = new HashMap<>();
         finalResult.put(FINAL_SCORE, calculatedScore);
         finalResult.put(IS_PASSED, passed);

@@ -4,6 +4,7 @@ import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.TestResultDTO;
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.Course;
+import funix.sloc_system.entity.StudyProcess;
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.TopicType;
@@ -13,7 +14,6 @@ import funix.sloc_system.mapper.TopicMapper;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.*;
 import funix.sloc_system.util.AppUtil;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -58,6 +58,9 @@ public class CourseLearningController {
     @Autowired
     private TestResultMapper testResultMapper;
 
+    @Autowired
+    private StudyProcessService studyProcessService;
+
     /**
      * list all courses
      * @param model
@@ -73,30 +76,31 @@ public class CourseLearningController {
 
     /**
      * Course General View
-     * @param id
+     * @param courseId
      * @param securityUser
      * @param model
      * @return
      */
     @GetMapping(value = {"/{id}" ,"/{id}/general"})
-    public String viewCourseGeneral(@PathVariable Long id, 
+    public String viewCourseGeneral(@PathVariable("id") Long courseId,
                                 @AuthenticationPrincipal SecurityUser securityUser, 
                                 RedirectAttributes redirectAttributes,
                                 Model model) {
-        if (!appUtil.isCourseReady(id)) {
+        if (!appUtil.isCourseReady(courseId)) {
             redirectAttributes.addAttribute("errorMessage", "Course not found.");
             return "redirect:/courses";
         }
 
-        Course course = courseService.findById(id);
+        Course course = courseService.findById(courseId);
         User user = userService.findById(securityUser.getUserId());
         if (course != null && user != null) {
             boolean isEnrolled = enrollmentService.checkEnrollment(user, course);            
-            CourseDTO courseDTO = dtoService.getAvailableCourseDTO(id);
-            Map<String, Object> courseProcessPoint = appUtil.calculateCoursePoint(user.getId(), course.getId());
-            List<TestResultDTO> testResults = (List<TestResultDTO>) courseProcessPoint.get("topicResult");
-            Integer finalScore = (Integer) courseProcessPoint.get("finalScore");
-            Boolean isFinalPassed = (Boolean) courseProcessPoint.get("isPassed");
+            CourseDTO courseDTO = dtoService.getAvailableCourseDTO(courseId);
+
+            List<TestResultDTO> testResults = appUtil.getCourseTestsResult(user.getId(), courseId);
+            StudyProcess studyProcess = studyProcessService.findByUserIdAndCourseId(user.getId(), courseId);
+            Integer finalScore = studyProcess.getFinalScore();
+            Boolean isFinalPassed = studyProcess.getPassCourse();
 
             model.addAttribute("course", courseDTO);
             model.addAttribute("isEnrolled", isEnrolled);
@@ -180,6 +184,9 @@ public class CourseLearningController {
             return String.format("redirect:/courses/%d", courseId);
         }
 
+        // Save the topic that the student recently viewed
+        studyProcessService.saveLastViewTopic(user.getId(), courseId, topic.getId());
+
         TopicDTO topicDTO = topicMapper.toDTO(topic);
         topicDTO.setQuestions(dtoService.getAvailableQuestions(topicDTO));
 
@@ -218,6 +225,9 @@ public class CourseLearningController {
         
         Topic topic = topicService.findById(quizId);
         if (topic != null) {
+            // try to calculate final score after finish a test
+            studyProcessService.calculateAndSaveFinalResult(securityUser.getUserId(), courseId, quizId);
+
             TopicDTO topicDTO = topicMapper.toDTO(topic);
             topicDTO.setQuestions(dtoService.getAvailableQuestions(topicDTO));
     
@@ -247,8 +257,10 @@ public class CourseLearningController {
 
         Topic exam = topicService.findById(examId);
 
-
         if (exam != null) {
+            // try to calculate final score after finish a test
+            studyProcessService.calculateAndSaveFinalResult(securityUser.getUserId(), courseId, examId);
+
             TopicDTO examDTO = topicMapper.toDTO(exam);
             examDTO.setQuestions(dtoService.getAvailableQuestions(examDTO));
 
