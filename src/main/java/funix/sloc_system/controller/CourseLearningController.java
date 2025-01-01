@@ -101,12 +101,24 @@ public class CourseLearningController {
             StudyProcess studyProcess = studyProcessService.findByUserIdAndCourseId(user.getId(), courseId);
             Integer finalScore = studyProcess.getFinalScore();
             Boolean isFinalPassed = studyProcess.getPassCourse();
+            Long lastViewTopicId = studyProcess.getLastViewTopic();
+            Integer studyingTopicSeq = null;
+            Integer studyingChapterSeq = null;
+            if (lastViewTopicId != null) {
+                Topic lastViewTopic = topicService.findById(lastViewTopicId);
+                if (lastViewTopic != null) {
+                    studyingTopicSeq = lastViewTopic.getSequence();
+                    studyingChapterSeq = lastViewTopic.getChapter().getSequence();
+                }
+            }
 
             model.addAttribute("course", courseDTO);
             model.addAttribute("isEnrolled", isEnrolled);
             model.addAttribute("processes", testResults);
             model.addAttribute("finalScore", finalScore);
             model.addAttribute("finalPass", isFinalPassed);
+            model.addAttribute("lastTopic", studyingTopicSeq);
+            model.addAttribute("lastChapter", studyingChapterSeq);
             return "course/general";
         } else {
             return "redirect:/courses";

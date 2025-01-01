@@ -41,74 +41,88 @@
           <a th:href="@{/courses/{id}/enroll(id=${course.id})}" class="btn btn-success">Enroll</a>
         </div>
         <div th:if="${isEnrolled}">
-          <a th:href="@{/courses/{id}/{chapterNumber}_{topicNumber}(id=${course.id},chapterNumber=1,topicNumber=1)}"
+          <!-- Start learning -->
+          <a th:if="${lastTopic == null}"
+          th:href="@{/courses/{id}/{chapterNumber}_{topicNumber}(id=${course.id},chapterNumber=1,topicNumber=1)}"
             class="btn btn-primary">
             Start Learning
+          </a>
+          <!-- resume from last topic -->
+          <a th:if="${lastTopic != null}"
+          th:href="@{/courses/{id}/{chapterNumber}_{topicNumber}(id=${course.id},chapterNumber=${lastChapter},topicNumber=${lastTopic})}"
+            class="btn btn-primary">
+            Resume Course
           </a>
         </div>
       </div>
     </div>
+
+    <div class="row">
+      <!-- Tab links -->
+      <div class="tab">
+        <button class="tablinks active" th:if="${isEnrolled}" onclick="courseTab(event, 'course')">Course</button>
+        <button class="tablinks" th:if="${isEnrolled}" onclick="courseTab(event, 'process')">Process</button>
+      </div>
+      <!-- Tab content -->
+
+        <!-- Chapter and topic list -->
+        <div id="course" class="tabcontent" style="display: block;">
+          <div class="center_text">
+            <h2 style="color: rgb(2, 117, 2); vertical-align: top; padding-top: 30px; padding-left: 10px; 
+            margin-left: 10px; margin-right: 10px; margin-bottom: 20px; font-weight: bold;">Courses Chapters</h2>
+            <ul class="list-group list-group-light" style="margin-left: 60px;">
+              <li class="list-group-item justify-content-between align-items-center" th:each="chapter : ${course.chapters}"
+                style="max-width: 60%;">
+                <h4 th:text="${chapter.title}"></h4>
+                <span th:text="${course.title}" class="badge rounded-pill badge-success"
+                  style="margin-right: 100px; margin-bottom: 20px;">Chapters</span>
+                <ul>
+                  <li th:each="topic : ${chapter.topics}">
+                    <a th:href="@{/courses/{id}/{chapterNumber}_{topicNumber}
+                    (id=${course.id}, chapterNumber=${chapter.getSequence()}, topicNumber=${topic.getSequence()})}"
+                      th:text="${topic.title}"></a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- user process -->
+        <div id="process" class="tabcontent">
+          <div style="margin-left: 60px;">
+            <div class="center_text">
+              <h2 style="color: rgb(2, 117, 2); vertical-align: top; padding-top: 30px; 
+              margin-bottom: 20px; font-weight: bold;">Course Process</h2>
+              <p><b>Final Score (GPA) = sum (quizzes scores * 0.4) + (exams score * 0.6)</b></p>
+              <p><b>Passing conditions:</b></p>
+              <p>- Final Score >= 50</p>
+              <p>- All quizzes and exams are passed</p>
+            </div>
+
+            <table class="center_table">
+              <tr>
+                <th>Topic</th>
+                <th>Score</th>
+                <th>Status</th>
+              </tr>
+              <tr th:each="process: ${processes}">
+                <td th:text="${process.topic.title}">Topic</td>
+                <td th:text="${process.highestScore == null ? 'N/A' : process.highestScore}">Score</td>
+                <td th:text="${process.passed == null ? 'N/A' : (process.passed ? 'Pass' : 'Fail')}">Pass/Fail Status</td>
+              </tr>
+              <tr>
+                <td><b>Summary</b></td>
+                <td th:text="${finalScore == null ? 'N/A' : finalScore}">Score</td>
+                <td th:text="${finalPass == null ? 'N/A' : (finalPass ? 'Pass' : 'Fail')}">Pass/Fail Status</td>
+              </tr>
+            </table>
+            <br>
+          </div>
+        </div>
+    </div>    
   </div>
 
-  <!-- Tab links -->
-  <div class="tab">
-    <button class="tablinks" th:if="${isEnrolled}" onclick="courseTab(event, 'course')">Course</button>
-    <button class="tablinks" th:if="${isEnrolled}" onclick="courseTab(event, 'process')">Process</button>
-  </div>
-
-  <!-- Tab content -->
-
-  <!-- Chapter and topic list -->
-  <div id="course" class="tabcontent">
-    <h2 style="color: rgb(2, 117, 2); vertical-align: top; padding-top: 30px; padding-left: 10px; 
-      margin-left: 10px; margin-right: 10px; margin-bottom: 20px; font-weight: bold;">Courses Chapters</h2>
-    <ul class="list-group list-group-light" style="margin-left: 60px;">
-      <li class="list-group-item justify-content-between align-items-center" th:each="chapter : ${course.chapters}"
-        style="max-width: 60%;">
-        <h4 th:text="${chapter.title}"></h4>
-        <span th:text="${course.title}" class="badge rounded-pill badge-success"
-          style="margin-right: 100px; margin-bottom: 20px;">Chapters</span>
-        <ul>
-          <li th:each="topic : ${chapter.topics}">
-            <a th:href="@{/courses/{id}/{chapterNumber}_{topicNumber}
-            (id=${course.id}, chapterNumber=${chapter.getSequence()}, topicNumber=${topic.getSequence()})}"
-              th:text="${topic.title}"></a>
-          </li>
-        </ul>
-      </li>
-    </ul>
-  </div>
-
-  <!-- user process -->
-  <div id="process" class="tabcontent">
-    <div style="margin-left: 60px;">
-      <h2>Course Process</h2>
-      <p>Final Score (GPA) = sum (quizzes scores * 0.4) + (exams score * 0.6)</p>
-      <br>
-      <p>Passing conditions:</p>
-      <br>
-      <p>- Final Score >= 50</p>
-      <br>
-      <p>- All quizzes and exams are passed</p>
-      <table class="center_table">
-        <tr>
-          <th>Topic</th>
-          <th>Score</th>
-          <th>Status</th>
-        </tr>
-        <tr th:each="process: ${processes}">
-          <td th:text="${process.topic.title}">Topic</td>
-          <td th:text="${process.highestScore == null ? 'N/A' : process.highestScore}">Score</td>
-          <td th:text="${process.passed == null ? 'N/A' : (process.passed ? 'Pass' : 'Fail')}">Pass/Fail Status</td>
-        </tr>
-        <tr>
-          <td><b>Summary</b></td>
-          <td th:text="${finalScore == null ? 'N/A' : finalScore}">Score</td>
-          <td th:text="${finalPass == null ? 'N/A' : (finalPass ? 'Pass' : 'Fail')}">Pass/Fail Status</td>
-        </tr>
-      </table>
-    </div>
-  </div>
 
   <script>
     function courseTab(evt, tabName) {
