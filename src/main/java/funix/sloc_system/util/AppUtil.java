@@ -1,14 +1,8 @@
 package funix.sloc_system.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import funix.sloc_system.dto.ChapterDTO;
-import funix.sloc_system.dto.CourseDTO;
-import funix.sloc_system.dto.TestResultDTO;
-import funix.sloc_system.dto.TopicDTO;
-import funix.sloc_system.entity.Chapter;
-import funix.sloc_system.entity.ContentChangeTemporary;
-import funix.sloc_system.entity.Course;
-import funix.sloc_system.entity.Topic;
+import funix.sloc_system.dto.*;
+import funix.sloc_system.entity.*;
 import funix.sloc_system.enums.*;
 import funix.sloc_system.mapper.*;
 import funix.sloc_system.repository.*;
@@ -16,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -38,6 +33,8 @@ public class AppUtil {
     private TestResultRepository testResultRepository;
     @Autowired
     private ContentChangeRepository contentChangeRepository;
+    @Autowired
+    private StudyProcessRepository studyProcessRepository;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -375,6 +372,85 @@ public class AppUtil {
         finalResult.put(FINAL_SCORE, calculatedScore);
         finalResult.put(IS_PASSED, passed);
         return finalResult;
+    }
+
+    @Transactional
+    public void evaluateStudentsStudy(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElse(null);
+        if (course == null) {
+            return;
+        }
+        CourseDTO courseDTO = courseMapper.toDTO(course);
+        // count have test topic
+        List<TopicDTO> haveTestTopic = new ArrayList<>();
+        String topicType;
+        for (ChapterDTO chapter : courseDTO.getChapters()) {
+            for (TopicDTO topic : chapter.getTopics()) {
+                topicType = topic.getTopicType();
+                if (topicType.equalsIgnoreCase(TopicType.EXAM.name())
+                        || topicType.equalsIgnoreCase(TopicType.QUIZ.name())) {
+                    haveTestTopic.add(topic);
+                }
+            }
+        }
+
+        int testCount = haveTestTopic.size();
+        if (testCount == 0) {
+            return;
+        }
+
+        // get student enroll
+        Set<Long> studentEnrollId = new HashSet<>();
+        Set<EnrollmentDTO> enrollmentDTOList = courseDTO.getEnrollments();
+
+        for (EnrollmentDTO enrollmentDTO : enrollmentDTOList) {
+            studentEnrollId.add(enrollmentDTO.getUser().getId());
+        }
+
+        if (studentEnrollId.isEmpty()) {
+            return;
+        }
+
+
+        long passDay = LocalDate.now().toEpochDay() - courseDTO.getStartDate().toEpochDay();
+        long totalDay = courseDTO.getEndDate().toEpochDay() - courseDTO.getStartDate().toEpochDay();
+        double dayPassRatio = ((double) passDay)/totalDay;
+
+        // begin evaluate each student
+        int testPassCount;
+        double testPassRatio;
+        int testPassNeeded;
+        StudyProcess studyProcess;
+        for (Long studentId : studentEnrollId) {
+            studyProcess = studyProcessRepository.findByUserIdAndCourseId(studentId, courseDTO.getId()).orElse(null);
+            if (studyProcess == null) {
+                studyProcess = new StudyProcess();
+                studyProcess.setUserId(studentId);
+                studyProcess.setCourseId(courseId);
+                studyProcess.setProgressAssessment("You should begin studying.");
+                studyProcessRepository.save(studyProcess);
+                return;
+            }
+
+            testPassCount = 0;
+            for (TopicDTO topicDTO : haveTestTopic) {
+                TestResult testResult = testResultRepository.findByUserIdAndTopicId(studentId, topicDTO.getId()).orElse(null);
+                if (testResult != null && Boolean.TRUE.equals(testResult.getPassed())) {
+                    testPassCount += 1;
+                }
+            }
+            testPassRatio = ((double) testPassCount)/testCount;
+            if (testPassRatio < dayPassRatio) {
+                testPassNeeded = (int) Math.round(testCount*dayPassRatio);
+                studyProcess.setProgressAssessment(String.format("You are behind schedule. " +
+                                "You currently have to complete at least %d" +
+                                " exercises/tests but have only completed %d.",
+                        testPassNeeded, testPassCount));
+            } else {
+                studyProcess.setProgressAssessment("Very good, you have done well in your studies, keep up the good work.");
+            }
+            studyProcessRepository.save(studyProcess);
+        }
     }
 }
 

@@ -26,4 +26,6 @@ public class StudyProcess {
     private Integer finalScore;
     @Column(name = "pass_course")
     private Boolean passCourse;
+    @Column(name = "progress_assessment")
+    private String progressAssessment;
 }

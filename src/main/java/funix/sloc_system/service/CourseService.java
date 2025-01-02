@@ -47,6 +47,21 @@ public class CourseService {
     private AppUtil appUtil;
 
     /**
+     * Run when start app
+     */
+    @PostConstruct
+    public void checkOnStartup() {
+        // check to make sure not calling second time after startup
+        if (!isCheckedOnStartup) {
+            // check Expired Courses
+            archiveExpiredCourses();
+            // Evaluate study process
+//            evaluateStudyProcess();
+            isCheckedOnStartup = true;
+        }
+    }
+
+    /**
      * Run in midnight and turn course to archived when out of learning time
      */
     @Scheduled(cron = "0 0 0 * * ?")
@@ -59,15 +74,27 @@ public class CourseService {
             courseRepository.save(course);
         }
     }
+
     /**
-     * Run when start app and turn course to archived when out of learning time
+     * Run in weekly at 1 am on Monday to evaluate students study process.
+     * Courses have to be published and total learning day longer than 14 days.
      */
-    @PostConstruct
-    public void checkExpiredCoursesOnStartup() {
-        // check to make sure not calling second time after startup
-        if (!isCheckedOnStartup) {
-            archiveExpiredCourses();
-            isCheckedOnStartup = true;
+    @Scheduled(cron = "0 0 1 * * MON")
+    public void evaluateStudyProcess() {
+        List<ContentStatus> contentStatusList = List.of(
+                ContentStatus.PUBLISHED,
+                ContentStatus.PUBLISHED_EDITING);
+        List<Course> courses = courseRepository.findByContentStatusIn(contentStatusList);
+
+        for (Course course : courses) {
+            long duration = course.getEndDate().toEpochDay() - course.getStartDate().toEpochDay();
+            if (duration < 14) {
+                courses.remove(course);
+            }
+        }
+
+        for (Course course : courses) {
+            appUtil.evaluateStudentsStudy(course.getId());
         }
     }
 
@@ -91,11 +118,14 @@ public class CourseService {
         return courseRepository.findAllByInstructorAndApprovalStatus(instructor, ApprovalStatus.REJECTED);
     }
 
+    /**
+     * Course have to be published.
+     * @return
+     */
     public List<Course> getAvailableCourses() {
         List<ContentStatus> contentStatusList = List.of(
                 ContentStatus.PUBLISHED,
-                ContentStatus.PUBLISHED_EDITING,
-                ContentStatus.ARCHIVED);
+                ContentStatus.PUBLISHED_EDITING);
         return courseRepository.findByContentStatusIn(contentStatusList);
     }
 

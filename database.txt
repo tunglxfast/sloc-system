@@ -142,9 +142,10 @@ CREATE TABLE study_process (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
     course_id BIGINT NOT NULL,
-    last_view_topic BIGINT NOT NULL,
+    last_view_topic BIGINT,
     final_score INT,
-    pass_course BOOLEAN
+    pass_course BOOLEAN,
+    progress_assessment TEXT
 );
 
 

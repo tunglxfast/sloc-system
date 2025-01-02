@@ -99,7 +99,13 @@
               <p>- Final Score >= 50</p>
               <p>- All quizzes and exams are passed</p>
             </div>
-
+            <div class="center_text">
+              <p><b>Process assessment: </b></p>
+              <p th:text="${processAssessment != null ? processAssessment : 'N/A' }">Process assessment</p>
+            </div>
+            <div class="center_text">
+              <p><b>Score table: </b></p>
+            </div>
             <table class="center_table">
               <tr>
                 <th>Topic</th>
