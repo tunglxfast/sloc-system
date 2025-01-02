@@ -1,13 +1,13 @@
 package funix.sloc_system.service;
 
-import funix.sloc_system.dto.UserDTO;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * Chứa các chức năng của user
@@ -54,5 +54,11 @@ public class UserService {
 
     public void updateUser(User user) {
         userRepository.save(user);
+    }
+
+    public User getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 }

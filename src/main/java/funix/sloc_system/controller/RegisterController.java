@@ -4,7 +4,7 @@ import funix.sloc_system.entity.User;
 import funix.sloc_system.repository.UserRepository;
 import funix.sloc_system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +22,8 @@ public class RegisterController {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("/register")
     public String register() {
@@ -30,11 +32,11 @@ public class RegisterController {
 
     @PostMapping("/register")
     public String register(@ModelAttribute User user, Model model) {
-        // Kiểm tra username hoặc email đã tồn tại
+        // Check username or email already exist
         String checkRegistered = userService.checkRegistered(user);
 
         if (checkRegistered.equalsIgnoreCase("Pass")) {
-            user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setLocked(false);
             user.setFailedAttempts(0);
             userRepository.save(user);

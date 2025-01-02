@@ -11,7 +11,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -65,7 +64,7 @@ public class Course {
     @OrderBy("sequence ASC")
     private List<Chapter> chapters;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "course", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private Set<Enrollment> enrollments;
 
     // Helper method

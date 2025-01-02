@@ -2,8 +2,10 @@ package funix.sloc_system.controller;
 
 import funix.sloc_system.security.SecurityUser;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.GetMapping;
  */
 @Controller
 public class AuthController {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping(value={"", "/", "/login"})
     public String login(@AuthenticationPrincipal SecurityUser securityUser) {
@@ -32,16 +36,16 @@ public class AuthController {
         return "home";
     }
 
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        if (session != null && session.getAttributeNames() != null) {
-            session.invalidate();
-        }
+    // @GetMapping("/logout")
+    // public String logout(HttpSession session) {
+    //     if (session != null && session.getAttributeNames() != null) {
+    //         session.invalidate();
+    //     }
 
-        // Delete security info
-        SecurityContextHolder.getContext().setAuthentication(null);
-        SecurityContextHolder.clearContext();
+    //     // Delete security info
+    //     SecurityContextHolder.getContext().setAuthentication(null);
+    //     SecurityContextHolder.clearContext();
 
-        return "redirect:/login?logout";
-    }
+    //     return "redirect:/login?logout";
+    // }
 }

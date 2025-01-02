@@ -1,13 +1,17 @@
 package funix.sloc_system.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import funix.sloc_system.dto.CategoryDTO;
 import funix.sloc_system.dto.CourseDTO;
+import funix.sloc_system.dto.UserDTO;
 import funix.sloc_system.entity.*;
 import funix.sloc_system.enums.ApprovalStatus;
 import funix.sloc_system.enums.ContentAction;
 import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.EntityType;
+import funix.sloc_system.mapper.CategoryMapper;
 import funix.sloc_system.mapper.CourseMapper;
+import funix.sloc_system.mapper.UserMapper;
 import funix.sloc_system.repository.CategoryRepository;
 import funix.sloc_system.repository.ContentChangeRepository;
 import funix.sloc_system.repository.CourseRepository;
@@ -43,6 +47,10 @@ public class CourseService {
     private ObjectMapper objectMapper;
     @Autowired
     private CourseMapper courseMapper;
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private CategoryMapper categoryMapper;
     @Autowired
     private AppUtil appUtil;
 
@@ -195,11 +203,14 @@ public class CourseService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category information error, please contact support center."));
 
+        UserDTO instructorDTO = userMapper.toDTO(instructor);
+        CategoryDTO categoryDTO = categoryMapper.toDTO(category);
+
         courseDTO.setContentStatus(ContentStatus.DRAFT.name());
-        courseDTO.setInstructor(instructor);
+        courseDTO.setInstructor(instructorDTO);
         courseDTO.setCreatedAt(LocalDate.now());
-        courseDTO.setCreatedBy(instructor);
-        courseDTO.setCategory(category);
+        courseDTO.setCreatedBy(instructorDTO);
+        courseDTO.setCategory(categoryDTO);
 
         String thumbnailUrl = saveThumbnail(file);
         if (thumbnailUrl != null && !thumbnailUrl.isBlank()){
@@ -223,7 +234,9 @@ public class CourseService {
         Category category = categoryRepository.findById(categoryId).orElse(null);
 
         // update title, description, category, start/end date, update time and updater
-        courseDTO.updateEditingValues(editingValues, category, instructor);
+        UserDTO instructorDTO = userMapper.toDTO(instructor);
+        CategoryDTO categoryDTO = categoryMapper.toDTO(category);
+        courseDTO.updateEditingValues(editingValues, categoryDTO, instructorDTO);
 
         // Update thumbnail if provided
         if (file != null && !file.isEmpty()) {

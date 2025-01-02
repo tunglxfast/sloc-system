@@ -1,8 +1,10 @@
 package funix.sloc_system.service;
 
+import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Enrollment;
 import funix.sloc_system.entity.User;
+import funix.sloc_system.mapper.CourseMapper;
 import funix.sloc_system.repository.CourseRepository;
 import funix.sloc_system.repository.EnrollmentRepository;
 import funix.sloc_system.repository.UserRepository;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Service
@@ -23,6 +26,8 @@ public class EnrollmentService {
 
     @Autowired
     private CourseRepository courseRepository;
+    @Autowired
+    private CourseMapper courseMapper;
 
     @Transactional
     public String enrollCourse(User user, Course course) {
@@ -66,5 +71,25 @@ public class EnrollmentService {
     public Set<Enrollment> getEnrollmentsByCourseId(Long courseId) {
         Course course = courseRepository.findById(courseId).orElse(null);
         return enrollmentRepository.findByCourse(course);
+    }
+
+    /**
+     * Find all courses that user enrolled and return as courseDTO set.
+     * @param userId
+     * @return
+     */
+    @Transactional
+    public Set<CourseDTO> getUserEnrollCourses(Long userId) {
+        Set<Enrollment> enrollments = getEnrollmentsByUserId(userId);
+        Set<CourseDTO> courseDTOSet = new HashSet<>();
+        CourseDTO courseDTO; 
+        for (Enrollment enrollment : enrollments) {
+            courseDTO = courseMapper.toDTO(enrollment.getCourse());
+            if (courseDTO != null) {
+                courseDTOSet.add(courseDTO);
+            }
+        }
+
+        return courseDTOSet;
     }
 }
