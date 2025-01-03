@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class AppUtil {
@@ -35,6 +36,8 @@ public class AppUtil {
     private ContentChangeRepository contentChangeRepository;
     @Autowired
     private StudyProcessRepository studyProcessRepository;
+    @Autowired
+    private LearnedTopicRepository learnedTopicRepository;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -411,7 +414,6 @@ public class AppUtil {
             return;
         }
 
-
         long passDay = LocalDate.now().toEpochDay() - courseDTO.getStartDate().toEpochDay();
         long totalDay = courseDTO.getEndDate().toEpochDay() - courseDTO.getStartDate().toEpochDay();
         double dayPassRatio = ((double) passDay)/totalDay;
@@ -428,6 +430,12 @@ public class AppUtil {
                 studyProcess.setUserId(studentId);
                 studyProcess.setCourseId(courseId);
                 studyProcess.setProgressAssessment("You should begin studying.");
+                studyProcessRepository.save(studyProcess);
+                return;
+            }
+
+            if (studyProcess.getLearningProgress() < dayPassRatio) {
+                studyProcess.setProgressAssessment("You are falling behind in your studies, try harder.");
                 studyProcessRepository.save(studyProcess);
                 return;
             }
@@ -451,6 +459,33 @@ public class AppUtil {
             }
             studyProcessRepository.save(studyProcess);
         }
+    }
+
+    /**
+     * Percent of learned topics / total topics
+     * @param userId
+     * @param courseId
+     * @return
+     */
+    @Transactional
+    public double calculateLearningProgress(Long userId, Long courseId) {
+        Course course = courseRepository.findById(courseId).orElse(null);
+        if (course == null) {
+            return 0.0;
+        }
+        Set<Topic> topics = new HashSet<>();
+        for (Chapter chapter : course.getChapters()) {
+            if (chapter.getTopics() != null) {
+                topics.addAll(chapter.getTopics());
+            }
+        }
+
+        Set<Topic> learnedTopics = topics.stream()
+                .filter(c -> learnedTopicRepository
+                        .existsByUserIdAndTopicId(userId, c.getId()))
+                .collect(Collectors.toSet());
+
+        return (((double) learnedTopics.size())/topics.size()) * 100;
     }
 }
 

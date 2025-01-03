@@ -22,6 +22,8 @@ public class StudyProcess {
     private Long courseId;
     @Column(name = "last_view_topic")
     private Long lastViewTopic;
+    @Column(name = "learning_progress")
+    private double learningProgress = 0.0;
     @Column(name = "final_score")
     private Integer finalScore;
     @Column(name = "pass_course")

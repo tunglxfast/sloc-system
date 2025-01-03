@@ -100,6 +100,9 @@
               <p>- All quizzes and exams are passed</p>
             </div>
             <div class="center_text">
+              <p><b>Learning progress: </b><p th:text="${learningProgress + ' %'}"></p></p>
+            </div>
+            <div class="center_text">
               <p><b>Process assessment: </b></p>
               <p th:text="${processAssessment != null ? processAssessment : 'N/A' }">Process assessment</p>
             </div>

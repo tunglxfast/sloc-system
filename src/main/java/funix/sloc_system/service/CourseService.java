@@ -64,7 +64,7 @@ public class CourseService {
             // check Expired Courses
             archiveExpiredCourses();
             // Evaluate study process
-//            evaluateStudyProcess();
+            evaluateStudyProcess();
             isCheckedOnStartup = true;
         }
     }

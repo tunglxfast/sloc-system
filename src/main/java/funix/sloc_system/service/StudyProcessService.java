@@ -1,7 +1,9 @@
 package funix.sloc_system.service;
 
 import funix.sloc_system.dto.TestResultDTO;
+import funix.sloc_system.entity.LearnedTopic;
 import funix.sloc_system.entity.StudyProcess;
+import funix.sloc_system.repository.LearnedTopicRepository;
 import funix.sloc_system.repository.StudyProcessRepository;
 import funix.sloc_system.util.AppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,8 @@ public class StudyProcessService {
     private StudyProcessRepository studyProcessRepository;
     @Autowired
     private AppUtil appUtil;
+    @Autowired
+    private LearnedTopicRepository learnedTopicRepository;
 
     public StudyProcess findByUserIdAndCourseId(Long userId, Long courseId) throws IllegalArgumentException {
         return studyProcessRepository
@@ -40,7 +44,19 @@ public class StudyProcessService {
             studyProcess.setCourseId(courseId);
         }
 
+        double learningPercent = appUtil.calculateLearningProgress(userId, courseId);
+        studyProcess.setLearningProgress(learningPercent);
+
         studyProcess.setLastViewTopic(topicId);
+
+        // check and add topic to LearnedTopic
+        if(!learnedTopicRepository.existsByUserIdAndTopicId(userId,topicId)) {
+            LearnedTopic learnedTopic = new LearnedTopic();
+            learnedTopic.setUserId(userId);
+            learnedTopic.setTopicId(topicId);
+            learnedTopicRepository.save(learnedTopic);
+        }
+
         return studyProcessRepository.save(studyProcess);
     }
 

@@ -103,6 +103,7 @@ public class CourseLearningController {
             Boolean isFinalPassed = studyProcess.getPassCourse();
             Long lastViewTopicId = studyProcess.getLastViewTopic();
             String processAssessment = studyProcess.getProgressAssessment();
+            Double learningProgress = studyProcess.getLearningProgress();
             Integer studyingTopicSeq = null;
             Integer studyingChapterSeq = null;
             if (lastViewTopicId != null) {
@@ -116,6 +117,7 @@ public class CourseLearningController {
             model.addAttribute("course", courseDTO);
             model.addAttribute("isEnrolled", isEnrolled);
             model.addAttribute("processes", testResults);
+            model.addAttribute("learningProgress", learningProgress);
             model.addAttribute("finalScore", finalScore);
             model.addAttribute("finalPass", isFinalPassed);
             model.addAttribute("processAssessment", processAssessment);
