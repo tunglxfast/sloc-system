@@ -200,15 +200,15 @@
             <div th:if="${chapters == null || chapters.isEmpty()}" class="text-center mt-4">
               <p class="text-muted">No chapters available. Add a new chapter to get started.</p>
             </div>
-          </div>
-          <div class="text-center mt-4">
-            <!-- Add New Chapter Button -->
-            <button id="showFormButton" class="btn btn-primary btn-rounded" data-mdb-toggle="modal"
-                    data-mdb-target="#addChapterModal">
-              <i class="fas fa-plus-circle"></i> Add New Chapter
-            </button>
-            <a class="btn btn-secondary btn-rounded" th:href="@{/instructor/courses}" >Back</a>
-          </div>
+          </div>          
+        </div>
+        <div class="text-center mt-4">
+          <!-- Add New Chapter Button -->
+          <button id="showFormButton" class="btn btn-primary btn-rounded" data-mdb-toggle="modal"
+                  data-mdb-target="#addChapterModal">
+            <i class="fas fa-plus-circle"></i> Add New Chapter
+          </button>
+          <a class="btn btn-secondary btn-rounded" th:href="@{/instructor/courses}" >Back</a>
         </div>
       </div>
     </div>
