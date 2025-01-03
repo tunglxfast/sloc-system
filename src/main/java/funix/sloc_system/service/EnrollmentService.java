@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -79,7 +80,7 @@ public class EnrollmentService {
      * @return
      */
     @Transactional
-    public Set<CourseDTO> getUserEnrollCourses(Long userId) {
+    public List<CourseDTO> getUserEnrollCourses(Long userId) {
         Set<Enrollment> enrollments = getEnrollmentsByUserId(userId);
         Set<CourseDTO> courseDTOSet = new HashSet<>();
         CourseDTO courseDTO; 
@@ -89,7 +90,6 @@ public class EnrollmentService {
                 courseDTOSet.add(courseDTO);
             }
         }
-
-        return courseDTOSet;
+        return courseDTOSet.stream().toList();
     }
 }
