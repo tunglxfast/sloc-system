@@ -61,7 +61,7 @@
       <!-- Tab links -->
       <div class="tab">
         <button class="tablinks active" th:if="${isEnrolled}" onclick="courseTab(event, 'course')">Course</button>
-        <button class="tablinks" th:if="${isEnrolled}" onclick="courseTab(event, 'process')">Process</button>
+        <button class="tablinks" th:if="${isEnrolled}" onclick="courseTab(event, 'progress')">Progress</button>
       </div>
       <!-- Tab content -->
 
@@ -89,11 +89,11 @@
         </div>
 
         <!-- user process -->
-        <div id="process" class="tabcontent">
+        <div id="progress" class="tabcontent">
           <div style="margin-left: 60px;">
             <div class="center_text">
               <h2 style="color: rgb(2, 117, 2); vertical-align: top; padding-top: 30px; 
-              margin-bottom: 20px; font-weight: bold;">Course Process</h2>
+              margin-bottom: 20px; font-weight: bold;">Course Progress</h2>
               <p><b>Final Score (GPA) = sum (quizzes scores * 0.4) + (exams score * 0.6)</b></p>
               <p><b>Passing conditions:</b></p>
               <p>- Final Score >= 50</p>

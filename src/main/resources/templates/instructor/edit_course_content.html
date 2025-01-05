@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Chapters</title>
+  <title>Edit Course</title>
   <link rel="stylesheet" href="/css/bootstrap.min.css">
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
@@ -104,7 +104,7 @@
     <div class="col-md-9">
       <div style="margin-left: 5%; width: 80%;">
         <!-- Existing Chapters List -->
-        <h2 class="text-center mb-4">Existing Chapters</h2>
+        <h2 class="text-center mb-4">Edit Course Content</h2>
         <div th:if="${chapters != null}">
           <div class="accordion" id="chaptersAccordion">
             <div th:each="chapter : ${chapters}" class="accordion-item">

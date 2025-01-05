@@ -93,7 +93,7 @@
         </div>
         <div class="col-md-9">
             <div style="margin-left: 5%; width: 80%;">
-                <h2 class="text-center mb-4">Edit Course</h2>
+                <h2 class="text-center mb-4">Edit Course General</h2>
                 <form th:action="@{/instructor/course/{id}/submit(id=${course.id})}"
                         th:object="${course}" method="post" enctype="multipart/form-data" class="bg-light p-4 rounded shadow">
                     <input type="hidden" th:field="*{id}"/>
