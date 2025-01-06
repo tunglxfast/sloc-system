@@ -44,7 +44,7 @@
 <body>
     <!-- Include Navbar -->
     <div th:with="activePage='courses'">
-        <div th:replace="/fragments/basic_navbar :: navbarFragment"></div>
+        <div th:replace="~{/fragments/basic_navbar :: navbarFragment}"></div>
     </div>
 
     <div class="row">
@@ -110,21 +110,9 @@
                     <div id="cooldown-text" style="margin-top: 3%;"></div>
                 </form>
             </div>
-            <!-- Action Button -->
-            <div class="row" style="margin-bottom: 5%; margin-left: 4%;">
-                <div class="col-md-6" style="margin-top: 40px;">
-                    <a th:href="@{/courses/{courseId}(courseId=${courseId})}">
-                        <button type="button" class="btn btn-success btn-rounded" data-mdb-ripple-init>Back to current
-                            course</button>
-                    </a>
-                </div>
-
-                <div class="col-md-6" style="margin-top: 40px;">
-                    <a th:href="@{${nextTopicUrl}}">
-                        <button type="button" class="btn btn-info btn-rounded" data-mdb-ripple-init
-                            style="float: right;">Go to next course</button>
-                    </a>
-                </div>
+            <!-- Include Action Button -->
+            <div>
+                <div th:replace="/fragments/topic_back_forward :: topicBackForwardFragment"></div>
             </div>
         </div>
 

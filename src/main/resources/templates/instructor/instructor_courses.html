@@ -13,11 +13,13 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
     <!-- MDB -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.0.0/mdb.min.css" rel="stylesheet" />
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+
     <style>
         body {
             font-family: 'Laila';
         }
-
         h4 {
             font-weight: bold;
         }
@@ -27,7 +29,7 @@
 <body>
     <!-- Include Navbar -->
     <div th:with="activePage='instructorDashboard'">
-        <div th:replace="/fragments/basic_navbar :: navbarFragment"></div>
+        <div th:replace="~{/fragments/basic_navbar :: navbarFragment}"></div>
     </div>
 
     <div class="row">
@@ -59,23 +61,7 @@
                         <div class="d-flex justify-content-end">
                             <a th:href="@{/instructor/course/create}" class="btn btn-success mb-3">Create New Course</a>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center border-0" style="margin-top: 2%;">
-                            <div class="d-flex flex-wrap gap-4">
-                                <button class="btn btn-primary btn-rounded sort-btn" data-column="1">Sort Title</button>
-                                <button class="btn btn-secondary btn-rounded sort-btn" data-column="2">Sort
-                                    Category</button>
-                                <button class="btn btn-success btn-rounded sort-btn" data-column="3">Sort Content
-                                    Status</button>
-                                <button class="btn btn-success btn-rounded sort-btn" data-column="4">Sort Approval
-                                    Status</button>
-                                <button class="btn btn-warning btn-rounded sort-btn" data-column="5">Sort Start
-                                    Date</button>
-                                <button class="btn btn-danger btn-rounded sort-btn" data-column="6">Sort End
-                                    Date</button>
-                            </div>
-                            <button class="btn btn-dark btn-rounded" id="reset-btn">Reset</button>
-                        </div>
-                        <table class="table table-hover table-bordered" style="margin-top: 2%;">
+                        <table id="reviewCourseTable" class="table table-hover table-bordered" style="margin-top: 2%;">
                             <thead class="table-dark">
                                 <tr>
                                     <th>#</th>
@@ -138,8 +124,13 @@
                                             <i class="text-danger" style="cursor: pointer;"
                                                th:data-bs-toggle="tooltip"
                                                th:data-bs-placement="top"
-                                               th:title="${course.rejectReason}">(Hover here)
+                                               th:title="${course.rejectReason}"
+                                               onclick="toggleRejectReason(this)">
+                                               (Click to view full reason)
                                             </i>
+                                            <div class="full-reject-reason" style="display: none; margin-top: 5px;">
+                                                <p th:text="${course.rejectReason}"></p>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -151,109 +142,37 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const table = document.querySelector('.table tbody');
-            const rows = Array.from(table.rows);
-            let originalRows = [...rows]; // Store the original order of rows
-            const sortState = {}; // Track sort state for each column
-
-            // Function to sort the table
-            const sortTable = (columnIndex, order) => {
-                const sortedRows = rows.sort((a, b) => {
-                    let aText = a.cells[columnIndex].textContent.trim();
-                    let bText = b.cells[columnIndex].textContent.trim();
-
-                    // Handle dates
-                    if (columnIndex === 5 || columnIndex === 6) {
-                        aText = new Date(aText).getTime();
-                        bText = new Date(bText).getTime();
-                    }
-
-                    // Perform sorting
-                    if (order === 'asc') {
-                        return aText > bText ? 1 : -1;
-                    } else {
-                        return aText < bText ? 1 : -1;
-                    }
-                });
-
-                // Reorder table rows
-                table.innerHTML = '';
-                sortedRows.forEach(row => table.appendChild(row));
-            };
-
-            // Update button text with ▲ or ▼
-            const updateButtonText = (button, order) => {
-                const defaultText = button.getAttribute('data-default-text');
-                if (defaultText) {
-                    if (order === 'asc') {
-                        button.innerHTML = `${defaultText} ▲`;
-                    } else if (order === 'desc') {
-                        button.innerHTML = `${defaultText} ▼`;
-                    }
-                }
-            };
-
-            // Event listener for sorting buttons
-            document.querySelectorAll('.sort-btn').forEach(button => {
-                // Preserve default text in button
-                if (!button.hasAttribute('data-default-text')) {
-                    button.setAttribute('data-default-text', button.textContent.trim());
-                }
-
-                button.addEventListener('click', () => {
-                    const columnIndex = parseInt(button.getAttribute('data-column'));
-
-                    // Toggle between ascending and descending
-                    const currentOrder = sortState[columnIndex] || 'desc'; // Default to 'desc' initially
-                    const newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
-                    sortState[columnIndex] = newOrder;
-
-                    // Update the sorting
-                    sortTable(columnIndex, newOrder);
-
-                    // Update button text
-                    updateButtonText(button, newOrder);
-
-                    // Reset other buttons' text
-                    document.querySelectorAll('.sort-btn').forEach(otherButton => {
-                        if (otherButton !== button) {
-                            const otherDefaultText = otherButton.getAttribute('data-default-text');
-                            otherButton.innerHTML = otherDefaultText; // Reset to default text
-                        }
-                    });
-                });
-            });
-
-            // Reset button functionality
-            document.getElementById('reset-btn').addEventListener('click', () => {
-                table.innerHTML = '';
-                originalRows.forEach(row => table.appendChild(row));
-
-                // Clear sort states
-                Object.keys(sortState).forEach(key => (sortState[key] = null));
-
-                // Reset all button texts
-                document.querySelectorAll('.sort-btn').forEach(button => {
-                    const defaultText = button.getAttribute('data-default-text');
-                    if (defaultText) {
-                        button.innerHTML = defaultText; // Reset to default text
-                    }
-                });
-            });
-        });
-    </script>
-
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
     <script src="/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#reviewCourseTable').DataTable({
+                "pageLength": 10,
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "emptyTable": "No courses pending review",
+                "zeroRecords": "No matching courses pending review"
+            });
+        });
+
+        function toggleRejectReason(element) {
+            // Find the corresponding full reject reason div
+            var fullRejectReasonDiv = element.closest('div').querySelector('.full-reject-reason');
+            
+            // Toggle the visibility of the full reject reason
+            if (fullRejectReasonDiv.style.display === 'none') {
+                fullRejectReasonDiv.style.display = 'block';
+                element.textContent = '(Click to hide reason)';
+            } else {
+                fullRejectReasonDiv.style.display = 'none';
+                element.textContent = '(Click to view full reason)';
+            }
+        }
+    </script>
 </body>
 
 </html>

@@ -4,6 +4,7 @@ import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.TestResultDTO;
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.Course;
+import funix.sloc_system.entity.StudyProcess;
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.TopicType;
@@ -13,8 +14,10 @@ import funix.sloc_system.mapper.TopicMapper;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.*;
 import funix.sloc_system.util.AppUtil;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -58,71 +61,105 @@ public class CourseLearningController {
     @Autowired
     private TestResultMapper testResultMapper;
 
-    /**
-     * list all courses
-     * @param model
-     * @return
+    @Autowired
+    private StudyProcessService studyProcessService;
+
+    @Autowired
+    private CategoryService categoryService;
+
+    private void addCategoriesToModel(Model model) {
+        model.addAttribute("categories", categoryService.findAllCategoriesDTO());
+    }
+
+    /*
+     * Show all courses.
      */
-    @GetMapping(value = {"","/"})
-    public String listCourses(Model model) {
-        List<Course> courses = courseService.getAvailableCourses();
-        List<CourseDTO> courseDTOList = courseMapper.toDTO(courses);
+    @GetMapping(value = {"", "/", "/search"})
+    public String listCourses(@RequestParam(required = false) String title, 
+                            @RequestParam(required = false) String category,
+                            @RequestParam(defaultValue = "0") int page, 
+                            @RequestParam(defaultValue = "10") int size, 
+                            Model model) 
+                            {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Course> coursePage;
+        
+        if (title != null && !title.isEmpty() && category != null && !category.isEmpty()) {
+            coursePage = courseService.searchCoursesByTitleAndCategoryWithPagination(title, category, pageable);
+        } else if (title != null && !title.isEmpty()) {
+            coursePage = courseService.searchCoursesByTitleWithPagination(title, pageable);
+        } else if (category != null && !category.isEmpty()) {
+            coursePage = courseService.searchCoursesByCategoryWithPagination(category, pageable);
+        } else {
+            coursePage = courseService.getCoursesWithPagination(pageable);
+        }
+    
+        List<CourseDTO> courseDTOList = courseMapper.toDTO(coursePage.getContent());
+        
         model.addAttribute("courses", courseDTOList);
+        model.addAttribute("totalPages", coursePage.getTotalPages());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalItems", coursePage.getTotalElements());
+        model.addAttribute("searchTitle", title);
+        model.addAttribute("searchCategory", category);
+        addCategoriesToModel(model);
         return "courses";
     }
 
     /**
      * Course General View
-     * @param id
+     * @param courseId
      * @param securityUser
      * @param model
      * @return
      */
     @GetMapping(value = {"/{id}" ,"/{id}/general"})
-    public String viewCourseGeneral(@PathVariable Long id, @AuthenticationPrincipal SecurityUser securityUser, Model model) {
-        if (!appUtil.isCourseReady(id)) {
+    public String viewCourseGeneral(@PathVariable("id") Long courseId,
+                                @AuthenticationPrincipal SecurityUser securityUser, 
+                                RedirectAttributes redirectAttributes,
+                                Model model) {
+        if (!appUtil.isCourseReady(courseId)) {
+            redirectAttributes.addAttribute("errorMessage", "Course not found.");
             return "redirect:/courses";
         }
 
-        Course course = courseService.findById(id);
+        Course course = courseService.findById(courseId);
         User user = userService.findById(securityUser.getUserId());
         if (course != null && user != null) {
             boolean isEnrolled = enrollmentService.checkEnrollment(user, course);            
-            CourseDTO courseDTO = dtoService.getAvailableCourseDTO(id);
+            CourseDTO courseDTO = dtoService.getAvailableCourseDTO(courseId);
+
+            List<TestResultDTO> testResults = appUtil.getCourseTestsResult(user.getId(), courseId);
+            StudyProcess studyProcess = studyProcessService.findByUserIdAndCourseId(user.getId(), courseId);
+            Integer finalScore = studyProcess.getFinalScore();
+            Boolean isFinalPassed = studyProcess.getPassCourse();
+            Long lastViewTopicId = studyProcess.getLastViewTopic();
+            String processAssessment = studyProcess.getProgressAssessment();
+            Double learningProgress = studyProcess.getLearningProgress();
+            Integer studyingTopicSeq = null;
+            Integer studyingChapterSeq = null;
+            if (lastViewTopicId != null) {
+                Topic lastViewTopic = topicService.findById(lastViewTopicId);
+                if (lastViewTopic != null) {
+                    studyingTopicSeq = lastViewTopic.getSequence();
+                    studyingChapterSeq = lastViewTopic.getChapter().getSequence();
+                }
+            }
+
             model.addAttribute("course", courseDTO);
             model.addAttribute("isEnrolled", isEnrolled);
+            model.addAttribute("processes", testResults);
+            model.addAttribute("learningProgress", learningProgress);
+            model.addAttribute("finalScore", finalScore);
+            model.addAttribute("finalPass", isFinalPassed);
+            model.addAttribute("processAssessment", processAssessment);
+            model.addAttribute("lastTopic", studyingTopicSeq);
+            model.addAttribute("lastChapter", studyingChapterSeq);
             return "course/general";
         } else {
             return "redirect:/courses";
         }
     }
-
-    /*
-     * Find course by title
-     */
-    @GetMapping("/search")
-    public String searchCourse(@RequestParam(required = false) String title, 
-                              @RequestParam(required = false) String category,
-                              Model model) {
-        List<CourseDTO> courseDTOList = null;
-        if (title != null && !title.isEmpty() && category != null && !category.isEmpty()) {
-            List<Course> courses = courseService.findCoursesByTitleAndCategory(title, category);
-            courseDTOList = courseMapper.toDTO(courses);           
-        } else if (title != null && !title.isEmpty()) {
-            List<Course> courses = courseService.findCoursesByTitle(title);
-            courseDTOList = courseMapper.toDTO(courses);
-        } else if (category != null && !category.isEmpty()) {
-            List<Course> courses = courseService.findCoursesByCategory(category);
-            courseDTOList = courseMapper.toDTO(courses);
-        }
-
-        if (courseDTOList == null) {
-            courseDTOList = new ArrayList<>();
-        }
-        model.addAttribute("courses", courseDTOList);
-        return "courses";
-    }
-
 
     @GetMapping("/{courseId}/enroll")
     public String enrollCourse(@PathVariable Long courseId, @AuthenticationPrincipal SecurityUser securityUser, Model model) {
@@ -168,14 +205,19 @@ public class CourseLearningController {
             return String.format("redirect:/courses/%d", courseId);
         }
 
+        // Save the topic that the student recently viewed
+        studyProcessService.saveLastViewTopic(user.getId(), courseId, topic.getId());
+
         TopicDTO topicDTO = topicMapper.toDTO(topic);
         topicDTO.setQuestions(dtoService.getAvailableQuestions(topicDTO));
 
         String nextTopicUrl = appUtil.getNextTopicUrl(topic.getId(), courseId);
+        String previousTopicUrl = appUtil.getPreviousTopicUrl(topic.getId(), courseId);
 
         model.addAttribute("topic", topicDTO);
         model.addAttribute("courseId", courseId);
         model.addAttribute("nextTopicUrl", nextTopicUrl);
+        model.addAttribute("previousTopicUrl", previousTopicUrl);
         
         TestResultDTO testResult = testResultService.findByUserIdAndTopicId(user.getId(), topic.getId());
         if (testResult != null) {
@@ -206,15 +248,20 @@ public class CourseLearningController {
         
         Topic topic = topicService.findById(quizId);
         if (topic != null) {
+            // try to calculate final score after finish a test
+            studyProcessService.calculateAndSaveFinalResult(securityUser.getUserId(), courseId, quizId);
+
             TopicDTO topicDTO = topicMapper.toDTO(topic);
             topicDTO.setQuestions(dtoService.getAvailableQuestions(topicDTO));
     
             String nextTopicUrl = appUtil.getNextTopicUrl(topic.getId(), courseId);
+            String previousTopicUrl = appUtil.getPreviousTopicUrl(topic.getId(), courseId);
 
             model.addAttribute("result", resultDTO);
             model.addAttribute("topic", topicDTO);
             model.addAttribute("courseId", courseId);
             model.addAttribute("nextTopicUrl", nextTopicUrl);
+            model.addAttribute("previousTopicUrl", previousTopicUrl);
 
         }
         return "course/course_quiz";
@@ -235,17 +282,21 @@ public class CourseLearningController {
 
         Topic exam = topicService.findById(examId);
 
-
         if (exam != null) {
+            // try to calculate final score after finish a test
+            studyProcessService.calculateAndSaveFinalResult(securityUser.getUserId(), courseId, examId);
+
             TopicDTO examDTO = topicMapper.toDTO(exam);
             examDTO.setQuestions(dtoService.getAvailableQuestions(examDTO));
 
             String nextTopicUrl = appUtil.getNextTopicUrl(exam.getId(), courseId);
+            String previousTopicUrl = appUtil.getPreviousTopicUrl(exam.getId(), courseId);
 
             model.addAttribute("result", result);
             model.addAttribute("topic", examDTO);
             model.addAttribute("courseId", courseId);
             model.addAttribute("nextTopicUrl", nextTopicUrl);
+            model.addAttribute("previousTopicUrl", previousTopicUrl);
 
         }
         return "course/course_exam";

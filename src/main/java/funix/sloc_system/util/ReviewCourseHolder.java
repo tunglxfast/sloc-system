@@ -1,11 +1,9 @@
 package funix.sloc_system.util;
 
-import org.springframework.stereotype.Component;
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.enums.ContentAction;
 import lombok.NoArgsConstructor;
 
-@Component
 @NoArgsConstructor
 public class ReviewCourseHolder {
 

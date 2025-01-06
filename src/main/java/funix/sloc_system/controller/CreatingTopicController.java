@@ -6,7 +6,6 @@ import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.QuestionDTO;
 import funix.sloc_system.dto.TopicDTO;
-import funix.sloc_system.entity.Question;
 import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.*;
@@ -25,11 +24,6 @@ import java.util.List;
 @Controller
 @RequestMapping("/instructor/course/{courseId}/edit/topic")
 public class CreatingTopicController {
-
-    @Autowired
-    private ChapterService chapterService;
-    @Autowired
-    private CourseService courseService;
     @Autowired
     private TopicService topicService;
     @Autowired

@@ -9,7 +9,7 @@
 <body>
     <!-- Include Navbar -->
     <div th:with="activePage='instructorDashboard'">
-        <div th:replace="/fragments/basic_navbar :: navbarFragment"></div>
+        <div th:replace="~{/fragments/basic_navbar :: navbarFragment}"></div>
     </div>  
 
     <div class="container mt-5">
@@ -58,8 +58,8 @@
                     <!-- Reading Topic Fields -->
                     <div th:if="${topicType == 'READING'}" class="mb-3">
                         <label for="readingFile" class="form-label">Content File</label>
-                        <input type="file" class="form-control" id="readingFile" name="readingFile" accept=".pdf,.doc,.docx">
-                        <small class="text-muted">Supported formats: PDF, DOC, DOCX</small>
+                        <input type="file" class="form-control" id="readingFile" name="readingFile" accept=".pdf">
+                        <small class="text-muted">Supported formats: PDF</small>
                     </div>
 
                     <div class="mt-4">

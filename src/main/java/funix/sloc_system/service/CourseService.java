@@ -1,13 +1,27 @@
 package funix.sloc_system.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import funix.sloc_system.enums.*;
-import funix.sloc_system.repository.*;
-import funix.sloc_system.dto.*;
+import funix.sloc_system.dto.CategoryDTO;
+import funix.sloc_system.dto.CourseDTO;
+import funix.sloc_system.dto.UserDTO;
 import funix.sloc_system.entity.*;
-import funix.sloc_system.mapper.*;
+import funix.sloc_system.enums.ApprovalStatus;
+import funix.sloc_system.enums.ContentAction;
+import funix.sloc_system.enums.ContentStatus;
+import funix.sloc_system.enums.EntityType;
+import funix.sloc_system.mapper.CategoryMapper;
+import funix.sloc_system.mapper.CourseMapper;
+import funix.sloc_system.mapper.UserMapper;
+import funix.sloc_system.repository.CategoryRepository;
+import funix.sloc_system.repository.ContentChangeRepository;
+import funix.sloc_system.repository.CourseRepository;
+import funix.sloc_system.repository.UserRepository;
 import funix.sloc_system.util.AppUtil;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,15 +30,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class CourseService {
-
     public final String THUMBNAIL_LOCAL = "/img/courses/thumbnails/";
+    private boolean isCheckedOnStartup = false;
 
     @Autowired
     private UserRepository userRepository;
@@ -38,9 +49,64 @@ public class CourseService {
     private ObjectMapper objectMapper;
     @Autowired
     private CourseMapper courseMapper;
-
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private CategoryMapper categoryMapper;
     @Autowired
     private AppUtil appUtil;
+
+    /**
+     * Run when start app
+     */
+    @PostConstruct
+    public void checkOnStartup() {
+        // check to make sure not calling second time after startup
+        if (!isCheckedOnStartup) {
+            // check Expired Courses
+            archiveExpiredCourses();
+            // Evaluate study process
+            evaluateStudyProcess();
+            isCheckedOnStartup = true;
+        }
+    }
+
+    /**
+     * Run in midnight and turn course to archived when out of learning time
+     */
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void archiveExpiredCourses() {
+        LocalDate now = LocalDate.now();
+        Set<Course> courses = courseRepository.findByEndDateBeforeAndContentStatusNot(now, ContentStatus.ARCHIVED);
+
+        for (Course course : courses) {
+            course.setContentStatus(ContentStatus.ARCHIVED);
+            courseRepository.save(course);
+        }
+    }
+
+    /**
+     * Run in weekly at 1 am on Monday to evaluate students study process.
+     * Courses have to be published and total learning day longer than 14 days.
+     */
+    @Scheduled(cron = "0 0 1 * * MON")
+    public void evaluateStudyProcess() {
+        List<ContentStatus> contentStatusList = List.of(
+                ContentStatus.PUBLISHED,
+                ContentStatus.PUBLISHED_EDITING);
+        List<Course> courses = courseRepository.findByContentStatusIn(contentStatusList);
+
+        for (Course course : courses) {
+            long duration = course.getEndDate().toEpochDay() - course.getStartDate().toEpochDay();
+            if (duration < 14) {
+                courses.remove(course);
+            }
+        }
+
+        for (Course course : courses) {
+            appUtil.evaluateStudentsStudy(course.getId());
+        }
+    }
 
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
@@ -62,11 +128,14 @@ public class CourseService {
         return courseRepository.findAllByInstructorAndApprovalStatus(instructor, ApprovalStatus.REJECTED);
     }
 
+    /**
+     * Course have to be published.
+     * @return
+     */
     public List<Course> getAvailableCourses() {
         List<ContentStatus> contentStatusList = List.of(
                 ContentStatus.PUBLISHED,
-                ContentStatus.PUBLISHED_EDITING,
-                ContentStatus.ARCHIVED);
+                ContentStatus.PUBLISHED_EDITING);
         return courseRepository.findByContentStatusIn(contentStatusList);
     }
 
@@ -136,11 +205,14 @@ public class CourseService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category information error, please contact support center."));
 
+        UserDTO instructorDTO = userMapper.toDTO(instructor);
+        CategoryDTO categoryDTO = categoryMapper.toDTO(category);
+
         courseDTO.setContentStatus(ContentStatus.DRAFT.name());
-        courseDTO.setInstructor(instructor);
+        courseDTO.setInstructor(instructorDTO);
         courseDTO.setCreatedAt(LocalDate.now());
-        courseDTO.setCreatedBy(instructor);
-        courseDTO.setCategory(category);
+        courseDTO.setCreatedBy(instructorDTO);
+        courseDTO.setCategory(categoryDTO);
 
         String thumbnailUrl = saveThumbnail(file);
         if (thumbnailUrl != null && !thumbnailUrl.isBlank()){
@@ -164,7 +236,9 @@ public class CourseService {
         Category category = categoryRepository.findById(categoryId).orElse(null);
 
         // update title, description, category, start/end date, update time and updater
-        courseDTO.updateEditingValues(editingValues, category, instructor);
+        UserDTO instructorDTO = userMapper.toDTO(instructor);
+        CategoryDTO categoryDTO = categoryMapper.toDTO(category);
+        courseDTO.updateEditingValues(editingValues, categoryDTO, instructorDTO);
 
         // Update thumbnail if provided
         if (file != null && !file.isEmpty()) {
@@ -321,9 +395,15 @@ public class CourseService {
                 courseRepository.deleteById(courseId);
                 return "Course deleted successfully.";
             } else {
-                CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
-                String json = objectMapper.writeValueAsString(courseDTO);
+                String json;
+                try {
+                    CourseDTO courseDTO = appUtil.getEditingCourseDTO(courseId);
+                    json = objectMapper.writeValueAsString(courseDTO);
+                } catch (Exception e) {
+                    throw new Exception("Error when deleting course content");
+                }
                 appUtil.saveContentChange(json, courseId, instructorId, ContentAction.DELETE);
+
                 submitForReview(courseId);
                 return "Delete course request is sent, please wait for approval.";
             }
@@ -343,4 +423,46 @@ public class CourseService {
             contentChangeRepository.delete(contentChange);
         }
     }
+
+    public Page<Course> getCoursesWithPagination(Pageable pageable) {
+        Page<Course> courses = courseRepository.findByContentStatusIn(
+            List.of(ContentStatus.PUBLISHED, ContentStatus.PUBLISHED_EDITING), pageable);
+        return courses;
+    }
+
+    public Page<Course> searchCoursesByCategoryWithPagination(String category, Pageable pageable) { 
+        if (category == null || category.isEmpty()) {
+            return Page.empty();
+        }
+        Category categoryEntity = categoryRepository.findByNameIgnoreCase(category).orElse(null);
+        if (categoryEntity == null) {
+            return Page.empty();
+        }
+        Page<Course> courses = courseRepository.findByCategoryAndContentStatusIn(categoryEntity,
+            List.of(ContentStatus.PUBLISHED, ContentStatus.PUBLISHED_EDITING), pageable);
+        return courses;
+    }
+
+    public Page<Course> searchCoursesByTitleWithPagination(String title, Pageable pageable) {
+        if (title == null || title.isEmpty()) {
+            return Page.empty();
+        }
+        Page<Course> courses = courseRepository.findByTitleContainingIgnoreCaseAndContentStatusIn(
+            title, List.of(ContentStatus.PUBLISHED, ContentStatus.PUBLISHED_EDITING), pageable);
+        return courses;
+    }
+    
+    public Page<Course> searchCoursesByTitleAndCategoryWithPagination(String title, String category, Pageable pageable) {
+        if (title == null || title.isEmpty() || category == null || category.isEmpty()) {
+            return Page.empty();
+        }
+        Category categoryEntity = categoryRepository.findByNameIgnoreCase(category).orElse(null);
+        if (categoryEntity == null) {
+            return Page.empty();
+        }
+        Page<Course> courses = courseRepository.findByTitleContainingIgnoreCaseAndCategoryAndContentStatusIn(
+            title, categoryEntity, List.of(ContentStatus.PUBLISHED, ContentStatus.PUBLISHED_EDITING), pageable);
+        return courses;
+    }
+
 }

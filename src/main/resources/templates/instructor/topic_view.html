@@ -61,7 +61,7 @@
 <body>
     <!-- Include Navbar -->
     <div th:with="activePage='moderatorDashboard'">
-        <div th:replace="/fragments/basic_navbar :: navbarFragment"></div>
+        <div th:replace="~{/fragments/basic_navbar :: navbarFragment}"></div>
     </div>
 
     <div class="container py-5">

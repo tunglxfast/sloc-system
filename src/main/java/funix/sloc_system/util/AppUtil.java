@@ -1,27 +1,19 @@
 package funix.sloc_system.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import funix.sloc_system.dto.ChapterDTO;
-import funix.sloc_system.dto.CourseDTO;
-import funix.sloc_system.dto.TopicDTO;
-import funix.sloc_system.entity.Chapter;
-import funix.sloc_system.entity.ContentChangeTemporary;
-import funix.sloc_system.entity.Course;
-import funix.sloc_system.entity.Topic;
-import funix.sloc_system.enums.ApprovalStatus;
-import funix.sloc_system.enums.ContentAction;
-import funix.sloc_system.enums.ContentStatus;
-import funix.sloc_system.enums.EntityType;
+import funix.sloc_system.dto.*;
+import funix.sloc_system.entity.*;
+import funix.sloc_system.enums.*;
 import funix.sloc_system.mapper.*;
 import funix.sloc_system.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class AppUtil {
@@ -39,7 +31,13 @@ public class AppUtil {
     @Autowired
     private AnswerRepository answerRepository;
     @Autowired
+    private TestResultRepository testResultRepository;
+    @Autowired
     private ContentChangeRepository contentChangeRepository;
+    @Autowired
+    private StudyProcessRepository studyProcessRepository;
+    @Autowired
+    private LearnedTopicRepository learnedTopicRepository;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -54,6 +52,11 @@ public class AppUtil {
     private AnswerMapper answerMapper;
     @Autowired
     private EnrollmentMapper enrollmentMapper;
+    @Autowired
+    private TestResultMapper testResultMapper;
+
+    private static final String FINAL_SCORE = "finalScore";
+    private static final String IS_PASSED = "isPassed";
 
     public Topic findNextTopic(Long topicId){
         Topic currentTopic = topicRepository.findById(topicId)
@@ -198,6 +201,38 @@ public class AppUtil {
         }
     }
 
+    public String getPreviousTopicUrl(Long topicId, Long courseId) {
+        Topic topic = topicRepository.findById(topicId).orElse(null);
+        if (topic != null) {
+            Chapter currentChapter = topic.getChapter();
+            int targetTopicSeq = 0;
+            int targetChapterSeq = 0;
+
+            if (topic.getSequence() > 1) {
+                targetTopicSeq = topic.getSequence() - 1;
+                targetChapterSeq = topic.getChapter().getSequence();
+                return String.format("/courses/%d/%d_%d", courseId, targetChapterSeq, targetTopicSeq);
+
+            } else if (currentChapter.getSequence() > 1) {
+                targetChapterSeq = currentChapter.getSequence()-1;
+                Course currentCourse = currentChapter.getCourse();
+                List<Chapter> chapters = chapterRepository.findByCourseIdOrderBySequence(currentCourse.getId());
+                for (Chapter chapter: chapters) {
+                    if (chapter.getSequence() == targetChapterSeq) {
+                        List<Topic> topics = chapter.getTopics();
+                        targetTopicSeq = topics.get(topics.size() - 1).getSequence();
+                        return String.format("/courses/%d/%d_%d", courseId, targetChapterSeq, targetTopicSeq);
+                    }
+                }
+            } else {
+                return String.format("/courses/%d", courseId);
+            }            
+        }
+
+        return String.format("/courses/%d", courseId);
+    }
+
+
     /**
      * Reorder chapters sequence
      */
@@ -229,11 +264,8 @@ public class AppUtil {
         }
         ContentChangeTemporary changeTemporary = contentChangeRepository
             .findByEntityTypeAndEntityId(EntityType.COURSE, courseId).orElse(null);
-        if (changeTemporary == null) {
-            return false;
-        } else {
-            return true;
-        }
+
+        return changeTemporary != null;
     }
 
     public CourseEditingHolder getCourseEditingHolder(Long courseId) throws Exception {
@@ -257,6 +289,203 @@ public class AppUtil {
             }
         }
         return courseEditingHolders;
+    }
+
+    @Transactional
+    public List<TestResultDTO> getCourseTestsResult(Long userId, Long courseId) {
+        Course course = courseRepository.findById(courseId).orElse(null);
+        if (course == null) {
+            return new ArrayList<>();
+        }
+
+        List<TestResultDTO> testResults = new ArrayList<>();
+        CourseDTO courseDTO = courseMapper.toDTO(course);
+        List<TopicDTO> haveTestTopic = new ArrayList<>();
+
+        String topicType;
+        for (ChapterDTO chapter : courseDTO.getChapters()) {
+            for (TopicDTO topic : chapter.getTopics()) {
+                topicType = topic.getTopicType();
+                if (topicType.equalsIgnoreCase(TopicType.EXAM.name())
+                        || topicType.equalsIgnoreCase(TopicType.QUIZ.name())) {
+                    haveTestTopic.add(topic);
+                }
+            }
+        }
+
+        TestResultDTO testResultDTO;
+        for (TopicDTO topic : haveTestTopic) {
+            testResultDTO = testResultMapper.toDTO(
+                    testResultRepository
+                            .findByUserIdAndTopicId(userId, topic.getId())
+                            .orElse(null)
+            );
+
+            if (testResultDTO == null) {
+                // add none score testResult to testResults
+                testResultDTO = new TestResultDTO();
+                testResultDTO.setTopic(topic);
+                testResultDTO.setTestType(topic.getTopicType());
+            }
+            testResults.add(testResultDTO);
+        }
+
+        return testResults;
+    }
+
+    public Map<String, Object> calculateFinalScore(List<TestResultDTO> testResults) {
+        // Final score = quiz * 0.4 + exam * 0.6
+        Double quizzesScore = 0.0;
+        Double examsScore = 0.0;
+        int calculatedScore;
+        int testsCount = testResults.size();
+        boolean allTestPass = true;
+        boolean isAllQuiz = true;
+        boolean isAllExam = true;
+
+        for (TestResultDTO testResultDTO : testResults) {
+            if (testResultDTO.getTestType().equalsIgnoreCase(TopicType.QUIZ.name())) {
+                isAllExam = false;
+
+                if (testResultDTO.getPassed() == null || !testResultDTO.getPassed()) {
+                    allTestPass = false;
+                }
+                quizzesScore += testResultDTO.getHighestScore();
+            } else if (testResultDTO.getTestType().equalsIgnoreCase(TopicType.EXAM.name())) {
+                isAllQuiz = false;
+
+                if (testResultDTO.getPassed() == null || !testResultDTO.getPassed()) {
+                    allTestPass = false;
+                }
+                examsScore  += testResultDTO.getHighestScore();
+            }
+        }
+
+
+        if (isAllQuiz) {
+            calculatedScore = (int)Math.round(quizzesScore / testsCount);
+        } else if (isAllExam) {
+            calculatedScore = (int)Math.round(examsScore / testsCount);
+        } else {
+            calculatedScore = (int)Math.round(((quizzesScore * 0.4) + (examsScore * 0.6))/testsCount);
+        }
+
+        boolean passed = calculatedScore >= 50 && allTestPass;
+        Map<String, Object> finalResult = new HashMap<>();
+        finalResult.put(FINAL_SCORE, calculatedScore);
+        finalResult.put(IS_PASSED, passed);
+        return finalResult;
+    }
+
+    @Transactional
+    public void evaluateStudentsStudy(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElse(null);
+        if (course == null) {
+            return;
+        }
+        CourseDTO courseDTO = courseMapper.toDTO(course);
+        // count have test topic
+        List<TopicDTO> haveTestTopic = new ArrayList<>();
+        String topicType;
+        for (ChapterDTO chapter : courseDTO.getChapters()) {
+            for (TopicDTO topic : chapter.getTopics()) {
+                topicType = topic.getTopicType();
+                if (topicType.equalsIgnoreCase(TopicType.EXAM.name())
+                        || topicType.equalsIgnoreCase(TopicType.QUIZ.name())) {
+                    haveTestTopic.add(topic);
+                }
+            }
+        }
+
+        int testCount = haveTestTopic.size();
+        if (testCount == 0) {
+            return;
+        }
+
+        // get student enroll
+        Set<Long> studentEnrollId = new HashSet<>();
+        Set<EnrollmentDTO> enrollmentDTOList = courseDTO.getEnrollments();
+
+        for (EnrollmentDTO enrollmentDTO : enrollmentDTOList) {
+            studentEnrollId.add(enrollmentDTO.getUser().getId());
+        }
+
+        if (studentEnrollId.isEmpty()) {
+            return;
+        }
+
+        long passDay = LocalDate.now().toEpochDay() - courseDTO.getStartDate().toEpochDay();
+        long totalDay = courseDTO.getEndDate().toEpochDay() - courseDTO.getStartDate().toEpochDay();
+        double dayPassRatio = ((double) passDay)/totalDay;
+
+        // begin evaluate each student
+        int testPassCount;
+        double testPassRatio;
+        int testPassNeeded;
+        StudyProcess studyProcess;
+        for (Long studentId : studentEnrollId) {
+            studyProcess = studyProcessRepository.findByUserIdAndCourseId(studentId, courseDTO.getId()).orElse(null);
+            if (studyProcess == null) {
+                studyProcess = new StudyProcess();
+                studyProcess.setUserId(studentId);
+                studyProcess.setCourseId(courseId);
+                studyProcess.setProgressAssessment("You should begin studying.");
+                studyProcessRepository.save(studyProcess);
+                return;
+            }
+
+            if (studyProcess.getLearningProgress() < dayPassRatio) {
+                studyProcess.setProgressAssessment("You are falling behind in your studies, try harder.");
+                studyProcessRepository.save(studyProcess);
+                return;
+            }
+
+            testPassCount = 0;
+            for (TopicDTO topicDTO : haveTestTopic) {
+                TestResult testResult = testResultRepository.findByUserIdAndTopicId(studentId, topicDTO.getId()).orElse(null);
+                if (testResult != null && Boolean.TRUE.equals(testResult.getPassed())) {
+                    testPassCount += 1;
+                }
+            }
+            testPassRatio = ((double) testPassCount)/testCount;
+            if (testPassRatio < dayPassRatio) {
+                testPassNeeded = (int) Math.round(testCount*dayPassRatio);
+                studyProcess.setProgressAssessment(String.format("You are behind schedule. " +
+                                "You currently have to complete at least %d" +
+                                " exercises/tests but have only completed %d.",
+                        testPassNeeded, testPassCount));
+            } else {
+                studyProcess.setProgressAssessment("Very good, you have done well in your studies, keep up the good work.");
+            }
+            studyProcessRepository.save(studyProcess);
+        }
+    }
+
+    /**
+     * Percent of learned topics / total topics
+     * @param userId
+     * @param courseId
+     * @return
+     */
+    @Transactional
+    public double calculateLearningProgress(Long userId, Long courseId) {
+        Course course = courseRepository.findById(courseId).orElse(null);
+        if (course == null) {
+            return 0.0;
+        }
+        Set<Topic> topics = new HashSet<>();
+        for (Chapter chapter : course.getChapters()) {
+            if (chapter.getTopics() != null) {
+                topics.addAll(chapter.getTopics());
+            }
+        }
+
+        Set<Topic> learnedTopics = topics.stream()
+                .filter(c -> learnedTopicRepository
+                        .existsByUserIdAndTopicId(userId, c.getId()))
+                .collect(Collectors.toSet());
+
+        return (((double) learnedTopics.size())/topics.size()) * 100;
     }
 }
 

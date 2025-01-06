@@ -1,16 +1,24 @@
 package funix.sloc_system.service;
 
+import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Enrollment;
 import funix.sloc_system.entity.User;
+import funix.sloc_system.mapper.CourseMapper;
 import funix.sloc_system.repository.CourseRepository;
 import funix.sloc_system.repository.EnrollmentRepository;
 import funix.sloc_system.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -23,6 +31,8 @@ public class EnrollmentService {
 
     @Autowired
     private CourseRepository courseRepository;
+    @Autowired
+    private CourseMapper courseMapper;
 
     @Transactional
     public String enrollCourse(User user, Course course) {
@@ -66,5 +76,31 @@ public class EnrollmentService {
     public Set<Enrollment> getEnrollmentsByCourseId(Long courseId) {
         Course course = courseRepository.findById(courseId).orElse(null);
         return enrollmentRepository.findByCourse(course);
+    }
+
+    /**
+     * Find all courses that user enrolled and return as courseDTO set.
+     * @param userId
+     * @return
+     */
+    @Transactional
+    public List<CourseDTO> getUserEnrollCourses(Long userId) {
+        Set<Enrollment> enrollments = getEnrollmentsByUserId(userId);
+        Set<CourseDTO> courseDTOSet = new HashSet<>();
+        CourseDTO courseDTO; 
+        for (Enrollment enrollment : enrollments) {
+            courseDTO = courseMapper.toDTO(enrollment.getCourse());
+            if (courseDTO != null) {
+                courseDTOSet.add(courseDTO);
+            }
+        }
+        return courseDTOSet.stream().sorted(Comparator.comparing(CourseDTO::getId)).toList();
+    }
+    
+
+    public Page<Course> getCoursesByUserIdWithPagination(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);  // Set page size and number
+        Page<Enrollment> enrollmentPage = enrollmentRepository.findByUserId(userId, pageable);
+        return enrollmentPage.map(Enrollment::getCourse);
     }
 }
