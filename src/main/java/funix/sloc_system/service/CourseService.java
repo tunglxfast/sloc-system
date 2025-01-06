@@ -19,6 +19,8 @@ import funix.sloc_system.repository.UserRepository;
 import funix.sloc_system.util.AppUtil;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -421,4 +423,46 @@ public class CourseService {
             contentChangeRepository.delete(contentChange);
         }
     }
+
+    public Page<Course> getCoursesWithPagination(Pageable pageable) {
+        Page<Course> courses = courseRepository.findByContentStatusIn(
+            List.of(ContentStatus.PUBLISHED, ContentStatus.PUBLISHED_EDITING), pageable);
+        return courses;
+    }
+
+    public Page<Course> searchCoursesByCategoryWithPagination(String category, Pageable pageable) { 
+        if (category == null || category.isEmpty()) {
+            return Page.empty();
+        }
+        Category categoryEntity = categoryRepository.findByNameIgnoreCase(category).orElse(null);
+        if (categoryEntity == null) {
+            return Page.empty();
+        }
+        Page<Course> courses = courseRepository.findByCategoryAndContentStatusIn(categoryEntity,
+            List.of(ContentStatus.PUBLISHED, ContentStatus.PUBLISHED_EDITING), pageable);
+        return courses;
+    }
+
+    public Page<Course> searchCoursesByTitleWithPagination(String title, Pageable pageable) {
+        if (title == null || title.isEmpty()) {
+            return Page.empty();
+        }
+        Page<Course> courses = courseRepository.findByTitleContainingIgnoreCaseAndContentStatusIn(
+            title, List.of(ContentStatus.PUBLISHED, ContentStatus.PUBLISHED_EDITING), pageable);
+        return courses;
+    }
+    
+    public Page<Course> searchCoursesByTitleAndCategoryWithPagination(String title, String category, Pageable pageable) {
+        if (title == null || title.isEmpty() || category == null || category.isEmpty()) {
+            return Page.empty();
+        }
+        Category categoryEntity = categoryRepository.findByNameIgnoreCase(category).orElse(null);
+        if (categoryEntity == null) {
+            return Page.empty();
+        }
+        Page<Course> courses = courseRepository.findByTitleContainingIgnoreCaseAndCategoryAndContentStatusIn(
+            title, categoryEntity, List.of(ContentStatus.PUBLISHED, ContentStatus.PUBLISHED_EDITING), pageable);
+        return courses;
+    }
+
 }

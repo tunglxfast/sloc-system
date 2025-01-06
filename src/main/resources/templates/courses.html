@@ -20,6 +20,7 @@
         h4 {
             font-weight: bold;
         }
+        
     </style>
 </head>
 
@@ -31,13 +32,32 @@
 
     <img th:src="@{/img/headerimg.png}" style="max-width: 100%; height: auto;">
     <div class="container">
+        <!-- Search Form -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <form th:action="@{/courses/search}" method="get" class="d-flex justify-content-center align-items-center">
+                    <input type="text" name="title" class="form-control me-2" placeholder="Search courses..." 
+                            th:value="${searchTitle}">
+                    <select name="category" class="form-select me-1" style="max-width: 200px;">
+                        <option value="">All Categories</option>
+                        <option th:each="cat : ${categories}" th:value="${cat.name}" th:text="${cat.name}"
+                                th:selected="${searchCategory != null and searchCategory == cat.name}">
+                        </option>
+                    </select>
+                    <button class="btn btn-success btn-hover" type="submit">
+                        Search
+                    </button>
+                </form>
+            </div>
+        </div>
 
+        <!-- Display Courses -->
         <div th:if="${#lists.isEmpty(courses)}" style="margin-top: 30px;">
             <h4 style="text-align: center;">No courses available.</h4>
         </div>
-
+    
         <div class="row" th:if="${!#lists.isEmpty(courses)}" th:each="course : ${courses}" style="margin-top: 30px;">
-            <!-- Box 1 -->
+            <!-- Course Card -->
             <div class="d-flex col-lg-4 col-md-12 p-4 border border-success border-3"
                 style="border-radius: 30px; padding: 20px;">
                 <div class="row align-items-center">
@@ -48,9 +68,9 @@
                         <h4 style="text-align: center;" th:text="${course.title}">Course Title</h4>
                     </div>
                     <div class="col-12" style="margin-top: 20px;">
-                        <h5
-                            th:text="${#strings.length(course.description) > 500 ? course.description.substring(0, 500) + '...' : course.description}">
-                            Courses about building websites and web applications</h5>
+                        <h5 th:text="${#strings.length(course.description) > 500 ? course.description.substring(0, 500) + '...' : course.description}">
+                            Courses about building websites and web applications
+                        </h5>
                     </div>
                     <div class="col-12" style="margin-top: 20px;">
                         <a th:href="@{/courses/{id}/general(id=${course.id})}">
@@ -60,9 +80,33 @@
                     </div>
                 </div>
             </div>
-            <script src="/js/bootstrap.bundle.min.js"></script>
+        </div>
+    
+        <!-- Pagination -->
+        <div th:if="${totalItems > 0}" class="pagination-container">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" href="#" th:href="@{/courses(page=0, size=${size}, title=${searchTitle}, category=${searchCategory})}">First</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" href="#" th:href="@{/courses(page=${currentPage - 1}, size=${size}, title=${searchTitle}, category=${searchCategory})}">Previous</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                        <a class="page-link" href="#" th:href="@{/courses(page=${i}, size=${size}, title=${searchTitle}, category=${searchCategory})}" th:text="${i + 1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" href="#" th:href="@{/courses(page=${currentPage + 1}, size=${size}, title=${searchTitle}, category=${searchCategory})}">Next</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" href="#" th:href="@{/courses(page=${totalPages - 1}, size=${size}, title=${searchTitle}, category=${searchCategory})}">Last</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

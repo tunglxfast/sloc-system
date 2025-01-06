@@ -22,6 +22,15 @@ public class CategoryMapper {
         return dto;
     }
 
+    public List<CategoryDTO> toDTO(List<Category> categories) {
+        if (categories == null) {
+            return null;
+        }
+        return categories.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
     public Category toEntity(CategoryDTO dto) {
         if (dto == null) {
             return null;
@@ -34,11 +43,12 @@ public class CategoryMapper {
         return category;
     }
 
-    public List<CategoryDTO> toDTO(List<Category> categories) {
-        return categories.stream().map(this::toDTO).collect(Collectors.toList());
-    }
-
-    public List<Category> toEntity(List<CategoryDTO> categoryDTOList) {
-        return categoryDTOList.stream().map(this::toEntity).collect(Collectors.toList());
+    public List<Category> toEntity(List<CategoryDTO> dtos) {
+        if (dtos == null) {
+            return null;
+        }
+        return dtos.stream()
+                .map(this::toEntity)
+                .collect(Collectors.toList());
     }
 } 

@@ -15,6 +15,9 @@ import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.*;
 import funix.sloc_system.util.AppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -61,16 +64,45 @@ public class CourseLearningController {
     @Autowired
     private StudyProcessService studyProcessService;
 
-    /**
-     * list all courses
-     * @param model
-     * @return
+    @Autowired
+    private CategoryService categoryService;
+
+    private void addCategoriesToModel(Model model) {
+        model.addAttribute("categories", categoryService.findAllCategoriesDTO());
+    }
+
+    /*
+     * Show all courses.
      */
-    @GetMapping(value = {"","/"})
-    public String listCourses(Model model) {
-        List<Course> courses = courseService.getAvailableCourses();
-        List<CourseDTO> courseDTOList = courseMapper.toDTO(courses);
+    @GetMapping(value = {"", "/", "/search"})
+    public String listCourses(@RequestParam(required = false) String title, 
+                            @RequestParam(required = false) String category,
+                            @RequestParam(defaultValue = "0") int page, 
+                            @RequestParam(defaultValue = "10") int size, 
+                            Model model) 
+                            {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Course> coursePage;
+        
+        if (title != null && !title.isEmpty() && category != null && !category.isEmpty()) {
+            coursePage = courseService.searchCoursesByTitleAndCategoryWithPagination(title, category, pageable);
+        } else if (title != null && !title.isEmpty()) {
+            coursePage = courseService.searchCoursesByTitleWithPagination(title, pageable);
+        } else if (category != null && !category.isEmpty()) {
+            coursePage = courseService.searchCoursesByCategoryWithPagination(category, pageable);
+        } else {
+            coursePage = courseService.getCoursesWithPagination(pageable);
+        }
+    
+        List<CourseDTO> courseDTOList = courseMapper.toDTO(coursePage.getContent());
+        
         model.addAttribute("courses", courseDTOList);
+        model.addAttribute("totalPages", coursePage.getTotalPages());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalItems", coursePage.getTotalElements());
+        model.addAttribute("searchTitle", title);
+        model.addAttribute("searchCategory", category);
+        addCategoriesToModel(model);
         return "courses";
     }
 
@@ -128,33 +160,6 @@ public class CourseLearningController {
             return "redirect:/courses";
         }
     }
-
-    /*
-     * Find course by title
-     */
-    @GetMapping("/search")
-    public String searchCourse(@RequestParam(required = false) String title, 
-                              @RequestParam(required = false) String category,
-                              Model model) {
-        List<CourseDTO> courseDTOList = null;
-        if (title != null && !title.isEmpty() && category != null && !category.isEmpty()) {
-            List<Course> courses = courseService.findCoursesByTitleAndCategory(title, category);
-            courseDTOList = courseMapper.toDTO(courses);           
-        } else if (title != null && !title.isEmpty()) {
-            List<Course> courses = courseService.findCoursesByTitle(title);
-            courseDTOList = courseMapper.toDTO(courses);
-        } else if (category != null && !category.isEmpty()) {
-            List<Course> courses = courseService.findCoursesByCategory(category);
-            courseDTOList = courseMapper.toDTO(courses);
-        }
-
-        if (courseDTOList == null) {
-            courseDTOList = new ArrayList<>();
-        }
-        model.addAttribute("courses", courseDTOList);
-        return "courses";
-    }
-
 
     @GetMapping("/{courseId}/enroll")
     public String enrollCourse(@PathVariable Long courseId, @AuthenticationPrincipal SecurityUser securityUser, Model model) {
