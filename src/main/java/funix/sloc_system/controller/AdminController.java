@@ -9,6 +9,7 @@ import funix.sloc_system.mapper.RoleMapper;
 import funix.sloc_system.service.UserService;
 import funix.sloc_system.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -31,12 +32,15 @@ public class AdminController {
     @Autowired
     private RoleMapper roleMapper;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @GetMapping("/users")
     public String listUsers(Model model) {
         List<User> users = userService.getAllUsers();
         List<UserDTO> userDTOList = userMapper.toDTO(users);
-        Set<Role> roles = roleService.getAllRoles();
-        Set<RoleDTO> roleDTOList = roleMapper.toDTO(roles);
+        List<Role> roles = roleService.getAllRoles();
+        List<RoleDTO> roleDTOList = roleMapper.toDTO(roles);
         model.addAttribute("users", userDTOList);
         model.addAttribute("roles", roleDTOList);
 
@@ -63,8 +67,8 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("error", "Password cannot be empty");
             return "redirect:/admin/users";
         }
-        if (newPassword.length() < 8) {
-            redirectAttributes.addFlashAttribute("error", "Password must be at least 8 characters long");
+        if (newPassword.length() <= 8 || newPassword.length() >= 16) {
+            redirectAttributes.addFlashAttribute("error", "Password must be at least 8 characters long and less than 16 characters");
             return "redirect:/admin/users";
         }
         if (newPassword.equals(user.getPassword())) {
@@ -72,7 +76,7 @@ public class AdminController {
             return "redirect:/admin/users";
         }
         // change password
-        user.setPassword(newPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
         userService.updateUser(user);
         redirectAttributes.addFlashAttribute("success", "Password changed successfully");
         return "redirect:/admin/users";

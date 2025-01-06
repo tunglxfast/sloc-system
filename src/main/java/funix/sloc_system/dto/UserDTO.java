@@ -23,4 +23,13 @@ public class UserDTO {
     public Set<String> getStringRoles() {
         return this.roles.stream().map(RoleDTO::getName).collect(Collectors.toSet());
     }
+
+    public boolean haveRoleName(String roleName) {
+        for (RoleDTO role : this.roles) {
+            if (role.getName().equals(roleName)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

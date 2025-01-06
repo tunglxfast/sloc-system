@@ -49,6 +49,9 @@
 </head>
 
 <body>
+<!-- Include navbar fragment -->
+<div th:replace="fragments/basic_navbar :: navbarFragment"></div>
+
 <div class="container mt-4">
     <h2>My Courses</h2>
     <div th:if="${#lists.isEmpty(courses)}">

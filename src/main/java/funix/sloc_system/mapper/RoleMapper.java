@@ -4,6 +4,7 @@ import funix.sloc_system.dto.RoleDTO;
 import funix.sloc_system.entity.Role;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,15 @@ public class RoleMapper {
         return roles.stream().map(this::toDTO).collect(Collectors.toSet());
     }
 
+    public List<RoleDTO> toDTO(List<Role> roles) {
+        return roles.stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
     public Set<Role> toEntity(Set<RoleDTO> roleDTOSet) {
         return roleDTOSet.stream().map(this::toEntity).collect(Collectors.toSet());
+    }
+
+    public List<Role> toEntity(List<RoleDTO> roleDTOList) {
+        return roleDTOList.stream().map(this::toEntity).collect(Collectors.toList());
     }
 } 
