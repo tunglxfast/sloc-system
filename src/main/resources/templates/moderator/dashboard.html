@@ -47,7 +47,7 @@
         </div>
         
         <div th:if="${!reviewCourseHolders.empty}" class="table-responsive">
-            <table class="table table-hover">
+            <table id="reviewCourseTable" class="table table-hover">
                 <thead class="table-success">
                     <tr>
                         <th>Course Title</th>
@@ -76,5 +76,21 @@
             </table>
         </div>
     </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#reviewCourseTable').DataTable({
+                "pageLength": 10,
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "emptyTable": "No courses pending review",
+                "zeroRecords": "No matching courses pending review"
+            });
+        });
+    </script>
+
 </body>
 </html> 

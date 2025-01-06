@@ -45,6 +45,36 @@
         .view-course-btn {
             white-space: nowrap;
         }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            padding: 8px 16px;
+            margin: 0 4px;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #007bff;
+            border: 1px solid #ddd;
+        }
+
+        .pagination a:hover {
+            background-color: #f8f9fa;
+        }
+
+        .pagination .disabled {
+            color: #6c757d;
+            pointer-events: none;
+        }
+
+        .pagination .active {
+            font-weight: bold;
+            background-color: #007bff;
+            color: white;
+        }
     </style>
 </head>
 
@@ -78,6 +108,14 @@
                     View Course
                 </a>
             </div>
+        </div>
+
+        <!-- Pagination controls -->
+        <div class="pagination">
+            <a th:href="@{/user/learning?page=0}" th:classappend="${currentPage == 0} ? 'disabled' : ''">First</a>
+            <a th:href="@{/user/learning?page=${currentPage - 1}}" th:classappend="${currentPage == 0} ? 'disabled' : ''">Previous</a>
+            <a th:href="@{/user/learning?page=${currentPage + 1}}" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">Next</a>
+            <a th:href="@{/user/learning?page=${totalPages - 1}}" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">Last</a>
         </div>
     </div>
 </div>

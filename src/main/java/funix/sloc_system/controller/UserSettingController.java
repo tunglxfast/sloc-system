@@ -2,6 +2,7 @@ package funix.sloc_system.controller;
 
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.UserDTO;
+import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.mapper.UserMapper;
 import funix.sloc_system.repository.UserRepository;
@@ -9,6 +10,7 @@ import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.EnrollmentService;
 import funix.sloc_system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -106,10 +108,15 @@ public class UserSettingController {
 
     // Show user enrolled courses
     @GetMapping("/learning")
-    public String showLearningCourse(@AuthenticationPrincipal SecurityUser securityUser, Model model) {
+    public String showLearningCourse(@AuthenticationPrincipal SecurityUser securityUser,
+                                    @RequestParam(defaultValue = "0") int page,
+                                    @RequestParam(defaultValue = "10") int size,
+                                    Model model) {
         Long userId = securityUser.getUserId();
-        List<CourseDTO> courseDTOList = enrollmentService.getUserEnrollCourses(userId);
-        model.addAttribute("courses", courseDTOList);
+        Page<Course> coursePage = enrollmentService.getCoursesByUserIdWithPagination(userId, page, size);
+        model.addAttribute("courses", coursePage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", coursePage.getTotalPages());
         return "user/learning_courses";
     }
 }
