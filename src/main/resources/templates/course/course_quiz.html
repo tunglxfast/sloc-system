@@ -72,7 +72,7 @@
                             <div th:each="answer : ${question.getAnswers()}">
                                 <input class="form-check-input"
                                        th:type="${questionType}"
-                                       th:name="'question_' + ${question.id} + '_answer_' + ${answer.id}"
+                                       th:name="'question_' + ${question.id}"
                                        th:value="${answer.id}"
                                        th:id="'answer_' + ${answer.id}">
                                 <label class="form-check-label" th:for="'answer_' + ${answer.id}" th:text="${answer.content}">
