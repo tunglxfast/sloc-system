@@ -6,7 +6,6 @@ import funix.sloc_system.entity.User;
 import funix.sloc_system.service.CommentService;
 import funix.sloc_system.service.TopicDiscussionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -66,37 +65,36 @@ public class TopicDiscussionController {
         return "redirect:/topic-discussions/view/" + id;
     }
 
-    // API endpoints for AJAX calls
-    @PutMapping("/api/{id}")
-    @ResponseBody
-    public ResponseEntity<TopicDiscussionDTO> updateDiscussion(
+    @PostMapping("/update/{id}")
+    public String updateDiscussion(
             @PathVariable Long id,
             @RequestParam String title,
             @RequestParam String content) {
-        TopicDiscussionDTO updatedDiscussion = topicDiscussionService.updateDiscussion(id, title, content);
-        return ResponseEntity.ok(updatedDiscussion);
+        TopicDiscussionDTO discussion = topicDiscussionService.updateDiscussion(id, title, content);
+        return "redirect:/topic-discussions/view/" + id;
     }
 
-    @DeleteMapping("/api/{id}")
-    @ResponseBody
-    public ResponseEntity<Void> deleteDiscussion(@PathVariable Long id) {
+    @PostMapping("/delete/{id}")
+    public String deleteDiscussion(@PathVariable Long id) {
+        TopicDiscussionDTO discussion = topicDiscussionService.getDiscussionById(id);
+        Long topicId = discussion.getTopicId();
         topicDiscussionService.deleteDiscussion(id);
-        return ResponseEntity.ok().build();
+        return "redirect:/topic-discussions/" + topicId;
     }
 
-    @PutMapping("/api/comments/{id}")
-    @ResponseBody
-    public ResponseEntity<CommentDTO> updateComment(
+    @PostMapping("/comments/update/{id}")
+    public String updateComment(
             @PathVariable Long id,
             @RequestParam String content) {
-        CommentDTO updatedComment = commentService.updateComment(id, content);
-        return ResponseEntity.ok(updatedComment);
+        CommentDTO comment = commentService.updateComment(id, content);
+        return "redirect:/topic-discussions/view/" + comment.getTopicDiscussionId();
     }
 
-    @DeleteMapping("/api/comments/{id}")
-    @ResponseBody
-    public ResponseEntity<Void> deleteComment(@PathVariable Long id) {
+    @PostMapping("/comments/delete/{id}")
+    public String deleteComment(@PathVariable Long id) {
+        CommentDTO comment = commentService.getCommentById(id);
+        Long discussionId = comment.getTopicDiscussionId();
         commentService.deleteComment(id);
-        return ResponseEntity.ok().build();
+        return "redirect:/topic-discussions/view/" + discussionId;
     }
 } 
