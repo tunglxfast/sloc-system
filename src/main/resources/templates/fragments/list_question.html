@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>list_question</title>
+</head>
+<body>
+    <div th:fragment="listQuestionFragment" 
+        th:each="question, iterStat : ${topic.questions}" 
+        class="question" 
+        style="margin-bottom: 3%;">
+      <h2>
+          Question <span th:text="${iterStat.count}"></span>:
+          <span th:text="${question.content}">Question content</span>
+      </h2>
+
+      <!-- Loop through the answer list -->
+      <div th:with="questionType = ${question.questionType == 'CHOICE_ONE' ? 'radio' : 'checkbox'}">
+          <div th:each="answer : ${question.getAnswers()}">
+              <input th:if="${questionType == 'checkbox'}"
+                      class="form-check-input" 
+                      type="checkbox"
+                      th:name="'question_' + ${question.id} + '_answer_' + ${answer.id}"
+                      th:value="${answer.content}" 
+                      th:id="'answer_' + ${answer.id}">
+              <input th:if="${questionType != 'checkbox'}"
+                      class="form-check-input"
+                      th:type="${questionType}"
+                      th:name="'question_' + ${question.id}"
+                      th:value="${answer.content}"
+                      th:id="'answer_' + ${answer.id}">
+              <label class="form-check-label" th:for="'answer_' + ${answer.id}" th:text="${answer.content}">
+                  Answer content
+              </label>
+          </div>
+      </div>
+    </div>
+</body>
+</html>

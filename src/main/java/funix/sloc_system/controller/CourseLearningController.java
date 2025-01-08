@@ -225,11 +225,11 @@ public class CourseLearningController {
         }
         TopicType topicType = topic.getTopicType();
         if (topicType.equals(TopicType.EXAM)){
-            return "course/course_exam";
+            return "course/topic_exam";
         } else if (topicType.equals(TopicType.QUIZ)) {
-            return "course/course_quiz";
+            return "course/topic_quiz";
         } else {
-            return "course/course_lesson";
+            return "course/topic_lesson";
         }
     }
 
@@ -264,7 +264,7 @@ public class CourseLearningController {
             model.addAttribute("previousTopicUrl", previousTopicUrl);
 
         }
-        return "course/course_quiz";
+        return "course/topic_quiz";
     }
 
     @PostMapping("/{courseId}/exam/submit")
@@ -299,6 +299,6 @@ public class CourseLearningController {
             model.addAttribute("previousTopicUrl", previousTopicUrl);
 
         }
-        return "course/course_exam";
+        return "course/topic_exam";
     }
 }

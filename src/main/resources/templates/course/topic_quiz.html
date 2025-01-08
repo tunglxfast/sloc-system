@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Chi tiết khóa học</title>
+    <title>Quiz Topic</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/bootstrap.bundle.min.js"></script>
@@ -60,28 +60,8 @@
                 <form th:action="@{/courses/{id}/quiz/submit(id=${courseId})}" method="post" id="quiz-form">
                     <input type="hidden" name="quizId" th:value="${topic.id}">
 
-                    <!-- Loop through the question list -->
-                    <div th:each="question, iterStat : ${topic.questions}" class="question" style="margin-bottom: 3%;">
-                        <h2>
-                            Question <span th:text="${iterStat.count}"></span>:
-                            <span th:text="${question.content}">Question content</span>
-                        </h2>
-
-                        <!-- Loop through the answer list -->
-                        <div th:with="questionType = ${question.questionType == 'CHOICE_ONE' ? 'radio' : 'checkbox'}">
-                            <div th:each="answer : ${question.getAnswers()}">
-                                <input class="form-check-input"
-                                       th:type="${questionType}"
-                                       th:name="'question_' + ${question.id}"
-                                       th:value="${answer.id}"
-                                       th:id="'answer_' + ${answer.id}">
-                                <label class="form-check-label" th:for="'answer_' + ${answer.id}" th:text="${answer.content}">
-                                    Answer content
-                                </label>
-                            </div>
-                        </div>
-
-                    </div>
+                    <!-- Loop through the questions list -->
+                    <div th:replace="/fragments/list_question :: listQuestionFragment"></div>
 
                     <button type="submit" class="btn btn-primary" style="margin-top: 20px;">Submit Quiz</button>
                 </form>
