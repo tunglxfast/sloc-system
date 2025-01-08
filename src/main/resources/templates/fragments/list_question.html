@@ -9,13 +9,14 @@
         th:each="question, iterStat : ${topic.questions}" 
         class="question" 
         style="margin-bottom: 3%;">
-      <h2>
-          Question <span th:text="${iterStat.count}"></span>:
+      <h5>
+          <b>Question <span th:text="${iterStat.count}"></span>: </b>
           <span th:text="${question.content}">Question content</span>
-      </h2>
+          <em th:if="${question.questionType == 'CHOICE_MANY'}"><small>(May select multiple answers)</small></em>
+      </h5>
 
       <!-- Loop through the answer list -->
-      <div th:with="questionType = ${question.questionType == 'CHOICE_ONE' ? 'radio' : 'checkbox'}">
+      <div th:with="questionType = ${question.questionType == 'CHOICE_MANY' ? 'checkbox' : 'radio'}">
           <div th:each="answer : ${question.getAnswers()}">
               <input th:if="${questionType == 'checkbox'}"
                       class="form-check-input" 
