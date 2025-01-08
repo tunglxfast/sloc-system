@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -66,6 +67,9 @@ public class EnrollmentService {
 
     public Set<Enrollment> getEnrollmentsByUserId(Long userId) {
         User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return new HashSet<>();
+        }
         return enrollmentRepository.findByUser(user);
     }
 
@@ -75,6 +79,9 @@ public class EnrollmentService {
 
     public Set<Enrollment> getEnrollmentsByCourseId(Long courseId) {
         Course course = courseRepository.findById(courseId).orElse(null);
+        if (course == null) {
+            return new HashSet<>();
+        }
         return enrollmentRepository.findByCourse(course);
     }
 
@@ -95,6 +102,16 @@ public class EnrollmentService {
             }
         }
         return courseDTOSet.stream().sorted(Comparator.comparing(CourseDTO::getId)).toList();
+    }
+
+    @Transactional
+    public List<Long> getEnrolledCourseIds(Long userId) {
+        Set<Enrollment> enrollments = getEnrollmentsByUserId(userId);
+        List<Long> courseIds = new ArrayList<>();
+        for (Enrollment enrollment : enrollments) {
+            courseIds.add(enrollment.getCourse().getId());
+        }
+        return courseIds;
     }
     
 

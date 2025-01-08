@@ -465,4 +465,16 @@ public class CourseService {
         return courses;
     }
 
+    public Page<Course> getCoursesPagination(String title, String category, Pageable pageable) {
+        if (title != null && !title.isEmpty() && category != null && !category.isEmpty()) {
+            return searchCoursesByTitleAndCategoryWithPagination(title, category, pageable);
+        } else if (title != null && !title.isEmpty()) {
+            return searchCoursesByTitleWithPagination(title, pageable);
+        } else if (category != null && !category.isEmpty()) {
+            return searchCoursesByCategoryWithPagination(category, pageable);
+        } else {
+            return getCoursesWithPagination(pageable);
+        }
+    }
+
 }

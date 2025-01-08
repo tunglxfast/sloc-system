@@ -19,4 +19,7 @@ public class CommentDTO {
     private String createdByUsername;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // helper fields
+    private boolean createdByInstructor;
 } 

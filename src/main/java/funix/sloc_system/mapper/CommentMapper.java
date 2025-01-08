@@ -2,6 +2,8 @@ package funix.sloc_system.mapper;
 
 import funix.sloc_system.dto.CommentDTO;
 import funix.sloc_system.entity.Comment;
+import funix.sloc_system.enums.RoleType;
+
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,6 +24,7 @@ public class CommentMapper {
         dto.setCreatedByUsername(comment.getCreatedBy().getUsername());
         dto.setCreatedAt(comment.getCreatedAt());
         dto.setUpdatedAt(comment.getUpdatedAt());
+        dto.setCreatedByInstructor(comment.getCreatedBy().getStringRoles().contains(RoleType.INSTRUCTOR.name()));
 
         return dto;
     }

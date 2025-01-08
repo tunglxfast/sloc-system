@@ -60,6 +60,8 @@ public class CommentService {
 
         discussion.addComment(comment);
         Comment savedComment = commentRepository.save(comment);
+        discussion.setUpdatedAt(LocalDateTime.now());
+        topicDiscussionRepository.save(discussion);
         return commentMapper.toDTO(savedComment);
     }
 

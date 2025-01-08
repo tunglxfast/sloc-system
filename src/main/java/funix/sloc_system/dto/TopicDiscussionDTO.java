@@ -22,4 +22,5 @@ public class TopicDiscussionDTO {
     private LocalDateTime updatedAt;
     private int commentCount;
     private List<CommentDTO> comments;
+    
 } 

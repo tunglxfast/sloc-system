@@ -3,8 +3,10 @@ package funix.sloc_system.controller;
 import funix.sloc_system.dto.CommentDTO;
 import funix.sloc_system.dto.TopicDiscussionDTO;
 import funix.sloc_system.entity.User;
+import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.CommentService;
 import funix.sloc_system.service.TopicDiscussionService;
+import funix.sloc_system.util.AppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -23,78 +25,77 @@ public class TopicDiscussionController {
     @Autowired
     private CommentService commentService;
 
-    @GetMapping("/{topicId}")
-    public String getDiscussionsByTopic(@PathVariable Long topicId, Model model) {
-        List<TopicDiscussionDTO> discussions = topicDiscussionService.getDiscussionsByTopicId(topicId);
-        model.addAttribute("discussions", discussions);
-        model.addAttribute("topicId", topicId);
-        return "topic_discussions";
-    }
+    @Autowired
+    private AppUtil appUtil;
 
-    @GetMapping("/view/{id}")
-    public String viewDiscussion(@PathVariable Long id, Model model) {
-        TopicDiscussionDTO discussion = topicDiscussionService.getDiscussionById(id);
-        List<CommentDTO> comments = commentService.getCommentsByDiscussionId(id);
+    // @GetMapping("/{topicId}")
+    // public String getDiscussionsByTopic(@PathVariable Long topicId, Model model) {
+    //     List<TopicDiscussionDTO> discussions = topicDiscussionService.getDiscussionsByTopicId(topicId);
+    //     model.addAttribute("discussions", discussions);
+    //     model.addAttribute("topicId", topicId);
+    //     return "discussion/topic_discussions";
+    // }
+
+    @GetMapping("/view/{discussionId}")
+    public String viewDiscussion(@PathVariable Long discussionId, Model model) {
+        TopicDiscussionDTO discussion = topicDiscussionService.getDiscussionById(discussionId);
+        String discussionBackUrl = appUtil.getDiscussionBackUrl(discussion);
+        List<CommentDTO> comments = commentService.getCommentsByDiscussionId(discussionId);
         model.addAttribute("discussion", discussion);
         model.addAttribute("comments", comments);
-        return "view_discussion";
-    }
-
-    @GetMapping("/create/{topicId}")
-    public String showCreateDiscussionForm(@PathVariable Long topicId, Model model) {
-        model.addAttribute("topicId", topicId);
-        return "create_discussion";
+        model.addAttribute("discussionBackUrl", discussionBackUrl);
+        return "discussion/view_discussion";
     }
 
     @PostMapping("/create/{topicId}")
     public String createDiscussion(
             @PathVariable Long topicId,
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal SecurityUser securityUser,
             @RequestParam String title,
             @RequestParam String content) {
-        topicDiscussionService.createDiscussion(topicId, user.getId(), title, content);
-        return "redirect:/topic-discussions/" + topicId;
+        TopicDiscussionDTO discussion = topicDiscussionService.createDiscussion(topicId, securityUser.getUserId(), title, content);
+        return "redirect:/topic-discussions/view/" + discussion.getId();
     }
 
-    @PostMapping("/{id}/comment")
+    @PostMapping("/comments/create/{discussionId}")
     public String addComment(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User user,
+            @PathVariable Long discussionId,
+            @AuthenticationPrincipal SecurityUser securityUser,
             @RequestParam String content) {
-        commentService.createComment(id, user.getId(), content);
-        return "redirect:/topic-discussions/view/" + id;
+        commentService.createComment(discussionId, securityUser.getUserId(), content);
+        return "redirect:/topic-discussions/view/" + discussionId;
     }
 
-    @PostMapping("/update/{id}")
+    @PostMapping("/update/{discussionId}")
     public String updateDiscussion(
-            @PathVariable Long id,
+            @PathVariable Long discussionId,
             @RequestParam String title,
             @RequestParam String content) {
-        TopicDiscussionDTO discussion = topicDiscussionService.updateDiscussion(id, title, content);
-        return "redirect:/topic-discussions/view/" + id;
+        topicDiscussionService.updateDiscussion(discussionId, title, content);
+        return "redirect:/topic-discussions/view/" + discussionId;
     }
 
-    @PostMapping("/delete/{id}")
-    public String deleteDiscussion(@PathVariable Long id) {
-        TopicDiscussionDTO discussion = topicDiscussionService.getDiscussionById(id);
-        Long topicId = discussion.getTopicId();
-        topicDiscussionService.deleteDiscussion(id);
-        return "redirect:/topic-discussions/" + topicId;
+    @PostMapping("/delete/{discussionId}")
+    public String deleteDiscussion(@PathVariable Long discussionId) {
+        TopicDiscussionDTO discussion = topicDiscussionService.getDiscussionById(discussionId);
+        String discussionBackUrl = appUtil.getDiscussionBackUrl(discussion);
+        topicDiscussionService.deleteDiscussion(discussionId);
+        return "redirect:" + discussionBackUrl;
     }
 
-    @PostMapping("/comments/update/{id}")
+    @PostMapping("/comments/update/{commentId}")
     public String updateComment(
-            @PathVariable Long id,
+            @PathVariable Long commentId,
             @RequestParam String content) {
-        CommentDTO comment = commentService.updateComment(id, content);
+        CommentDTO comment = commentService.updateComment(commentId, content);
         return "redirect:/topic-discussions/view/" + comment.getTopicDiscussionId();
     }
 
-    @PostMapping("/comments/delete/{id}")
-    public String deleteComment(@PathVariable Long id) {
-        CommentDTO comment = commentService.getCommentById(id);
+    @PostMapping("/comments/delete/{commentId}")
+    public String deleteComment(@PathVariable Long commentId) {
+        CommentDTO comment = commentService.getCommentById(commentId);
         Long discussionId = comment.getTopicDiscussionId();
-        commentService.deleteComment(id);
+        commentService.deleteComment(commentId);
         return "redirect:/topic-discussions/view/" + discussionId;
     }
 } 
