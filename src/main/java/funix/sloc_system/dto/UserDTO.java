@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,11 @@ public class UserDTO {
     private String fullName;
     private boolean locked;
     private Set<RoleDTO> roles;
+    private String verificationToken;
+    private LocalDateTime tokenExpiryDate;
+    private boolean verified;
+
+    // methods
 
     public Set<String> getStringRoles() {
         return this.roles.stream().map(RoleDTO::getName).collect(Collectors.toSet());

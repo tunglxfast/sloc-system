@@ -5,13 +5,8 @@ import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.RoleType;
 import funix.sloc_system.repository.RoleRepository;
 import funix.sloc_system.repository.UserRepository;
-import funix.sloc_system.service.UserService;
 import funix.sloc_system.service.EmailService;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
+import funix.sloc_system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -20,6 +15,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Điều khiển trang đăng ký tài khoản.
@@ -49,7 +49,8 @@ public class RegisterController {
                            @RequestParam String username,
                            @RequestParam String email,
                            @RequestParam String fullName,
-                           @RequestParam String password) {
+                           @RequestParam String password,
+                           RedirectAttributes redirectAttributes) {
         // Check username or email already exist
         String checkRegistered = userService.checkRegistered(username, email);
 
@@ -62,6 +63,8 @@ public class RegisterController {
             newUser.setLocked(false);
             newUser.setFailedAttempts(0);
             registerNewUser(newUser);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Create user successfully. Please go to email for verification.");
             return "redirect:/login";
         } else {
             model.addAttribute("error-message", checkRegistered);

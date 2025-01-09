@@ -27,6 +27,9 @@ public class UserMapper {
         dto.setLocked(user.isLocked());
         // Map roles
         dto.setRoles(roleMapper.toDTO(user.getRoles()));
+        dto.setVerificationToken(user.getVerificationToken());
+        dto.setTokenExpiryDate(user.getTokenExpiryDate());
+        dto.setVerified(user.isVerified());
         
         return dto;
     }
@@ -42,6 +45,9 @@ public class UserMapper {
         user.setEmail(dto.getEmail());
         user.setFullName(dto.getFullName());
         user.setLocked(dto.isLocked());
+        user.setVerified(dto.isVerified());
+        user.setVerificationToken(dto.getVerificationToken());
+        user.setTokenExpiryDate(dto.getTokenExpiryDate());
         
         // Map roles if present
         if (dto.getRoles() != null) {
