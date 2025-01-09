@@ -4,6 +4,7 @@ import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.dto.UserDTO;
+import funix.sloc_system.dto.TopicDiscussionDTO;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.entity.User;
@@ -13,8 +14,11 @@ import funix.sloc_system.mapper.UserMapper;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.CourseService;
 import funix.sloc_system.service.UserService;
+import funix.sloc_system.service.TopicDiscussionService;
 import funix.sloc_system.util.AppUtil;
+import funix.sloc_system.util.CourseDiscussionStatsHolder;
 import funix.sloc_system.util.CourseEditingHolder;
+import funix.sloc_system.util.RedirectUrlHelper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,8 +27,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.security.Principal;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 @Controller
 @RequestMapping("/instructor")
@@ -39,10 +46,12 @@ public class InstructorViewController {
     private CourseMapper courseMapper;
     @Autowired
     private AppUtil appUtil;
+    @Autowired
+    private TopicDiscussionService topicDiscussionService;
 
     @GetMapping(value = {"", "/", "/courses"})
-    public String showInstructorManageList(@AuthenticationPrincipal SecurityUser securityUser,
-                                        Model model){
+    public String showDashboard(@AuthenticationPrincipal SecurityUser securityUser,
+                                Model model){
         User user = userService.findById(securityUser.getUserId());
         UserDTO userDTO = userMapper.toDTO(user);
         List<Course> courseList;
@@ -54,18 +63,15 @@ public class InstructorViewController {
 
         List<CourseDTO> courseDTOList = courseMapper.toDTO(courseList);
         List<CourseEditingHolder> courseEditingHolders = appUtil.getCourseEditingHolders(courseDTOList);
+        
+        // Get discussion stats for each course
+        List<CourseDiscussionStatsHolder> courseDiscussionStats = getCourseDiscussionStats(courseDTOList);
+
         model.addAttribute("user", userDTO);
         model.addAttribute("courseEditingHolders", courseEditingHolders);
         model.addAttribute("courses", courseDTOList);
-        return "instructor/instructor_courses";
-    }
-
-    @GetMapping("/notifications")
-    public String getNotifications(Principal principal, Model model) {
-        User instructor = userService.findByUsername(principal.getName());
-        List<Course> rejectedCourses = courseService.getInstructorRejectedCourses(instructor);
-        model.addAttribute("rejectedCourses", rejectedCourses);
-        return "instructor/notifications";
+        model.addAttribute("courseDiscussionStats", courseDiscussionStats);
+        return "instructor/instructor_dashboard";
     }
 
     @GetMapping("/course/{courseId}/view")
@@ -77,7 +83,7 @@ public class InstructorViewController {
             courseDTO = appUtil.getEditingCourseDTO(courseId);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/instructor/courses";
+            return RedirectUrlHelper.REDIRECT_INSTRUCTOR_DASHBOARD;
         }
         model.addAttribute("course", courseDTO);
         return "instructor/course_view";
@@ -94,14 +100,14 @@ public class InstructorViewController {
             courseDTO = appUtil.getEditingCourseDTO(courseId);
         } catch (Exception e) { 
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/instructor/courses";
+            return RedirectUrlHelper.REDIRECT_INSTRUCTOR_DASHBOARD;
         }
         if (chapterNumber < 1
             || topicNumber < 1
             || chapterNumber > courseDTO.getChapters().size()
             || topicNumber > courseDTO.getChapters().get(chapterNumber - 1).getTopics().size()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Chapter or topic not found");
-            return "redirect:/instructor/courses";
+            return RedirectUrlHelper.REDIRECT_INSTRUCTOR_DASHBOARD;
         }
 
         ChapterDTO chapterDTO = courseDTO.getChapters().get(chapterNumber - 1);
@@ -113,7 +119,7 @@ public class InstructorViewController {
             nextTopic = appUtil.findNextTopic(topicDTO.getId()); 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/instructor/courses";
+            return RedirectUrlHelper.REDIRECT_INSTRUCTOR_DASHBOARD;
         }
 
         if (nextTopic == null) {
@@ -129,5 +135,63 @@ public class InstructorViewController {
         model.addAttribute("topic", topicDTO);
         model.addAttribute("nextTopicUrl", nextTopicUrl);
         return "instructor/topic_view";
+    }
+
+    @GetMapping("/course/{courseId}/discussions")
+    public String viewCourseDiscussions(@PathVariable Long courseId,
+                                  @AuthenticationPrincipal SecurityUser securityUser,
+                                  RedirectAttributes redirectAttributes,
+                                  Model model) {
+        CourseDTO courseDTO;
+        try {
+            courseDTO = appUtil.getEditingCourseDTO(courseId);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return RedirectUrlHelper.REDIRECT_INSTRUCTOR_DASHBOARD;
+        }
+
+        Map<Long, List<TopicDiscussionDTO>> discussionsByTopic = getDiscussionsByTopic(courseId);
+
+        model.addAttribute("course", courseDTO);
+        model.addAttribute("discussionsByTopic", discussionsByTopic);
+        return "instructor/course_discussions";
+    }
+
+    // --- Helper methods ---
+
+    // Get discussions by topic
+    private Map<Long, List<TopicDiscussionDTO>> getDiscussionsByTopic(Long courseId) {
+        List<TopicDiscussionDTO> discussions = topicDiscussionService.getDiscussionsByCourseId(courseId);
+        Map<Long, List<TopicDiscussionDTO>> discussionsByTopic = new HashMap<>();
+        for (TopicDiscussionDTO discussion : discussions) {
+            Long topicId = discussion.getTopicId();
+            if (discussionsByTopic.containsKey(topicId)) {
+                discussionsByTopic.get(topicId).add(discussion);
+            } else {
+                discussionsByTopic.put(topicId, new ArrayList<>());
+                discussionsByTopic.get(topicId).add(discussion);
+            }
+        }
+        return discussionsByTopic;
+    }
+
+    // Get course discussion stats
+    private List<CourseDiscussionStatsHolder> getCourseDiscussionStats(List<CourseDTO> courseDTOList) {
+        List<CourseDiscussionStatsHolder> courseDiscussionStats = new ArrayList<>();
+        for (CourseDTO course : courseDTOList) {
+            int topicCount = course.getChapters().stream()
+                    .mapToInt(chapter -> chapter.getTopics().size())
+                    .sum();
+            List<TopicDiscussionDTO> discussions = topicDiscussionService.getDiscussionsByCourseId(course.getId());
+            CourseDiscussionStatsHolder stats = new CourseDiscussionStatsHolder(
+                course.getId(),
+                course.getTitle(),
+                course.getCategory().getName(),
+                topicCount,
+                discussions.size()
+            );
+            courseDiscussionStats.add(stats);
+        }
+        return courseDiscussionStats;
     }
 }

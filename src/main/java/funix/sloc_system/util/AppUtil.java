@@ -487,19 +487,5 @@ public class AppUtil {
 
         return (((double) learnedTopics.size())/topics.size()) * 100;
     }
-
-    public String getDiscussionBackUrl(TopicDiscussionDTO discussion) {
-      Long topicId = discussion.getTopicId();
-      Topic topic = topicRepository.findById(topicId).orElse(null); 
-      if (topic == null) {
-        return "/courses/";
-      }
-      else {
-        Long courseId = topic.getChapter().getCourse().getId();
-        int chapterNumber = topic.getChapter().getSequence();
-        int topicNumber = topic.getSequence();
-        return String.format("/courses/%d/%d_%d", courseId, chapterNumber, topicNumber);
-      }
-    }
 }
 

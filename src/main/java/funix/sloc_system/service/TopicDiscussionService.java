@@ -86,4 +86,14 @@ public class TopicDiscussionService {
                 .orElseThrow(() -> new EntityNotFoundException("Discussion not found"));
         topicDiscussionRepository.delete(discussion);
     }
+
+    public TopicDiscussion getTopicDiscussionEntity(Long id) {
+        return topicDiscussionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Discussion not found"));
+    }
+
+    public List<TopicDiscussionDTO> getDiscussionsByCourseId(Long courseId) {
+        List<TopicDiscussion> discussions = topicDiscussionRepository.findByCourseIdOrderByUpdatedAtDesc(courseId);
+        return topicDiscussionMapper.toDTO(discussions);
+    }
 } 

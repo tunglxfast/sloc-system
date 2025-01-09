@@ -28,9 +28,12 @@ public class TopicDiscussionMapper {
         return dto;
     }
 
-    public List<TopicDiscussionDTO> toDTOs(List<TopicDiscussion> topicDiscussions) {
+    public List<TopicDiscussionDTO> toDTO(List<TopicDiscussion> topicDiscussions) {
+        if (topicDiscussions == null) {
+            return null;
+        }
         return topicDiscussions.stream()
-            .map(this::toDTO)
-            .collect(Collectors.toList());
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 } 
