@@ -25,12 +25,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.persistence.EntityNotFoundException;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CourseService {
@@ -110,6 +112,12 @@ public class CourseService {
 
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
+    }
+
+    public List<CourseDTO> getAllCoursesDTO() {
+        return courseRepository.findAll().stream()
+            .map(courseMapper::toDTO)
+            .collect(Collectors.toList());
     }
 
     public Course findById(Long id) {
@@ -477,4 +485,28 @@ public class CourseService {
         }
     }
 
+    @Transactional
+    public void updateCourseStatus(Long courseId, ApprovalStatus approvalStatus, ContentStatus contentStatus) {
+        Course course = findById(courseId);
+        if (course == null) {
+            throw new EntityNotFoundException("Course not found");
+        }
+        course.setApprovalStatus(approvalStatus);
+        course.setContentStatus(contentStatus);
+        courseRepository.save(course);
+    }
+
+    @Transactional
+    public void updateCourseInstructor(Long courseId, Long instructorId) {
+        Course course = findById(courseId);
+        if (course == null) {
+            throw new EntityNotFoundException("Course not found");
+        }
+        User instructor = userRepository.findById(instructorId).orElse(null);
+        if (instructor == null) {
+            throw new IllegalArgumentException("Instructor not found");
+        }
+        course.setInstructor(instructor);
+        courseRepository.save(course);
+    }
 }

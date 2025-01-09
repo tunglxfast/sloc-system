@@ -1,6 +1,7 @@
 package funix.sloc_system.service;
 
 import funix.sloc_system.entity.User;
+import funix.sloc_system.enums.RoleType;
 import funix.sloc_system.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -60,5 +61,9 @@ public class UserService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    public List<User> getAllInstructors() {
+        return userRepository.findAllInstructors();
     }
 }
