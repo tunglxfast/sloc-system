@@ -2,15 +2,12 @@ package funix.sloc_system.controller;
 
 import funix.sloc_system.dto.CommentDTO;
 import funix.sloc_system.dto.TopicDiscussionDTO;
-import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Topic;
-import funix.sloc_system.entity.TopicDiscussion;
-import funix.sloc_system.entity.User;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.CommentService;
 import funix.sloc_system.service.TopicDiscussionService;
 import funix.sloc_system.repository.TopicRepository;
-import funix.sloc_system.repository.UserRepository;
+import funix.sloc_system.util.AppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -33,19 +30,11 @@ public class TopicDiscussionController {
     private TopicRepository topicRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private AppUtil appUtil;
 
     // --- Constants ---
     private final String ERROR_MSG_KEY = "errorMessage";
     private final String ERROR_MSG_ACCESS_DENIED = "You are not allowed to access this discussion";
-
-    // @GetMapping("/{topicId}")
-    // public String getDiscussionsByTopic(@PathVariable Long topicId, Model model) {
-    //     List<TopicDiscussionDTO> discussions = topicDiscussionService.getDiscussionsByTopicId(topicId);
-    //     model.addAttribute("discussions", discussions);
-    //     model.addAttribute("topicId", topicId);
-    //     return "discussion/topic_discussions";
-    // }
 
     @GetMapping("/view/{discussionId}")
     public String viewDiscussion(@PathVariable Long discussionId, 
@@ -53,24 +42,14 @@ public class TopicDiscussionController {
                                 @AuthenticationPrincipal SecurityUser securityUser, 
                                 Model model, 
                                 RedirectAttributes redirectAttributes) {
-        if (!checkAccessAbility(discussionId, securityUser)) {
+        if (!checkCourseAccessAbilityByDiscussionId(discussionId, securityUser.getUserId())) {
             redirectAttributes.addFlashAttribute(ERROR_MSG_KEY, ERROR_MSG_ACCESS_DENIED);
             return "redirect:/courses/";
         }
 
         try {
-            Long courseId = topicDiscussionService.getCourseId(discussionId);
-            TopicDiscussionDTO discussion = topicDiscussionService.getDiscussionById(discussionId);
-            String discussionBackUrl = getDiscussionBackUrl(discussion);
-            List<CommentDTO> comments = commentService.getCommentsByDiscussionId(discussionId);
-            model.addAttribute("discussion", discussion);
-            model.addAttribute("comments", comments);
-            if (fromInstructor != null && fromInstructor == true) {
-                model.addAttribute("discussionBackUrl", 
-                    String.format("/instructor/course/%d/discussions", courseId));
-            } else {
-                model.addAttribute("discussionBackUrl", discussionBackUrl);
-            }
+            setViewDiscussionModel(discussionId, fromInstructor, model);
+            
             return "discussion/view_discussion";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error occurred while viewing discussion");
@@ -85,7 +64,7 @@ public class TopicDiscussionController {
             @RequestParam String title,
             @RequestParam String content,
             RedirectAttributes redirectAttributes) {
-        if (!checkAccessAbility(topicId, securityUser)) {
+        if (!appUtil.checkCourseAccessAbilityByTopicId(topicId, securityUser.getUserId())) {
             redirectAttributes.addFlashAttribute(ERROR_MSG_KEY, ERROR_MSG_ACCESS_DENIED);
             return "redirect:/courses/";
         }
@@ -96,38 +75,50 @@ public class TopicDiscussionController {
     @PostMapping("/comments/create/{discussionId}")
     public String addComment(
             @PathVariable Long discussionId,
+            @RequestParam(required = false) Boolean fromInstructor,
             @AuthenticationPrincipal SecurityUser securityUser,
             @RequestParam String content,
-            RedirectAttributes redirectAttributes) {
-        if (!checkAccessAbility(discussionId, securityUser)) {
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        if (!checkCourseAccessAbilityByDiscussionId(discussionId, securityUser.getUserId())) {
             redirectAttributes.addFlashAttribute(ERROR_MSG_KEY, ERROR_MSG_ACCESS_DENIED);
             return "redirect:/courses/";
         }
         commentService.createComment(discussionId, securityUser.getUserId(), content);
+
+        if (fromInstructor != null) {
+            redirectAttributes.addFlashAttribute("fromInstructor", fromInstructor);
+        }
         return "redirect:/topic-discussions/view/" + discussionId;
     }
 
     @PostMapping("/update/{discussionId}")
     public String updateDiscussion(
             @PathVariable Long discussionId,
+            @RequestParam(required = false) Boolean fromInstructor,
             @RequestParam String title,
             @RequestParam String content,
             @AuthenticationPrincipal SecurityUser securityUser,
             RedirectAttributes redirectAttributes) {
-        if (!checkAccessAbility(discussionId, securityUser)) {
+        if (!checkCourseAccessAbilityByDiscussionId(discussionId, securityUser.getUserId())) {
             redirectAttributes.addFlashAttribute(ERROR_MSG_KEY, ERROR_MSG_ACCESS_DENIED);
             return "redirect:/courses/";
         }
+
         topicDiscussionService.updateDiscussion(discussionId, title, content);
+
+        if (fromInstructor != null) {
+            redirectAttributes.addFlashAttribute("fromInstructor", fromInstructor);
+        }
         return "redirect:/topic-discussions/view/" + discussionId;
     }
 
     @PostMapping("/delete/{discussionId}")
     public String deleteDiscussion(@PathVariable Long discussionId,
-                                  @RequestParam(required = false) String isInstructor,
-                                  @AuthenticationPrincipal SecurityUser securityUser,
-                                  RedirectAttributes redirectAttributes) {
-        if (!checkAccessAbility(discussionId, securityUser)) {
+                                @RequestParam(required = false) Boolean fromInstructor,
+                                @AuthenticationPrincipal SecurityUser securityUser,
+                                RedirectAttributes redirectAttributes) {
+        if (!checkCourseAccessAbilityByDiscussionId(discussionId, securityUser.getUserId())) {
             redirectAttributes.addFlashAttribute(ERROR_MSG_KEY, ERROR_MSG_ACCESS_DENIED);
             return "redirect:/courses/";
         }
@@ -136,7 +127,8 @@ public class TopicDiscussionController {
             TopicDiscussionDTO discussion = topicDiscussionService.getDiscussionById(discussionId);
             String discussionBackUrl = getDiscussionBackUrl(discussion);
             topicDiscussionService.deleteDiscussion(discussionId);
-            if (isInstructor != null && isInstructor.equals("instructor")) {
+
+            if (fromInstructor != null && fromInstructor == true) {
                 return String.format("redirect:/instructor/course/%d/discussions", courseId);
             } else {
                 return "redirect:" + discussionBackUrl;
@@ -151,27 +143,39 @@ public class TopicDiscussionController {
     public String updateComment(
             @PathVariable Long commentId,
             @RequestParam String content,
+            @RequestParam(required = false) Boolean fromInstructor,
             @AuthenticationPrincipal SecurityUser securityUser,
             RedirectAttributes redirectAttributes) {
-        if (!checkAccessAbility(commentId, securityUser)) {
+        if (!checkCourseAccessAbilityByCommentId(commentId, securityUser.getUserId())) {
             redirectAttributes.addFlashAttribute(ERROR_MSG_KEY, ERROR_MSG_ACCESS_DENIED);
             return "redirect:/courses/";
         }
         CommentDTO comment = commentService.updateComment(commentId, content);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Comment updated successfully");
+        if (fromInstructor != null) {
+            redirectAttributes.addFlashAttribute("fromInstructor", fromInstructor);
+        }
         return "redirect:/topic-discussions/view/" + comment.getTopicDiscussionId();
     }
 
     @PostMapping("/comments/delete/{commentId}")
     public String deleteComment(@PathVariable Long commentId,
-                               @AuthenticationPrincipal SecurityUser securityUser,
-                               RedirectAttributes redirectAttributes) {
-        if (!checkAccessAbility(commentId, securityUser)) {
+                                @RequestParam(required = false) Boolean fromInstructor,
+                                @AuthenticationPrincipal SecurityUser securityUser,
+                                RedirectAttributes redirectAttributes) {
+        if (!checkCourseAccessAbilityByCommentId(commentId, securityUser.getUserId())) {
             redirectAttributes.addFlashAttribute(ERROR_MSG_KEY, ERROR_MSG_ACCESS_DENIED);
             return "redirect:/courses/";
         }
         CommentDTO comment = commentService.getCommentById(commentId);
         Long discussionId = comment.getTopicDiscussionId();
         commentService.deleteComment(commentId);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Comment deleted successfully");
+        if (fromInstructor != null) {
+            redirectAttributes.addFlashAttribute("fromInstructor", fromInstructor);
+        }
         return "redirect:/topic-discussions/view/" + discussionId;
     }
 
@@ -192,27 +196,53 @@ public class TopicDiscussionController {
         }
     }
 
-    // Check if user has access to this feature
-    private boolean checkAccessAbility(Long discussionId, SecurityUser securityUser) {
-        Long userId = securityUser.getUserId();
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
+    /* 
+     * Check if user has access to this discussion.
+     * 
+     * @param discussionId the id of the discussion
+     * @param userId the id of the user
+     * @return true if user has access to this discussion, false otherwise
+     */
+    private boolean checkCourseAccessAbilityByDiscussionId(Long discussionId, Long userId) {
+        TopicDiscussionDTO discussion = topicDiscussionService.getDiscussionById(discussionId);
+        Long topicId = discussion.getTopicId();
+        Topic topic = topicRepository.findById(topicId).orElse(null);
+        if (topic == null) {
             return false;
         }
-        
-        TopicDiscussion discussion = topicDiscussionService.getTopicDiscussionEntity(discussionId);
-        if (discussion == null) {
-            return false;
+        return appUtil.checkCourseAccessAbilityByTopicId(topicId, userId);
+    }
+
+
+    private boolean checkCourseAccessAbilityByCommentId(Long commentId, Long userId) {
+        CommentDTO comment = commentService.getCommentById(commentId);
+        Long discussionId = comment.getTopicDiscussionId();
+        return checkCourseAccessAbilityByDiscussionId(discussionId, userId);
+    }
+
+    private void setViewDiscussionModel(Long discussionId, Boolean fromInstructor, Model model) {
+        Long courseId = topicDiscussionService.getCourseId(discussionId);
+        TopicDiscussionDTO discussion = topicDiscussionService.getDiscussionById(discussionId);
+        String discussionBackUrl = getDiscussionBackUrl(discussion);
+        List<CommentDTO> comments = commentService.getCommentsByDiscussionId(discussionId);
+        model.addAttribute("discussion", discussion);
+        model.addAttribute("comments", comments);
+
+
+        boolean isFromInstructor = false;
+        if (fromInstructor != null && fromInstructor == true) {
+            isFromInstructor = true;
+        } else if (model.getAttribute("fromInstructor") != null 
+                && model.getAttribute("fromInstructor").equals(true)) {
+            isFromInstructor = true;
         }
 
-        // is user enrolled in the course or is instructor of the course
-        Course course = discussion.getTopic().getChapter().getCourse();
-        if (course == null) {
-            return false;
-        }   
-        
-        boolean isEnrolled = course.getEnrollments().stream().anyMatch(enrollment -> enrollment.getUser().getId().equals(userId));
-        boolean isInstructor = course.getInstructor().getId().equals(userId);
-        return isEnrolled || isInstructor;
+        if (isFromInstructor) {
+            model.addAttribute("discussionBackUrl", 
+                String.format("/instructor/course/%d/discussions", courseId));
+            model.addAttribute("fromInstructor", isFromInstructor);
+        } else {
+            model.addAttribute("discussionBackUrl", discussionBackUrl);
+        }
     }
 } 
