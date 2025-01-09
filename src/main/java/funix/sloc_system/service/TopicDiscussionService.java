@@ -96,4 +96,9 @@ public class TopicDiscussionService {
         List<TopicDiscussion> discussions = topicDiscussionRepository.findByCourseIdOrderByUpdatedAtDesc(courseId);
         return topicDiscussionMapper.toDTO(discussions);
     }
+
+    public Long getCourseId(Long discussionId) {
+        TopicDiscussion discussion = getTopicDiscussionEntity(discussionId);
+        return discussion.getTopic().getChapter().getCourse().getId();
+    }
 } 

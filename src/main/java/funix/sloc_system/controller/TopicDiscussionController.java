@@ -49,6 +49,7 @@ public class TopicDiscussionController {
 
     @GetMapping("/view/{discussionId}")
     public String viewDiscussion(@PathVariable Long discussionId, 
+                                @RequestParam(required = false) Boolean fromInstructor,
                                 @AuthenticationPrincipal SecurityUser securityUser, 
                                 Model model, 
                                 RedirectAttributes redirectAttributes) {
@@ -57,13 +58,24 @@ public class TopicDiscussionController {
             return "redirect:/courses/";
         }
 
-        TopicDiscussionDTO discussion = topicDiscussionService.getDiscussionById(discussionId);
-        String discussionBackUrl = getDiscussionBackUrl(discussion);
-        List<CommentDTO> comments = commentService.getCommentsByDiscussionId(discussionId);
-        model.addAttribute("discussion", discussion);
-        model.addAttribute("comments", comments);
-        model.addAttribute("discussionBackUrl", discussionBackUrl);
-        return "discussion/view_discussion";
+        try {
+            Long courseId = topicDiscussionService.getCourseId(discussionId);
+            TopicDiscussionDTO discussion = topicDiscussionService.getDiscussionById(discussionId);
+            String discussionBackUrl = getDiscussionBackUrl(discussion);
+            List<CommentDTO> comments = commentService.getCommentsByDiscussionId(discussionId);
+            model.addAttribute("discussion", discussion);
+            model.addAttribute("comments", comments);
+            if (fromInstructor != null && fromInstructor == true) {
+                model.addAttribute("discussionBackUrl", 
+                    String.format("/instructor/course/%d/discussions", courseId));
+            } else {
+                model.addAttribute("discussionBackUrl", discussionBackUrl);
+            }
+            return "discussion/view_discussion";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error occurred while viewing discussion");
+            return "redirect:/courses/";
+        }
     }
 
     @PostMapping("/create/{topicId}")
@@ -112,16 +124,27 @@ public class TopicDiscussionController {
 
     @PostMapping("/delete/{discussionId}")
     public String deleteDiscussion(@PathVariable Long discussionId,
+                                  @RequestParam(required = false) String isInstructor,
                                   @AuthenticationPrincipal SecurityUser securityUser,
                                   RedirectAttributes redirectAttributes) {
         if (!checkAccessAbility(discussionId, securityUser)) {
             redirectAttributes.addFlashAttribute(ERROR_MSG_KEY, ERROR_MSG_ACCESS_DENIED);
             return "redirect:/courses/";
         }
-        TopicDiscussionDTO discussion = topicDiscussionService.getDiscussionById(discussionId);
-        String discussionBackUrl = getDiscussionBackUrl(discussion);
-        topicDiscussionService.deleteDiscussion(discussionId);
-        return "redirect:" + discussionBackUrl;
+        try {
+            Long courseId = topicDiscussionService.getCourseId(discussionId);
+            TopicDiscussionDTO discussion = topicDiscussionService.getDiscussionById(discussionId);
+            String discussionBackUrl = getDiscussionBackUrl(discussion);
+            topicDiscussionService.deleteDiscussion(discussionId);
+            if (isInstructor != null && isInstructor.equals("instructor")) {
+                return String.format("redirect:/instructor/course/%d/discussions", courseId);
+            } else {
+                return "redirect:" + discussionBackUrl;
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error occurred while deleting discussion");
+            return "redirect:/courses/";
+        }
     }
 
     @PostMapping("/comments/update/{commentId}")

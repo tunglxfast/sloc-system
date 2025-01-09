@@ -9,6 +9,7 @@ import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.RoleType;
+import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.mapper.CourseMapper;
 import funix.sloc_system.mapper.UserMapper;
 import funix.sloc_system.security.SecurityUser;
@@ -139,12 +140,16 @@ public class InstructorViewController {
 
     @GetMapping("/course/{courseId}/discussions")
     public String viewCourseDiscussions(@PathVariable Long courseId,
-                                  @AuthenticationPrincipal SecurityUser securityUser,
-                                  RedirectAttributes redirectAttributes,
-                                  Model model) {
+                                    @AuthenticationPrincipal SecurityUser securityUser,
+                                    RedirectAttributes redirectAttributes,
+                                    Model model) {
         CourseDTO courseDTO;
         try {
             courseDTO = appUtil.getEditingCourseDTO(courseId);
+            courseDTO = appUtil.removeUnnecessaryTopicTypes(
+                                    courseDTO, 
+                                    List.of(TopicType.QUIZ.name(), 
+                                    TopicType.EXAM.name()));
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return RedirectUrlHelper.REDIRECT_INSTRUCTOR_DASHBOARD;

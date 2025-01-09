@@ -1,6 +1,7 @@
 package funix.sloc_system.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import funix.sloc_system.dto.*;
 import funix.sloc_system.entity.*;
 import funix.sloc_system.enums.*;
@@ -486,6 +487,31 @@ public class AppUtil {
                 .collect(Collectors.toSet());
 
         return (((double) learnedTopics.size())/topics.size()) * 100;
+    }
+
+    /**
+     * Remove unnecessary topics from courseDTO.
+     * @param courseDTO
+     */
+    public CourseDTO removeUnnecessaryTopicTypes(CourseDTO courseDTO, List<String> topicTypes) {
+        if (courseDTO == null || topicTypes == null || topicTypes.isEmpty()) {
+            return null;
+        }
+        
+        List<ChapterDTO> newChapters = new ArrayList<>();
+        List<TopicDTO> newTopics;
+        for (ChapterDTO chapter : courseDTO.getChapters()) {
+            newTopics = new ArrayList<>();
+            for (TopicDTO topic : chapter.getTopics()) {
+                if (!topicTypes.contains(topic.getTopicType())) {
+                    newTopics.add(topic);
+                }
+            }
+            chapter.setTopics(newTopics);
+            newChapters.add(chapter);
+        }
+        courseDTO.setChapters(newChapters);
+        return courseDTO;
     }
 }
 
