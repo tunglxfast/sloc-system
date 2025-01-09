@@ -35,17 +35,4 @@ public class AuthController {
         model.addAttribute("username", securityUser.getUsername());
         return "home";
     }
-
-    // @GetMapping("/logout")
-    // public String logout(HttpSession session) {
-    //     if (session != null && session.getAttributeNames() != null) {
-    //         session.invalidate();
-    //     }
-
-    //     // Delete security info
-    //     SecurityContextHolder.getContext().setAuthentication(null);
-    //     SecurityContextHolder.clearContext();
-
-    //     return "redirect:/login?logout";
-    // }
 }

@@ -102,6 +102,15 @@
                             <input type="email" class="form-control" id="email" name="email"
                                    placeholder="Enter your email" th:value="${user.email}" required>
                         </div>
+                        <!-- Verification status -->
+                        <div class="mb-3">
+                            <span>Verification status: </span>
+                            <span th:if="${user.verified}" class="badge bg-success">Verified</span>
+                            <span th:unless="${user.verified}" class="badge bg-warning">Unverified</span>
+                            <form th:if="${!user.verified}" th:action="@{/user/settings/resend-verification}" method="post" class="d-inline ms-2">
+                                <button type="submit" class="btn btn-primary btn-sm">Resend verification email</button>
+                            </form>
+                        </div>
                         <button type="submit" class="btn btn-success">Save Changes</button>
                     </form>
                 </div>

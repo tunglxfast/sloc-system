@@ -21,4 +21,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = 'INSTRUCTOR'")
     List<User> findAllInstructors();
+
+    Optional<User> findByVerificationToken(String token);
 }

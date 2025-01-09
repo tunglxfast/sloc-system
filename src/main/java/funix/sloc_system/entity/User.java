@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,6 +43,15 @@ public class User {
 
     @Column(nullable = false)
     private int failedAttempts;
+
+    @Column(name = "verification_token")
+    private String verificationToken;
+
+    @Column(name = "token_expiry_date")
+    private LocalDateTime tokenExpiryDate;
+
+    @Column(name = "verified")
+    private boolean verified = false;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -79,5 +89,9 @@ public class User {
             this.roles = updatedUser.getRoles();
         }
         this.locked = updatedUser.isLocked();
+    }
+
+    public boolean isTokenExpired() {
+        return tokenExpiryDate != null && LocalDateTime.now().isAfter(tokenExpiryDate);
     }
 }

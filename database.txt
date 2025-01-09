@@ -42,7 +42,10 @@ CREATE TABLE users (
     full_name VARCHAR(255),
     password VARCHAR(255) NOT NULL,
     locked BOOLEAN DEFAULT FALSE,
-    failed_attempts INT DEFAULT 0
+    failed_attempts INT DEFAULT 0,
+    verification_token VARCHAR(255),
+    token_expiry_date DATETIME,
+    verified BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE user_roles (
@@ -210,30 +213,30 @@ INSERT INTO role (name) VALUES
 
 
 -- Insert sample users
-INSERT INTO users (username, email, full_name, password, locked, failed_attempts) VALUES
- ('admin', 'admin@example.com', 'Admin', '$2a$10$dbkSgQ9mW8ph/DH8YcoDrujNE10AR3n5RMD9wehJV2.cr04l6FxCa', false, 0),
-('moderator_01', ' moderator 1@example.com', 'Mod One', '$2a$10$FQQim7953z6v2JQ4T64GSez7C1obtRKPxxJ3txyd7gl2eOeK25leS', false, 0),
-('instructor_01', 'instructor1@example.com', 'Instructor One', '$2a$10$JAxB.j.NXTrBY0LQXVXCD.WeQIbocrb3Q.8BJgUvX.pYC0Yq91WZe', false, 0),
-('student_01', 'student1@example.com', 'Student One', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0),
-('student_02', 'student2@example.com', 'Student Two', '$2a$10$zUy8Fm9a3D7e8sz4Yf0q3eJXplr.6y/JnPI.kH5W1xy6HCMdD1P2G', false, 0),
-('student_03', 'student3@example.com', 'Student Three', '$2a$10$w7L1vLJkZq4qvS6WJX7YLuIhx6Q3QvLZcD9gPcfkN0Q8QYF6Lk8T2', false, 0),
-('student_04', 'student4@example.com', 'Student Four', '$2a$10$J9Z6nQW8mA7vV6YXYC9nUuJYt4P3sJ/K9R8gOefyN6R5YBMn9L6eF', false, 0),
-('student_05', 'student5@example.com', 'Student Five', '$2a$10$U3vY2mN1oP6bQ8YLYD6gOuIRX7P9sM/KnT8hYkfR1Q3O6FYn9P4eG', false, 0),
-('student_06', 'student6@example.com', 'Student Six', '$2a$10$V5W7nLJmP9vR5ZXYE6cQOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH', false, 0),
-('student_07', 'student7@example.com', 'Student Seven', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0),
-('student_08', 'student8@example.com', 'Student Eight', '$2a$10$N9V5mLJmP6vQ5ZXYE6cOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH8H', false, 0),
-('student_09', 'student9@example.com', 'Student Nine', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0),
-('student_10', 'student10@example.com', 'Student Ten', '$2a$10$N9V5mLJmP6vQ5ZXYE6cOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH8H', false, 0),
-('student_11', 'student11@example.com', 'Student Eleven', '$2a$10$zUy8Fm9a3D7e8sz4Yf0q3eJXplr.6y/JnPI.kH5W1xy6HCMdD1P2G', false, 0),
-('student_12', 'student12@example.com', 'Student Twelve', '$2a$10$w7L1vLJkZq4qvS6WJX7YLuIhx6Q3QvLZcD9gPcfkN0Q8QYF6Lk8T2', false, 0),
-('student_13', 'student13@example.com', 'Student Thirteen', '$2a$10$J9Z6nQW8mA7vV6YXYC9nUuJYt4P3sJ/K9R8gOefyN6R5YBMn9L6eF', false, 0),
-('student_14', 'student14@example.com', 'Student Fourteen', '$2a$10$U3vY2mN1oP6bQ8YLYD6gOuIRX7P9sM/KnT8hYkfR1Q3O6FYn9P4eG', false, 0),
-('student_15', 'student15@example.com', 'Student Fifteen', '$2a$10$V5W7nLJmP9vR5ZXYE6cQOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH', false, 0),
-('student_16', 'student16@example.com', 'Student Sixteen', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0),
-('student_17', 'student17@example.com', 'Student Seventeen', '$2a$10$N9V5mLJmP6vQ5ZXYE6cOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH8H', false, 0),
-('student_18', 'student18@example.com', 'Student Eighteen', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0),
-('student_19', 'student19@example.com', 'Student Nineteen', '$2a$10$N9V5mLJmP6vQ5ZXYE6cOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH8H', false, 0),
-('student_20', 'student20@example.com', 'Student Twenty', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0);
+INSERT INTO users (username, email, full_name, password, locked, failed_attempts, verification_token, token_expiry_date, verified) VALUES
+ ('admin', 'admin@example.com', 'Admin', '$2a$10$dbkSgQ9mW8ph/DH8YcoDrujNE10AR3n5RMD9wehJV2.cr04l6FxCa', false, 0, NULL, NULL, TRUE),
+('moderator_01', ' moderator 1@example.com', 'Mod One', '$2a$10$FQQim7953z6v2JQ4T64GSez7C1obtRKPxxJ3txyd7gl2eOeK25leS', false, 0, NULL, NULL, TRUE),
+('instructor_01', 'instructor1@example.com', 'Instructor One', '$2a$10$JAxB.j.NXTrBY0LQXVXCD.WeQIbocrb3Q.8BJgUvX.pYC0Yq91WZe', false, 0, NULL, NULL, TRUE),
+('student_01', 'student1@example.com', 'Student One', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
+('student_02', 'student2@example.com', 'Student Two', '$2a$10$zUy8Fm9a3D7e8sz4Yf0q3eJXplr.6y/JnPI.kH5W1xy6HCMdD1P2G', false, 0, NULL, NULL, TRUE),
+('student_03', 'student3@example.com', 'Student Three', '$2a$10$w7L1vLJkZq4qvS6WJX7YLuIhx6Q3QvLZcD9gPcfkN0Q8QYF6Lk8T2', false, 0, NULL, NULL, TRUE),
+('student_04', 'student4@example.com', 'Student Four', '$2a$10$J9Z6nQW8mA7vV6YXYC9nUuJYt4P3sJ/K9R8gOefyN6R5YBMn9L6eF', false, 0, NULL, NULL, TRUE),
+('student_05', 'student5@example.com', 'Student Five', '$2a$10$U3vY2mN1oP6bQ8YLYD6gOuIRX7P9sM/KnT8hYkfR1Q3O6FYn9P4eG', false, 0, NULL, NULL, TRUE),
+('student_06', 'student6@example.com', 'Student Six', '$2a$10$V5W7nLJmP9vR5ZXYE6cQOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH', false, 0, NULL, NULL, TRUE),
+('student_07', 'student7@example.com', 'Student Seven', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0, NULL, NULL, TRUE),
+('student_08', 'student8@example.com', 'Student Eight', '$2a$10$N9V5mLJmP6vQ5ZXYE6cOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH8H', false, 0, NULL, NULL, TRUE),
+('student_09', 'student9@example.com', 'Student Nine', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0, NULL, NULL, TRUE),
+('student_10', 'student10@example.com', 'Student Ten', '$2a$10$N9V5mLJmP6vQ5ZXYE6cOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH8H', false, 0, NULL, NULL, TRUE),
+('student_11', 'student11@example.com', 'Student Eleven', '$2a$10$zUy8Fm9a3D7e8sz4Yf0q3eJXplr.6y/JnPI.kH5W1xy6HCMdD1P2G', false, 0, NULL, NULL, TRUE),
+('student_12', 'student12@example.com', 'Student Twelve', '$2a$10$w7L1vLJkZq4qvS6WJX7YLuIhx6Q3QvLZcD9gPcfkN0Q8QYF6Lk8T2', false, 0, NULL, NULL, TRUE),
+('student_13', 'student13@example.com', 'Student Thirteen', '$2a$10$J9Z6nQW8mA7vV6YXYC9nUuJYt4P3sJ/K9R8gOefyN6R5YBMn9L6eF', false, 0, NULL, NULL, TRUE),
+('student_14', 'student14@example.com', 'Student Fourteen', '$2a$10$U3vY2mN1oP6bQ8YLYD6gOuIRX7P9sM/KnT8hYkfR1Q3O6FYn9P4eG', false, 0, NULL, NULL, TRUE),
+('student_15', 'student15@example.com', 'Student Fifteen', '$2a$10$V5W7nLJmP9vR5ZXYE6cQOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH', false, 0, NULL, NULL, TRUE),
+('student_16', 'student16@example.com', 'Student Sixteen', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0, NULL, NULL, TRUE),
+('student_17', 'student17@example.com', 'Student Seventeen', '$2a$10$N9V5mLJmP6vQ5ZXYE6cOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH8H', false, 0, NULL, NULL, TRUE),
+('student_18', 'student18@example.com', 'Student Eighteen', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0, NULL, NULL, TRUE),
+('student_19', 'student19@example.com', 'Student Nineteen', '$2a$10$N9V5mLJmP6vQ5ZXYE6cOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH8H', false, 0, NULL, NULL, TRUE),
+('student_20', 'student20@example.com', 'Student Twenty', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0, NULL, NULL, TRUE );
 
 -- Assign roles to users
 INSERT INTO user_roles (user_id, role_id) VALUES

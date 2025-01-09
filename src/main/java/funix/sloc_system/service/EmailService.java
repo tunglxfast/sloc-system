@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.User;
@@ -13,6 +14,9 @@ public class EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     public void sendEmail(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
@@ -45,5 +49,32 @@ public class EmailService {
                 + "Thank you.",
                 instructor.getFullName(), course.getTitle());
         sendEmail(instructor.getEmail(), subject, body);
+    }
+
+    public void sendVerificationEmail(User user, String token) {
+        String subject = "Verify your account";
+        String verificationLink = baseUrl + "/verify?token=" + token;
+        String body = String.format(
+                "Hello %s,%n%n"
+                + "Thank you for registering. Please click the link below to verify your email:%n"
+                + "%s%n%n"
+                + "This link will expire in 24 hours.%n"
+                + "If you did not register, please ignore this email.",
+                user.getFullName(), verificationLink
+        );
+        sendEmail(user.getEmail(), subject, body);
+    }
+
+    public void sendNewVerificationEmail(User user, String token) {
+        String subject = "Request new verification email";
+        String verificationLink = baseUrl + "/verify?token=" + token;
+        String body = String.format(
+                "Hello %s,%n%n"
+                + "You have requested to resend the verification email. Please click the link below to verify your email:%n"
+                + "%s%n%n"
+                + "This link will expire in 24 hours.",
+                user.getFullName(), verificationLink
+        );
+        sendEmail(user.getEmail(), subject, body);
     }
 }
