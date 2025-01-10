@@ -202,7 +202,7 @@ public class CourseLearningController {
             return String.format("redirect:/courses/%d", courseId);
         }
 
-        // Save the topic that the student recently viewed
+        // Save the topic that the student recently viewed and update LearnedTopic
         studyProcessService.saveLastViewTopic(user.getId(), courseId, topic.getId());
 
         TopicDTO topicDTO = topicMapper.toDTO(topic);

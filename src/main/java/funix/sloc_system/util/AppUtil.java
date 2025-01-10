@@ -481,10 +481,13 @@ public class AppUtil {
             }
         }
 
-        Set<Topic> learnedTopics = topics.stream()
-                .filter(c -> learnedTopicRepository
-                        .existsByUserIdAndTopicId(userId, c.getId()))
-                .collect(Collectors.toSet());
+        Set<Topic> learnedTopics = new HashSet<>();
+
+        for (Topic topic : topics) {
+            if (learnedTopicRepository.existsByUserIdAndTopicId(userId, topic.getId())) {
+                learnedTopics.add(topic);
+            }
+        }
 
         return (((double) learnedTopics.size())/topics.size()) * 100;
     }

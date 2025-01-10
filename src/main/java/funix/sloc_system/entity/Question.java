@@ -33,7 +33,7 @@ public class Question {
     private Topic topic;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Answer> answers;
+    private List<Answer> answers = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private ContentStatus contentStatus = ContentStatus.DRAFT;

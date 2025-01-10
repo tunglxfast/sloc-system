@@ -41,7 +41,9 @@ public class QuestionMapper {
             dto.setTopicId(question.getTopic().getId());
         }
         
-        if (question.getAnswers() != null) {
+        if (question.getAnswers() == null || question.getAnswers().isEmpty()) {
+            dto.setAnswers(new ArrayList<>());
+        } else {
             for (Answer answer : question.getAnswers()) {
                 dto.addAnswer(answerMapper.toDTO(answer));
             }
@@ -76,14 +78,18 @@ public class QuestionMapper {
         }
 
         question.setContent(dto.getContent());
-        question.setContentStatus(ContentStatus.valueOf(dto.getContentStatus()));
-        question.setQuestionType(QuestionType.valueOf(dto.getQuestionType()));
+        if (dto.getContentStatus() != null) {
+            question.setContentStatus(ContentStatus.valueOf(dto.getContentStatus()));
+        }
+        if (dto.getQuestionType() != null) {
+            question.setQuestionType(QuestionType.valueOf(dto.getQuestionType()));
+        }
 
         // Add Topic setting
         question.setTopic(topic);
 
         
-        if (dto.getAnswers() != null) {
+        if (dto.getAnswers() != null && !dto.getAnswers().isEmpty()) {
             if (question.getAnswers() != null) {
                 question.getAnswers().clear();
             } else {

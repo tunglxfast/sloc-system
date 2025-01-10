@@ -11,6 +11,7 @@ import funix.sloc_system.repository.CourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,14 +59,18 @@ public class CourseMapper {
         dto.setRejectReason(course.getRejectReason());
         dto.setCreatedAt(course.getCreatedAt());
         dto.setUpdatedAt(course.getUpdatedAt());
-        if (course.getChapters() != null) {
+        if (course.getChapters() != null && !course.getChapters().isEmpty()) {
             for (Chapter chapter : course.getChapters()) {
                 dto.addChapter(chapterMapper.toDTO(chapter));
             }
+        } else {
+            dto.setChapters(new ArrayList<>());
         }
+
         if (course.getEnrollments() != null) {
             dto.setEnrollments(enrollmentMapper.toDTO(course.getEnrollments()));
         }
+
         if (course.getInstructor() != null) {
             dto.setInstructor(userMapper.toDTO(course.getInstructor()));
         }
@@ -112,7 +117,7 @@ public class CourseMapper {
         course.setCreatedAt(dto.getCreatedAt());
         course.setUpdatedAt(dto.getUpdatedAt());
         
-        if (dto.getChapters() != null) {
+        if (dto.getChapters() != null && !dto.getChapters().isEmpty()) {
             course.getChapters().clear();
             for (ChapterDTO chapterDTO : dto.getChapters()) {
                 course.addChapter(chapterMapper.toEntity(chapterDTO, course));

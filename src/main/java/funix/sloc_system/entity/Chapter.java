@@ -29,7 +29,7 @@ public class Chapter {
     private Course course;
 
     @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Topic> topics;
+    private List<Topic> topics = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private ContentStatus contentStatus = ContentStatus.DRAFT;

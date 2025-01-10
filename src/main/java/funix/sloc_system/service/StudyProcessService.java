@@ -3,8 +3,11 @@ package funix.sloc_system.service;
 import funix.sloc_system.dto.TestResultDTO;
 import funix.sloc_system.entity.LearnedTopic;
 import funix.sloc_system.entity.StudyProcess;
+import funix.sloc_system.entity.Topic;
+import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.repository.LearnedTopicRepository;
 import funix.sloc_system.repository.StudyProcessRepository;
+import funix.sloc_system.repository.TopicRepository;
 import funix.sloc_system.util.AppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,8 @@ public class StudyProcessService {
     private AppUtil appUtil;
     @Autowired
     private LearnedTopicRepository learnedTopicRepository;
+    @Autowired
+    private TopicRepository topicRepository;
 
     public StudyProcess findByUserIdAndCourseId(Long userId, Long courseId) throws IllegalArgumentException {
         return studyProcessRepository
@@ -28,6 +33,14 @@ public class StudyProcessService {
                 .orElse(new StudyProcess());
     }
 
+    /*
+     * Save the topic that the student recently viewed.
+     * If the topic is not an exam or quiz, then add it to LearnedTopic.
+     * @param userId
+     * @param courseId
+     * @param topicId
+     * @return StudyProcess
+     */
     @Transactional
     public StudyProcess saveLastViewTopic(Long userId, Long courseId, Long topicId){
         if (userId == null || courseId == null || topicId == null) {
@@ -50,11 +63,14 @@ public class StudyProcessService {
         studyProcess.setLastViewTopic(topicId);
 
         // check and add topic to LearnedTopic
-        if(!learnedTopicRepository.existsByUserIdAndTopicId(userId,topicId)) {
-            LearnedTopic learnedTopic = new LearnedTopic();
-            learnedTopic.setUserId(userId);
-            learnedTopic.setTopicId(topicId);
-            learnedTopicRepository.save(learnedTopic);
+        Topic topic = topicRepository.findById(topicId).orElse(null);
+        if (topic != null && topic.getTopicType() != TopicType.EXAM && topic.getTopicType() != TopicType.QUIZ) {
+            if(!learnedTopicRepository.existsByUserIdAndTopicId(userId,topicId)) {
+                LearnedTopic learnedTopic = new LearnedTopic();
+                learnedTopic.setUserId(userId);
+                learnedTopic.setTopicId(topicId);
+                learnedTopicRepository.save(learnedTopic);
+            }
         }
 
         return studyProcessRepository.save(studyProcess);

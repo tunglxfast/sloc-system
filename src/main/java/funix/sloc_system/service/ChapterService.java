@@ -89,6 +89,8 @@ public class ChapterService {
         newChapter.setSequence(newSequence);
         newChapter.setContentStatus(ContentStatus.DRAFT);
         chapterRepository.save(newChapter);
+        course.addChapter(newChapter);
+        courseRepository.save(course);
 
         if (!ContentStatus.DRAFT.name().equals(courseDTO.getContentStatus())) {
             ChapterDTO newChapterDTO = chapterMapper.toDTO(newChapter);
