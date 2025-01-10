@@ -225,9 +225,9 @@ INSERT INTO role (name) VALUES
 
 -- Insert sample users
 INSERT INTO users (username, email, full_name, password, locked, failed_attempts, verification_token, token_expiry_date, verified) VALUES
- ('admin', 'funixtesting12972@gmail.com', 'Admin', '$2a$10$dbkSgQ9mW8ph/DH8YcoDrujNE10AR3n5RMD9wehJV2.cr04l6FxCa', false, 0, NULL, NULL, TRUE),
+ ('admin', 'sloc.mail.system@gmail.com', 'Admin', '$2a$10$dbkSgQ9mW8ph/DH8YcoDrujNE10AR3n5RMD9wehJV2.cr04l6FxCa', false, 0, NULL, NULL, TRUE),
 ('moderator_01', ' moderator 1@example.com', 'Mod One', '$2a$10$FQQim7953z6v2JQ4T64GSez7C1obtRKPxxJ3txyd7gl2eOeK25leS', false, 0, NULL, NULL, TRUE),
-('instructor_01', 'instructor1@example.com', 'Instructor One', '$2a$10$JAxB.j.NXTrBY0LQXVXCD.WeQIbocrb3Q.8BJgUvX.pYC0Yq91WZe', false, 0, NULL, NULL, TRUE),
+('instructor_01', 'funixtesting12972@gmail.com', 'Instructor One', '$2a$10$JAxB.j.NXTrBY0LQXVXCD.WeQIbocrb3Q.8BJgUvX.pYC0Yq91WZe', false, 0, NULL, NULL, TRUE),
 ('student_01', 'student1@example.com', 'Student One', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
 ('student_02', 'student2@example.com', 'Student Two', '$2a$10$zUy8Fm9a3D7e8sz4Yf0q3eJXplr.6y/JnPI.kH5W1xy6HCMdD1P2G', false, 0, NULL, NULL, TRUE),
 ('student_03', 'student3@example.com', 'Student Three', '$2a$10$w7L1vLJkZq4qvS6WJX7YLuIhx6Q3QvLZcD9gPcfkN0Q8QYF6Lk8T2', false, 0, NULL, NULL, TRUE),

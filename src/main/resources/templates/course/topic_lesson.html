@@ -23,6 +23,7 @@
         h4 {
             font-weight: bold;
         }
+
     </style>
 </head>
 
@@ -39,7 +40,6 @@
             <div class="col-md-3 border-end border-5" style="vertical-align: top; padding-top: 60px; padding-left: 10px;">
                 <div style="margin-left: 10%;">
                     <h1 th:text="${topic.title}" style="color: rgb(2, 117, 2); font-weight: bold;">Lesson Title</h1>
-                    <h3 style="margin-top: 10%;" th:text="${topic.description}"></h3>
                 </div>
                 <hr/>
                 <ul class="nav flex-column nav-pills" id="settings-tabs" role="tablist">
@@ -64,12 +64,19 @@
                     <!-- Course Lesson -->
                     <div class="tab-pane fade show active" id="lesson" role="tabpanel" aria-labelledby="lesson-tab">
                         <div style="margin-left: 5%;">
-                            <div th:if="${topic.getTopicType == 'READING'}">
+                            <!-- Description -->
+                            <div th:if="${topic.description != null}">
+                                <p style="margin-top: 10%;" th:utext="${topic.description}"></p>
+                            </div>
+
+                            <!-- Reading Material -->
+                            <div th:if="${topic.getTopicType == 'READING' && topic.fileUrl != null}">
                                 <p>Reading Material:</p>
                                 <iframe th:src="@{${topic.fileUrl}}" style="width: 100%; height: 500px;"></iframe>
                             </div>
 
-                            <div th:if="${topic.getTopicType == 'VIDEO'}">
+                            <!-- Video -->
+                            <div th:if="${topic.getTopicType == 'VIDEO' && topic.videoUrl != null}">
                                 <iframe th:src="${topic.videoUrl}" style="width: 80%; height: 500px;" allowfullscreen></iframe>
                             </div>
                         </div>

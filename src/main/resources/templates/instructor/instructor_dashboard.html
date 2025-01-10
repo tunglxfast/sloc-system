@@ -144,16 +144,31 @@
                                             </td>
                                             <td>
                                                 <div th:if="${course.rejectReason != null and !course.rejectReason.isEmpty()}">
-                                                    <span th:text="${#strings.abbreviate(course.rejectReason, 50)}"></span>
+                                                    <span th:text="${#strings.abbreviate(course.rejectReason, 30)}"></span>
                                                     <i class="text-danger" style="cursor: pointer;"
-                                                       th:data-bs-toggle="tooltip"
-                                                       th:data-bs-placement="top"
-                                                       th:title="${course.rejectReason}"
-                                                       onclick="toggleRejectReason(this)">
-                                                       (Click to view full reason)
+                                                        th:data-bs-toggle="modal"
+                                                        th:data-bs-target="'#rejectReasonModal'">
+                                                        <span th:if="${course.rejectReason.length() > 30}"> (See full reason)</span>
                                                     </i>
                                                     <div class="full-reject-reason" style="display: none; margin-top: 5px;">
                                                         <p th:text="${course.rejectReason}"></p>
+                                                    </div>
+                                                    <!-- Course Reject Reason Modal (Default hiddent) -->
+                                                    <div class="modal fade" id="rejectReasonModal" tabindex="-1" aria-labelledby="rejectReasonModalLabel" aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="rejectReasonModalLabel">Full Reject Reason</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p th:text="${course.rejectReason}"></p>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </td>
