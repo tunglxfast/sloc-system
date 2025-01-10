@@ -58,11 +58,13 @@ public class TopicMapper {
                     dto.setTimeLimit(topic.getTimeLimit());
                 }
                 // Map questions
-                if (topic.getQuestions() != null) {
+                if (topic.getQuestions() != null && !topic.getQuestions().isEmpty()) {
                     for (Question question : topic.getQuestions()) {
                         QuestionDTO questionDTO = questionMapper.toDTO(question);
                         dto.addQuestion(questionDTO);
                     }
+                } else {
+                    dto.setQuestions(new ArrayList<>());
                 }
                 break;
         }
@@ -109,7 +111,7 @@ public class TopicMapper {
         topic.setTimeLimit(dto.getTimeLimit());
 
         // Map questions if present
-        if (dto.getQuestions() != null) {
+        if (dto.getQuestions() != null && !dto.getQuestions().isEmpty()) {
             if (topic.getQuestions() != null) {
                 topic.getQuestions().clear();
             } else {

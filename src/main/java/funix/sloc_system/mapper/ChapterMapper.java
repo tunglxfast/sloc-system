@@ -44,10 +44,12 @@ public class ChapterMapper {
         }
         
         // Map topics
-        if (chapter.getTopics() != null) {
+        if (chapter.getTopics() != null && !chapter.getTopics().isEmpty()) {
             for (Topic topic : chapter.getTopics()) {
                 dto.addTopic(topicMapper.toDTO(topic));
             }
+        } else {
+            dto.setTopics(new ArrayList<>());
         }
         
         return dto;
@@ -79,7 +81,7 @@ public class ChapterMapper {
         }
 
         // Map topics if present
-        if (dto.getTopics() != null) {
+        if (dto.getTopics() != null && !dto.getTopics().isEmpty()) {
             if (chapter.getTopics() != null) {
                 chapter.getTopics().clear();
             } else {

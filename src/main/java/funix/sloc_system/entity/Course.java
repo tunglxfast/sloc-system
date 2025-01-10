@@ -62,7 +62,7 @@ public class Course {
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sequence ASC")
-    private List<Chapter> chapters;
+    private List<Chapter> chapters = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private Set<Enrollment> enrollments;

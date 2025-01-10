@@ -41,7 +41,9 @@ public class QuestionMapper {
             dto.setTopicId(question.getTopic().getId());
         }
         
-        if (question.getAnswers() != null) {
+        if (question.getAnswers() == null || question.getAnswers().isEmpty()) {
+            dto.setAnswers(new ArrayList<>());
+        } else {
             for (Answer answer : question.getAnswers()) {
                 dto.addAnswer(answerMapper.toDTO(answer));
             }
@@ -83,7 +85,7 @@ public class QuestionMapper {
         question.setTopic(topic);
 
         
-        if (dto.getAnswers() != null) {
+        if (dto.getAnswers() != null && !dto.getAnswers().isEmpty()) {
             if (question.getAnswers() != null) {
                 question.getAnswers().clear();
             } else {

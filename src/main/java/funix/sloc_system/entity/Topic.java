@@ -53,7 +53,7 @@ public class Topic {
     private Integer timeLimit; // Only for Exam
 
     @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Question> questions;
+    private List<Question> questions = new ArrayList<>();
 
     @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TopicDiscussion> discussions = new ArrayList<>();

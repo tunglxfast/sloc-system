@@ -7,8 +7,8 @@ DROP TABLE IF EXISTS enrollment;
 DROP TABLE IF EXISTS learned_topic;
 DROP TABLE IF EXISTS study_process;
 DROP TABLE IF EXISTS test_result;
-DROP TABLE IF EXISTS topic_discussion;
 DROP TABLE IF EXISTS comment;
+DROP TABLE IF EXISTS topic_discussion;
 DROP TABLE IF EXISTS forgot_password;
 DROP TABLE IF EXISTS content_change_temporary;
 DROP TABLE IF EXISTS course_change_temporary;
@@ -64,7 +64,7 @@ CREATE TABLE course (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255),
     description TEXT,
-    thumbnail_url VARCHAR(1000),
+    thumbnail_url TEXT,
     category_id BIGINT,
     instructor_id BIGINT,
     created_by BIGINT,
@@ -99,8 +99,8 @@ CREATE TABLE topic (
     sequence INT,
     chapter_id BIGINT,
     content_status VARCHAR(50) DEFAULT 'DRAFT',
-    video_url VARCHAR(1000),
-    file_url VARCHAR(1000),
+    video_url TEXT,
+    file_url TEXT,
     pass_score INT,
     total_score INT,
     time_limit INT,

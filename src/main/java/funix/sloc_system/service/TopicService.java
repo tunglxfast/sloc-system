@@ -176,13 +176,14 @@ public class TopicService {
             }
         }
         chapter.addTopic(newTopic);
+        topicRepository.save(newTopic);
         chapterRepository.save(chapter);
         
         // If course is not draft, save entire course DTO to temp table
         if (course.getContentStatus() != ContentStatus.DRAFT) {
             // Add new topic to course DTO
             ChapterDTO chapterDTO = AppUtil.getSelectChapterDTO(courseDTO, chapterId);
-            chapterDTO.getTopics().add(topicDTO);
+            chapterDTO.getTopics().add(topicMapper.toDTO(newTopic));
             
             // Save to temp table
             String json = objectMapper.writeValueAsString(courseDTO);
