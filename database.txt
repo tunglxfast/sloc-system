@@ -1,9 +1,15 @@
+CREATE DATABASE IF NOT EXISTS sloc_system;
+USE sloc_system;
+
 -- Drop tables in reverse order of dependency to avoid foreign key issues
 DROP TABLE IF EXISTS instructor_course;
 DROP TABLE IF EXISTS enrollment;
 DROP TABLE IF EXISTS learned_topic;
 DROP TABLE IF EXISTS study_process;
 DROP TABLE IF EXISTS test_result;
+DROP TABLE IF EXISTS topic_discussion;
+DROP TABLE IF EXISTS comment;
+DROP TABLE IF EXISTS forgot_password;
 DROP TABLE IF EXISTS content_change_temporary;
 DROP TABLE IF EXISTS course_change_temporary;
 DROP TABLE IF EXISTS answer;
@@ -40,7 +46,10 @@ CREATE TABLE users (
     full_name VARCHAR(255),
     password VARCHAR(255) NOT NULL,
     locked BOOLEAN DEFAULT FALSE,
-    failed_attempts INT DEFAULT 0
+    failed_attempts INT DEFAULT 0,
+    verification_token VARCHAR(255),
+    token_expiry_date DATETIME,
+    verified BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE user_roles (
@@ -170,6 +179,37 @@ CREATE TABLE content_change_temporary (
     UNIQUE (entity_type, entity_id)
 );
 
+-- Create topic_discussions table
+CREATE TABLE topic_discussion (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    content TEXT,
+    topic_id BIGINT NOT NULL,
+    created_by BIGINT NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL
+);
+
+-- Create comments table
+CREATE TABLE comment (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    content TEXT NOT NULL,
+    topic_discussion_id BIGINT NOT NULL,
+    created_by BIGINT NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL
+); 
+
+-- Create forgot_password table
+CREATE TABLE forgot_password (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    token VARCHAR(255) NOT NULL,
+    expiry_date DATETIME NOT NULL,
+    UNIQUE (email)
+);
+
 -- Insert sample data
 
 -- Insert sample categories
@@ -187,30 +227,30 @@ INSERT INTO role (name) VALUES
 
 
 -- Insert sample users
-INSERT INTO users (username, email, full_name, password, locked, failed_attempts) VALUES
- ('admin', 'admin@example.com', 'Admin', '$2a$10$dbkSgQ9mW8ph/DH8YcoDrujNE10AR3n5RMD9wehJV2.cr04l6FxCa', false, 0),
-('moderator_01', ' moderator 1@example.com', 'Mod One', '$2a$10$FQQim7953z6v2JQ4T64GSez7C1obtRKPxxJ3txyd7gl2eOeK25leS', false, 0),
-('instructor_01', 'instructor1@example.com', 'Instructor One', '$2a$10$JAxB.j.NXTrBY0LQXVXCD.WeQIbocrb3Q.8BJgUvX.pYC0Yq91WZe', false, 0),
-('student_01', 'student1@example.com', 'Student One', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0),
-('student_02', 'student2@example.com', 'Student Two', '$2a$10$zUy8Fm9a3D7e8sz4Yf0q3eJXplr.6y/JnPI.kH5W1xy6HCMdD1P2G', false, 0),
-('student_03', 'student3@example.com', 'Student Three', '$2a$10$w7L1vLJkZq4qvS6WJX7YLuIhx6Q3QvLZcD9gPcfkN0Q8QYF6Lk8T2', false, 0),
-('student_04', 'student4@example.com', 'Student Four', '$2a$10$J9Z6nQW8mA7vV6YXYC9nUuJYt4P3sJ/K9R8gOefyN6R5YBMn9L6eF', false, 0),
-('student_05', 'student5@example.com', 'Student Five', '$2a$10$U3vY2mN1oP6bQ8YLYD6gOuIRX7P9sM/KnT8hYkfR1Q3O6FYn9P4eG', false, 0),
-('student_06', 'student6@example.com', 'Student Six', '$2a$10$V5W7nLJmP9vR5ZXYE6cQOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH', false, 0),
-('student_07', 'student7@example.com', 'Student Seven', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0),
-('student_08', 'student8@example.com', 'Student Eight', '$2a$10$N9V5mLJmP6vQ5ZXYE6cOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH8H', false, 0),
-('student_09', 'student9@example.com', 'Student Nine', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0),
-('student_10', 'student10@example.com', 'Student Ten', '$2a$10$N9V5mLJmP6vQ5ZXYE6cOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH8H', false, 0),
-('student_11', 'student11@example.com', 'Student Eleven', '$2a$10$zUy8Fm9a3D7e8sz4Yf0q3eJXplr.6y/JnPI.kH5W1xy6HCMdD1P2G', false, 0),
-('student_12', 'student12@example.com', 'Student Twelve', '$2a$10$w7L1vLJkZq4qvS6WJX7YLuIhx6Q3QvLZcD9gPcfkN0Q8QYF6Lk8T2', false, 0),
-('student_13', 'student13@example.com', 'Student Thirteen', '$2a$10$J9Z6nQW8mA7vV6YXYC9nUuJYt4P3sJ/K9R8gOefyN6R5YBMn9L6eF', false, 0),
-('student_14', 'student14@example.com', 'Student Fourteen', '$2a$10$U3vY2mN1oP6bQ8YLYD6gOuIRX7P9sM/KnT8hYkfR1Q3O6FYn9P4eG', false, 0),
-('student_15', 'student15@example.com', 'Student Fifteen', '$2a$10$V5W7nLJmP9vR5ZXYE6cQOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH', false, 0),
-('student_16', 'student16@example.com', 'Student Sixteen', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0),
-('student_17', 'student17@example.com', 'Student Seventeen', '$2a$10$N9V5mLJmP6vQ5ZXYE6cOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH8H', false, 0),
-('student_18', 'student18@example.com', 'Student Eighteen', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0),
-('student_19', 'student19@example.com', 'Student Nineteen', '$2a$10$N9V5mLJmP6vQ5ZXYE6cOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH8H', false, 0),
-('student_20', 'student20@example.com', 'Student Twenty', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0);
+INSERT INTO users (username, email, full_name, password, locked, failed_attempts, verification_token, token_expiry_date, verified) VALUES
+ ('admin', 'sloc.mail.system@gmail.com', 'Admin', '$2a$10$dbkSgQ9mW8ph/DH8YcoDrujNE10AR3n5RMD9wehJV2.cr04l6FxCa', false, 0, NULL, NULL, TRUE),
+('moderator_01', ' moderator 1@example.com', 'Mod One', '$2a$10$FQQim7953z6v2JQ4T64GSez7C1obtRKPxxJ3txyd7gl2eOeK25leS', false, 0, NULL, NULL, TRUE),
+('instructor_01', 'funixtesting12972@gmail.com', 'Instructor One', '$2a$10$JAxB.j.NXTrBY0LQXVXCD.WeQIbocrb3Q.8BJgUvX.pYC0Yq91WZe', false, 0, NULL, NULL, TRUE),
+('student_01', 'student1@example.com', 'Student One', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
+('student_02', 'student2@example.com', 'Student Two', '$2a$10$zUy8Fm9a3D7e8sz4Yf0q3eJXplr.6y/JnPI.kH5W1xy6HCMdD1P2G', false, 0, NULL, NULL, TRUE),
+('student_03', 'student3@example.com', 'Student Three', '$2a$10$w7L1vLJkZq4qvS6WJX7YLuIhx6Q3QvLZcD9gPcfkN0Q8QYF6Lk8T2', false, 0, NULL, NULL, TRUE),
+('student_04', 'student4@example.com', 'Student Four', '$2a$10$J9Z6nQW8mA7vV6YXYC9nUuJYt4P3sJ/K9R8gOefyN6R5YBMn9L6eF', false, 0, NULL, NULL, TRUE),
+('student_05', 'student5@example.com', 'Student Five', '$2a$10$U3vY2mN1oP6bQ8YLYD6gOuIRX7P9sM/KnT8hYkfR1Q3O6FYn9P4eG', false, 0, NULL, NULL, TRUE),
+('student_06', 'student6@example.com', 'Student Six', '$2a$10$V5W7nLJmP9vR5ZXYE6cQOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH', false, 0, NULL, NULL, TRUE),
+('student_07', 'student7@example.com', 'Student Seven', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0, NULL, NULL, TRUE),
+('student_08', 'student8@example.com', 'Student Eight', '$2a$10$N9V5mLJmP6vQ5ZXYE6cOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH8H', false, 0, NULL, NULL, TRUE),
+('student_09', 'student9@example.com', 'Student Nine', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0, NULL, NULL, TRUE),
+('student_10', 'student10@example.com', 'Student Ten', '$2a$10$N9V5mLJmP6vQ5ZXYE6cOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH8H', false, 0, NULL, NULL, TRUE),
+('student_11', 'student11@example.com', 'Student Eleven', '$2a$10$zUy8Fm9a3D7e8sz4Yf0q3eJXplr.6y/JnPI.kH5W1xy6HCMdD1P2G', false, 0, NULL, NULL, TRUE),
+('student_12', 'student12@example.com', 'Student Twelve', '$2a$10$w7L1vLJkZq4qvS6WJX7YLuIhx6Q3QvLZcD9gPcfkN0Q8QYF6Lk8T2', false, 0, NULL, NULL, TRUE),
+('student_13', 'student13@example.com', 'Student Thirteen', '$2a$10$J9Z6nQW8mA7vV6YXYC9nUuJYt4P3sJ/K9R8gOefyN6R5YBMn9L6eF', false, 0, NULL, NULL, TRUE),
+('student_14', 'student14@example.com', 'Student Fourteen', '$2a$10$U3vY2mN1oP6bQ8YLYD6gOuIRX7P9sM/KnT8hYkfR1Q3O6FYn9P4eG', false, 0, NULL, NULL, TRUE),
+('student_15', 'student15@example.com', 'Student Fifteen', '$2a$10$V5W7nLJmP9vR5ZXYE6cQOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH', false, 0, NULL, NULL, TRUE),
+('student_16', 'student16@example.com', 'Student Sixteen', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0, NULL, NULL, TRUE),
+('student_17', 'student17@example.com', 'Student Seventeen', '$2a$10$N9V5mLJmP6vQ5ZXYE6cOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH8H', false, 0, NULL, NULL, TRUE),
+('student_18', 'student18@example.com', 'Student Eighteen', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0, NULL, NULL, TRUE),
+('student_19', 'student19@example.com', 'Student Nineteen', '$2a$10$N9V5mLJmP6vQ5ZXYE6cOaJUY7Q8RZ/JnP9mHkfT2N6Q5XZn4O3eH8H', false, 0, NULL, NULL, TRUE),
+('student_20', 'student20@example.com', 'Student Twenty', '$2a$10$T8V2mN1oQ9bP8LYD6gORX7Y6P9sM/JnT8mNkfR1Q5O6FYn9P4eG8H', false, 0, NULL, NULL, TRUE );
 
 -- Assign roles to users
 INSERT INTO user_roles (user_id, role_id) VALUES
@@ -288,3 +328,24 @@ INSERT INTO answer (content, correct, question_id, content_status) VALUES
 INSERT INTO enrollment (user_id, course_id, enrollment_date) VALUES
 (4, 1, '2024-01-01'),  -- student_01 enrolls in Web Development course
 (4, 2, '2024-02-01');  -- student_01 enrolls in Data Science course
+
+-- Insert sample topic discussions
+INSERT INTO topic_discussion (title, content, topic_id, created_by, created_at, updated_at) VALUES
+('How to use div tags effectively', 'I am having trouble using div tags for layout. Can someone explain how to use div tags effectively?', 1, 4, '2024-01-02 10:00:00', '2024-01-02 10:00:00'),
+('Difference between class and id in CSS', 'What is the difference between class and id in CSS? When should I use class and when should I use id?', 2, 4, '2024-01-03 14:30:00', '2024-01-03 14:30:00'),
+('Resources for learning Data Science', 'Can anyone recommend some good resources for learning more about Data Science?', 3, 4, '2024-01-04 09:15:00', '2024-01-04 09:15:00'),
+('How to center text in HTML', 'How can I center text in HTML? I tried using center but it does not work.', 1, 5, '2024-01-05 11:20:00', '2024-01-05 11:20:00'),
+('Issues with CSS Flexbox', 'I am having trouble with Flexbox. How can I evenly space items in a container?', 2, 6, '2024-01-06 16:45:00', '2024-01-06 16:45:00');
+
+-- Insert sample comments
+INSERT INTO comment (content, topic_discussion_id, created_by, created_at, updated_at) VALUES
+('To use div tags effectively, you should combine them with CSS Flexbox or Grid. This will make layout management much easier.', 1, 3, '2024-01-02 10:30:00', '2024-01-02 10:30:00'),
+('Classes are used when you want to apply styles to multiple elements, while IDs should only be used for unique elements.', 2, 3, '2024-01-03 15:00:00', '2024-01-03 15:00:00'),
+('I recommend Harvard''s CS109 course and the book "Python for Data Analysis".', 3, 3, '2024-01-04 10:00:00', '2024-01-04 10:00:00'),
+('You can use CSS text-align: center to center text.', 4, 7, '2024-01-05 11:45:00', '2024-01-05 11:45:00'),
+('To evenly space items in flexbox, you can use justify-content: space-between or space-around.', 5, 8, '2024-01-06 17:00:00', '2024-01-06 17:00:00'),
+('I am also learning this part, very helpful!', 1, 9, '2024-01-02 11:00:00', '2024-01-02 11:00:00'),
+('Thank you for sharing!', 2, 10, '2024-01-03 15:30:00', '2024-01-03 15:30:00'),
+('I will check out these resources.', 3, 11, '2024-01-04 10:30:00', '2024-01-04 10:30:00'),
+('You can also use margin: auto to center block elements.', 4, 12, '2024-01-05 12:00:00', '2024-01-05 12:00:00'),
+('Flexbox is really powerful for layouts!', 5, 13, '2024-01-06 17:30:00', '2024-01-06 17:30:00');

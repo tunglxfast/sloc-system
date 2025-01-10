@@ -157,8 +157,7 @@ public class ModeratorService {
         courseRepository.save(course);
 
         // Send notification email
-        // TODO: Implement email service
-        // emailService.sendApprovalEmail(course.getInstructor(), course);
+        emailService.sendApprovalEmail(course.getInstructor(), course);
     }
 
     @Transactional
@@ -182,8 +181,7 @@ public class ModeratorService {
         courseRepository.save(course);
 
         // Send notification email
-        // TODO: Implement email service
-        // emailService.sendRejectionEmail(course.getInstructor(), course, rejectionReason);
+        emailService.sendRejectionEmail(course.getInstructor(), course, rejectionReason);
     }
 
     public ChapterDTO findChapterBySequence(CourseDTO courseDTO, int chapterNumber) {

@@ -53,4 +53,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     Page<Course> findByTitleContainingIgnoreCaseAndCategoryAndContentStatusIn(
         String title, Category category, List<ContentStatus> contentStatuses, Pageable pageable);
 
+    List<Course> findByApprovalStatus(ApprovalStatus approvalStatus);
+
 }

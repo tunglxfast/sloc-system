@@ -3,6 +3,7 @@ package funix.sloc_system.controller;
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.TestResultDTO;
 import funix.sloc_system.dto.TopicDTO;
+import funix.sloc_system.dto.TopicDiscussionDTO;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.StudyProcess;
 import funix.sloc_system.entity.Topic;
@@ -62,6 +63,9 @@ public class CourseLearningController {
     private TestResultMapper testResultMapper;
 
     @Autowired
+    private TopicDiscussionService topicDiscussionService;
+
+    @Autowired
     private StudyProcessService studyProcessService;
 
     @Autowired
@@ -79,29 +83,22 @@ public class CourseLearningController {
                             @RequestParam(required = false) String category,
                             @RequestParam(defaultValue = "0") int page, 
                             @RequestParam(defaultValue = "10") int size, 
+                            @AuthenticationPrincipal SecurityUser securityUser,
                             Model model) 
                             {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Course> coursePage;
-        
-        if (title != null && !title.isEmpty() && category != null && !category.isEmpty()) {
-            coursePage = courseService.searchCoursesByTitleAndCategoryWithPagination(title, category, pageable);
-        } else if (title != null && !title.isEmpty()) {
-            coursePage = courseService.searchCoursesByTitleWithPagination(title, pageable);
-        } else if (category != null && !category.isEmpty()) {
-            coursePage = courseService.searchCoursesByCategoryWithPagination(category, pageable);
-        } else {
-            coursePage = courseService.getCoursesWithPagination(pageable);
-        }
+        Page<Course> coursePage = courseService.getCoursesPagination(title, category, pageable);
     
         List<CourseDTO> courseDTOList = courseMapper.toDTO(coursePage.getContent());
-        
+        List<Long> enrolledCourseIds = enrollmentService.getEnrolledCourseIds(securityUser.getUserId());
+
         model.addAttribute("courses", courseDTOList);
         model.addAttribute("totalPages", coursePage.getTotalPages());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalItems", coursePage.getTotalElements());
         model.addAttribute("searchTitle", title);
         model.addAttribute("searchCategory", category);
+        model.addAttribute("enrolledCourseIds", enrolledCourseIds);
         addCategoriesToModel(model);
         return "courses";
     }
@@ -225,11 +222,13 @@ public class CourseLearningController {
         }
         TopicType topicType = topic.getTopicType();
         if (topicType.equals(TopicType.EXAM)){
-            return "course/course_exam";
+            return "course/topic_exam";
         } else if (topicType.equals(TopicType.QUIZ)) {
-            return "course/course_quiz";
+            return "course/topic_quiz";
         } else {
-            return "course/course_lesson";
+            List<TopicDiscussionDTO> discussions = topicDiscussionService.getDiscussionsByTopicId(topicDTO.getId());
+            model.addAttribute("discussions", discussions);
+            return "course/topic_lesson";
         }
     }
 
@@ -264,7 +263,7 @@ public class CourseLearningController {
             model.addAttribute("previousTopicUrl", previousTopicUrl);
 
         }
-        return "course/course_quiz";
+        return "course/topic_quiz";
     }
 
     @PostMapping("/{courseId}/exam/submit")
@@ -299,6 +298,6 @@ public class CourseLearningController {
             model.addAttribute("previousTopicUrl", previousTopicUrl);
 
         }
-        return "course/course_exam";
+        return "course/topic_exam";
     }
 }

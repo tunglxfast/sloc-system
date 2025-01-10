@@ -6,19 +6,40 @@
     <title>Moderator Dashboard</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/style.css">
-    <script src="/js/bootstrap.bundle.min.js"></script>
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
     <!-- MDB -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.0.0/mdb.min.css" rel="stylesheet" />
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+
     <style>
         body {
             font-family: 'Laila';
         }
         h4 {
             font-weight: bold;
+        }
+        .nav-link {
+            color: #333;
+            padding: 10px 20px;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover, .nav-link.active {
+            background-color: #e9ecef;
+            color: #007bff;
+        }
+        .nav-link i {
+            margin-right: 10px;
+        }
+        .clickable {
+            cursor: pointer;
+            color: #007bff;
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -29,54 +50,197 @@
         <div th:replace="~{/fragments/basic_navbar :: navbarFragment}"></div>
     </div>
 
-    <div class="container py-5">
-        <h1 style="color: rgb(2, 117, 2); font-weight: bold; margin-bottom: 30px;">Moderator Dashboard</h1>
-        
-        <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
-            <span th:text="${errorMessage}"></span>
-        </div>
-        
-        <div th:if="${successMessage}" class="alert alert-success" role="alert">
-            <span th:text="${successMessage}"></span>
+    <div class="row">
+        <!-- Left sidebar -->
+        <div class="col-md-3 border-end border-5" style="vertical-align: top; padding-top: 60px; padding-left: 10px;">
+            <div style="margin-left: 10%;">
+                <h2 style="margin-bottom: 20%; color: rgb(2, 117, 2); font-weight: bold; text-align: center;">Moderator Dashboard</h2>
+                <div th:if="${errorMessage}">
+                    <p th:text="${errorMessage}" style="color: red;"></p>
+                </div>
+
+                <div th:if="${successMessage}">
+                    <p th:text="${successMessage}" style="color: blue;"></p>
+                </div>
+
+                <!-- Navigation Menu -->
+                <nav class="nav flex-column mt-4">
+                    <a class="nav-link active" href="#pendingReviews" data-bs-toggle="tab">
+                        <i class="fas fa-tasks"></i> Pending Reviews
+                    </a>
+                    <a class="nav-link" href="#coursesManagement" data-bs-toggle="tab">
+                        <i class="fas fa-book"></i> Courses Management
+                    </a>
+                </nav>
+            </div>
         </div>
 
-        <h2 style="color: rgb(2, 117, 2); font-weight: bold; margin-bottom: 20px;">Pending Course Reviews</h2>
-        
-        <div th:if="${reviewCourseHolders.empty}" class="alert alert-info">
-            No courses pending review.
-        </div>
-        
-        <div th:if="${!reviewCourseHolders.empty}" class="table-responsive">
-            <table id="reviewCourseTable" class="table table-hover">
-                <thead class="table-success">
-                    <tr>
-                        <th>Course Title</th>
-                        <th>Instructor</th>
-                        <th>Category</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="reviewCourseHolder : ${reviewCourseHolders}">
-                        <td th:text="${reviewCourseHolder.course.title}">Course Title</td>
-                        <td th:text="${reviewCourseHolder.course.instructor.fullName}">Instructor Name</td>
-                        <td th:text="${reviewCourseHolder.course.category.name}">Category Name</td>
-                        <td>
-                            <span class="badge rounded-pill bg-info" th:if="${reviewCourseHolder.action == 'CREATE'}">Request Create Course</span>
-                            <span class="badge rounded-pill bg-warning" th:if="${reviewCourseHolder.action == 'UPDATE'}">Request Update Course</span>
-                            <span class="badge rounded-pill bg-danger" th:if="${reviewCourseHolder.action == 'DELETE'}">Request Delete Course</span>
-                        </td>
-                        <td>
-                            <a th:href="@{/moderator/course/{id}/review(id=${reviewCourseHolder.course.id})}" 
-                               class="btn btn-success btn-sm">Review</a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <!-- Right content -->
+        <div class="col-md-9" style="padding-right: 10%; vertical-align: top; padding-top: 60px;">
+            <div class="tab-content">
+                <!-- Pending Reviews Tab -->
+                <div class="tab-pane fade show active" id="pendingReviews">
+                    <div style="margin-left: 5%;">
+                        <h2 style="margin-bottom: 2%; text-align: center;">Pending Course Reviews</h2>
+                        <div th:if="${reviewCourseHolders.empty}" class="alert alert-info">
+                            No courses pending review.
+                        </div>
+                        
+                        <div th:if="${!reviewCourseHolders.empty}" class="table-responsive">
+                            <table id="reviewCourseTable" class="table table-hover">
+                                <thead class="table-success">
+                                    <tr>
+                                        <th>Course Title</th>
+                                        <th>Instructor</th>
+                                        <th>Category</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="reviewCourseHolder : ${reviewCourseHolders}">
+                                        <td th:text="${reviewCourseHolder.course.title}">Course Title</td>
+                                        <td th:text="${reviewCourseHolder.course.instructor.fullName}">Instructor Name</td>
+                                        <td th:text="${reviewCourseHolder.course.category.name}">Category Name</td>
+                                        <td>
+                                            <span class="badge rounded-pill bg-info" th:if="${reviewCourseHolder.action == 'CREATE'}">Request Create Course</span>
+                                            <span class="badge rounded-pill bg-warning" th:if="${reviewCourseHolder.action == 'UPDATE'}">Request Update Course</span>
+                                            <span class="badge rounded-pill bg-danger" th:if="${reviewCourseHolder.action == 'DELETE'}">Request Delete Course</span>
+                                        </td>
+                                        <td>
+                                            <a th:href="@{/moderator/course/{id}/review(id=${reviewCourseHolder.course.id})}" 
+                                               class="btn btn-success btn-sm">Review</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Courses Management Tab -->
+                <div class="tab-pane fade" id="coursesManagement">
+                    <div style="margin-left: 5%;">
+                        <h2 style="margin-bottom: 2%; text-align: center;">Courses Management</h2>
+                        <div class="table-responsive">
+                            <table id="coursesTable" class="table table-hover">
+                                <thead class="table-success">
+                                    <tr>
+                                        <th>Course Title</th>
+                                        <th>Category</th>
+                                        <th>Approval Status</th>
+                                        <th>Content Status</th>
+                                        <th>Instructor</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="course : ${courses}">
+                                        <td th:text="${course.title}">Course Title</td>
+                                        <td th:text="${course.category.name}">Category</td>
+                                        <td class="clickable" th:text="${course.contentStatus}"
+                                            th:attr="data-id=${course.id}, data-approval-status=${course.approvalStatus}, data-content-status=${course.contentStatus}" 
+                                            onclick="handleStatusClick(this)">
+                                            Content Status
+                                        </td>
+                                        <td class="clickable" th:text="${course.approvalStatus}"
+                                            th:attr="data-id=${course.id}, data-approval-status=${course.approvalStatus}, data-content-status=${course.contentStatus}" 
+                                            onclick="handleStatusClick(this)">
+                                            Approval Status
+                                        </td>
+                                        <td class="clickable" th:text="${course.instructor.fullName}"
+                                            th:attr="data-id=${course.id}" 
+                                            onclick="handleInstructorClick(this)">
+                                            Instructor Name
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Status Update Modal -->
+    <div class="modal fade" id="statusModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Course Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="statusForm" th:action="@{/moderator/course/update-status}" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="courseId" name="courseId">
+                        
+                        <div class="mb-3">
+                            <label for="contentStatus" class="form-label">Content Status</label>
+                            <select class="form-select" id="contentStatus" name="contentStatus" required>
+                                <option th:each="status : ${contentStatuses}"
+                                        th:value="${status.name()}"
+                                        th:text="${status.name()}">
+                                    Content Status
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="approvalStatus" class="form-label">Approval Status</label>
+                            <select class="form-select" id="approvalStatus" name="approvalStatus" required>
+                                <option th:each="status : ${approvalStatuses}"
+                                        th:value="${status.name()}"
+                                        th:text="${status.name()}">
+                                    Approval Status
+                                </option>
+                            </select>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Status</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructor Update Modal -->
+    <div class="modal fade" id="instructorModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Course Instructor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="instructorForm" th:action="@{/moderator/course/update-instructor}" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="courseIdInstructor" name="courseId">
+                        
+                        <div class="mb-3">
+                            <label for="instructorId" class="form-label">Select Instructor</label>
+                            <select class="form-select" id="instructorId" name="instructorId" required>
+                                <option th:each="instructor : ${instructors}"
+                                        th:value="${instructor.id}"
+                                        th:text="${instructor.fullName}">
+                                    Instructor Name
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Instructor</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function() {
             $('#reviewCourseTable').DataTable({
@@ -89,8 +253,43 @@
                 "emptyTable": "No courses pending review",
                 "zeroRecords": "No matching courses pending review"
             });
-        });
-    </script>
 
+            $('#coursesTable').DataTable({
+                "pageLength": 10,
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "emptyTable": "No courses found",
+                "zeroRecords": "No matching courses found"
+            });
+        });
+
+        function handleStatusClick(element) {
+            const courseId = element.getAttribute('data-id');
+            const approvalStatus = element.getAttribute('data-approval-status');
+            const contentStatus = element.getAttribute('data-content-status');
+            
+            showStatusModal(courseId, approvalStatus, contentStatus);
+        }
+
+        function showStatusModal(courseId, approvalStatus, contentStatus) {
+            $('#courseId').val(courseId);
+            $('#approvalStatus').val(approvalStatus);
+            $('#contentStatus').val(contentStatus);
+            $('#statusModal').modal('show');
+        }
+
+        function handleInstructorClick(element) {
+            const courseId = element.getAttribute('data-id');
+            showInstructorModal(courseId);
+        }
+
+        function showInstructorModal(courseId) {
+            $('#courseIdInstructor').val(courseId);
+            $('#instructorModal').modal('show');
+        }
+    </script>
 </body>
 </html> 

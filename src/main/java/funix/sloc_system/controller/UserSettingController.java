@@ -7,6 +7,7 @@ import funix.sloc_system.entity.User;
 import funix.sloc_system.mapper.UserMapper;
 import funix.sloc_system.repository.UserRepository;
 import funix.sloc_system.security.SecurityUser;
+import funix.sloc_system.service.EmailService;
 import funix.sloc_system.service.EnrollmentService;
 import funix.sloc_system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/user")
@@ -36,6 +39,8 @@ public class UserSettingController {
     private UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private EmailService emailService;
 
     @GetMapping(value = {"", "/", "/settings"})
     public String viewSettings(Model model, RedirectAttributes redirectAttributes) {
@@ -118,5 +123,30 @@ public class UserSettingController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", coursePage.getTotalPages());
         return "user/learning_courses";
+    }
+
+    // Resend verification email
+    @PostMapping("/settings/resend-verification")
+    public String resendVerification(RedirectAttributes redirectAttributes) {
+        try {
+            User currentUser = userService.getCurrentUser();
+            if (currentUser.isVerified()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Your account has been verified.");
+                return "redirect:/user/settings";
+            }
+
+            // Generate token and set expiry date
+            String token = UUID.randomUUID().toString();
+            currentUser.setVerificationToken(token);
+            currentUser.setTokenExpiryDate(LocalDateTime.now().plusDays(1));
+            userRepository.save(currentUser);
+
+            // Send verification email
+            emailService.sendNewVerificationEmail(currentUser, token);
+            redirectAttributes.addFlashAttribute("successMessage", "New verification email has been sent. Please check your email.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred while sending verification email.");
+        }
+        return "redirect:/user/settings";
     }
 }

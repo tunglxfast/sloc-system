@@ -4,7 +4,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 public class RedirectUrlHelper {
-    public static final String REDIRECT_INSTRUCTOR_COURSES = "redirect:/instructor/courses";
+    public static final String REDIRECT_INSTRUCTOR_DASHBOARD = "redirect:/instructor/courses";
 
     // Private constructor to prevent instantiation
     private RedirectUrlHelper() {

@@ -27,7 +27,7 @@
 <body>
     <!-- Include Navbar -->
     <div th:with="activePage='courses'">
-        <div th:replace="~{/fragments/basic_navbar :: navbarFragment}"></div>
+        <div th:replace="/fragments/basic_navbar :: navbarFragment"></div>
     </div>
 
     <img th:src="@{/img/headerimg.png}" style="max-width: 100%; height: auto;">
@@ -75,7 +75,8 @@
                     <div class="col-12" style="margin-top: 20px;">
                         <a th:href="@{/courses/{id}/general(id=${course.id})}">
                             <button type="button" class="btn btn-outline-success" data-mdb-ripple-init
-                                data-mdb-ripple-color="green" style="float: right;">Enroll now</button>
+                                data-mdb-ripple-color="green" style="float: right;"
+                                th:text="${enrolledCourseIds.contains(course.id) ? 'Start learning' : 'Enroll now'}">Enroll now</button>
                         </a>
                     </div>
                 </div>

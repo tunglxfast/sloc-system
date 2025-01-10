@@ -55,6 +55,8 @@ public class Topic {
     @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;
 
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TopicDiscussion> discussions = new ArrayList<>();
 
     public void updateWithOtherTopic(Topic updatedTopic) {
         if (updatedTopic.getTitle() != null) {
@@ -117,6 +119,23 @@ public class Topic {
         for (Question question : questions) {
             question.setContentStatus(status);
             question.setAnswersContentStatus(status);
+        }
+    }
+
+    // Helper method to add discussion
+    public void addDiscussion(TopicDiscussion discussion) {
+        if (discussions == null) {
+            discussions = new ArrayList<>();
+        }
+        discussions.add(discussion);
+        discussion.setTopic(this);
+    }
+
+    // Helper method to remove discussion
+    public void removeDiscussion(TopicDiscussion discussion) {
+        if (discussions != null) {
+            discussions.remove(discussion);
+            discussion.setTopic(null);
         }
     }
 }
