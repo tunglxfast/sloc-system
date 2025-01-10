@@ -34,6 +34,9 @@ public class TestResultService {
     private TestResultRepository testResultRepository;
 
     @Autowired
+    private LearnedTopicRepository learnedTopicRepository;
+
+    @Autowired
     private TestResultMapper testResultMapper;
 
     @Autowired
@@ -48,6 +51,16 @@ public class TestResultService {
         return testResultMapper.toDTO(result);
     }
 
+
+    /*
+     * Calculate the score of the test and 
+     * update LearnedTopic if the test is passed.
+     * 
+     * @param userId
+     * @param topicId
+     * @param answers
+     * @return TestResultDTO
+     */
     @Transactional
     public TestResultDTO calculateScore(Long userId, Long topicId, Map<String, String> answers) {
         User user = userRepository.findById(userId).orElse(null);
@@ -102,6 +115,17 @@ public class TestResultService {
         totalScore = Math.round(countCorrectAnswer / questions.size() * 100);
         boolean isPassed = totalScore >= passScore;
 
+        // update LearnedTopic
+        if (isPassed) {
+            if(!learnedTopicRepository.existsByUserIdAndTopicId(userId,topicId)) {
+                LearnedTopic learnedTopic = new LearnedTopic();
+                learnedTopic.setUserId(userId);
+                learnedTopic.setTopicId(topicId);
+                learnedTopicRepository.save(learnedTopic);
+            }
+        }
+
+        // save test result
         TestResult testResult = testResultRepository.findByUserIdAndTopicId(userId, topicId).orElse(null);
         if (testResult == null){
             testResult = new TestResult(totalScore, totalScore, isPassed, 1, topicType, user, topicEntity);
