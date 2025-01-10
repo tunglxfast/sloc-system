@@ -17,10 +17,14 @@
 
 -------------------------------Prepare Database------------------------------------------
 
-- Run application
-- Run in browser - http://localhost:8080/h2-console/
-- Enter user/password: sa/123456
-- Open database.txt, copy mysql codes and insert it into database query. Run mysql codes to insert database.
+- Install MySQL
+- In application.properties, change MySQL Database details to your MySQL Database details
+- Open MySQL Command Line Client
+- Run mysql codes in database.txt to create database and tables
+
+-------------------------------Run Application------------------------------------------
+- Run application (SlocSystemApplication.java)
+- Open in browser - http://localhost:8080/
 
 --------------------------------Username : Password--------------------------------------
 admin/adminpassword

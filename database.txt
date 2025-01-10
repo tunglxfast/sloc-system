@@ -1,3 +1,6 @@
+CREATE DATABASE IF NOT EXISTS sloc_system;
+USE sloc_system;
+
 -- Drop tables in reverse order of dependency to avoid foreign key issues
 DROP TABLE IF EXISTS instructor_course;
 DROP TABLE IF EXISTS enrollment;
