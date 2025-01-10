@@ -222,6 +222,13 @@
     function prepareSubmit(event) {
         event.preventDefault();
         
+        // Validate form
+        const form = document.getElementById('testTopicForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        
         // Validate questions
         const questionCards = document.querySelectorAll('#questionsContainer .card');
         let hasError = false;

@@ -56,7 +56,9 @@ public class AnswerMapper {
         }
 
         answer.setContent(dto.getContent());
-        answer.setContentStatus(ContentStatus.valueOf(dto.getContentStatus()));
+        if (dto.getContentStatus() != null) {
+            answer.setContentStatus(ContentStatus.valueOf(dto.getContentStatus()));
+        }
         answer.setQuestion(question);
         answer.setCorrect(dto.isCorrect());
         

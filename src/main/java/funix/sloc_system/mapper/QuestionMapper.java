@@ -78,8 +78,12 @@ public class QuestionMapper {
         }
 
         question.setContent(dto.getContent());
-        question.setContentStatus(ContentStatus.valueOf(dto.getContentStatus()));
-        question.setQuestionType(QuestionType.valueOf(dto.getQuestionType()));
+        if (dto.getContentStatus() != null) {
+            question.setContentStatus(ContentStatus.valueOf(dto.getContentStatus()));
+        }
+        if (dto.getQuestionType() != null) {
+            question.setQuestionType(QuestionType.valueOf(dto.getQuestionType()));
+        }
 
         // Add Topic setting
         question.setTopic(topic);
