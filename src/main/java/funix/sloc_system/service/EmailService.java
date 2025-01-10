@@ -94,4 +94,21 @@ public class EmailService {
         );
         sendEmailHTML(user.getEmail(), subject, body);
     }
+
+    /**
+     * Send reset password email.
+     * @param username
+     * @param email
+     * @param token
+     */
+    public void sendResetPasswordEmail(String username, String email, String token) throws Exception {
+        String subject = "Reset your password";
+        String resetLink = baseUrl + "/reset-password?token=" + token;
+        String body = String.format(
+            "Hello %s, <br>" 
+            + "You have requested to reset your password. Please click the link below to reset your password: <br>"
+            + "<a href=\"%s\">%s</a><br>"
+            + "This link will expire in 1 hours.", username, resetLink, resetLink);
+        sendEmailHTML(email, subject, body);
+    }
 }

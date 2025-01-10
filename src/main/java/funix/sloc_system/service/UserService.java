@@ -77,4 +77,8 @@ public class UserService {
     public List<User> getAllInstructors() {
         return userRepository.findAllInstructors();
     }
+
+    public User findByEmail(String email) {
+      return userRepository.findByEmail(email).orElse(null);
+    }
 }

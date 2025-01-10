@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS study_process;
 DROP TABLE IF EXISTS test_result;
 DROP TABLE IF EXISTS topic_discussion;
 DROP TABLE IF EXISTS comment;
+DROP TABLE IF EXISTS forgot_password;
 DROP TABLE IF EXISTS content_change_temporary;
 DROP TABLE IF EXISTS course_change_temporary;
 DROP TABLE IF EXISTS answer;
@@ -196,6 +197,16 @@ CREATE TABLE comment (
     updated_at DATETIME NOT NULL
 ); 
 
+-- Create forgot_password table
+CREATE TABLE forgot_password (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    token VARCHAR(255) NOT NULL,
+    expiry_date DATETIME NOT NULL,
+    UNIQUE (email)
+);
+
 -- Insert sample data
 
 -- Insert sample categories
@@ -214,7 +225,7 @@ INSERT INTO role (name) VALUES
 
 -- Insert sample users
 INSERT INTO users (username, email, full_name, password, locked, failed_attempts, verification_token, token_expiry_date, verified) VALUES
- ('admin', 'admin@example.com', 'Admin', '$2a$10$dbkSgQ9mW8ph/DH8YcoDrujNE10AR3n5RMD9wehJV2.cr04l6FxCa', false, 0, NULL, NULL, TRUE),
+ ('admin', 'funixtesting12972@gmail.com', 'Admin', '$2a$10$dbkSgQ9mW8ph/DH8YcoDrujNE10AR3n5RMD9wehJV2.cr04l6FxCa', false, 0, NULL, NULL, TRUE),
 ('moderator_01', ' moderator 1@example.com', 'Mod One', '$2a$10$FQQim7953z6v2JQ4T64GSez7C1obtRKPxxJ3txyd7gl2eOeK25leS', false, 0, NULL, NULL, TRUE),
 ('instructor_01', 'instructor1@example.com', 'Instructor One', '$2a$10$JAxB.j.NXTrBY0LQXVXCD.WeQIbocrb3Q.8BJgUvX.pYC0Yq91WZe', false, 0, NULL, NULL, TRUE),
 ('student_01', 'student1@example.com', 'Student One', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
