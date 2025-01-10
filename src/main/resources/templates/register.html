@@ -43,13 +43,13 @@
 
             <!-- Name input -->
             <div data-mdb-input-init class="form-outline mb-4">
-              <input type="text" id="name" name="name" class="form-control form-control-lg" required/>
-              <label class="form-label" for="name">Name</label>
+              <input type="text" id="fullName" name="fullName" class="form-control form-control-lg" required/>
+              <label class="form-label" for="fullName">Full Name</label>
             </div>
 
-            <!-- Password input -->
+            <!-- Password input longer than 8 characters -->
             <div data-mdb-input-init class="form-outline mb-4">
-              <input type="password" id="password" name="password" class="form-control form-control-lg" required/>
+              <input type="password" id="password" name="password" class="form-control form-control-lg" required minlength="8"/>
               <label class="form-label" for="password">Password</label>
             </div>
 

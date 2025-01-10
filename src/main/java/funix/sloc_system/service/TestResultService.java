@@ -69,16 +69,16 @@ public class TestResultService {
         double countCorrectAnswer = 0;
 
         List<Answer> correctAnswers = new ArrayList<>();
-        List<String> correctAnswerIds = new ArrayList<>();
-        List<String> selectedAnswerIds = new ArrayList<>();
+        List<String> correctAnswerContents = new ArrayList<>();
+        List<String> selectedAnswerContents = new ArrayList<>();
         List<QuestionDTO> questions = topicDTO.getQuestions();
 
         for (QuestionDTO question : questions) {
             correctAnswers.clear();
-            correctAnswerIds.clear();
-            selectedAnswerIds.clear();
+            correctAnswerContents.clear();
+            selectedAnswerContents.clear();
 
-            selectedAnswerIds.addAll(
+            selectedAnswerContents.addAll(
                     answers.entrySet().stream()
                             .filter(entry -> entry.getKey().startsWith("question_" + question.getId()))
                             .map(stringEntry -> stringEntry.getValue()).collect(Collectors.toList()))
@@ -88,11 +88,11 @@ public class TestResultService {
                 if (answer.getId() == null) {
                     continue;
                 }
-                correctAnswerIds.add(answer.getId().toString());
+                correctAnswerContents.add(answer.getContent());
             }
 
-            if (new HashSet<>(selectedAnswerIds).containsAll(correctAnswerIds)
-                    && new HashSet<>(correctAnswerIds).containsAll(selectedAnswerIds)) {
+            if (new HashSet<>(selectedAnswerContents).containsAll(correctAnswerContents)
+                    && new HashSet<>(correctAnswerContents).containsAll(selectedAnswerContents)) {
                 countCorrectAnswer += 1;
             }
         }

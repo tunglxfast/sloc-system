@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Course Discussions</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.0.0/mdb.min.css" rel="stylesheet" />
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+
+    <style>
+        body {
+            font-family: 'Laila';
+        }
+        h4 {
+            font-weight: bold;
+        }
+        .topic-section {
+            margin-bottom: 2rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+        .topic-header {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+        .discussion-list {
+            padding-left: 1rem;
+        }
+        .discussion-item {
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border-left: 3px solid #007bff;
+        }
+        .discussion-meta {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Include Navbar -->
+    <div th:with="activePage='instructorDashboard'">
+        <div th:replace="~{/fragments/basic_navbar :: navbarFragment}"></div>
+    </div>
+
+    <div class="container mt-4">
+        <!-- Course Info -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 th:text="${course.title}" class="card-title text-success">Course Title</h2>
+                <p class="text-muted">
+                    <i class="fas fa-folder me-2"></i>
+                    <span th:text="${course.category.name}">Category</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Discussions by Topic -->
+        <div class="accordion" id="topicAccordion">
+            <div th:each="chapter : ${course.chapters}" class="mb-4">
+                <h3 th:text="${chapter.title}" class="mb-3">Chapter Title</h3>
+                
+                <div th:each="topic : ${chapter.topics}" class="topic-section">
+                    <div class="topic-header d-flex justify-content-between align-items-center" 
+                         th:data-bs-toggle="collapse" 
+                         th:data-bs-target="'#topic' + ${topic.id}">
+                        <div>
+                            <h4 th:text="${topic.title}" class="mb-0">Topic Title</h4>
+                            <span class="badge bg-secondary" th:text="${topic.topicType}">Type</span>
+                        </div>
+                        <span class="badge bg-primary rounded-pill" 
+                              th:text="${discussionsByTopic.containsKey(topic.id) ? discussionsByTopic.get(topic.id).size() : 0} + ' discussions'">
+                            0 discussions
+                        </span>
+                    </div>
+
+                    <div th:id="'topic' + ${topic.id}" class="collapse discussion-list">
+                        <div th:if="${discussionsByTopic.containsKey(topic.id)}">
+                            <div th:each="discussion : ${discussionsByTopic.get(topic.id)}" class="discussion-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                  <div>
+                                    <a th:href="@{/topic-discussions/view/{id}(id=${discussion.id})}" 
+                                      th:text="${discussion.title}"
+                                      class="text-decoration-none h5">
+                                        Discussion Title
+                                    </a>
+                                    <div class="discussion-meta mt-2">
+                                        <i class="fas fa-user me-1"></i>
+                                        <span th:text="${discussion.createdByUsername}">Author</span>
+                                        <i class="fas fa-clock ms-3 me-1"></i>
+                                        <span th:text="${#temporals.format(discussion.createdAt, 'dd-MM-yyyy HH:mm')}">Date</span>
+                                        <i class="fas fa-comments ms-3 me-1"></i>
+                                        <span th:text="${discussion.commentCount} + ' comments'">0 comments</span>
+                                    </div>
+                                  </div>
+                                  <div class="d-flex gap-2">
+                                    <a th:href="@{/topic-discussions/view/{id}(id=${discussion.id}, fromInstructor=true)}"
+                                       class="btn btn-primary">
+                                        View
+                                    </a>
+                                    <form th:action="@{/topic-discussions/delete/{id}(id=${discussion.id})}" method="post">
+                                        <input type="hidden" name="fromInstructor" value="true">
+                                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this discussion?')">Delete</button>
+                                    </form>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div th:unless="${discussionsByTopic.containsKey(topic.id)}" class="text-muted">
+                            No discussions yet for this topic.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <div class="mt-4">
+            <a href="/instructor" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html> 

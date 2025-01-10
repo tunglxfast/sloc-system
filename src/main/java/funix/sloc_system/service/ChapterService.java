@@ -97,7 +97,7 @@ public class ChapterService {
                 String json = objectMapper.writeValueAsString(courseDTO);
                 appUtil.saveContentChange(json, courseId, instructorId, ContentAction.UPDATE);
             } catch (Exception e) {
-                throw new RuntimeException("Chapter fail to create.");// TODO: handle exception
+                throw new RuntimeException("Chapter fail to create.");
             }
         }
     }

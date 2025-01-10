@@ -11,11 +11,14 @@ import java.util.stream.Collectors;
 
 public class SecurityUser implements UserDetails {
 
+    private Long id;
+
     private User user;
 
     @Autowired
     public SecurityUser(User user) {
         this.user = user;
+        this.id = user.getId();
     }
 
     @Override
@@ -57,6 +60,10 @@ public class SecurityUser implements UserDetails {
 
     public Long getUserId() {
         return user.getId();
+    }
+
+    public Long getId() {
+        return id;
     }
 }
 

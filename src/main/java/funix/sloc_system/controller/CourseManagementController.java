@@ -73,7 +73,7 @@ public class CourseManagementController {
                                 RedirectAttributes redirectAttributes) {
         if (!courseService.checkCourseExists(courseId)) {
             redirectAttributes.addFlashAttribute("errorMessage", "Course does not exist.");
-            return RedirectUrlHelper.REDIRECT_INSTRUCTOR_COURSES;
+            return RedirectUrlHelper.REDIRECT_INSTRUCTOR_DASHBOARD;
         }
 
         try {
@@ -89,7 +89,7 @@ public class CourseManagementController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "An error occurred, please try again later");
-            return RedirectUrlHelper.REDIRECT_INSTRUCTOR_COURSES;
+            return RedirectUrlHelper.REDIRECT_INSTRUCTOR_DASHBOARD;
         }
     }
 
@@ -117,7 +117,7 @@ public class CourseManagementController {
                 courseService.submitForReview(courseId);
                 redirectAttributes.addFlashAttribute("successMessage",
                         "Course submitted successfully! Please wait for moderator review.");
-                return RedirectUrlHelper.REDIRECT_INSTRUCTOR_COURSES;
+                return RedirectUrlHelper.REDIRECT_INSTRUCTOR_DASHBOARD;
             } else {
                 // Save Draft
                 redirectAttributes.addFlashAttribute("successMessage",

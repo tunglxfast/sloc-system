@@ -1,6 +1,7 @@
 package funix.sloc_system.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import funix.sloc_system.dto.*;
 import funix.sloc_system.entity.*;
 import funix.sloc_system.enums.*;
@@ -486,6 +487,71 @@ public class AppUtil {
                 .collect(Collectors.toSet());
 
         return (((double) learnedTopics.size())/topics.size()) * 100;
+    }
+
+    /**
+     * Remove unnecessary topics from courseDTO.
+     * @param courseDTO
+     */
+    public CourseDTO removeUnnecessaryTopicTypes(CourseDTO courseDTO, List<String> topicTypes) {
+        if (courseDTO == null || topicTypes == null || topicTypes.isEmpty()) {
+            return null;
+        }
+        
+        List<ChapterDTO> newChapters = new ArrayList<>();
+        List<TopicDTO> newTopics;
+        for (ChapterDTO chapter : courseDTO.getChapters()) {
+            newTopics = new ArrayList<>();
+            for (TopicDTO topic : chapter.getTopics()) {
+                if (!topicTypes.contains(topic.getTopicType())) {
+                    newTopics.add(topic);
+                }
+            }
+            chapter.setTopics(newTopics);
+            newChapters.add(chapter);
+        }
+        courseDTO.setChapters(newChapters);
+        return courseDTO;
+    }
+
+        /* 
+     * Check if user has access to this course.
+     * 
+     * @param courseId the id of the course
+     * @param userId the id of the user
+     * @return true if user has access to this course, false otherwise
+     */
+    public boolean checkCourseAccessAbility(Long courseId, Long userId) {
+        Course course = courseRepository.findById(courseId).orElse(null);
+        if (course == null) {
+            return false;
+        }
+
+        boolean isInstructor = course.getInstructor().getId().equals(userId);
+        if (isInstructor) {
+            return true;
+        }
+
+        boolean isEnrolled = course.getEnrollments().stream().anyMatch(enrollment -> enrollment.getUser().getId().equals(userId));
+        if (isEnrolled) {
+            return true;
+        }
+        return false;
+    }   
+
+    /**
+     * Check if user has access to this topic.
+     * @param topicId the id of the topic
+     * @param userId the id of the user
+     * @return true if user has access to this topic, false otherwise
+     */
+    public boolean checkCourseAccessAbilityByTopicId(Long topicId, Long userId) {
+        Topic topic = topicRepository.findById(topicId).orElse(null);
+        if (topic == null) {
+            return false;
+        }
+        Long courseId = topic.getChapter().getCourse().getId();
+        return checkCourseAccessAbility(courseId, userId);
     }
 }
 
