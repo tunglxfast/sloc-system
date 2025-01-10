@@ -1,18 +1,14 @@
 package funix.sloc_system.controller;
 
-import funix.sloc_system.dto.UserDTO;
 import funix.sloc_system.entity.ForgotPassword;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.security.SecurityUser;
-import jakarta.servlet.http.HttpSession;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

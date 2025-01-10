@@ -30,7 +30,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
             .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
-                    .requestMatchers("/login", "/login_form", "/register", "/register_form").permitAll()
+                    .requestMatchers("/login", "/login_form", "/register", "/register_form", "/support").permitAll()
                     .requestMatchers("/verify", "/reset-password", "/forgot-password").permitAll()
                     .requestMatchers("/h2-console/**").permitAll()
                     .requestMatchers("/admin/**").hasAuthority("ADMIN")
