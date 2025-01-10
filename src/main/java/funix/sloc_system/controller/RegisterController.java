@@ -62,7 +62,12 @@ public class RegisterController {
             newUser.setPassword(passwordEncoder.encode(password));
             newUser.setLocked(false);
             newUser.setFailedAttempts(0);
-            registerNewUser(newUser);
+            try {
+                registerNewUser(newUser);
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", "An error occurred while sending verification email.");
+                return "redirect:/register";
+            }
             redirectAttributes.addFlashAttribute("successMessage",
                     "Create user successfully. Please go to email for verification.");
             return "redirect:/login";
@@ -101,7 +106,10 @@ public class RegisterController {
         // Add STUDENT role
         Role studentRole = roleRepository.findByName(RoleType.STUDENT.name()).orElse(null);
         if (studentRole != null) {
-            user.setRoles(Set.of(studentRole));
+            if (user.getRoles() == null) {
+                user.setRoles(new HashSet<>());
+            }
+            user.getRoles().add(studentRole);
         } else {
           redirectAttributes.addFlashAttribute("errorMessage", "Server error. Please try again later.");
           return "redirect:/login";
@@ -112,7 +120,7 @@ public class RegisterController {
         return "redirect:/login";
     }
 
-    private User registerNewUser(User user) {
+    private User registerNewUser(User user) throws Exception {
         // Generate verification token
         String token = UUID.randomUUID().toString();
         user.setVerificationToken(token);

@@ -1,13 +1,16 @@
 package funix.sloc_system.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.User;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class EmailService {
@@ -18,12 +21,26 @@ public class EmailService {
     @Value("${app.base-url}")
     private String baseUrl;
 
+    @Async
     public void sendEmail(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject(subject);
         message.setText(body);
         mailSender.send(message);
+    }
+
+    @Async
+    public void sendEmailHTML(String to, String subject, String body) throws Exception {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            message.setRecipients(MimeMessage.RecipientType.TO, InternetAddress.parse(to));
+            message.setSubject(subject);
+            message.setContent(body, "text/html; charset=utf-8");
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new Exception("Failed to send email");
+        }
     }
 
     
@@ -51,30 +68,30 @@ public class EmailService {
         sendEmail(instructor.getEmail(), subject, body);
     }
 
-    public void sendVerificationEmail(User user, String token) {
+    public void sendVerificationEmail(User user, String token) throws Exception {
         String subject = "Verify your account";
         String verificationLink = baseUrl + "/verify?token=" + token;
         String body = String.format(
-                "Hello %s,%n%n"
-                + "Thank you for registering. Please click the link below to verify your email:%n"
-                + "%s%n%n"
-                + "This link will expire in 24 hours.%n"
+                "Hello %s, <br>"
+                + "Thank you for registering. Please click the link below to verify your email: <br>"
+                + "<a href=\"%s\">%s</a><br>"
+                + "This link will expire in 24 hours.<br>"
                 + "If you did not register, please ignore this email.",
-                user.getFullName(), verificationLink
+                user.getFullName(), verificationLink, verificationLink
         );
-        sendEmail(user.getEmail(), subject, body);
+        sendEmailHTML(user.getEmail(), subject, body);
     }
 
-    public void sendNewVerificationEmail(User user, String token) {
+    public void sendNewVerificationEmail(User user, String token) throws Exception {
         String subject = "Request new verification email";
         String verificationLink = baseUrl + "/verify?token=" + token;
         String body = String.format(
-                "Hello %s,%n%n"
-                + "You have requested to resend the verification email. Please click the link below to verify your email:%n"
-                + "%s%n%n"
+                "Hello %s, <br>"
+                + "You have requested to resend the verification email. Please click the link below to verify your email: <br>"
+                + "<a href=\"%s\">%s</a><br>"
                 + "This link will expire in 24 hours.",
-                user.getFullName(), verificationLink
+                user.getFullName(), verificationLink, verificationLink
         );
-        sendEmail(user.getEmail(), subject, body);
+        sendEmailHTML(user.getEmail(), subject, body);
     }
 }

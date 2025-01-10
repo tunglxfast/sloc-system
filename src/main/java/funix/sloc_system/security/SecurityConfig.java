@@ -36,6 +36,7 @@ public class SecurityConfig {
                     .requestMatchers("/moderator/**").hasAnyAuthority("MODERATOR", "ADMIN")
                     .requestMatchers("/instructor/**").hasAuthority("INSTRUCTOR")
                     .requestMatchers("/courses/**").hasAnyAuthority("STUDENT", "INSTRUCTOR", "MODERATOR", "ADMIN")
+                    .requestMatchers("/verify").permitAll()
                     .anyRequest().authenticated()
             )
             .formLogin(form -> form
