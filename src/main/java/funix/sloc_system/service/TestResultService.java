@@ -77,10 +77,7 @@ public class TestResultService {
         TopicDTO topicDTO = topicMapper.toDTO(topicEntity);
         topicDTO.setQuestions(dtoService.getAvailableQuestions(topicDTO));
 
-        // 0 - 100
-        double totalScore = 0;
-        double countCorrectAnswer = 0;
-
+        int countPoint = 0;
         List<Answer> correctAnswers = new ArrayList<>();
         List<String> correctAnswerContents = new ArrayList<>();
         List<String> selectedAnswerContents = new ArrayList<>();
@@ -106,14 +103,13 @@ public class TestResultService {
 
             if (new HashSet<>(selectedAnswerContents).containsAll(correctAnswerContents)
                     && new HashSet<>(correctAnswerContents).containsAll(selectedAnswerContents)) {
-                countCorrectAnswer += 1;
+                countPoint += question.getPoint();
             }
         }
 
-         // 0 - 100
-        int passScore = topicDTO.getPassScore();
-        totalScore = Math.round(countCorrectAnswer / questions.size() * 100);
-        boolean isPassed = totalScore >= passScore;
+        int passPoint = topicDTO.getPassPoint();
+        boolean isPassed = countPoint >= passPoint;
+        double totalScore = Math.round(((double)countPoint / topicDTO.getMaxPoint()) * 100);
 
         // update LearnedTopic
         if (isPassed) {

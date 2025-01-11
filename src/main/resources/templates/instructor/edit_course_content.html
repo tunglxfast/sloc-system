@@ -72,11 +72,8 @@
     </div>
 
     <div class="row" style="margin-right: 40%;">
-        <h4 style="margin-top: 5%; text-align: right; margin-bottom: 3%;">Editing chapters for Course: <span
-          style="color: rgb(80, 80, 255);" th:text="${courseTitle}">Course Title</span></h4>
-      <div th:if="${errorMessage}">
-        <p th:text="${errorMessage}" style="color: red;"></p>
-      </div>
+      <h4 style="margin-top: 5%; text-align: right; margin-bottom: 3%;">Editing chapters for Course: <span
+        style="color: rgb(80, 80, 255);" th:text="${courseTitle}">Course Title</span></h4>
     </div>
 
   <div class="row" style="font-family: Arial, Helvetica, sans-serif;">
@@ -95,7 +92,6 @@
                 <i class="fas fa-edit"></i> Edit Course Content
               </a>
             </li>
-
           </ul>
 
         </div>
@@ -105,8 +101,15 @@
 
     <div class="col-md-9">
       <div style="margin-left: 5%; width: 80%;">
-        <!-- Existing Chapters List -->
         <h2 class="text-center mb-4">Edit Course Content</h2>
+        <!-- Display Error and Success Messages -->
+        <div th:if="${errorMessage}">
+          <p th:text="${errorMessage}" style="color: red;"></p>
+        </div>
+        <div th:if="${successMessage}">
+          <p th:text="${successMessage}" style="color: green;"></p>
+        </div>
+        <!-- Existing Chapters List -->
         <div th:if="${chapters != null}">
           <div class="accordion" id="chaptersAccordion">
             <div th:each="chapter : ${chapters}" class="accordion-item">

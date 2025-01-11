@@ -41,7 +41,7 @@ public class CreatingTopicController {
                               @RequestParam String topicType,
                               Model model) {
         if (chapterId == null ) {
-            return RedirectUrlHelper.buildRedirectErrorUrl(courseId, "Chapter info not found");
+            return RedirectUrlHelper.buildRedirectErrorUrlToCourseContent(courseId, "Chapter info not found");
         }
 
         try {
@@ -61,10 +61,10 @@ public class CreatingTopicController {
             } else if (topicType.equals("QUIZ") || topicType.equals("EXAM")) {
                 return "instructor/create_test_topic";
             } else {
-                return RedirectUrlHelper.buildRedirectErrorUrl(courseId, "Invalid topic type");
+                return RedirectUrlHelper.buildRedirectErrorUrlToCourseContent(courseId, "Invalid topic type");
             }
         } catch (Exception e) {
-            return RedirectUrlHelper.buildRedirectErrorUrl(courseId, e.getMessage());
+            return RedirectUrlHelper.buildRedirectErrorUrlToCourseContent(courseId, e.getMessage());
         }
     }
 
@@ -78,7 +78,7 @@ public class CreatingTopicController {
                           @RequestParam(required = false) MultipartFile videoFile,
                           @RequestParam(required = false) String videoUrl,
                           @RequestParam(required = false) String questions,
-                          @RequestParam(required = false) Integer passScore,
+                          @RequestParam(required = false) Integer passPoint,
                           @RequestParam(required = false) Integer timeLimit,
                           @AuthenticationPrincipal SecurityUser securityUser,
                           RedirectAttributes redirectAttributes) {
@@ -91,42 +91,16 @@ public class CreatingTopicController {
             // Handle different topic types
             switch (topicType) {
                 case "READING":
-                    if (readingFile != null && !readingFile.isEmpty()) {
-                        String contentType = readingFile.getContentType();
-                        if (contentType != null 
-                        && (contentType.equals("application/pdf") || 
-                            contentType.equals("application/msword") ||
-                            contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))) {
-                            String fileUrl = minioService.uploadFile(readingFile, contentType);
-                            topicDTO.setFileUrl(fileUrl);
-                        }
-                    }
+                    handleReadingTopic(topicDTO, readingFile);
                     break;
 
                 case "VIDEO":
-                    if (videoFile != null && !videoFile.isEmpty()) {
-                        String contentType = videoFile.getContentType();
-                        if (contentType != null && contentType.startsWith("video/")) {
-                            String fileUrl = minioService.uploadFile(videoFile, contentType);
-                            topicDTO.setVideoUrl(fileUrl);
-                        }
-                    } else if (videoUrl != null && !videoUrl.isEmpty()) {
-                        topicDTO.setVideoUrl(videoUrl);
-                    }
+                    handleVideoTopic(topicDTO, videoFile, videoUrl);
                     break;
 
                 case "QUIZ":
                 case "EXAM":
-                    if (questions != null) {
-                        List<QuestionDTO> questionDTOs = objectMapper.readValue(questions,
-                            objectMapper.getTypeFactory().constructCollectionType(List.class, QuestionDTO.class));
-                        topicDTO.setQuestions(questionDTOs);
-                        topicDTO.setPassScore(passScore);
-                        
-                        if ("EXAM".equals(topicType)) {
-                            topicDTO.setTimeLimit(timeLimit);
-                        }
-                    }
+                    handleQuizExamTopic(topicDTO, topicType, questions, passPoint, timeLimit);
                     break;
             }
 
@@ -144,19 +118,21 @@ public class CreatingTopicController {
                 }
             }
 
-            return RedirectUrlHelper.buildRedirectSuccessUrl(courseId, "Topic created successfully.");
+            return RedirectUrlHelper.buildRedirectSuccessUrlToCourseContent(courseId, "Topic created successfully.");
         } catch (Exception e) {
-            return RedirectUrlHelper.buildRedirectErrorUrl(courseId, e.getMessage());
+            return RedirectUrlHelper.buildRedirectErrorUrlToCourseContent(courseId, "Topic creation failed");
         }
     }
 
     @GetMapping("/edit")
     public String showEditTopicForm(@PathVariable Long courseId,
+                                    @RequestParam(value = "errorMessage", required = false) String errorMessage,
+                                    @RequestParam(value = "successMessage", required = false) String successMessage,
                                     @RequestParam("chapterId") Long chapterId,
                                     @RequestParam("topicId") Long topicId,
                                     Model model) {
         if (chapterId == null || topicId == null ) {
-            return RedirectUrlHelper.buildRedirectErrorUrl(courseId, "Chapter or topic info not found");
+            return RedirectUrlHelper.buildRedirectErrorUrlToTopicEdit(courseId, chapterId, topicId, "Chapter or topic info not found");
         }
 
         try {
@@ -171,6 +147,8 @@ public class CreatingTopicController {
             model.addAttribute("chapterTitle", chapterDTO.getTitle());
             model.addAttribute("topicType", topicType);
             model.addAttribute("topic", topicDTO);
+            model.addAttribute("errorMessage", errorMessage);
+            model.addAttribute("successMessage", successMessage);
 
             if (topicType.equals(TopicType.READING.name())
                     || topicType.equals(TopicType.VIDEO.name())) {
@@ -179,7 +157,7 @@ public class CreatingTopicController {
                 return "instructor/edit_test_topic";
             }
         } catch (Exception e) {
-            return RedirectUrlHelper.buildRedirectErrorUrl(courseId, e.getMessage());
+            return RedirectUrlHelper.buildRedirectErrorUrlToTopicEdit(courseId, chapterId, topicId, e.getMessage());
         }
     }
 
@@ -193,7 +171,7 @@ public class CreatingTopicController {
                           @RequestParam(required = false) MultipartFile videoFile,
                           @RequestParam(required = false) String videoUrl,
                           @RequestParam(required = false) String questions,
-                          @RequestParam(required = false) Integer passScore,
+                          @RequestParam(required = false) Integer passPoint,
                           @RequestParam(required = false) Integer timeLimit,
                           @RequestParam Long topicId,
                           @AuthenticationPrincipal SecurityUser securityUser,
@@ -208,51 +186,27 @@ public class CreatingTopicController {
             // Handle different topic types
             switch (topicType) {
                 case "READING":
-                    if (readingFile != null && !readingFile.isEmpty()) {
-                        String contentType = readingFile.getContentType();
-                        if (contentType != null 
-                        && (contentType.equals("application/pdf") || 
-                            contentType.equals("application/msword") ||
-                            contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))) {
-                            String fileUrl = minioService.uploadFile(readingFile, contentType);
-                            topicDTO.setFileUrl(fileUrl);
-                        }
-                    }
+                    handleReadingTopic(topicDTO, readingFile);
                     break;
 
                 case "VIDEO":
-                    if (videoFile != null && !videoFile.isEmpty()) {
-                        String contentType = videoFile.getContentType();
-                        if (contentType != null && contentType.startsWith("video/")) {
-                            String fileUrl = minioService.uploadFile(videoFile, contentType);
-                            topicDTO.setVideoUrl(fileUrl);
-                        }
-                    } else if (videoUrl != null && !videoUrl.isEmpty()) {
-                        topicDTO.setVideoUrl(videoUrl);
-                    }
+                    handleVideoTopic(topicDTO, videoFile, videoUrl);
                     break;
 
                 case "QUIZ":
                 case "EXAM":
-                    if (questions != null) {
-                        List<QuestionDTO> questionDTOs = objectMapper.readValue(questions, new TypeReference<List<QuestionDTO>>() {});
-                        topicDTO.setQuestions(questionDTOs);
-                        topicDTO.setPassScore(passScore);
-                        
-                        if ("EXAM".equals(topicType)) {
-                            topicDTO.setTimeLimit(timeLimit);
-                        }
-
-                        // Handle questions in service
+                    List<QuestionDTO> questionDTOs = handleQuizExamTopic(topicDTO, topicType, questions, passPoint, timeLimit);
+                    if (questionDTOs != null && !questionDTOs.isEmpty()) {
+                        // Handle questions, update/delete questions in database
                         questionService.handleTopicQuestions(topicId, questionDTOs, securityUser.getUserId());
                     }
                     break;
             }
 
             topicService.saveTopicChanges(courseId, chapterId, topicDTO, securityUser.getUserId());
-            return RedirectUrlHelper.buildRedirectSuccessUrl(courseId, "Topic updated successfully.");
+            return RedirectUrlHelper.buildRedirectSuccessUrlToCourseContent(courseId, "Topic updated successfully.");
         } catch (Exception e) {
-            return RedirectUrlHelper.buildRedirectErrorUrl(courseId, e.getMessage());
+            return RedirectUrlHelper.buildRedirectErrorUrlToTopicEdit(courseId, chapterId, topicId, e.getMessage());
         }
     }
 
@@ -270,5 +224,71 @@ public class CreatingTopicController {
             redirectAttributes.addFlashAttribute("errorMessage", "Error when deleting topic content");
         }
         return "redirect:/instructor/course/" + courseId + "/edit/chapters";
+    }
+
+    // -- Helper methods --
+
+    /*
+     * Handle reading topic.
+     * @param topicDTO TopicDTO object to be updated
+     * @param readingFile Reading file
+     */ 
+    private void handleReadingTopic(TopicDTO topicDTO, MultipartFile readingFile) throws Exception {
+        if (readingFile != null && !readingFile.isEmpty()) {
+            String contentType = readingFile.getContentType();
+            if (contentType != null 
+            && (contentType.equals("application/pdf") || 
+                contentType.equals("application/msword") ||
+                contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))) {
+                String fileUrl = minioService.uploadFile(readingFile, contentType);
+                topicDTO.setFileUrl(fileUrl);
+            }
+        }
+    }
+
+    private void handleVideoTopic(TopicDTO topicDTO, MultipartFile videoFile, String videoUrl) throws Exception {
+        if (videoFile != null && !videoFile.isEmpty()) {
+            String contentType = videoFile.getContentType();
+            if (contentType != null && contentType.startsWith("video/")) {
+                String fileUrl = minioService.uploadFile(videoFile, contentType);
+                topicDTO.setVideoUrl(fileUrl);
+            }
+        } else if (videoUrl != null && !videoUrl.isEmpty()) {
+            topicDTO.setVideoUrl(videoUrl);
+        }
+    }
+
+    /*
+     * Handle quiz/exam topic.
+     * @param topicDTO TopicDTO object to be updated
+     * @param topicType Topic type
+     * @param questions Questions in JSON format
+     * @param passPoint Pass point
+     * @param timeLimit Time limit
+     * @param topicId Topic ID
+     * @param instructorId Instructor ID
+     */
+    private List<QuestionDTO> handleQuizExamTopic(TopicDTO topicDTO, String topicType, String questions, Integer passPoint, Integer timeLimit) throws Exception {
+        if (questions != null) {
+            List<QuestionDTO> questionDTOs = objectMapper.readValue(questions, new TypeReference<List<QuestionDTO>>() {});
+            topicDTO.setQuestions(questionDTOs);
+            topicDTO.setPassPoint(passPoint);
+            if ("EXAM".equals(topicType)) {
+                topicDTO.setTimeLimit(timeLimit);
+            }
+
+            // Calculate max point
+            int maxPoint = questionDTOs.stream().mapToInt(QuestionDTO::getPoint).sum();
+            if (passPoint < 0) {
+                throw new IllegalArgumentException("Pass point must be greater than 0");
+            } else if (maxPoint < passPoint) {
+                throw new IllegalArgumentException("Total point must be greater than pass point");
+            }
+            topicDTO.setMaxPoint(maxPoint);
+
+            return questionDTOs;
+        } else {
+            return null;
+        }
     }
 }

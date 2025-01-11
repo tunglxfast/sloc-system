@@ -179,6 +179,7 @@ public class QuestionService {
         Question newQuestion = questionMapper.toEntity(questionDTO, topic);
         newQuestion.setTopic(topic);
         topic.getQuestions().add(newQuestion);
+        topic.setMaxPoint(topic.getMaxPoint() + questionDTO.getPoint());
         topicRepository.save(topic);
         
         // If course is not draft, save entire course DTO to temp table

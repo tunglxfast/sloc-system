@@ -122,8 +122,11 @@ public class TopicService {
                 existingTopicDTO.addQuestion(questionDTO);
             }
         }
-        if (topicDTO.getPassScore() != null) {
-            existingTopicDTO.setPassScore(topicDTO.getPassScore());
+        if (topicDTO.getPassPoint() != null) {
+            existingTopicDTO.setPassPoint(topicDTO.getPassPoint());
+        }
+        if (topicDTO.getMaxPoint() != null) {
+            existingTopicDTO.setMaxPoint(topicDTO.getMaxPoint());
         }
         if (topicDTO.getTimeLimit() != null) {
             existingTopicDTO.setTimeLimit(topicDTO.getTimeLimit());

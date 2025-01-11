@@ -35,17 +35,20 @@
             <div style="margin-left: 10%;">
                 <h1 th:text="${topic.title}" style="color: rgb(2, 117, 2); font-weight: bold;">Quiz Title</h1>
                 <!-- Quiz Requirement-->
-                <h5 style="color: rgb(219, 90, 90);">Pass Score (percentage):
-                    <span th:text="${topic.passScore}"></span>
+                <h5 style="color: rgb(219, 90, 90);">Pass Point:
+                    <span th:text="${topic.passPoint == null ? 0 : topic.passPoint}"></span>
+                </h5>
+                <h5 style="color: rgb(219, 90, 90);">Total Point:
+                    <span th:text="${topic.maxPoint == null ? 0 : topic.maxPoint}"></span>
                 </h5>
                 <!-- Quiz Status-->
                 <div class="quiz-result" th:if="${result != null}">
                     <h2 style="margin-top: 20%; color: rgb(2, 117, 2); font-weight: bold;">Result</h2>
-                    <h5>Highest Score:
-                        <span th:text="${result.highestScore}"></span>
+                    <h5>Highest Score (percentage):
+                        <span th:text="${result.highestScore == null ? 0 : result.highestScore}"></span>
                     </h5>
-                    <h5>Latest Score:
-                        <span th:text="${result.latestScore}"></span>
+                    <h5>Latest Score (percentage):
+                        <span th:text="${result.latestScore == null ? 0 : result.latestScore}"></span>
                     </h5>
                     <h5>Status:
                         <span th:text="${result.passed ? 'Pass' : 'Fail'}"></span>

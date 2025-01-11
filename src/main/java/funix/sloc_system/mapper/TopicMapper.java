@@ -52,8 +52,8 @@ public class TopicMapper {
                 break;
             case QUIZ:
             case EXAM:
-                dto.setPassScore(topic.getPassScore());
-                dto.setTotalScore(topic.getTotalScore());
+                dto.setPassPoint(topic.getPassPoint());
+                dto.setMaxPoint(topic.getMaxPoint());
                 if (topic.getTopicType() == TopicType.EXAM) {
                     dto.setTimeLimit(topic.getTimeLimit());
                 }
@@ -106,8 +106,8 @@ public class TopicMapper {
 
         topic.setFileUrl(dto.getFileUrl());
         topic.setVideoUrl(dto.getVideoUrl());
-        topic.setPassScore(dto.getPassScore());
-        topic.setTotalScore(dto.getTotalScore());
+        topic.setPassPoint(dto.getPassPoint());
+        topic.setMaxPoint(dto.getMaxPoint());
         topic.setTimeLimit(dto.getTimeLimit());
 
         // Map questions if present

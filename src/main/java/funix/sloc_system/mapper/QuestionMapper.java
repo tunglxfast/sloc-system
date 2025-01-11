@@ -37,6 +37,10 @@ public class QuestionMapper {
         dto.setContentStatus(question.getContentStatus().name());
         dto.setQuestionType(question.getQuestionType().name());
 
+        if (question.getPoint() != null) {
+            dto.setPoint(question.getPoint());
+        }
+
         if (question.getTopic() != null) {
             dto.setTopicId(question.getTopic().getId());
         }
@@ -78,6 +82,11 @@ public class QuestionMapper {
         }
 
         question.setContent(dto.getContent());
+
+        if (dto.getPoint() != null) {
+            question.setPoint(dto.getPoint());
+        }
+
         if (dto.getContentStatus() != null) {
             question.setContentStatus(ContentStatus.valueOf(dto.getContentStatus()));
         }

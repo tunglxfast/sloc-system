@@ -48,8 +48,8 @@ public class Topic {
     private String videoUrl;
 
     // Fields for Quiz and Exam
-    private Integer passScore;
-    private Integer totalScore;
+    private Integer passPoint = 0;
+    private Integer maxPoint = 0;
     private Integer timeLimit; // Only for Exam
 
     @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -80,11 +80,11 @@ public class Topic {
         if (updatedTopic.getFileUrl() != null) {
             this.fileUrl = updatedTopic.getFileUrl();
         }
-        if (updatedTopic.getPassScore() != null) {
-            this.passScore = updatedTopic.getPassScore();
+        if (updatedTopic.getPassPoint() != null) {
+            this.passPoint = updatedTopic.getPassPoint();
         }
-        if (updatedTopic.getTotalScore() != null) {
-            this.totalScore = updatedTopic.getTotalScore();
+        if (updatedTopic.getMaxPoint() != null) {
+            this.maxPoint = updatedTopic.getMaxPoint();
         }
         if (updatedTopic.getTimeLimit() != null) {
             this.timeLimit = updatedTopic.getTimeLimit();

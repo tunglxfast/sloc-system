@@ -30,6 +30,8 @@ public class CreatingChapterController {
             model.addAttribute("courseTitle", courseDTO.getTitle());
             model.addAttribute("courseId", courseDTO.getId());
             model.addAttribute("chapters", courseDTO.getChapters());
+            model.addAttribute("errorMessage", errorMessage);
+            model.addAttribute("successMessage", successMessage);
             return "instructor/edit_course_content";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());

@@ -46,9 +46,8 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="passScore" class="form-label">Pass Score (%)</label>
-                        <input type="number" class="form-control" id="passScore" name="passScore" 
-                            min="0" max="100" required>
+                        <label for="passPoint" class="form-label">Pass Point</label>
+                        <input type="number" class="form-control" id="passPoint" name="passPoint" min="1" required>
                     </div>
 
                     <!-- Exam-specific fields -->
@@ -100,6 +99,10 @@
                 <div class="mb-3">
                     <label class="form-label">Question Content</label>
                     <textarea class="form-control question-content" rows="2" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Question Point</label>
+                    <input type="number" class="form-control question-point" name="point" min="1" required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Question Type</label>
@@ -280,6 +283,7 @@
             questions.push({
                 content: questionCard.querySelector('.question-content').value,
                 questionType: questionCard.querySelector('.question-type').value,
+                point: questionCard.querySelector('.question-point').value,
                 answers: answers
             });
         });

@@ -28,6 +28,8 @@ public class Question {
     @Enumerated(EnumType.STRING)
     private QuestionType questionType; // CHOICE_MANY, CHOICE_ONE
 
+    private Integer point = 0;
+
     @ManyToOne
     @JoinColumn(name = "topic_id", nullable = false)
     private Topic topic;
