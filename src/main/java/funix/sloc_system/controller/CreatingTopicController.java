@@ -198,7 +198,8 @@ public class CreatingTopicController {
                     List<QuestionDTO> questionDTOs = handleQuizExamTopic(topicDTO, topicType, questions, passPoint, timeLimit);
                     if (questionDTOs != null && !questionDTOs.isEmpty()) {
                         // Handle questions, update/delete questions in database
-                        questionService.handleTopicQuestions(topicId, questionDTOs, securityUser.getUserId());
+                        List<QuestionDTO> afterHandle = questionService.handleTopicQuestions(topicId, questionDTOs, securityUser.getUserId());
+                        topicDTO.setQuestions(afterHandle);
                     }
                     break;
             }

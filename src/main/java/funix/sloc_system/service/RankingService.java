@@ -50,7 +50,7 @@ public class RankingService {
 
     @Transactional
     public List<Ranking> calculateAndSaveRankings(Long courseId) {
-        List<Object[]> results = testResultRepository.calculateTotalScores(courseId);
+        List<Object[]> results = testResultRepository.calculateWeightedTotalScores(courseId);
 
         User userHolder;
         Course courseHolder;

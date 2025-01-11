@@ -139,8 +139,8 @@
           </div>
         </div>
 
-        Student Rank
-        <div id="studentRank" class="tabcontent" style="display: block;">
+        <!-- Student Rank -->
+        <div id="studentRank" class="tabcontent">
           <div style="margin-left: 60px;">
             <h2 style="color: rgb(2, 117, 2); vertical-align: top; padding-top: 30px; 
             margin-bottom: 20px; font-weight: bold;">Student Rank</h2>
@@ -155,7 +155,7 @@
                 <td th:text="${ranking.rankPosition}">Rank Position</td>
                 <td th:text="${ranking.userName}">User Name</td>
                 <td th:text="${ranking.fullName}">Full Name</td>
-                <td th:text="${ranking.allCourseScore}">Total Score</td>
+                <td th:text="${ranking.allCourseScore}">Total Score (with weight)</td>
               </tr>
             </table>
           </div>

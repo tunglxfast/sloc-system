@@ -6,6 +6,7 @@ import funix.sloc_system.dto.TestResultDTO;
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.*;
 import funix.sloc_system.enums.TopicType;
+import funix.sloc_system.enums.QuestionType;
 import funix.sloc_system.mapper.TestResultMapper;
 import funix.sloc_system.mapper.TopicMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,15 +102,26 @@ public class TestResultService {
                 correctAnswerContents.add(answer.getContent());
             }
 
-            if (new HashSet<>(selectedAnswerContents).containsAll(correctAnswerContents)
-                    && new HashSet<>(correctAnswerContents).containsAll(selectedAnswerContents)) {
-                countPoint += question.getPoint();
+            if (QuestionType.INPUT_TEXT.name().equals(question.getQuestionType())) {
+                // For INPUT_TEXT questions, compare the user's input with the correct answer
+                // Ignore case and trim whitespace
+                String userInput = selectedAnswerContents.isEmpty() ? "" : selectedAnswerContents.get(0).trim().toLowerCase();
+                String correctAnswer = correctAnswerContents.isEmpty() ? "" : correctAnswerContents.get(0).trim().toLowerCase();
+                if (userInput.equals(correctAnswer)) {
+                    countPoint += question.getPoint();
+                }
+            } else {
+                // For CHOICE_ONE and CHOICE_MANY questions, use the existing logic
+                if (new HashSet<>(selectedAnswerContents).containsAll(correctAnswerContents)
+                        && new HashSet<>(correctAnswerContents).containsAll(selectedAnswerContents)) {
+                    countPoint += question.getPoint();
+                }
             }
         }
 
         int passPoint = topicDTO.getPassPoint();
         boolean isPassed = countPoint >= passPoint;
-        double totalScore = Math.round(((double)countPoint / topicDTO.getMaxPoint()) * 100);
+        double mark = Math.round(((double)countPoint / topicDTO.getMaxPoint()) * 100);
 
         // update LearnedTopic
         if (isPassed) {
@@ -124,16 +136,16 @@ public class TestResultService {
         // save test result
         TestResult testResult = testResultRepository.findByUserIdAndTopicId(userId, topicId).orElse(null);
         if (testResult == null){
-            testResult = new TestResult(totalScore, totalScore, isPassed, 1, topicType, user, topicEntity);
+            testResult = new TestResult(mark, mark, isPassed, 1, topicType, user, topicEntity);
         } else {
-            testResult.setLatestScore(totalScore);
+            testResult.setLatestScore(mark);
             if (testResult.getParticipationCount() != null) {
                 testResult.setParticipationCount(testResult.getParticipationCount()+1);
             } else {
                 testResult.setParticipationCount(1);
             }
-            if (testResult.getHighestScore() < totalScore) {
-                testResult.setHighestScore(totalScore);
+            if (testResult.getHighestScore() < mark) {
+                testResult.setHighestScore(mark);
             }
             if (!testResult.getPassed()) {
                 testResult.setPassed(isPassed);

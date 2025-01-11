@@ -26,7 +26,7 @@ public class Question {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    private QuestionType questionType; // CHOICE_MANY, CHOICE_ONE
+    private QuestionType questionType; // CHOICE_MANY, CHOICE_ONE, INPUT_TEXT
 
     private Integer point = 0;
 

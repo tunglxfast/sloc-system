@@ -21,4 +21,16 @@ public interface TestResultRepository extends JpaRepository<TestResult, Long> {
            "GROUP BY tr.user.id, tr.topic.chapter.course.id " +
            "ORDER BY totalScore DESC")
     List<Object[]> calculateTotalScores(@Param("courseId") Long courseId);
+
+    @Query("SELECT tr.user.id AS userId, tr.topic.chapter.course.id AS courseId, " +
+        "SUM(CASE WHEN tr.testType = 'QUIZ' THEN tr.highestScore * 0.4 " +
+                    "WHEN tr.testType = 'EXAM' THEN tr.highestScore * 0.6 " +
+                    "ELSE 0 END) AS totalScore " +
+        "FROM TestResult tr " +
+        "WHERE tr.topic.chapter.course.id = :courseId " +
+        "AND tr.testType IN ('QUIZ', 'EXAM') " +
+        "GROUP BY tr.user.id, tr.topic.chapter.course.id " +
+        "ORDER BY totalScore DESC")
+    List<Object[]> calculateWeightedTotalScores(@Param("courseId") Long courseId);
+
 }

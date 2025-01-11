@@ -18,7 +18,7 @@ public class QuestionDTO {
     private Long id;
     private String content;
     private String contentStatus;
-    private String questionType; // CHOICE_MANY, CHOICE_ONE
+    private String questionType; // CHOICE_MANY, CHOICE_ONE, INPUT_TEXT
     private Integer point = 0;
     private Long topicId;  // Parent topic ID
     private List<AnswerDTO> answers;
