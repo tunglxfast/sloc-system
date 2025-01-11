@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Instructor Profile Settings</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.0.0/mdb.min.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+
+    <script src="https://cdn.ckeditor.com/ckeditor5/35.0.1/classic/ckeditor.js"></script>
+
+    <style>
+        body {
+            font-family: 'Laila';
+            background-color: #f8f9fa;
+        }
+
+        .settings-container {
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .avatar-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .avatar-container img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-right: 20px;
+        }
+
+        .avatar-container input[type="file"] {
+            margin-top: 10px;
+        }
+
+        .user-info {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 20px;
+            padding-top: 10px;
+        }
+
+        .btn-badge-size {
+            font-size: 0.7rem;
+            padding: 0.3rem 0.4rem;
+            line-height: 0.7rem;
+        }
+    </style>
+</head>
+
+<body>
+<div th:replace="~{/fragments/basic_navbar :: navbarFragment}"></div>
+
+<div class="container settings-container">
+    <div class="row">
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+            <span th:text="${errorMessage}"></span>
+        </div>
+        <div th:if="${successMessage}" class="alert alert-success" role="alert">
+            <span th:text="${successMessage}"></span>
+        </div>
+
+        <div class="col-md-12">
+            <h3>Instructor Profile</h3>
+
+            <!-- Avatar Display -->
+            <div class="avatar-container">
+                <img th:src="@{${instructorInfo.avatarUrl}}" alt="Avatar" />
+                <div>
+                    <form th:action="@{/instructor/profile/edit_profile}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="instructorId" th:value="${instructorInfo.userId}">
+                        <label for="avatarFile" class="form-label">Change Avatar</label>
+                        <input type="file" class="form-control" id="avatarFile" name="avatarFile" accept="image/*">
+                        <button type="submit" class="btn btn-primary btn-badge-size mt-2">Update Avatar</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Editable Profile Information -->
+            <form th:action="@{/instructor/profile/edit_profile}" method="post">
+                <input type="hidden" name="instructorId" th:value="${instructorInfo.userId}">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Full Name</label>
+                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter your full name" th:value="${instructorInfo.name}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" th:value="${instructorInfo.email}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="text" class="form-control" id="phone" name="phone" placeholder="Enter your phone number" th:value="${instructorInfo.phone}">
+                </div>
+                <div class="mb-3">
+                    <label for="bio" class="form-label">Bio</label>
+                    <!-- CKEditor for Bio -->
+                    <textarea id="bio" name="bio" class="form-control" placeholder="Write a short bio" th:utext="${instructorInfo.bio}"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="/js/popper.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Initialize CKEditor for the bio field
+    ClassicEditor
+        .create(document.querySelector('#bio'))
+        .catch(error => {
+            console.error(error);
+        });
+</script>
+</body>
+
+</html>

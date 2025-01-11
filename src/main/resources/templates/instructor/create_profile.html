@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Create Instructor Profile</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="/css/style.css">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+  <!-- MDB -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.0.0/mdb.min.css" rel="stylesheet" />
+  <!-- CKEditor -->
+  <script src="https://cdn.ckeditor.com/ckeditor5/38.0.0/classic/ckeditor.js"></script>
+</head>
+
+<body>
+  <section class="vh-100">
+    <!-- Include Navbar -->
+    <div th:replace="/fragments/basic_navbar :: navbarFragment"></div>
+    
+    <div class="container py-5 h-100">
+      <div class="row d-flex align-items-center justify-content-center h-100">
+        <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
+          <h2>Create Instructor Profile</h2>
+          <form th:action="@{/instructor/profile/create_profile}" method="POST" enctype="multipart/form-data">
+            <!-- Instructor ID (hidden) -->
+            <input type="hidden" id="instructorId" name="instructorId" th:value="${instructorId}" />
+
+            <!-- Name input -->
+            <div class="form-group mb-4">
+              <label for="name" class="form-label">Full Name</label>
+              <input type="text" id="name" name="name" class="form-control form-control-lg" required/>
+            </div>
+
+            <!-- Email input -->
+            <div class="form-group mb-4">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" id="email" name="email" class="form-control form-control-lg" required/>
+            </div>
+
+            <!-- Phone input -->
+            <div class="form-group mb-4">
+              <label for="phone" class="form-label">Phone</label>
+              <input type="text" id="phone" name="phone" class="form-control form-control-lg" required/>
+            </div>
+
+            <!-- Bio input (with CKEditor) -->
+            <div class="form-group mb-4">
+              <label for="bio" class="form-label">Bio</label>
+              <textarea id="bio" name="bio" class="form-control form-control-lg"></textarea>
+            </div>
+
+            <!-- Avatar input -->
+            <div class="form-group mb-4">
+              <label for="avatarFile" class="form-label">Avatar</label>
+              <input type="file" id="avatarFile" name="avatarFile" class="form-control form-control-lg" accept=".jpg,.jpeg,.png" required/>
+            </div>
+
+            <!-- Submit button -->
+            <button type="submit" data-mdb-ripple-init class="btn btn-primary btn-lg btn-block">Create Profile</button>
+            <a href="/home" class="btn btn-secondary btn-lg btn-block">Cancel</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bootstrap -->
+  <script src="/js/popper.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"></script>
+  <!-- MDB -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.0.0/mdb.umd.min.js"></script>
+
+  <!-- Initialize CKEditor -->
+  <script>
+    ClassicEditor
+      .create(document.querySelector('#bio'))
+      .catch(error => {
+        console.error(error);
+      });
+  </script>
+</body>
+
+</html>

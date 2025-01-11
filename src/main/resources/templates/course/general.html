@@ -15,6 +15,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.0.0/mdb.min.css" rel="stylesheet" />
   <!-- CSS -->
   <link th:href="@{/css/course_general_style.css}" rel="stylesheet">
+  <link th:href="@{/css/instructor_profile_style.css}" rel="stylesheet">
 </head>
 
 <body>
@@ -60,7 +61,8 @@
     <div class="row">
       <!-- Tab links -->
       <div class="tab">
-        <button class="tablinks active" th:if="${isEnrolled}" onclick="courseTab(event, 'course')">Course</button>
+        <button class="tablinks active" onclick="courseTab(event, 'course')">Course</button>
+        <button class="tablinks" onclick="courseTab(event, 'instructorProfile')">Instructor Profile</button>
         <button class="tablinks" th:if="${isEnrolled}" onclick="courseTab(event, 'progress')">Progress</button>
         <button class="tablinks" th:if="${isEnrolled}" onclick="courseTab(event, 'studentRank')">Student Rank</button>
       </div>
@@ -87,6 +89,11 @@
               </li>
             </ul>
           </div>
+        </div>
+
+        <!-- Instructor Profile -->
+        <div id="instructorProfile" class="tabcontent">
+          <div th:replace="/fragments/instructor_profile_fragment :: instructorProfile"></div>
         </div>
 
         <!-- user process -->

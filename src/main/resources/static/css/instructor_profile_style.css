@@ -1,0 +1,25 @@
+#instructorProfile-container {
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.instructorProfile-user-info {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #495057;
+    margin-bottom: 20px;
+    padding-top: 10px;
+}
+
+.instructorProfile-avatar-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+}
+
+.instructorProfile-profile-item {
+    margin-bottom: 15px;
+}
