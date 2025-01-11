@@ -4,14 +4,16 @@ import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.TestResultDTO;
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.dto.TopicDiscussionDTO;
+import funix.sloc_system.dto.RankingDTO;
 import funix.sloc_system.entity.Course;
+import funix.sloc_system.entity.Ranking;
 import funix.sloc_system.entity.StudyProcess;
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.mapper.CourseMapper;
-import funix.sloc_system.mapper.TestResultMapper;
 import funix.sloc_system.mapper.TopicMapper;
+import funix.sloc_system.mapper.RankingMapper;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.*;
 import funix.sloc_system.util.AppUtil;
@@ -25,7 +27,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -60,7 +61,10 @@ public class CourseLearningController {
     private TopicMapper topicMapper;
 
     @Autowired
-    private TestResultMapper testResultMapper;
+    private RankingService rankingService;
+
+    @Autowired
+    private RankingMapper rankingMapper;
 
     @Autowired
     private TopicDiscussionService topicDiscussionService;
@@ -143,6 +147,16 @@ public class CourseLearningController {
                 }
             }
 
+            Ranking ranking = rankingService.getRankingsByUserAndCourse(user.getId(), courseId);
+            if (ranking != null) {
+                RankingDTO rankingDTO = rankingMapper.toDTO(ranking);
+                model.addAttribute("userRanking", rankingDTO);
+            }
+
+            List<Ranking> rankings = rankingService.getRankingsByCourse(courseId);
+            List<RankingDTO> rankingDTOs = rankingMapper.toDTOs(rankings);
+            
+            model.addAttribute("rankings", rankingDTOs);
             model.addAttribute("course", courseDTO);
             model.addAttribute("isEnrolled", isEnrolled);
             model.addAttribute("processes", testResults);

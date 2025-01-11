@@ -4,16 +4,20 @@ import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.dto.UserDTO;
+import funix.sloc_system.dto.RankingDTO;
 import funix.sloc_system.dto.TopicDiscussionDTO;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.entity.User;
+import funix.sloc_system.entity.Ranking;
 import funix.sloc_system.enums.RoleType;
 import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.mapper.CourseMapper;
 import funix.sloc_system.mapper.UserMapper;
+import funix.sloc_system.mapper.RankingMapper;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.CourseService;
+import funix.sloc_system.service.RankingService;
 import funix.sloc_system.service.UserService;
 import funix.sloc_system.service.TopicDiscussionService;
 import funix.sloc_system.util.AppUtil;
@@ -49,6 +53,10 @@ public class InstructorViewController {
     private AppUtil appUtil;
     @Autowired
     private TopicDiscussionService topicDiscussionService;
+    @Autowired
+    private RankingService rankingService;
+    @Autowired
+    private RankingMapper rankingMapper;
 
     @GetMapping(value = {"", "/", "/courses"})
     public String showDashboard(@AuthenticationPrincipal SecurityUser securityUser,
@@ -82,12 +90,16 @@ public class InstructorViewController {
         CourseDTO courseDTO;
         try {
             courseDTO = appUtil.getEditingCourseDTO(courseId);
+
+            List<Ranking> rankings = rankingService.getRankingsByCourse(courseId);
+            List<RankingDTO> rankingDTOs = rankingMapper.toDTOs(rankings);
+            model.addAttribute("rankings", rankingDTOs);
+            model.addAttribute("course", courseDTO);
+            return "instructor/course_view";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return RedirectUrlHelper.REDIRECT_INSTRUCTOR_DASHBOARD;
         }
-        model.addAttribute("course", courseDTO);
-        return "instructor/course_view";
     }
 
     @GetMapping("/course/{courseId}/{chapterNumber}_{topicNumber}/view")
