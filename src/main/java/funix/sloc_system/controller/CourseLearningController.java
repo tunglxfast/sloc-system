@@ -8,6 +8,7 @@ import funix.sloc_system.dto.RankingDTO;
 import funix.sloc_system.entity.InstructorInfo;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Ranking;
+import funix.sloc_system.entity.Role;
 import funix.sloc_system.entity.StudyProcess;
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.entity.User;
@@ -139,8 +140,14 @@ public class CourseLearningController {
     }
 
     @GetMapping("/{courseId}/enroll")
-    public String enrollCourse(@PathVariable Long courseId, @AuthenticationPrincipal SecurityUser securityUser, Model model) {
+    public String enrollCourse(@PathVariable Long courseId, @AuthenticationPrincipal SecurityUser securityUser, RedirectAttributes redirectAttributes, Model model) {
         if (!appUtil.isCourseReady(courseId)) {
+            redirectAttributes.addAttribute("errorMessage", "Course not found.");
+            return "redirect:/courses";
+        }
+
+        if (!mayEnroll(securityUser)) {
+            redirectAttributes.addAttribute("errorMessage", "You are not allowed to enroll this course.");
             return "redirect:/courses";
         }
 
@@ -325,5 +332,18 @@ public class CourseLearningController {
         model.addAttribute("lastTopic", studyingTopicSeq);
         model.addAttribute("lastChapter", studyingChapterSeq);
         model.addAttribute("instructorInfo", instructorInfo);
+    }
+
+    private boolean mayEnroll(SecurityUser securityUser) {
+        User user = userService.findById(securityUser.getUserId());
+        if (user == null) {
+            return false;
+        }
+
+        if (user.getStringRoles().contains("STUDENT")) {
+            return true;
+        }
+        
+        return false;
     }
 }
