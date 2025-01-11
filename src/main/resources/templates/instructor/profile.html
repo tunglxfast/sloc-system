@@ -80,8 +80,8 @@
                 <div>
                     <form th:action="@{/instructor/profile/edit_profile}" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="instructorId" th:value="${instructorInfo.userId}">
-                        <label for="avatarFile" class="form-label">Change Avatar</label>
-                        <input type="file" class="form-control" id="avatarFile" name="avatarFile" accept="image/*">
+                        <label for="avatarFile" class="form-label">Change Avatar (JPG, JPEG, or PNG < 10MB)</label>
+                        <input type="file" class="form-control" id="avatarFile" name="avatarFile" accept=".jpg,.jpeg,.png" required>
                         <button type="submit" class="btn btn-primary btn-badge-size mt-2">Update Avatar</button>
                     </form>
                 </div>

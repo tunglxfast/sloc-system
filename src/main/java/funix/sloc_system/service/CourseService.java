@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 public class CourseService {
     public final String THUMBNAIL_LOCAL = "/img/courses/thumbnails/";
     private boolean isCheckedOnStartup = false;
+    private static final int MAX_THUMBNAIL_SIZE = 10 * 1024 * 1024; // 10MB
 
     @Autowired
     private UserRepository userRepository;
@@ -206,7 +207,7 @@ public class CourseService {
     public CourseDTO createNewCourse(CourseDTO courseDTO,
                                      Long instructorId,
                                      MultipartFile file,
-                                     Long categoryId) throws IOException {
+                                     Long categoryId) throws Exception {
 
         User instructor = userRepository.findById(instructorId)
                 .orElseThrow(() -> new RuntimeException("Missing user information, please login again."));
@@ -221,6 +222,10 @@ public class CourseService {
         courseDTO.setCreatedAt(LocalDate.now());
         courseDTO.setCreatedBy(instructorDTO);
         courseDTO.setCategory(categoryDTO);
+
+        if (file != null && file.getSize() > MAX_THUMBNAIL_SIZE) {
+            throw new IllegalArgumentException("Thumbnail size must be less than 10MB");
+        }
 
         String thumbnailUrl = saveThumbnail(file);
         if (thumbnailUrl != null && !thumbnailUrl.isBlank()){
@@ -266,14 +271,20 @@ public class CourseService {
         }
     }
 
-    private String saveThumbnail(MultipartFile file) throws NullPointerException, IOException {
+    private String saveThumbnail(MultipartFile file) throws IOException {
         String uuid = UUID.randomUUID().toString();
         if (!file.isEmpty()) {
-            String fileName = String.format("thumbnail-%s.jpg", uuid);
+            String originalFilename = file.getOriginalFilename();
+            String fileExtension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase() : "";
+            String fileName = String.format("thumbnail-%s%s", uuid, fileExtension);
             String absolutePath = Paths.get("").toAbsolutePath() + "/src/main/resources/static" + THUMBNAIL_LOCAL;
             File saveFile = new File(absolutePath + fileName);
-            file.transferTo(saveFile);
-            return "/img/courses/thumbnails/" + fileName;
+            try {
+                file.transferTo(saveFile);
+            } catch (IOException e) {
+                throw new IOException("Error when saving thumbnail");
+            }
+            return THUMBNAIL_LOCAL + fileName;
         } else {
             return null;
         }

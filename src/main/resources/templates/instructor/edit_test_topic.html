@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Test Topic</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 </head>
 <body>
     <!-- Include Navbar -->
@@ -110,7 +111,7 @@
                 <input type="hidden" class="question-id" value="${questionId}">
                 <div class="mb-3">
                     <label class="form-label">Question Content</label>
-                    <textarea class="form-control question-content" rows="2" required>${questionContent}</textarea>
+                    <textarea class="form-control question-content" id="question-content-${questionCounter}" rows="2" required>${questionContent}</textarea>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Question Point</label>
@@ -152,6 +153,16 @@
                 addAnswer(questionCounter);
             }
         }
+
+        // Initialize CKEditor for each question content
+        var editor = CKEDITOR.replace(`question-content-${questionCounter}`);
+        if(questionContent != null) {
+            editor.setData(questionContent);
+        }
+        editor.on('required', function(event) {
+            alert("Question content cannot be empty.");
+            event.cancel();
+        });
         
         questionCounter++;
     }
@@ -330,6 +341,10 @@
                 });
             });
             
+            // Get question content from CKEditor and update the value to the input field
+            const questionContentId = questionCard.querySelector('.question-content').id;
+            CKEDITOR.instances[questionContentId].updateElement();
+
             questions.push({
                 id: questionId || null,
                 content: questionCard.querySelector('.question-content').value,

@@ -16,8 +16,9 @@ import funix.sloc_system.repository.InstructorInfoRepository;
 
 @Service
 public class InstructorInfoService {
-
   private static final String AVATAR_LOCAL = "/img/instructor_avatars/";
+  private static final int MAX_AVATAR_SIZE = 10 * 1024 * 1024; // 10MB
+
   @Autowired
   private InstructorInfoRepository instructorInfoRepository;
 
@@ -75,12 +76,21 @@ public class InstructorInfoService {
 
 
   private String saveAvatar(MultipartFile file) throws NullPointerException, IOException {
+    if (file != null && file.getSize() > MAX_AVATAR_SIZE) {
+      throw new IllegalArgumentException("Avatar size must be less than 10MB");
+    }
     String uuid = UUID.randomUUID().toString();
     if (!file.isEmpty()) {
-        String fileName = String.format("avatar-%s.jpg", uuid);
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase() : "";
+        String fileName = String.format("avatar-%s%s", uuid, fileExtension);
         String absolutePath = Paths.get("").toAbsolutePath() + "/src/main/resources/static" + AVATAR_LOCAL;
         File saveFile = new File(absolutePath + fileName);
-        file.transferTo(saveFile);
+        try {
+          file.transferTo(saveFile);
+        } catch (IOException e) {
+          throw new IOException("Error when saving avatar");
+        }
         return AVATAR_LOCAL + fileName;
     } else {
         return null;

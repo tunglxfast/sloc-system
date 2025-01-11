@@ -24,6 +24,9 @@ public class MinioService {
     @Value("${minio.bucket}")
     private String bucket;
 
+    private static final long MAX_PDF_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final long MAX_VIDEO_SIZE = 150 * 1024 * 1024; // 150MB
+
     private MinioClient getMinioClient() {
         return MinioClient.builder()
                 .endpoint(minioEndpoint)
@@ -32,6 +35,10 @@ public class MinioService {
     }
 
     public String uploadFile(MultipartFile file, String contentType) throws Exception {
+        if (!checkFileSize(file)) {
+            throw new Exception("File size exceeds the maximum limit.");
+        }
+
         // Generate unique filename
         String filename = UUID.randomUUID().toString() + getFileExtension(file.getOriginalFilename());
         
@@ -73,5 +80,23 @@ public class MinioService {
         }
         int lastDotIndex = filename.lastIndexOf(".");
         return lastDotIndex == -1 ? "" : filename.substring(lastDotIndex);
+    }
+
+    private boolean checkFileSize(MultipartFile file) throws Exception {
+        String contentType = file.getContentType();
+
+        // 5MB for PDF and 150MB for video
+        if (contentType == null) {
+            return false;
+        } else if ("application/pdf".equals(contentType)) {
+            if (file.getSize() > MAX_PDF_SIZE) {
+                return false;
+            }
+        } else if (contentType.startsWith("video/")) {
+            if (file.getSize() > MAX_VIDEO_SIZE) {
+                return false;
+            }
+        }
+        return true;
     }
 } 

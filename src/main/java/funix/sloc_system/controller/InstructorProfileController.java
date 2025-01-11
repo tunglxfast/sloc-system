@@ -63,7 +63,7 @@ public class InstructorProfileController {
           redirectAttributes.addFlashAttribute("successMessage", "Create profile successfully");
           return "redirect:/instructor/profile";
       } catch (Exception e) {
-          redirectAttributes.addFlashAttribute("errorMessage", "Create profile failed");
+          redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
           return "redirect:/instructor";
       }
   }   
@@ -93,7 +93,7 @@ public class InstructorProfileController {
         redirectAttributes.addFlashAttribute("successMessage", "Update profile successfully");
         return "redirect:/instructor/profile";
       } catch (Exception e) {
-        redirectAttributes.addFlashAttribute("errorMessage", "Update profile failed");
+        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         return "redirect:/instructor/profile";
       }
   }

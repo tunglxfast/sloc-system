@@ -11,6 +11,8 @@ import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.*;
 import funix.sloc_system.util.AppUtil;
 import funix.sloc_system.util.RedirectUrlHelper;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -85,7 +87,8 @@ public class CreatingTopicController {
         try {
             TopicDTO topicDTO = new TopicDTO();
             topicDTO.setTitle(title);
-            topicDTO.setDescription(description);
+            String sanitizedDescription = Jsoup.clean(description, Safelist.relaxed());
+            topicDTO.setDescription(sanitizedDescription);
             topicDTO.setTopicType(topicType);
 
             // Handle different topic types
@@ -103,20 +106,8 @@ public class CreatingTopicController {
                     handleQuizExamTopic(topicDTO, topicType, questions, passPoint, timeLimit);
                     break;
             }
-
-            // Create topic first
+            
             topicService.createTopic(chapterId, topicDTO, securityUser.getUserId());
-
-            // If it's a quiz/exam, create questions
-            if ((topicType.equals("QUIZ") || topicType.equals("EXAM")) && questions != null) {
-                List<QuestionDTO> questionDTOs = objectMapper.readValue(questions,
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, QuestionDTO.class));
-                
-                for (QuestionDTO questionDTO : questionDTOs) {
-                    questionDTO.setTopicId(topicDTO.getId());
-                    questionService.createQuestion(topicDTO.getId(), questionDTO, securityUser.getUserId());
-                }
-            }
 
             return RedirectUrlHelper.buildRedirectSuccessUrlToCourseContent(courseId, "Topic created successfully.");
         } catch (Exception e) {
@@ -180,7 +171,8 @@ public class CreatingTopicController {
             TopicDTO topicDTO = new TopicDTO();
             topicDTO.setId(topicId);
             topicDTO.setTitle(title);
-            topicDTO.setDescription(description);
+            String sanitizedDescription = Jsoup.clean(description, Safelist.relaxed());
+            topicDTO.setDescription(sanitizedDescription);
             topicDTO.setTopicType(topicType);
 
             // Handle different topic types
@@ -241,8 +233,13 @@ public class CreatingTopicController {
             && (contentType.equals("application/pdf") || 
                 contentType.equals("application/msword") ||
                 contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))) {
-                String fileUrl = minioService.uploadFile(readingFile, contentType);
-                topicDTO.setFileUrl(fileUrl);
+                try {
+                    String fileUrl = minioService.uploadFile(readingFile, contentType);
+                    topicDTO.setFileUrl(fileUrl);
+                } catch (Exception e) {
+                    Long fileSizeInMB = readingFile.getSize() / (1024 * 1024);
+                    throw new Exception("Fail uploading file: " + readingFile.getName() + " size: " + fileSizeInMB + "MB");
+                }
             }
         }
     }
@@ -251,8 +248,13 @@ public class CreatingTopicController {
         if (videoFile != null && !videoFile.isEmpty()) {
             String contentType = videoFile.getContentType();
             if (contentType != null && contentType.startsWith("video/")) {
-                String fileUrl = minioService.uploadFile(videoFile, contentType);
-                topicDTO.setVideoUrl(fileUrl);
+                try {
+                    String fileUrl = minioService.uploadFile(videoFile, contentType);
+                    topicDTO.setVideoUrl(fileUrl);
+                } catch (Exception e) {
+                    Long fileSizeInMB = videoFile.getSize() / (1024 * 1024);
+                    throw new Exception("Fail uploading file: " + videoFile.getName() + " size: " + fileSizeInMB + "MB");
+                }
             }
         } else if (videoUrl != null && !videoUrl.isEmpty()) {
             topicDTO.setVideoUrl(videoUrl);
@@ -272,6 +274,11 @@ public class CreatingTopicController {
     private List<QuestionDTO> handleQuizExamTopic(TopicDTO topicDTO, String topicType, String questions, Integer passPoint, Integer timeLimit) throws Exception {
         if (questions != null) {
             List<QuestionDTO> questionDTOs = objectMapper.readValue(questions, new TypeReference<List<QuestionDTO>>() {});
+            // Sanitize question content
+            for (QuestionDTO questionDTO : questionDTOs) {
+                String sanitizedContent = Jsoup.clean(questionDTO.getContent(), Safelist.relaxed());
+                questionDTO.setContent(sanitizedContent);
+            }
             topicDTO.setQuestions(questionDTOs);
             topicDTO.setPassPoint(passPoint);
             if ("EXAM".equals(topicType)) {

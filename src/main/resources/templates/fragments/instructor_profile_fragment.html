@@ -18,32 +18,35 @@
     <div class="row">
         <div class="col-md-12">
             <h3>Instructor Profile</h3>
-
-            <!-- Display Avatar -->
-            <div class="mb-3 instructorProfile-profile-item">
-                <label class="form-label">Avatar</label><br>
-                <img src="#" th:src="@{${instructorInfo.avatarUrl}}" alt="Instructor Avatar" class="instructorProfile-avatar-img">
+            <div th:if="${instructorInfo == null}">
+                <p>Instructor has not updated profile yet.</p>
             </div>
+            <div th:if="${instructorInfo != null}">
+                <!-- Display Avatar -->
+                <div class="mb-3 instructorProfile-profile-item">
+                    <img src="#" th:src="@{${instructorInfo.avatarUrl}}" alt="Instructor Avatar" class="instructorProfile-avatar-img">
+                </div>
 
-            <!-- Display Profile Information -->
-            <div class="instructorProfile-profile-item">
-                <label class="form-label">Full Name</label>
-                <p th:text="${instructorInfo.name}" class="instructorProfile-user-info"></p>
-            </div>
+                <!-- Display Profile Information -->
+                <div class="instructorProfile-profile-item">
+                    <label class="form-label">Full Name: </label>
+                    <p th:text="${instructorInfo.name}" class="instructorProfile-user-info"></p>
+                </div>
 
-            <div class="instructorProfile-profile-item">
-                <label class="form-label">Email</label>
-                <p th:text="${instructorInfo.email}" class="instructorProfile-user-info"></p>
-            </div>
+                <div class="instructorProfile-profile-item">
+                    <label class="form-label">Email: </label>
+                    <p th:text="${instructorInfo.email}" class="instructorProfile-user-info"></p>
+                </div>
 
-            <div class="instructorProfile-profile-item">
-                <label class="form-label">Phone</label>
-                <p th:text="${instructorInfo.phone}" class="instructorProfile-user-info"></p>
-            </div>
+                <div class="instructorProfile-profile-item">
+                    <label class="form-label">Phone: </label>
+                    <p th:text="${instructorInfo.phone}" class="instructorProfile-user-info"></p>
+                </div>
 
-            <div class="instructorProfile-profile-item">
-                <label class="form-label">Bio</label>
-                <div th:utext="${instructorInfo.bio}" class="instructorProfile-user-info"></div>
+                <div class="instructorProfile-profile-item">
+                    <label class="form-label">Bio: </label>
+                    <div th:utext="${instructorInfo.bio}" class="instructorProfile-user-info"></div>
+                </div>
             </div>
         </div>
     </div>

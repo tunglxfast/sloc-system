@@ -192,6 +192,7 @@ public class QuestionService {
         Question newQuestion = questionMapper.toEntity(questionDTO, topic);
         newQuestion.setTopic(topic);
         questionRepository.save(newQuestion);
+        
         topic.getQuestions().add(newQuestion);
         topic.setMaxPoint(topic.getMaxPoint() + questionDTO.getPoint());
         topicRepository.save(topic);

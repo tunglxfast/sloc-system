@@ -181,6 +181,8 @@ public class TopicService {
         chapter.addTopic(newTopic);
         topicRepository.save(newTopic);
         chapterRepository.save(chapter);
+
+        topicDTO.setId(newTopic.getId());
         
         // If course is not draft, save entire course DTO to temp table
         if (course.getContentStatus() != ContentStatus.DRAFT) {

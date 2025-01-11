@@ -11,7 +11,7 @@
         style="margin-bottom: 3%;">
       <h5>
           <b>Question <span th:text="${iterStat.count}"></span>: </b>
-          <span th:if="${question.content != null}"><span th:text="${question.content}"/> <em th:text="${'(' + question.point + ' point)'}"/></span>
+          <span th:if="${question.content != null}"><span th:utext="${question.content}"/> <em th:text="${'(' + question.point + ' point)'}"/></span>
           <em th:if="${question.questionType == 'CHOICE_MANY'}"><small>(May select multiple answers)</small></em>
       </h5>
 

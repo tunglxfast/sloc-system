@@ -2,6 +2,7 @@ CREATE DATABASE IF NOT EXISTS sloc_system;
 USE sloc_system;
 
 -- Drop tables in reverse order of dependency to avoid foreign key issues
+DROP TABLE IF EXISTS instructor_info;
 DROP TABLE IF EXISTS instructor_course;
 DROP TABLE IF EXISTS enrollment;
 DROP TABLE IF EXISTS rankings;
@@ -371,3 +372,15 @@ INSERT INTO comment (content, topic_discussion_id, created_by, created_at, updat
 ('I will check out these resources.', 3, 11, '2024-01-04 10:30:00', '2024-01-04 10:30:00'),
 ('You can also use margin: auto to center block elements.', 4, 12, '2024-01-05 12:00:00', '2024-01-05 12:00:00'),
 ('Flexbox is really powerful for layouts!', 5, 13, '2024-01-06 17:30:00', '2024-01-06 17:30:00');
+
+-- Insert sample instructor info
+INSERT INTO instructor_info (user_id, name, email, phone, bio, avatar_url) VALUES 
+(3, 'Dr. Jame Smith', 'jane.smith@example.com', '+1234567890', 
+'<p>
+  <strong>Dr. Jane Smith</strong> is a professor with over 
+  <strong>10 years of experience</strong> in teaching 
+  <em>computer science</em> and <em>software engineering</em>. 
+  She specializes in <strong>AI</strong> and <strong>machine learning</strong>.
+</p>'
+,  
+'/img/instructor_avatars/professor_jame_smith.png');
