@@ -520,4 +520,18 @@ public class CourseService {
         course.setInstructor(instructor);
         courseRepository.save(course);
     }
+
+    public List<CourseDTO> getTopThreeCourses() {
+        List<Course> courses = courseRepository.findTopCoursesByEnrollmentDesc();
+        List<CourseDTO> courseDTOs = new ArrayList<>();
+        int count = 0;
+        for (Course course : courses) {
+            if (count >= 3) {
+                break;
+            }
+            courseDTOs.add(courseMapper.toDTO(course));
+            count++;
+        }
+        return courseDTOs;
+    }
 }

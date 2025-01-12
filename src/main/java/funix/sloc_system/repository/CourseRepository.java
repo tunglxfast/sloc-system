@@ -9,6 +9,7 @@ import funix.sloc_system.enums.ContentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -54,5 +55,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
         String title, Category category, List<ContentStatus> contentStatuses, Pageable pageable);
 
     List<Course> findByApprovalStatus(ApprovalStatus approvalStatus);
+
+    @Query("SELECT c FROM Course c LEFT JOIN c.enrollments e GROUP BY c ORDER BY COUNT(e) DESC")
+    List<Course> findTopCoursesByEnrollmentDesc();
 
 }

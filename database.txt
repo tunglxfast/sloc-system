@@ -239,7 +239,10 @@ CREATE TABLE rankings (
 INSERT INTO category (name, description) VALUES 
 ('Web Development', 'Courses about building websites and web applications'),
 ('Data Science', 'Courses about data analysis and machine learning'),
-('Design', 'Courses on graphic and UI/UX design');
+('Design', 'Courses on graphic and UI/UX design'),
+('Finance', 'Courses on finance and accounting'),
+('Programming', 'Courses on programming languages and algorithms'),
+('Accounting', 'Courses on accounting and finance');
 
 -- Insert sample roles
 INSERT INTO role (name) VALUES 
@@ -247,7 +250,6 @@ INSERT INTO role (name) VALUES
 ('MODERATOR'), 
 ('INSTRUCTOR'),
 ('STUDENT');
-
 
 -- Insert sample users
 INSERT INTO users (username, email, full_name, password, locked, failed_attempts, verification_token, token_expiry_date, verified) VALUES
@@ -286,13 +288,22 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 -- Insert sample courses
 INSERT INTO course (title, description, thumbnail_url, category_id, instructor_id, created_by, last_updated_by, start_date, end_date, content_status, approval_status, reject_reason, created_at, updated_at) VALUES
 ('Introduction to Web Development', 'Learn the basics of web development including HTML, CSS, and JavaScript.', '/img/courses/thumbnails/thumbnail1.jpg', 1, 3, 3, 3, '2024-01-01', '2026-06-01', 'PUBLISHED', 'APPROVED', NULL, '2024-01-01', '2024-01-01'),
-('Data Science for Beginners', 'Learn the fundamentals of data science and machine learning.', '/img/courses/thumbnails/thumbnail2.jpg', 2, 3, 3, 3, '2024-02-01', '2024-07-01', 'PUBLISHED', 'APPROVED', NULL, '2024-02-01', '2024-02-01');
+('Data Science for Beginners', 'Learn the fundamentals of data science and machine learning.', '/img/courses/thumbnails/thumbnail2.jpg', 2, 3, 3, 3, '2024-02-01', '2024-07-01', 'PUBLISHED', 'APPROVED', NULL, '2024-02-01', '2024-02-01'),
+('Introduction to Python Programming', 'Master the basics of Python programming, including syntax and data structures.', '/img/courses/thumbnails/thumbnail3.jpg', 5, 4, 4, 4, '2024-03-01', '2025-09-01', 'PUBLISHED', 'APPROVED', NULL, '2024-03-01', '2024-03-01'),
+('Basics of Machine Learning', 'Understand the fundamentals of machine learning algorithms and their applications.', '/img/courses/thumbnails/thumbnail4.jpg', 2, 5, 5, 5, '2024-04-01', '2025-10-01', 'PUBLISHED', 'APPROVED', NULL, '2024-04-01', '2024-04-01'),
+('Understanding Cloud Computing', 'Explore the key concepts of cloud computing and its benefits.', '/img/courses/thumbnails/thumbnail5.jpg', 2, 6, 6, 6, '2024-05-01', '2025-11-01', 'PUBLISHED', 'APPROVED', NULL, '2024-05-01', '2024-05-01');
 
 -- Insert sample chapters
 INSERT INTO chapter (title, sequence, course_id, content_status) VALUES
 ('Chapter 1: HTML Basics', 1, 1, 'PUBLISHED'),
-('Chapter 2: CSS Styling', 2, 1, 'PUBLISHED'),
-('Chapter 1: Introduction to Data Science', 1, 2, 'PUBLISHED');
+('Chapter 2: CSS Fundamentals', 2, 1, 'PUBLISHED'),
+('Chapter 1: Introduction to Data Science', 1, 2, 'PUBLISHED'),
+('Chapter 2: Machine Learning Basics', 2, 2, 'PUBLISHED'),
+('Chapter 1: Python Basics', 1, 3, 'PUBLISHED'),
+('Chapter 2: Python Intermediate', 2, 3, 'PUBLISHED'),
+('Chapter 1: Introduction to Machine Learning', 1, 4, 'PUBLISHED'),
+('Chapter 2: Machine Learning Advanced', 2, 4, 'PUBLISHED'),
+('Chapter 1: Cloud Computing Overview', 1, 5, 'PUBLISHED');
 
 -- Insert sample topics
 INSERT INTO topic (title, description, topic_type, sequence, chapter_id, content_status, video_url, file_url, pass_point, max_point, time_limit) VALUES
@@ -301,7 +312,13 @@ INSERT INTO topic (title, description, topic_type, sequence, chapter_id, content
 ('What is Data Science?', 'Introduction to Data Science concepts', 'READING', 1, 3, 'PUBLISHED', NULL, '/reading/intro_data_science.pdf', NULL, NULL, NULL),
 ('HTML Syntax Quiz', 'HTML Syntax Quiz', 'QUIZ', 2, 1, 'PUBLISHED', NULL, NULL, 3, 4, NULL),
 ('CSS Selectors Quiz', 'CSS Selectors Quiz', 'QUIZ', 2, 2, 'PUBLISHED', NULL, NULL, 1, 1, NULL),
-('Final Exam for Data Science', 'Final Exam for Data Science', 'EXAM', 2, 3, 'PUBLISHED', NULL, NULL, 1, 1, 120);
+('Final Exam for Data Science', 'Final Exam for Data Science', 'EXAM', 2, 4, 'PUBLISHED', NULL, NULL, 1, 1, 120),
+('Basics of Machine Learning', 'Explore the basics of machine learning and its applications.', 'READING', 1, 4, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
+('Introduction to Python', 'Learn the basics of Python programming language.', 'READING', 1, 5, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
+('Introduction to OOP', 'Learn the basics of object-oriented programming in Python.', 'READING', 1, 6, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
+('Supervised Learning', 'Understand the basics of supervised learning algorithms.', 'READING', 1, 7, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
+('Introduction to Neural Networks', 'Learn the structure and working of neural networks.', 'READING', 1, 8, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
+('What is Cloud Computing?', 'Introduction to the concept of cloud computing.', 'READING', 1, 9, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL);
 
 
 -- Insert sample questions

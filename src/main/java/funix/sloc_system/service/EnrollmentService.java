@@ -37,18 +37,17 @@ public class EnrollmentService {
 
     @Transactional
     public String enrollCourse(User user, Course course) {
-        // Kiểm tra xem khóa học có còn trong thời gian đăng ký không
+        // check if course is available for registration
         if (course.getStartDate().isAfter(LocalDate.now()) || course.getEndDate().isBefore(LocalDate.now())) {
             return "Course is not available for registration";
         }
 
-        // Kiểm tra xem người dùng đã đăng ký khóa học chưa
+        // check if user already enrolled this course
         boolean isEnrolled = checkEnrollment(user, course);
         if (isEnrolled) {
             return "User already enrolled this course";
         }
 
-        // Tạo đăng ký mới
         Enrollment enrollment = new Enrollment();
         enrollment.setUser(user);
         enrollment.setCourse(course);
@@ -56,7 +55,6 @@ public class EnrollmentService {
 
         enrollmentRepository.save(enrollment);
 
-        // sau khi đăng ký khóa học, cần cập nhật lại thông tin
         user.getEnrollments().add(enrollment);
         course.getEnrollments().add(enrollment);
         userRepository.save(user);
