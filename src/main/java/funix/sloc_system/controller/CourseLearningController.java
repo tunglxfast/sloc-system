@@ -4,14 +4,18 @@ import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.TestResultDTO;
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.dto.TopicDiscussionDTO;
+import funix.sloc_system.dto.RankingDTO;
+import funix.sloc_system.entity.InstructorInfo;
 import funix.sloc_system.entity.Course;
+import funix.sloc_system.entity.Ranking;
+import funix.sloc_system.entity.Role;
 import funix.sloc_system.entity.StudyProcess;
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.mapper.CourseMapper;
-import funix.sloc_system.mapper.TestResultMapper;
 import funix.sloc_system.mapper.TopicMapper;
+import funix.sloc_system.mapper.RankingMapper;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.*;
 import funix.sloc_system.util.AppUtil;
@@ -25,7 +29,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -60,7 +63,10 @@ public class CourseLearningController {
     private TopicMapper topicMapper;
 
     @Autowired
-    private TestResultMapper testResultMapper;
+    private RankingService rankingService;
+
+    @Autowired
+    private RankingMapper rankingMapper;
 
     @Autowired
     private TopicDiscussionService topicDiscussionService;
@@ -70,6 +76,9 @@ public class CourseLearningController {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private InstructorInfoService instructorInfoService;
 
     private void addCategoriesToModel(Model model) {
         model.addAttribute("categories", categoryService.findAllCategoriesDTO());
@@ -123,35 +132,7 @@ public class CourseLearningController {
         Course course = courseService.findById(courseId);
         User user = userService.findById(securityUser.getUserId());
         if (course != null && user != null) {
-            boolean isEnrolled = enrollmentService.checkEnrollment(user, course);            
-            CourseDTO courseDTO = dtoService.getAvailableCourseDTO(courseId);
-
-            List<TestResultDTO> testResults = appUtil.getCourseTestsResult(user.getId(), courseId);
-            StudyProcess studyProcess = studyProcessService.findByUserIdAndCourseId(user.getId(), courseId);
-            Integer finalScore = studyProcess.getFinalScore();
-            Boolean isFinalPassed = studyProcess.getPassCourse();
-            Long lastViewTopicId = studyProcess.getLastViewTopic();
-            String processAssessment = studyProcess.getProgressAssessment();
-            Double learningProgress = studyProcess.getLearningProgress();
-            Integer studyingTopicSeq = null;
-            Integer studyingChapterSeq = null;
-            if (lastViewTopicId != null) {
-                Topic lastViewTopic = topicService.findById(lastViewTopicId);
-                if (lastViewTopic != null) {
-                    studyingTopicSeq = lastViewTopic.getSequence();
-                    studyingChapterSeq = lastViewTopic.getChapter().getSequence();
-                }
-            }
-
-            model.addAttribute("course", courseDTO);
-            model.addAttribute("isEnrolled", isEnrolled);
-            model.addAttribute("processes", testResults);
-            model.addAttribute("learningProgress", learningProgress);
-            model.addAttribute("finalScore", finalScore);
-            model.addAttribute("finalPass", isFinalPassed);
-            model.addAttribute("processAssessment", processAssessment);
-            model.addAttribute("lastTopic", studyingTopicSeq);
-            model.addAttribute("lastChapter", studyingChapterSeq);
+            repairCourseGeneralModel(model, user, course);
             return "course/general";
         } else {
             return "redirect:/courses";
@@ -159,8 +140,14 @@ public class CourseLearningController {
     }
 
     @GetMapping("/{courseId}/enroll")
-    public String enrollCourse(@PathVariable Long courseId, @AuthenticationPrincipal SecurityUser securityUser, Model model) {
+    public String enrollCourse(@PathVariable Long courseId, @AuthenticationPrincipal SecurityUser securityUser, RedirectAttributes redirectAttributes, Model model) {
         if (!appUtil.isCourseReady(courseId)) {
+            redirectAttributes.addAttribute("errorMessage", "Course not found.");
+            return "redirect:/courses";
+        }
+
+        if (!mayEnroll(securityUser)) {
+            redirectAttributes.addAttribute("errorMessage", "You are not allowed to enroll this course.");
             return "redirect:/courses";
         }
 
@@ -299,5 +286,64 @@ public class CourseLearningController {
 
         }
         return "course/topic_exam";
+    }
+
+
+    // Repair course general model for course detail page   
+    private void repairCourseGeneralModel(Model model, User user, Course course) {
+        boolean isEnrolled = enrollmentService.checkEnrollment(user, course);            
+        CourseDTO courseDTO = dtoService.getAvailableCourseDTO(course.getId());
+
+        List<TestResultDTO> testResults = appUtil.getCourseTestsResult(user.getId(), course.getId());
+        StudyProcess studyProcess = studyProcessService.findByUserIdAndCourseId(user.getId(), course.getId());
+        Integer finalScore = studyProcess.getFinalScore();
+        Boolean isFinalPassed = studyProcess.getPassCourse();
+        Long lastViewTopicId = studyProcess.getLastViewTopic();
+        String processAssessment = studyProcess.getProgressAssessment();
+        Double learningProgress = studyProcess.getLearningProgress();
+        Integer studyingTopicSeq = null;
+        Integer studyingChapterSeq = null;
+        if (lastViewTopicId != null) {
+            Topic lastViewTopic = topicService.findById(lastViewTopicId);
+            if (lastViewTopic != null) {
+                studyingTopicSeq = lastViewTopic.getSequence();
+                studyingChapterSeq = lastViewTopic.getChapter().getSequence();
+            }
+        }
+
+        Ranking ranking = rankingService.getRankingsByUserAndCourse(user.getId(), course.getId());
+        if (ranking != null) {
+            RankingDTO rankingDTO = rankingMapper.toDTO(ranking);
+            model.addAttribute("userRanking", rankingDTO);
+        }
+
+        List<Ranking> rankings = rankingService.getRankingsByCourse(course.getId());
+        List<RankingDTO> rankingDTOs = rankingMapper.toDTOs(rankings);
+        InstructorInfo instructorInfo = instructorInfoService.getInstructorInfoByUserId(course.getInstructor().getId());
+        
+        model.addAttribute("rankings", rankingDTOs);
+        model.addAttribute("course", courseDTO);
+        model.addAttribute("isEnrolled", isEnrolled);
+        model.addAttribute("processes", testResults);
+        model.addAttribute("learningProgress", learningProgress);
+        model.addAttribute("finalScore", finalScore);
+        model.addAttribute("finalPass", isFinalPassed);
+        model.addAttribute("processAssessment", processAssessment);
+        model.addAttribute("lastTopic", studyingTopicSeq);
+        model.addAttribute("lastChapter", studyingChapterSeq);
+        model.addAttribute("instructorInfo", instructorInfo);
+    }
+
+    private boolean mayEnroll(SecurityUser securityUser) {
+        User user = userService.findById(securityUser.getUserId());
+        if (user == null) {
+            return false;
+        }
+
+        if (user.getStringRoles().contains("STUDENT")) {
+            return true;
+        }
+        
+        return false;
     }
 }

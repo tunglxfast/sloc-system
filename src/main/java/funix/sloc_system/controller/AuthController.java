@@ -2,6 +2,8 @@ package funix.sloc_system.controller;
 
 import funix.sloc_system.entity.ForgotPassword;
 import funix.sloc_system.entity.User;
+import funix.sloc_system.dto.CourseDTO;
+import funix.sloc_system.entity.Course;
 import funix.sloc_system.security.SecurityUser;
 
 import java.time.LocalDateTime;
@@ -18,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import funix.sloc_system.service.UserService;
 import funix.sloc_system.service.EmailService;
 import funix.sloc_system.repository.ForgotPasswordRepository;
+import funix.sloc_system.service.CourseService;
+import java.util.List;
+
 /**
  * Control login, logout.
  */
@@ -37,12 +42,15 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private CourseService courseService;
+
     @GetMapping(value={"", "/", "/login"})
     public String login(@AuthenticationPrincipal SecurityUser securityUser) {
         if (securityUser == null) {
             return "login_form";
         } else {
-            return "home";
+            return "redirect:/home";
         }
     }
 
@@ -51,7 +59,9 @@ public class AuthController {
         if (securityUser == null || securityUser.getUserId() == null) {
             return "redirect:/login";
         }
+        List<CourseDTO> topThreeCourses = courseService.getTopThreeCourses();
         model.addAttribute("username", securityUser.getUsername());
+        model.addAttribute("topCourses", topThreeCourses);
         return "home";
     }
 

@@ -25,12 +25,12 @@ public class RedirectUrlHelper {
      *
      * @param courseId
      * @param errorMessage
-     * @return String 'redirect:/instructor/course/{courseId}/edit/chapters?errorMessage=%s'
+     * @return String 'redirect:/instructor/course/{courseId}/edit/topic/edit'
      */
-    public static String buildRedirectErrorUrl(Long courseId, String errorMessage) {
+    public static String buildRedirectErrorUrlToTopicEdit(Long courseId, Long chapterId, Long topicId, String errorMessage) {
         return String.format(
-                "redirect:/instructor/course/%d/edit/chapters?errorMessage=%s",
-                courseId, sanitizeMessage(errorMessage)
+                "redirect:/instructor/course/%d/edit/topic/edit?chapterId=%d&topicId=%d&errorMessage=%s",
+                courseId, chapterId, topicId, sanitizeMessage(errorMessage)
         );
     }
 
@@ -40,10 +40,17 @@ public class RedirectUrlHelper {
      * @param successMessage
      * @return String 'redirect:/instructor/course/{courseId}/edit/chapters?successMessage=%s'
      */
-    public static String buildRedirectSuccessUrl(Long courseId, String successMessage) {
+    public static String buildRedirectSuccessUrlToCourseContent(Long courseId, String successMessage) {
         return String.format(
                 "redirect:/instructor/course/%d/edit/chapters?successMessage=%s",
                 courseId, sanitizeMessage(successMessage)
+        );
+    }
+
+    public static String buildRedirectErrorUrlToCourseContent(Long courseId, String errorMessage) {
+        return String.format(
+                "redirect:/instructor/course/%d/edit/chapters?errorMessage=%s",
+                courseId, sanitizeMessage(errorMessage)
         );
     }
 }

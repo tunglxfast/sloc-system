@@ -28,8 +28,8 @@ public class TopicDTO {
     private String videoUrl;
     
     // Fields for Quiz and Exam
-    private Integer passScore;
-    private Integer totalScore;
+    private Integer passPoint;
+    private Integer maxPoint;
     private Integer timeLimit; // Only for Exam
     private List<QuestionDTO> questions;
 

@@ -122,8 +122,11 @@ public class TopicService {
                 existingTopicDTO.addQuestion(questionDTO);
             }
         }
-        if (topicDTO.getPassScore() != null) {
-            existingTopicDTO.setPassScore(topicDTO.getPassScore());
+        if (topicDTO.getPassPoint() != null) {
+            existingTopicDTO.setPassPoint(topicDTO.getPassPoint());
+        }
+        if (topicDTO.getMaxPoint() != null) {
+            existingTopicDTO.setMaxPoint(topicDTO.getMaxPoint());
         }
         if (topicDTO.getTimeLimit() != null) {
             existingTopicDTO.setTimeLimit(topicDTO.getTimeLimit());
@@ -178,6 +181,8 @@ public class TopicService {
         chapter.addTopic(newTopic);
         topicRepository.save(newTopic);
         chapterRepository.save(chapter);
+
+        topicDTO.setId(newTopic.getId());
         
         // If course is not draft, save entire course DTO to temp table
         if (course.getContentStatus() != ContentStatus.DRAFT) {

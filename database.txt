@@ -2,8 +2,10 @@ CREATE DATABASE IF NOT EXISTS sloc_system;
 USE sloc_system;
 
 -- Drop tables in reverse order of dependency to avoid foreign key issues
+DROP TABLE IF EXISTS instructor_info;
 DROP TABLE IF EXISTS instructor_course;
 DROP TABLE IF EXISTS enrollment;
+DROP TABLE IF EXISTS rankings;
 DROP TABLE IF EXISTS learned_topic;
 DROP TABLE IF EXISTS study_process;
 DROP TABLE IF EXISTS test_result;
@@ -50,6 +52,16 @@ CREATE TABLE users (
     verification_token VARCHAR(255),
     token_expiry_date DATETIME,
     verified BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE instructor_info (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT,
+    name VARCHAR(255),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone VARCHAR(255),
+    bio TEXT,
+    avatar_url TEXT
 );
 
 CREATE TABLE user_roles (
@@ -101,8 +113,8 @@ CREATE TABLE topic (
     content_status VARCHAR(50) DEFAULT 'DRAFT',
     video_url TEXT,
     file_url TEXT,
-    pass_score INT,
-    total_score INT,
+    pass_point INT,
+    max_point INT,
     time_limit INT,
     FOREIGN KEY (chapter_id) REFERENCES chapter(id),
     UNIQUE (chapter_id, sequence)
@@ -111,6 +123,7 @@ CREATE TABLE topic (
 CREATE TABLE question (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     content VARCHAR(255),
+    point INT,
     question_type VARCHAR(255),
     topic_id BIGINT NOT NULL,
     content_status VARCHAR(255) DEFAULT 'DRAFT',
@@ -210,13 +223,26 @@ CREATE TABLE forgot_password (
     UNIQUE (email)
 );
 
+-- Create ranking table
+CREATE TABLE rankings (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    course_id BIGINT NOT NULL,
+    all_course_score DOUBLE NOT NULL,
+    ranking_position INT NOT NULL,
+    UNIQUE (user_id, course_id)
+);
+
 -- Insert sample data
 
 -- Insert sample categories
 INSERT INTO category (name, description) VALUES 
 ('Web Development', 'Courses about building websites and web applications'),
 ('Data Science', 'Courses about data analysis and machine learning'),
-('Design', 'Courses on graphic and UI/UX design');
+('Design', 'Courses on graphic and UI/UX design'),
+('Finance', 'Courses on finance and accounting'),
+('Programming', 'Courses on programming languages and algorithms'),
+('Accounting', 'Courses on accounting and finance');
 
 -- Insert sample roles
 INSERT INTO role (name) VALUES 
@@ -224,7 +250,6 @@ INSERT INTO role (name) VALUES
 ('MODERATOR'), 
 ('INSTRUCTOR'),
 ('STUDENT');
-
 
 -- Insert sample users
 INSERT INTO users (username, email, full_name, password, locked, failed_attempts, verification_token, token_expiry_date, verified) VALUES
@@ -263,32 +288,47 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 -- Insert sample courses
 INSERT INTO course (title, description, thumbnail_url, category_id, instructor_id, created_by, last_updated_by, start_date, end_date, content_status, approval_status, reject_reason, created_at, updated_at) VALUES
 ('Introduction to Web Development', 'Learn the basics of web development including HTML, CSS, and JavaScript.', '/img/courses/thumbnails/thumbnail1.jpg', 1, 3, 3, 3, '2024-01-01', '2026-06-01', 'PUBLISHED', 'APPROVED', NULL, '2024-01-01', '2024-01-01'),
-('Data Science for Beginners', 'Learn the fundamentals of data science and machine learning.', '/img/courses/thumbnails/thumbnail2.jpg', 2, 3, 3, 3, '2024-02-01', '2024-07-01', 'PUBLISHED', 'APPROVED', NULL, '2024-02-01', '2024-02-01');
+('Data Science for Beginners', 'Learn the fundamentals of data science and machine learning.', '/img/courses/thumbnails/thumbnail2.jpg', 2, 3, 3, 3, '2024-02-01', '2024-07-01', 'PUBLISHED', 'APPROVED', NULL, '2024-02-01', '2024-02-01'),
+('Introduction to Python Programming', 'Master the basics of Python programming, including syntax and data structures.', '/img/courses/thumbnails/thumbnail3.jpg', 5, 4, 4, 4, '2024-03-01', '2025-09-01', 'PUBLISHED', 'APPROVED', NULL, '2024-03-01', '2024-03-01'),
+('Basics of Machine Learning', 'Understand the fundamentals of machine learning algorithms and their applications.', '/img/courses/thumbnails/thumbnail4.jpg', 2, 5, 5, 5, '2024-04-01', '2025-10-01', 'PUBLISHED', 'APPROVED', NULL, '2024-04-01', '2024-04-01'),
+('Understanding Cloud Computing', 'Explore the key concepts of cloud computing and its benefits.', '/img/courses/thumbnails/thumbnail5.jpg', 2, 6, 6, 6, '2024-05-01', '2025-11-01', 'PUBLISHED', 'APPROVED', NULL, '2024-05-01', '2024-05-01');
 
 -- Insert sample chapters
 INSERT INTO chapter (title, sequence, course_id, content_status) VALUES
 ('Chapter 1: HTML Basics', 1, 1, 'PUBLISHED'),
-('Chapter 2: CSS Styling', 2, 1, 'PUBLISHED'),
-('Chapter 1: Introduction to Data Science', 1, 2, 'PUBLISHED');
+('Chapter 2: CSS Fundamentals', 2, 1, 'PUBLISHED'),
+('Chapter 1: Introduction to Data Science', 1, 2, 'PUBLISHED'),
+('Chapter 2: Machine Learning Basics', 2, 2, 'PUBLISHED'),
+('Chapter 1: Python Basics', 1, 3, 'PUBLISHED'),
+('Chapter 2: Python Intermediate', 2, 3, 'PUBLISHED'),
+('Chapter 1: Introduction to Machine Learning', 1, 4, 'PUBLISHED'),
+('Chapter 2: Machine Learning Advanced', 2, 4, 'PUBLISHED'),
+('Chapter 1: Cloud Computing Overview', 1, 5, 'PUBLISHED');
 
 -- Insert sample topics
-INSERT INTO topic (title, description, topic_type, sequence, chapter_id, content_status, video_url, file_url, pass_score, total_score, time_limit) VALUES
+INSERT INTO topic (title, description, topic_type, sequence, chapter_id, content_status, video_url, file_url, pass_point, max_point, time_limit) VALUES
 ('HTML Syntax', 'Learn the basic syntax of HTML', 'VIDEO', 1, 1, 'PUBLISHED', 'https://www.youtube.com/embed/9r_hbFzA8ho?si=pyTUZYtQjuOYk2Uh', NULL, NULL, NULL, NULL),
 ('CSS Selectors', 'Learn about different CSS selectors and how to use them', 'VIDEO', 1, 2, 'PUBLISHED', 'https://www.youtube.com/embed/l1mER1bV0N0?si=Lhp6M1Tzl5La5BQ-', NULL, NULL, NULL, NULL),
 ('What is Data Science?', 'Introduction to Data Science concepts', 'READING', 1, 3, 'PUBLISHED', NULL, '/reading/intro_data_science.pdf', NULL, NULL, NULL),
-('HTML Syntax Quiz', 'HTML Syntax Quiz', 'QUIZ', 2, 1, 'PUBLISHED', NULL, NULL, 70, 4, NULL),
-('CSS Selectors Quiz', 'CSS Selectors Quiz', 'QUIZ', 2, 2, 'PUBLISHED', NULL, NULL, 70, 1, NULL),
-('Final Exam for Data Science', 'Final Exam for Data Science', 'EXAM', 2, 3, 'PUBLISHED', NULL, NULL, 70, 1, 120);
+('HTML Syntax Quiz', 'HTML Syntax Quiz', 'QUIZ', 2, 1, 'PUBLISHED', NULL, NULL, 3, 4, NULL),
+('CSS Selectors Quiz', 'CSS Selectors Quiz', 'QUIZ', 2, 2, 'PUBLISHED', NULL, NULL, 1, 1, NULL),
+('Final Exam for Data Science', 'Final Exam for Data Science', 'EXAM', 2, 4, 'PUBLISHED', NULL, NULL, 1, 1, 120),
+('Basics of Machine Learning', 'Explore the basics of machine learning and its applications.', 'READING', 1, 4, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
+('Introduction to Python', 'Learn the basics of Python programming language.', 'READING', 1, 5, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
+('Introduction to OOP', 'Learn the basics of object-oriented programming in Python.', 'READING', 1, 6, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
+('Supervised Learning', 'Understand the basics of supervised learning algorithms.', 'READING', 1, 7, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
+('Introduction to Neural Networks', 'Learn the structure and working of neural networks.', 'READING', 1, 8, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
+('What is Cloud Computing?', 'Introduction to the concept of cloud computing.', 'READING', 1, 9, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL);
 
 
 -- Insert sample questions
-INSERT INTO question (content, question_type, topic_id, content_status) VALUES
-('What is HTML?', 'CHOICE_ONE', 4, 'PUBLISHED'),
-('What is a CSS Selector?', 'CHOICE_ONE', 5, 'PUBLISHED'),
-('What is Data Science?', 'CHOICE_ONE', 6, 'PUBLISHED'),
-('What does the `<title>` tag do?', 'CHOICE_ONE', 4, 'PUBLISHED'),
-('Which tag is used to create a hyperlink?', 'CHOICE_ONE', 4, 'PUBLISHED'),
-('Which of the following are valid HTML tags?', 'CHOICE_MANY', 4, 'PUBLISHED');
+INSERT INTO question (content, point, question_type, topic_id, content_status) VALUES
+('What is HTML?', 1, 'CHOICE_ONE', 4, 'PUBLISHED'),
+('What is a CSS Selector?', 1, 'CHOICE_ONE', 5, 'PUBLISHED'),
+('What is Data Science?', 1, 'CHOICE_ONE', 6, 'PUBLISHED'),
+('What does the `<title>` tag do?', 1, 'CHOICE_ONE', 4, 'PUBLISHED'),
+('Which tag is used to create a hyperlink?', 1, 'CHOICE_ONE', 4, 'PUBLISHED'),
+('Which of the following are valid HTML tags?', 1, 'CHOICE_MANY', 4, 'PUBLISHED');
 
 
 -- Insert sample answers
@@ -349,3 +389,15 @@ INSERT INTO comment (content, topic_discussion_id, created_by, created_at, updat
 ('I will check out these resources.', 3, 11, '2024-01-04 10:30:00', '2024-01-04 10:30:00'),
 ('You can also use margin: auto to center block elements.', 4, 12, '2024-01-05 12:00:00', '2024-01-05 12:00:00'),
 ('Flexbox is really powerful for layouts!', 5, 13, '2024-01-06 17:30:00', '2024-01-06 17:30:00');
+
+-- Insert sample instructor info
+INSERT INTO instructor_info (user_id, name, email, phone, bio, avatar_url) VALUES 
+(3, 'Dr. Jame Smith', 'jane.smith@example.com', '+1234567890', 
+'<p>
+  <strong>Dr. Jane Smith</strong> is a professor with over 
+  <strong>10 years of experience</strong> in teaching 
+  <em>computer science</em> and <em>software engineering</em>. 
+  She specializes in <strong>AI</strong> and <strong>machine learning</strong>.
+</p>'
+,  
+'/img/instructor_avatars/professor_jame_smith.png');

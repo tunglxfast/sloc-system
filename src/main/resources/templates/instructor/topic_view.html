@@ -154,7 +154,9 @@
                     </div>
                     <div class="alert alert-info mb-4">
                         <i class="fas fa-info-circle me-2"></i>
-                        <strong>Pass Score:</strong> <span th:text="${topic.passScore}+'%'">70%</span>
+                        <strong>Pass Point:</strong> <span th:text="${topic.passPoint == null ? 0 : topic.passPoint}"></span>
+                        <span>/</span>
+                        <span th:text="${topic.maxPoint == null ? 0 : topic.maxPoint}"></span>
                     </div>
                     <div th:if="${topic.description}" class="alert alert-secondary mb-4">
                         <i class="fas fa-file-alt me-2"></i>
@@ -197,7 +199,9 @@
                                 <strong>Time Limit:</strong> <span th:text="${topic.timeLimit + ' minutes'}">60 minutes</span>
                             </div>
                             <div>
-                                <strong>Pass Score:</strong> <span th:text="${topic.passScore}+'%'">70%</span>
+                                <strong>Pass Point:</strong> <span th:text="${topic.passPoint == null ? 0 : topic.passPoint}"></span>
+                                <span>/</span>
+                                <span th:text="${topic.maxPoint == null ? 0 : topic.maxPoint}"></span>
                             </div>
                         </div>
                     </div>

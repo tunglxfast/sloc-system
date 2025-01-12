@@ -15,6 +15,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.0.0/mdb.min.css" rel="stylesheet" />
   <!-- CSS -->
   <link th:href="@{/css/course_general_style.css}" rel="stylesheet">
+  <link th:href="@{/css/instructor_profile_style.css}" rel="stylesheet">
 </head>
 
 <body>
@@ -60,8 +61,10 @@
     <div class="row">
       <!-- Tab links -->
       <div class="tab">
-        <button class="tablinks active" th:if="${isEnrolled}" onclick="courseTab(event, 'course')">Course</button>
+        <button class="tablinks active" onclick="courseTab(event, 'course')">Course</button>
+        <button class="tablinks" onclick="courseTab(event, 'instructorProfile')">Instructor Profile</button>
         <button class="tablinks" th:if="${isEnrolled}" onclick="courseTab(event, 'progress')">Progress</button>
+        <button class="tablinks" th:if="${isEnrolled}" onclick="courseTab(event, 'studentRank')">Student Rank</button>
       </div>
       <!-- Tab content -->
 
@@ -88,17 +91,25 @@
           </div>
         </div>
 
+        <!-- Instructor Profile -->
+        <div id="instructorProfile" class="tabcontent">
+          <div th:replace="/fragments/instructor_profile_fragment :: instructorProfile"></div>
+        </div>
+
         <!-- user process -->
         <div id="progress" class="tabcontent">
           <div style="margin-left: 60px;">
             <div class="center_text">
               <h2 style="color: rgb(2, 117, 2); vertical-align: top; padding-top: 30px; 
               margin-bottom: 20px; font-weight: bold;">Course Progress</h2>
-              <p><b>Final Score (GPA) = sum (quizzes scores * 0.4) + (exams score * 0.6)</b></p>
-              <p><b>Passing conditions:</b></p>
-              <p>- Final Score >= 50</p>
-              <p>- All quizzes and exams are passed</p>
+              <div style="margin-left: 5%; margin-right: 5%; border: 1px solid grey; padding: 10px; border-radius: 10px;">
+                <p><b>Final Score (GPA) = sum (quizzes scores * 0.4) + (exams score * 0.6)</b></p>
+                <p><b>Passing conditions:</b></p>
+                <p>- Final Score >= 50</p>
+                <p>- All quizzes and exams are passed</p>
+              </div>
             </div>
+            <br>
             <div class="center_text">
               <p><b>Learning progress: </b><p th:text="${learningProgress + ' %'}"></p></p>
             </div>
@@ -107,6 +118,11 @@
               <p th:text="${processAssessment != null ? processAssessment : 'N/A' }">Process assessment</p>
             </div>
             <div class="center_text">
+              <span><b>Ranking: </b></span>
+              <span th:text="${userRanking != null ? userRanking.rankPosition : 'N/A' }">Ranking</span>
+            </div>
+            <div class="center_text">
+              <hr>
               <p><b>Score table: </b></p>
             </div>
             <table class="center_table">
@@ -129,10 +145,34 @@
             <br>
           </div>
         </div>
+
+        <!-- Student Rank -->
+        <div id="studentRank" class="tabcontent">
+          <div style="margin-left: 60px;">
+            <h2 style="color: rgb(2, 117, 2); vertical-align: top; padding-top: 30px; 
+            margin-bottom: 20px; font-weight: bold;">Student Rank</h2>
+            <table id="studentRank-table" class="table center_table">
+              <tr>
+                <th>Rank Position</th>
+                <th>User Name</th>
+                <th>Full Name</th>
+                <th>Total Score</th>
+              </tr>
+              <tr th:each="ranking : ${rankings}">
+                <td th:text="${ranking.rankPosition}">Rank Position</td>
+                <td th:text="${ranking.userName}">User Name</td>
+                <td th:text="${ranking.fullName}">Full Name</td>
+                <td th:text="${ranking.allCourseScore}">Total Score (with weight)</td>
+              </tr>
+            </table>
+          </div>
+        </div>
     </div>    
   </div>
 
 
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
   <script>
     function courseTab(evt, tabName) {
       var i, tabcontent, tablinks;

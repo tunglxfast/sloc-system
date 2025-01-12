@@ -72,6 +72,12 @@
                     <i class="fas fa-chalkboard-teacher me-2"></i>Instructor Dashboard
                   </a>
                 </li>
+                <!-- Instructor Profile -->
+                <li sec:authorize="hasAuthority('INSTRUCTOR')">
+                  <a class="dropdown-item" th:href="@{/instructor/profile}">
+                    <i class="fas fa-user me-2"></i>Instructor Profile
+                  </a>
+                </li>
                 <!-- Review Course (Visible to Moderators Only) -->
                 <li sec:authorize="hasAnyAuthority('MODERATOR')">
                   <a class="dropdown-item" th:href="@{/moderator/}">

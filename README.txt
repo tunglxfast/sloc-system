@@ -23,6 +23,7 @@
 - Run mysql codes in database.txt to create database and tables
 
 -------------------------------Run Application------------------------------------------
+
 - Run application (SlocSystemApplication.java)
 - Open in browser - http://localhost:8080/
 
@@ -31,3 +32,8 @@ admin/adminpassword
 moderator_01/modpassword
 instructor_01/instructorpassword
 student_01/studentpassword
+
+---------------------------------Email-------------------------------------------------
+Current support email: sloc.help.center@gmail.com
+Current system email for sending email: sloc.mail.system@gmail.com
+- Change in application.properties for suitable email

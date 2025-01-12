@@ -109,7 +109,7 @@
                     </div>
             
                     <div class="mb-3">
-                        <label for="thumbnailFile" class="form-label">Thumbnail:</label>
+                        <label for="thumbnailFile" class="form-label">Thumbnail: (JPG, JPEG, or PNG < 10MB)</label>
                         <input type="file" id="thumbnailFile" name="thumbnailFile" accept=".jpg,.jpeg,.png" class="form-control"/>
                         <div th:if="${course.thumbnailUrl}">
                             <img th:src="${course.thumbnailUrl}" alt="Thumbnail" class="img-fluid" 

@@ -11,12 +11,21 @@
         style="margin-bottom: 3%;">
       <h5>
           <b>Question <span th:text="${iterStat.count}"></span>: </b>
-          <span th:text="${question.content}">Question content</span>
+          <span th:if="${question.content != null}"><span th:utext="${question.content}"/> <em th:text="${'(' + question.point + ' point)'}"/></span>
           <em th:if="${question.questionType == 'CHOICE_MANY'}"><small>(May select multiple answers)</small></em>
       </h5>
 
-      <!-- Loop through the answer list -->
-      <div th:with="questionType = ${question.questionType == 'CHOICE_MANY' ? 'checkbox' : 'radio'}">
+      <!-- For INPUT_TEXT questions -->
+      <div th:if="${question.questionType == 'INPUT_TEXT'}" class="mb-3">
+          <input type="text" 
+                 class="form-control" 
+                 th:name="'question_' + ${question.id}"
+                 placeholder="Enter your answer here"
+                 required>
+      </div>
+
+      <!-- For CHOICE_ONE and CHOICE_MANY questions -->
+      <div th:if="${question.questionType != 'INPUT_TEXT'}" th:with="questionType = ${question.questionType == 'CHOICE_MANY' ? 'checkbox' : 'radio'}">
           <div th:each="answer : ${question.getAnswers()}">
               <input th:if="${questionType == 'checkbox'}"
                       class="form-check-input" 

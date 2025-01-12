@@ -93,70 +93,23 @@
     margin-left: 10px; margin-right: 10px; font-weight: bold;">Popular Courses</h2>
     <div class="container">
         <div class="row">
-            <!-- Box 1 -->
-            <div class="d-flex col-lg-4 col-md-12 p-4" style="border-radius: 30px; padding: 20px;">
+            <!-- Top 3 courses -->
+            <div th:each="course : ${topCourses}" class="d-flex col-lg-4 col-md-12 p-4" style="border-radius: 30px; padding: 20px;">
                 <div class="row align-items-center">
                     <div class="col-12 d-flex justify-content-center align-items-center">
-                        <img src="https://i.imgur.com/PHJHzYu.png" class="img-fluid" style="max-height: 220px;">
+                        <img th:src="${course.thumbnailUrl}" class="img-fluid" style="max-height: 220px; min-height: 220px; max-width: 390px;">
                     </div>
                     <div class="col-12" style="margin-top: 20px;">
-                        <h4 style="text-align: center;">Google Data Analytics</h4>
+                        <h4 style="text-align: center;" th:text="${course.title}"></h4>
                     </div>
-                    <div class="col-6" style="margin-top: 20px;">
-                        <img src="https://i.imgur.com/r9UUEsx.png" class="img-fluid" style="width: 80px;">
+                    <div class="col-7" style="text-align: left; margin-top: 20px;">
+                        <h5 th:text="${'Instructor: ' + course.instructor.fullName}"></h5>
                     </div>
-                    <div class="col-6" style="text-align: right;">
-                        <h5 style="color: rgb(2, 117, 2);">Services</h5>
-                    </div>
-                    <div class="col-12" style="margin-top: 20px;">
-                        <a href="">
-                            <img src="https://i.imgur.com/YZzVT9m.png" class="img-fluid"
-                                style="width: 60px; float: right;">
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <!-- Box 2 -->
-            <div class="d-flex col-lg-4 col-md-12 p-4" style="border-radius: 30px; padding: 20px;">
-                <div class="row align-items-center">
-                    <div class="col-12 d-flex justify-content-center align-items-center">
-                        <img src="https://i.imgur.com/xBRfgqG.png" class="img-fluid"
-                            style="max-height: 220px; margin: 0 auto;">
+                    <div class="col-5" style="text-align: right; margin-top: 20px;">
+                        <h5 style="color: rgb(2, 117, 2);" th:text="${course.category.name}"></h5>
                     </div>
                     <div class="col-12" style="margin-top: 20px;">
-                        <h4 style="text-align: center;">SAS Visual Business Analytics</h4>
-                    </div>
-                    <div class="col-6" style="margin-top: 20px;">
-                        <img src="https://i.imgur.com/zl7ELtP.png" class="img-fluid" style="width: 80px;">
-                    </div>
-                    <div class="col-6 align-items-center" style="text-align: right;">
-                        <h5 style="color: rgb(2, 117, 2);">Business</h5>
-                    </div>
-                    <div class="col-12" style="margin-top: 20px;">
-                        <a href="">
-                            <img src="https://i.imgur.com/YZzVT9m.png" class="img-fluid"
-                                style="width: 60px; float: right;">
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <!-- Box 3 -->
-            <div class="d-flex col-lg-4 col-md-12 p-4" style="border-radius: 30px; padding: 20px;">
-                <div class="row align-items-center">
-                    <div class="col-12 d-flex justify-content-center align-items-center">
-                        <img src="https://i.imgur.com/XvvAAJQ.png" class="img-fluid" style="max-height: 220px;">
-                    </div>
-                    <div class="col-12" style="margin-top: 20px;">
-                        <h4 style="text-align: center;">IT Automation with Python</h4>
-                    </div>
-                    <div class="col-6" style="margin-top: 20px;">
-                        <img src="https://i.imgur.com/8J6V7XY.png" class="img-fluid" style="width: 80px;">
-                    </div>
-                    <div class="col-6 align-items-center" style="text-align: right;">
-                        <h5 style="color: rgb(2, 117, 2);">Programming</h5>
-                    </div>
-                    <div class="col-12" style="margin-top: 20px;">
-                        <a href="">
+                        <a th:href="@{/courses/{id}(id=${course.id})}">
                             <img src="https://i.imgur.com/YZzVT9m.png" class="img-fluid"
                                 style="width: 60px; float: right;">
                         </a>
@@ -168,17 +121,11 @@
         <div class="container" style="margin-top: 200px;">
             <div class="row">
                 <div class="col-lg-4 col-md-4 col-sm-12 mb-4">
-                    <div class="mb-4">
-                        <h4>About</h4>
-                    </div>
                     <div class="mb-4"><a href="">Patches</a></div>
                     <div class="mb-4"><a href="">Updates</a></br></div>
                     <div class="mb-4"><a href="">Members</a></div>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-12 mb-4">
-                    <div class="mb-4">
-                        <h4>Helps and Solution</h4>
-                    </div>
                     <div class="mb-4"><a href="">Talk to support</a></div>
                     <div class="mb-4"><a href="">Support document</a></br></div>
                     <div class="mb-4"><a href="">System status</a></div>

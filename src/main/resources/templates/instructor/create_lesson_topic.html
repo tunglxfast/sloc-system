@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Lesson Topic</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <!-- CKEditor -->
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 </head>
 <body>
     <!-- Include Navbar -->
@@ -72,6 +74,17 @@
         </div>
     </div>
 
-<script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Initialize CKEditor -->
+    <script>
+
+        var editor = CKEDITOR.replace('description');
+
+        editor.on('required', function(event) {
+            alert("Description cannot be empty.");
+            event.cancel();
+        });
+    </script>
 </body>
 </html> 
