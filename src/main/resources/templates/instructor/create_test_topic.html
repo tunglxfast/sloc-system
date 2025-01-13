@@ -132,7 +132,9 @@
         addAnswer(questionCounter); // Second answer
 
         // Initialize CKEditor for each question content
-        var editor = CKEDITOR.replace(`question-content-${questionCounter}`);
+        var editor = CKEDITOR.replace(`question-content-${questionCounter}`, {
+            versionCheck: false,
+        });
         editor.on('required', function(event) {
             alert("Question content cannot be empty.");
             event.cancel();

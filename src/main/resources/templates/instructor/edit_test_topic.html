@@ -155,7 +155,9 @@
         }
 
         // Initialize CKEditor for each question content
-        var editor = CKEDITOR.replace(`question-content-${questionCounter}`);
+        var editor = CKEDITOR.replace(`question-content-${questionCounter}`, {
+            versionCheck: false,
+        });
         if(questionContent != null) {
             editor.setData(questionContent);
         }

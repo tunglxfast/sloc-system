@@ -101,7 +101,9 @@
     <!-- Initialize CKEditor -->
     <script>
 
-        var editor = CKEDITOR.replace('description');
+        var editor = CKEDITOR.replace('description', {
+            versionCheck: false,
+        });
 
         editor.on('required', function(event) {
             alert("Description cannot be empty.");
