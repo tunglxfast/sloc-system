@@ -1,14 +1,15 @@
 package funix.sloc_system.service;
 
-import io.minio.*;
-import io.minio.http.Method;
+import io.minio.BucketExistsArgs;
+import io.minio.MakeBucketArgs;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class MinioService {
@@ -61,15 +62,18 @@ public class MinioService {
             );
         }
 
-        // Generate presigned URL for file access
-        String url = minioClient.getPresignedObjectUrl(
-            GetPresignedObjectUrlArgs.builder()
-                .bucket(bucket)
-                .object(filename)
-                .method(Method.GET)
-                .expiry(7, TimeUnit.DAYS)
-                .build()
-        );
+        // Generate presigned URL for file access if secure
+//        String url = minioClient.getPresignedObjectUrl(
+//            GetPresignedObjectUrlArgs.builder()
+//                .bucket(bucket)
+//                .object(filename)
+//                .method(Method.GET)
+//                .expiry(7, TimeUnit.DAYS)
+//                .build()
+//        );
+
+        // Public file url
+        String url = minioEndpoint + "/" + bucket + "/" + filename;
 
         return url;
     }
