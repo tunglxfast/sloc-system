@@ -226,7 +226,7 @@
           <!-- Modal Header -->
           <div class="modal-header">
             <h5 class="modal-title" id="addChapterModalLabel">Add New Chapter</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
           </div>
           <!-- Modal Body -->
           <div class="modal-body">
@@ -259,7 +259,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="editChapterModalLabel">Edit Chapter</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" data-mdb-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <form id="editChapterForm" th:action="@{'/instructor/course/' + ${courseId} + '/edit/chapters/edit'}" method="post">
@@ -274,7 +274,7 @@
             </form>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-mdb-dismiss="modal">Cancel</button>
             <button type="button" class="btn btn-primary" onclick="applyEdit()">Apply</button>
           </div>
         </div>

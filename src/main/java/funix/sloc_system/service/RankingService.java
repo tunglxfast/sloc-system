@@ -1,13 +1,5 @@
 package funix.sloc_system.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.stream.Collectors;
 import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Ranking;
 import funix.sloc_system.entity.User;
@@ -16,6 +8,14 @@ import funix.sloc_system.repository.RankingRepository;
 import funix.sloc_system.repository.TestResultRepository;
 import funix.sloc_system.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RankingService {
@@ -32,8 +32,8 @@ public class RankingService {
     @Autowired
     private RankingRepository rankingRepository;
 
-    // run every day at 00:00
-    @Scheduled(cron = "0 0 0 * * ?") 
+    // run every day at 07:00
+    @Scheduled(cron = "0 0 7 * * ?")
     public void updateRankings() {
         List<Long> courseIds = getAllCourseIds();
 

@@ -124,7 +124,7 @@ public class CourseManagementController {
                 return "redirect:/instructor/course/" + courseId + "/edit";
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e);
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/instructor/course/" + courseId + "/edit";
         }
     }

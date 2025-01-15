@@ -100,7 +100,8 @@
                 </div>
                 <div class="mb-3">
                     <label for="phone" class="form-label">Phone</label>
-                    <input type="text" class="form-control" id="phone" name="phone" placeholder="Enter your phone number" th:value="${instructorInfo.phone}">
+                    <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{10}" maxlength="10" placeholder="Enter your phone number" th:value="${instructorInfo.phone}">
+                    <small>(10 digits number)</small>
                 </div>
                 <div class="mb-3">
                     <label for="bio" class="form-label">Bio</label>

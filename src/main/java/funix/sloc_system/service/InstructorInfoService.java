@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-import org.checkerframework.checker.units.qual.s;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import funix.sloc_system.entity.InstructorInfo;
@@ -80,7 +79,7 @@ public class InstructorInfoService {
       throw new IllegalArgumentException("Avatar size must be less than 10MB");
     }
     String uuid = UUID.randomUUID().toString();
-    if (!file.isEmpty()) {
+    if (file != null && !file.isEmpty()) {
         String originalFilename = file.getOriginalFilename();
         String fileExtension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase() : "";
         String fileName = String.format("avatar-%s%s", uuid, fileExtension);

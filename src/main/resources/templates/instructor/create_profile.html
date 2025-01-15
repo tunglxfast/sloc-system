@@ -44,7 +44,8 @@
             <!-- Phone input -->
             <div class="form-group mb-4">
               <label for="phone" class="form-label">Phone</label>
-              <input type="text" id="phone" name="phone" class="form-control form-control-lg" required/>
+              <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" maxlength="10" class="form-control form-control-lg" required/>
+              <small>(10 digits number)</small>
             </div>
 
             <!-- Bio input (with CKEditor) -->

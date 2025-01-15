@@ -214,6 +214,8 @@ public class CourseService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category information error, please contact support center."));
 
+        checkCourseStartDateEndDate(courseDTO);
+
         UserDTO instructorDTO = userMapper.toDTO(instructor);
         CategoryDTO categoryDTO = categoryMapper.toDTO(category);
 
@@ -227,9 +229,13 @@ public class CourseService {
             throw new IllegalArgumentException("Thumbnail size must be less than 10MB");
         }
 
-        String thumbnailUrl = saveThumbnail(file);
-        if (thumbnailUrl != null && !thumbnailUrl.isBlank()){
-            courseDTO.setThumbnailUrl(thumbnailUrl);
+        try {
+            String thumbnailUrl = saveThumbnail(file);
+            if (thumbnailUrl != null && !thumbnailUrl.isBlank()){
+                courseDTO.setThumbnailUrl(thumbnailUrl);
+            }
+        } catch (Exception e) {
+            throw new Exception("Can not upload file.");
         }
 
         Course course = courseMapper.toEntity(courseDTO, instructor);
@@ -248,10 +254,18 @@ public class CourseService {
         User instructor = userRepository.findById(instructorId).orElse(null);
         Category category = categoryRepository.findById(categoryId).orElse(null);
 
+        if (instructor == null) {
+            throw new RuntimeException("Missing user information, please login again.");
+        } else if (category == null) {
+            throw new RuntimeException("Category information error, please contact support center.");
+        }
+
         // update title, description, category, start/end date, update time and updater
         UserDTO instructorDTO = userMapper.toDTO(instructor);
         CategoryDTO categoryDTO = categoryMapper.toDTO(category);
         courseDTO.updateEditingValues(editingValues, categoryDTO, instructorDTO);
+
+        checkCourseStartDateEndDate(courseDTO);
 
         // Update thumbnail if provided
         if (file != null && !file.isEmpty()) {
@@ -533,5 +547,13 @@ public class CourseService {
             count++;
         }
         return courseDTOs;
+    }
+
+    private void checkCourseStartDateEndDate(CourseDTO courseDTO) throws RuntimeException {
+        Long startDay = courseDTO.getStartDate().toEpochDay();
+        Long endDay = courseDTO.getEndDate().toEpochDay();
+        if (endDay - startDay < 7) {
+            throw new RuntimeException("Course end date must before course start date at least 7 day!");
+        }
     }
 }
