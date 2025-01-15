@@ -2,7 +2,6 @@ package funix.sloc_system.service;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,6 @@ public class EmailService {
     @Value("${app.base-url}")
     private String baseUrl;
 
-    @Async
     public void sendEmail(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
@@ -30,7 +28,6 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    @Async
     public void sendEmailHTML(String to, String subject, String body) throws Exception {
         try {
             MimeMessage message = mailSender.createMimeMessage();
