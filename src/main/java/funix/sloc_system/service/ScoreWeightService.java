@@ -8,8 +8,8 @@ import funix.sloc_system.repository.ScoreWeightRepository;
 
 @Service
 public class ScoreWeightService {
-  private static final Double DEFAULT_QUIZ_WEIGHT = 0.4;
-  private static final Double DEFAULT_EXAM_WEIGHT = 0.6;
+  public static final Double DEFAULT_QUIZ_WEIGHT = 0.4;
+  public static final Double DEFAULT_EXAM_WEIGHT = 0.6;
 
   @Autowired
   private ScoreWeightRepository scoreWeightRepository;

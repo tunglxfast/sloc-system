@@ -95,7 +95,7 @@ public class StudyProcessService {
         }
 
         if (isCalculateFinal) {
-            Map<String, Object> finalCourseResult = appUtil.calculateFinalScore(testResults);
+            Map<String, Object> finalCourseResult = appUtil.calculateFinalScore(testResults, courseId);
             int finalScore = (int) finalCourseResult.get("finalScore");
             boolean passed = (boolean) finalCourseResult.get("isPassed");
             studyProcess.setFinalScore(finalScore);

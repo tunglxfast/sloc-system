@@ -25,10 +25,10 @@ public class ScoreWeight {
   @Column(name = "course_id")
   private Long courseId;
 
-  @Column(name = "quiz_weight")
+  @Column(name = "quiz_weight", nullable = false)
   private Double quizWeight;
 
-  @Column(name = "exam_weight")
+  @Column(name = "exam_weight", nullable = false)
   private Double examWeight;
 }
 
