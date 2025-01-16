@@ -7,6 +7,7 @@ import funix.sloc_system.entity.*;
 import funix.sloc_system.enums.*;
 import funix.sloc_system.mapper.*;
 import funix.sloc_system.repository.*;
+import funix.sloc_system.service.ScoreWeightService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,6 +56,8 @@ public class AppUtil {
     private EnrollmentMapper enrollmentMapper;
     @Autowired
     private TestResultMapper testResultMapper;
+    @Autowired
+    private ScoreWeightService scoreWeightService;
 
     private static final String FINAL_SCORE = "finalScore";
     private static final String IS_PASSED = "isPassed";
@@ -334,8 +337,15 @@ public class AppUtil {
         return testResults;
     }
 
-    public Map<String, Object> calculateFinalScore(List<TestResultDTO> testResults) {
-        // Final score = quiz * 0.4 + exam * 0.6
+    public Map<String, Object> calculateFinalScore(List<TestResultDTO> testResults, Long courseId) {
+        ScoreWeight scoreWeight = scoreWeightService.getScoreWeightByCourseId(courseId);
+        double quizWeight = ScoreWeightService.DEFAULT_QUIZ_WEIGHT;
+        double examWeight = ScoreWeightService.DEFAULT_EXAM_WEIGHT;
+        if (scoreWeight != null) {
+            quizWeight = scoreWeight.getQuizWeight();
+            examWeight = scoreWeight.getExamWeight();
+        }
+
         Double quizzesScore = 0.0;
         Double examsScore = 0.0;
         int calculatedScore;
@@ -368,7 +378,7 @@ public class AppUtil {
         } else if (isAllExam) {
             calculatedScore = (int)Math.round(examsScore / testsCount);
         } else {
-            calculatedScore = (int)Math.round(((quizzesScore * 0.4) + (examsScore * 0.6))/testsCount);
+            calculatedScore = (int)Math.round(((quizzesScore * quizWeight) + (examsScore * examWeight))/testsCount);
         }
 
         boolean passed = calculatedScore >= 50 && allTestPass;

@@ -1,21 +1,11 @@
 package funix.sloc_system.controller;
 
-import funix.sloc_system.dto.CourseDTO;
-import funix.sloc_system.dto.TestResultDTO;
-import funix.sloc_system.dto.TopicDTO;
-import funix.sloc_system.dto.TopicDiscussionDTO;
-import funix.sloc_system.dto.RankingDTO;
-import funix.sloc_system.entity.InstructorInfo;
-import funix.sloc_system.entity.Course;
-import funix.sloc_system.entity.Ranking;
-import funix.sloc_system.entity.Role;
-import funix.sloc_system.entity.StudyProcess;
-import funix.sloc_system.entity.Topic;
-import funix.sloc_system.entity.User;
+import funix.sloc_system.dto.*;
+import funix.sloc_system.entity.*;
 import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.mapper.CourseMapper;
-import funix.sloc_system.mapper.TopicMapper;
 import funix.sloc_system.mapper.RankingMapper;
+import funix.sloc_system.mapper.TopicMapper;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.*;
 import funix.sloc_system.util.AppUtil;
@@ -79,6 +69,9 @@ public class CourseLearningController {
 
     @Autowired
     private InstructorInfoService instructorInfoService;
+
+    @Autowired
+    private ScoreWeightService scoreWeightService;
 
     private void addCategoriesToModel(Model model) {
         model.addAttribute("categories", categoryService.findAllCategoriesDTO());
@@ -320,6 +313,14 @@ public class CourseLearningController {
         List<Ranking> rankings = rankingService.getRankingsByCourse(course.getId());
         List<RankingDTO> rankingDTOs = rankingMapper.toDTOs(rankings);
         InstructorInfo instructorInfo = instructorInfoService.getInstructorInfoByUserId(course.getInstructor().getId());
+
+        ScoreWeight scoreWeight = scoreWeightService.getScoreWeightByCourseId(course.getId());
+        double quizWeight = ScoreWeightService.DEFAULT_QUIZ_WEIGHT;
+        double examWeight = ScoreWeightService.DEFAULT_EXAM_WEIGHT;
+        if (scoreWeight != null) {
+            quizWeight = scoreWeight.getQuizWeight();
+            examWeight = scoreWeight.getExamWeight();
+        }
         
         model.addAttribute("rankings", rankingDTOs);
         model.addAttribute("course", courseDTO);
@@ -332,6 +333,8 @@ public class CourseLearningController {
         model.addAttribute("lastTopic", studyingTopicSeq);
         model.addAttribute("lastChapter", studyingChapterSeq);
         model.addAttribute("instructorInfo", instructorInfo);
+        model.addAttribute("quizWeight", quizWeight);
+        model.addAttribute("examWeight", examWeight);
     }
 
     private boolean mayEnroll(SecurityUser securityUser) {
