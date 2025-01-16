@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Course Tab-bar</title>
+</head>
+<body>
+  <div class="col-md-3 border-end border-2" style="padding-left: 2%; padding-right: 2%;">
+    <div style="margin-left: 10%;" th:fragment="editCourseTabBarFragment">
+      <div class="d-flex flex-column" style="width: 250px; height: 100vh; position: fixed; margin-left: 2%;">
+        <h4 class="mb-4">Navigation</h4>
+        <ul class="nav flex-column">
+          <li class="nav-item mb-2">
+            <a class="nav-link"
+               th:classappend="${activePage == 'editGeneral' ? 'text-primary fw-bold' : 'text-dark'}"
+               th:href="@{/instructor/course/{id}/edit(id=${courseId})}">
+              <i class="fas fa-graduation-cap"></i> Edit Course General
+            </a>
+          </li>
+          <li class="nav-item mb-2">
+            <a class="nav-link"
+               th:classappend="${activePage == 'editContent' ? 'text-primary fw-bold' : 'text-dark'}"
+               th:href="@{/instructor/course/{id}/edit/chapters(id=${courseId})}">
+              <i class="fas fa-edit"></i> Edit Course Content
+            </a>
+          </li>
+          <li class="nav-item mb-2">
+            <a class="nav-link"
+               th:classappend="${activePage == 'scoreWeight' ? 'text-primary fw-bold' : 'text-dark'}"
+               th:href="@{/instructor/course/{id}/score_weight(id=${courseId})}">
+              <i class="fas fa-scale-balanced"></i> Edit Score Weight
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

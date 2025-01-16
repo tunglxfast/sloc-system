@@ -103,7 +103,8 @@
               <h2 style="color: rgb(2, 117, 2); vertical-align: top; padding-top: 30px; 
               margin-bottom: 20px; font-weight: bold;">Course Progress</h2>
               <div style="margin-left: 5%; margin-right: 5%; border: 1px solid grey; padding: 10px; border-radius: 10px;">
-                <p><b>Final Score (GPA) = sum (quizzes scores * 0.4) + (exams score * 0.6)</b></p>
+                <p><b>Final Score (GPA) = sum (quizzes scores * <span th:text="${quizWeight != null ? quizWeight : 0}"/>)
+                  + (exams score * <span th:text="${examWeight != null ? examWeight : 0}"/>)</b></p>
                 <p><b>Passing conditions:</b></p>
                 <p>- Final Score >= 50</p>
                 <p>- All quizzes and exams are passed</p>

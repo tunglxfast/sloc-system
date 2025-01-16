@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Edit Course</title>
+    <title>Edit Score Weight</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
@@ -70,57 +70,53 @@
     </div>
 
     <div class="row" style="font-family: Arial, Helvetica, sans-serif;">
-        <div class="col-md-3 border-end border-2" th:with="activePage='editGeneral'" style="padding-left: 2%; padding-right: 2%;">
+        <div class="col-md-3 border-end border-2" th:with="activePage='scoreWeight'" style="padding-left: 2%; padding-right: 2%;">
             <div th:replace="~{/fragments/edit_course_tab_bar :: editCourseTabBarFragment}"/>
         </div>
         <div class="col-md-9">
             <div style="margin-left: 5%; width: 80%;">
-                <h2 class="text-center mb-4">Edit Course General</h2>
-                <form th:action="@{/instructor/course/{id}/submit(id=${course.id})}"
-                        th:object="${course}" method="post" enctype="multipart/form-data" class="bg-light p-4 rounded shadow">
-                    <input type="hidden" th:field="*{id}"/>
-            
-                    <div class="mb-3">
-                        <label for="title" class="form-label">Title:</label>
-                        <input type="text" id="title" th:field="*{title}" class="form-control" required/>
+                <h2 class="text-center mb-4">Edit Score Weight</h2>
+                <form th:action="@{'/instructor/course/' + ${courseId} + '/score_weight'}" method="post" class="bg-light p-4 rounded shadow">
+                    <input type="hidden" name="courseId" th:value="${courseId}"/>
+
+                    <div class="mb-3" style="border: double; margin-left: auto; margin-right: auto; padding-left: 1rem;">
+                        <h4>
+                            Final score will be calculated base on score weight:
+                        </h4>
+                        <p>
+                            - Total weight always 1.0
+                        </p>
+                        <p>
+                            - Quiz weight = Quiz weight point / (Quiz weight point + Exam weight point)
+                        </p>
+                        <p>
+                            - Exam weight = Exam weight point / (Quiz weight point + Exam weight point)
+                        </p>
                     </div>
-            
+
                     <div class="mb-3">
-                        <label for="description" class="form-label">Description:</label>
-                        <textarea id="description" th:field="*{description}" rows="4" class="form-control" required></textarea>
+                        <h4>
+                            Edit Weight:
+                        </h4>
                     </div>
-            
+
                     <div class="mb-3">
-                        <label for="thumbnailFile" class="form-label">Thumbnail: (JPG, JPEG, or PNG < 10MB)</label>
-                        <input type="file" id="thumbnailFile" name="thumbnailFile" accept=".jpg,.jpeg,.png" class="form-control"/>
-                        <div th:if="${course.thumbnailUrl}">
-                            <img th:src="${course.thumbnailUrl}" alt="Thumbnail" class="img-fluid" 
-                                  style="max-width: 200px; max-height: 200px; height: auto;">
-                        </div>
+                        <label for="quizWeight" class="form-label">Quiz weight point (0-1):</label>
+                        <input type="number" class="form-control"
+                               id="quizWeight" name="quizWeight"
+                               th:value="${quizWeight}" step="0.1" min="0" max="1" required/>
                     </div>
-            
+
                     <div class="mb-3">
-                        <label for="category" class="form-label">Category:</label>
-                        <select id="category" name="categoryId" class="form-select" required>
-                            <option th:each="category : ${categories}" th:value="${category.id}"
-                                    th:text="${category.name}" th:selected="${course.category.id == category.id}">
-                            </option>
-                        </select>
-                    </div>
-            
-                    <div class="mb-3">
-                        <label for="startDate" class="form-label">Start Date:</label>
-                        <input type="date" id="startDate" th:field="*{startDate}" class="form-control" required/>
-                    </div>
-            
-                    <div class="mb-3">
-                        <label for="endDate" class="form-label">End Date:</label>
-                        <input type="date" id="endDate" th:field="*{endDate}" class="form-control" required/>
+                        <label for="examWeight" class="form-label">Exam weight point (0-1):</label>
+                        <input type="number" class="form-control"
+                               id="examWeight" name="examWeight"
+                               th:value="${examWeight}" step="0.1" min="0" max="1" required/>
                     </div>
             
                     <div class="d-flex justify-content-between">
-                        <input type="submit" name="action" value="Save Draft" class="btn btn-secondary"/>
                         <input type="submit" name="action" value="Submit" class="btn btn-primary"/>
+                        <a th:href="@{/instructor/course/{courseId}/edit(courseId=${courseId})}" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
             </div>

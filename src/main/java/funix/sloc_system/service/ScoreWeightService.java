@@ -18,17 +18,17 @@ public class ScoreWeightService {
     return scoreWeightRepository.findByCourseId(courseId).orElse(null);
   }
 
-  public ScoreWeight saveScoreWeight(Long courseId, Double quizWeight, Double examWeight) {
+  public ScoreWeight saveScoreWeight(Long courseId, double quizWeight, double examWeight) {
     ScoreWeight scoreWeight = getScoreWeightByCourseId(courseId);
     if (scoreWeight == null) {
       scoreWeight = new ScoreWeight();
       scoreWeight.setCourseId(courseId);
     }
-    Double totalWeight = quizWeight + examWeight;
-    Double quizWeightRate = Math.round(quizWeight / totalWeight * 10) / 10.0;
-    Double examWeightRate = 1.0 - quizWeightRate;
-    scoreWeight.setQuizWeight(quizWeightRate);
-    scoreWeight.setExamWeight(examWeightRate);
+    double totalWeight = quizWeight + examWeight;
+    double quizRate = Math.round(quizWeight / totalWeight * 10) / 10.0;
+    double examRate = 1.0 - quizRate;
+    scoreWeight.setQuizWeight(quizRate);
+    scoreWeight.setExamWeight(examRate);
     return scoreWeightRepository.save(scoreWeight);
   }
 

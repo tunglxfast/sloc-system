@@ -3,11 +3,13 @@ package funix.sloc_system.controller;
 import funix.sloc_system.dto.CategoryDTO;
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.UserDTO;
+import funix.sloc_system.entity.ScoreWeight;
 import funix.sloc_system.mapper.CategoryMapper;
 import funix.sloc_system.mapper.UserMapper;
 import funix.sloc_system.security.SecurityUser;
 import funix.sloc_system.service.CategoryService;
 import funix.sloc_system.service.CourseService;
+import funix.sloc_system.service.ScoreWeightService;
 import funix.sloc_system.service.UserService;
 import funix.sloc_system.util.AppUtil;
 import funix.sloc_system.util.RedirectUrlHelper;
@@ -19,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.IOException;
 import java.util.List;
 
 @Controller
@@ -31,6 +32,8 @@ public class CourseManagementController {
     private CategoryService categoryService;
     @Autowired
     private CourseService courseService;
+    @Autowired
+    private ScoreWeightService scoreWeightService;
     @Autowired
     private CategoryMapper categoryMapper;
     @Autowired
@@ -155,5 +158,50 @@ public class CourseManagementController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/instructor/courses";
+    }
+
+    @GetMapping("/{courseId}/score_weight")
+    public String showScoreWeightForm(@PathVariable("courseId") Long courseId,
+                                      Model model,
+                                      RedirectAttributes redirectAttributes) {
+        if (!courseService.checkCourseExists(courseId)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Course does not exist.");
+            return RedirectUrlHelper.REDIRECT_INSTRUCTOR_DASHBOARD;
+        }
+
+        try {
+            ScoreWeight scoreWeight = scoreWeightService.getScoreWeightByCourseId(courseId);
+            double quizWeight = ScoreWeightService.DEFAULT_QUIZ_WEIGHT;
+            double examWeight = ScoreWeightService.DEFAULT_EXAM_WEIGHT;
+            if (scoreWeight != null) {
+                quizWeight = scoreWeight.getQuizWeight();
+                examWeight = scoreWeight.getExamWeight();
+            }
+            model.addAttribute("courseId", courseId);
+            model.addAttribute("quizWeight", quizWeight);
+            model.addAttribute("examWeight", examWeight);
+            return "instructor/score_weight";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "An error occurred, please try again later");
+            return RedirectUrlHelper.REDIRECT_INSTRUCTOR_DASHBOARD;
+        }
+    }
+
+    @PostMapping("/{courseId}/score_weight")
+    public String updateScoreWeight (@PathVariable("courseId") Long courseId,
+                                     @RequestParam("quizWeight") double quizWeight,
+                                     @RequestParam("examWeight") double examWeight,
+                                     RedirectAttributes redirectAttributes) {
+        try {
+            scoreWeightService.saveScoreWeight(courseId, quizWeight, examWeight);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Score weight saved");
+            return "redirect:/instructor/course/" + courseId + "/score_weight";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "An error occurred, please try again later");
+            return "redirect:/instructor/course/" + courseId + "/edit";
+        }
     }
 }
