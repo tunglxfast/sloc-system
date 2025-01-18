@@ -1,411 +1,636 @@
-CREATE DATABASE IF NOT EXISTS sloc_system;
-USE sloc_system;
+-- MySQL dump 10.13  Distrib 8.0.40, for Win64 (x86_64)
+--
+-- Host: localhost    Database: sloc_system
+-- ------------------------------------------------------
+-- Server version	9.1.0
 
--- Drop tables in reverse order of dependency to avoid foreign key issues
-DROP TABLE IF EXISTS instructor_info;
-DROP TABLE IF EXISTS instructor_course;
-DROP TABLE IF EXISTS enrollment;
-DROP TABLE IF EXISTS rankings;
-DROP TABLE IF EXISTS learned_topic;
-DROP TABLE IF EXISTS study_process;
-DROP TABLE IF EXISTS score_weight;
-DROP TABLE IF EXISTS test_result;
-DROP TABLE IF EXISTS comment;
-DROP TABLE IF EXISTS topic_discussion;
-DROP TABLE IF EXISTS forgot_password;
-DROP TABLE IF EXISTS content_change_temporary;
-DROP TABLE IF EXISTS course_change_temporary;
-DROP TABLE IF EXISTS answer;
-DROP TABLE IF EXISTS question;
-DROP TABLE IF EXISTS exam;
-DROP TABLE IF EXISTS quiz;
-DROP TABLE IF EXISTS reading_lesson;
-DROP TABLE IF EXISTS video_lesson;
-DROP TABLE IF EXISTS topic;
-DROP TABLE IF EXISTS chapter;
-DROP TABLE IF EXISTS course;
-DROP TABLE IF EXISTS user_roles;
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS role;
-DROP TABLE IF EXISTS category;
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
--- Create tables
+--
+-- Table structure for table `answer`
+--
 
-CREATE TABLE category (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255),
-    description TEXT
-);
+DROP TABLE IF EXISTS `answer`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `answer` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `content` varchar(255) DEFAULT NULL,
+  `correct` tinyint(1) DEFAULT NULL,
+  `question_id` bigint DEFAULT NULL,
+  `content_status` varchar(50) DEFAULT 'DRAFT',
+  PRIMARY KEY (`id`),
+  KEY `question_id` (`question_id`),
+  CONSTRAINT `answer_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `question` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=379 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-CREATE TABLE role (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) UNIQUE NOT NULL
-);
+--
+-- Dumping data for table `answer`
+--
 
-CREATE TABLE users (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) UNIQUE NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    full_name VARCHAR(255),
-    password VARCHAR(255) NOT NULL,
-    locked BOOLEAN DEFAULT FALSE,
-    failed_attempts INT DEFAULT 0,
-    verification_token VARCHAR(255),
-    token_expiry_date DATETIME,
-    verified BOOLEAN DEFAULT FALSE
-);
+LOCK TABLES `answer` WRITE;
+/*!40000 ALTER TABLE `answer` DISABLE KEYS */;
+INSERT INTO `answer` VALUES (1,'A markup language',1,1,'PUBLISHED'),(2,'A programming language',0,1,'PUBLISHED'),(3,'A mathematical formula',0,1,'PUBLISHED'),(4,'A type of HTML tag',0,1,'PUBLISHED'),(5,'A way to select HTML elements',1,2,'PUBLISHED'),(6,'A CSS property',0,2,'PUBLISHED'),(7,'A JavaScript function',0,2,'PUBLISHED'),(8,'A data format',0,2,'PUBLISHED'),(9,'An interdisciplinary field',1,3,'PUBLISHED'),(10,'A type of software',0,3,'PUBLISHED'),(11,'A programming language',0,3,'PUBLISHED'),(12,'A database',0,3,'PUBLISHED'),(13,'Defines the title of the document',1,4,'PUBLISHED'),(14,'Adds a link to an image',0,4,'PUBLISHED'),(15,'Styles the text in bold',0,4,'PUBLISHED'),(16,'Creates a table in HTML',0,4,'PUBLISHED'),(17,'<a>',1,5,'PUBLISHED'),(18,'<div>',0,5,'PUBLISHED'),(19,'<h1>',0,5,'PUBLISHED'),(20,'<img>',0,5,'PUBLISHED'),(21,'<div>',1,6,'PUBLISHED'),(22,'<span>',1,6,'PUBLISHED'),(23,'<customtag>',0,6,'PUBLISHED'),(24,'<script>',1,6,'PUBLISHED'),(25,'<abc>',0,6,'PUBLISHED'),(26,'Organize data (into a dataset)',1,7,'PUBLISHED'),(27,'Format and adjust data',0,7,'PUBLISHED'),(32,'Get input from others ',0,8,'PUBLISHED'),(33,'Format and adjust data',0,8,'PUBLISHED'),(34,'Transform data',1,8,'PUBLISHED'),(35,'Organize data (into a dataset)',0,8,'PUBLISHED'),(36,'Format and adjust data',1,9,'PUBLISHED'),(37,'Get input from others ',0,9,'PUBLISHED'),(38,'Organize data (into a dataset)',0,9,'PUBLISHED'),(39,'Transform data',0,9,'PUBLISHED'),(40,'Get input from others ',0,7,'PUBLISHED'),(41,'Transform data',0,7,'PUBLISHED'),(42,'database references',0,10,'PUBLISHED'),(43,'database organization',1,10,'PUBLISHED'),(44,'database relationships',0,10,'PUBLISHED'),(45,'database normalization',0,10,'PUBLISHED'),(46,'The data analyst should add a filter to return only sales in Stamford, Connecticut, then sort the least recent sales at the top of their list.',0,11,'PUBLISHED'),(47,'The data analyst should filter out sale amounts in Stamford, Connecticut, then sort the highest sales at the top of their list.',0,11,'PUBLISHED'),(48,'The data analyst should filter out sales in Stamford, Connecticut, then sort the least recent sales at the top of their list.',0,11,'PUBLISHED'),(49,'The data analyst should add a filter to return only sales in Stamford, Connecticut, then sort the most recent sales at the top of their list.',1,11,'PUBLISHED'),(50,'COUNT',0,12,'PUBLISHED'),(51,'WHERE',1,12,'PUBLISHED'),(52,'IF',0,12,'PUBLISHED'),(53,'RETURN',0,12,'PUBLISHED'),(54,'Sort Sheet ',1,13,'PUBLISHED'),(55,'Sort By Rank',0,13,'PUBLISHED'),(56,'Sort Data',0,13,'PUBLISHED'),(57,'Sort Range ',0,13,'PUBLISHED'),(58,'True',1,14,'PUBLISHED'),(59,'False',0,14,'PUBLISHED'),(60,'FALSE',1,15,'PUBLISHED'),(61,'TRUE',0,15,'PUBLISHED'),(62,'Z-A',0,15,'PUBLISHED'),(63,'DESCEND',0,15,'PUBLISHED'),(64,'WHERE shrub_price',0,16,'PUBLISHED'),(65,'ORDER BY shrub_price DESC',0,16,'PUBLISHED'),(66,'WHERE shrub_price ASC',0,16,'PUBLISHED'),(67,'ORDER BY shrub_price ',1,16,'PUBLISHED'),(68,'ORDER',0,17,'PUBLISHED'),(69,'ASC',0,17,'PUBLISHED'),(70,'ORDER BY',1,17,'PUBLISHED'),(71,'ASCENDING',0,17,'PUBLISHED'),(72,'DESCENDING',0,18,'PUBLISHED'),(73,'DESC SORT',0,18,'PUBLISHED'),(74,'DESC BY',0,18,'PUBLISHED'),(75,'DESC',1,18,'PUBLISHED'),(76,'Analyze',1,19,'PUBLISHED'),(77,'Prepare',0,19,'PUBLISHED'),(78,'Process',0,19,'PUBLISHED'),(79,'Act',0,19,'PUBLISHED'),(80,'Get input from others',0,20,'PUBLISHED'),(81,'Transform data',1,20,'PUBLISHED'),(82,'Organize data ',0,20,'PUBLISHED'),(83,'Format and adjust data',0,20,'PUBLISHED'),(84,'Transform data',1,21,'PUBLISHED'),(85,'Get input from others',0,21,'PUBLISHED'),(86,'Format and adjust data',0,21,'PUBLISHED'),(87,'Organize data',0,21,'PUBLISHED'),(88,'criteria',1,22,'PUBLISHED'),(89,'model',0,22,'PUBLISHED'),(90,'observation',0,22,'PUBLISHED'),(91,'measure',0,22,'PUBLISHED'),(92,'Sort Column',0,23,'PUBLISHED'),(93,'Sort Rows',0,23,'PUBLISHED'),(94,'Sort Together',0,23,'PUBLISHED'),(95,'Sort Sheet',1,23,'PUBLISHED'),(96,'=SORT(A1:E50, 4, TRUE)',0,24,'PUBLISHED'),(97,'=SORT(A1:E50, D, TRUE)',0,24,'PUBLISHED'),(98,'=SORT(A1:E50, D, FALSE)',0,24,'PUBLISHED'),(99,'=SORT(A1:E50, 4, FALSE)',1,24,'PUBLISHED'),(100,'In line 3, album should be album_id.',1,25,'PUBLISHED'),(101,'Line 3 contains an equal sign.',0,25,'PUBLISHED'),(102,'SELECT, FROM, and WHERE should be capitalized.',0,25,'PUBLISHED'),(103,'In line 3, album is not capitalized.',0,25,'PUBLISHED'),(104,'In line 3, “Chicago” has quotation marks.',0,26,'PUBLISHED'),(105,'Line 4 is missing the BY between ORDER and total.',1,26,'PUBLISHED'),(106,'Line 4 is missing column = between ORDER and total.',0,26,'PUBLISHED'),(107,'SELECT, FROM, WHERE, and ORDER are capitalized.',0,26,'PUBLISHED'),(108,'=CONVERT(-22, C, F)',0,27,'PUBLISHED'),(109,'=CONVERT(-22, F, C)',0,27,'PUBLISHED'),(110,'=CONVERT(-22, \"F\", \"C\")',0,27,'PUBLISHED'),(111,'=CONVERT(-22, \"C\", \"F\")',1,27,'PUBLISHED'),(112,'Reject Invalid Inputs',1,28,'PUBLISHED'),(113,'Deny Help Text',0,28,'PUBLISHED'),(114,'Remove Validation',0,28,'PUBLISHED'),(115,'Forbid Entry',0,28,'PUBLISHED'),(116,'Data validation',0,29,'PUBLISHED'),(117,'Conditional formatting',1,29,'PUBLISHED'),(118,'CONVERT',0,29,'PUBLISHED'),(119,'Filtering',0,29,'PUBLISHED'),(120,'CONNECT',0,30,'PUBLISHED'),(121,'CONCAT',1,30,'PUBLISHED'),(122,'COMBINE',0,30,'PUBLISHED'),(123,'IMPORT RANGE',0,30,'PUBLISHED'),(124,'FIRST',0,31,'PUBLISHED'),(125,'RETURN',0,31,'PUBLISHED'),(126,'COUNT',0,31,'PUBLISHED'),(127,'LIMIT',1,31,'PUBLISHED'),(128,'=LEN(20)',0,32,'PUBLISHED'),(129,'=LEN(B8)',1,32,'PUBLISHED'),(130,'=LEN(B8, 20)',0,32,'PUBLISHED'),(131,'=LEN(20, B8)',0,32,'PUBLISHED'),(132,'Format as Money',0,33,'PUBLISHED'),(133,'Format as Number',0,33,'PUBLISHED'),(134,'Format as Yen',0,33,'PUBLISHED'),(135,'Format as Currency',1,33,'PUBLISHED'),(136,'Merging two or more columns.',0,34,'PUBLISHED'),(137,'Adding drop down menus on cells',1,34,'PUBLISHED'),(138,'Avoiding invalid inputs to functions',1,34,'PUBLISHED'),(139,'Protecting structured data',1,34,'PUBLISHED'),(140,'Data validation',0,35,'PUBLISHED'),(141,'CONVERT ',0,35,'PUBLISHED'),(142,'Conditional formatting',1,35,'PUBLISHED'),(143,'Add color',0,35,'PUBLISHED'),(144,'GROUP',0,36,'PUBLISHED'),(145,'JOIN',0,36,'PUBLISHED'),(146,'CONCAT',1,36,'PUBLISHED'),(147,'COMBINE',0,36,'PUBLISHED'),(148,'LIMIT,50',0,37,'PUBLISHED'),(149,'LIMIT_50',0,37,'PUBLISHED'),(150,'LIMIT 50',1,37,'PUBLISHED'),(151,'LIMIT = 50',0,37,'PUBLISHED'),(152,'The COUNT function',0,38,'PUBLISHED'),(153,'The MID function',0,38,'PUBLISHED'),(154,'The LEN function',1,38,'PUBLISHED'),(155,'The CHAR function',0,38,'PUBLISHED'),(156,'=RIGHT(F2, 5)',1,39,'PUBLISHED'),(157,'=LEFT(F2, 5)',0,39,'PUBLISHED'),(158,'=RIGHT(5,F2)',0,39,'PUBLISHED'),(159,'=LEFT(5,F2)',0,39,'PUBLISHED'),(160,'FIND(“_”, A6)',0,40,'PUBLISHED'),(161,'FIND(A6, “ “)',0,40,'PUBLISHED'),(162,'FIND(A6, _ )',0,40,'PUBLISHED'),(163,'FIND(“ “, A6)',1,40,'PUBLISHED'),(164,'=CONVERT(F8)',0,41,'PUBLISHED'),(165,'=NUM(F8)',0,41,'PUBLISHED'),(166,'=MATCH(F8)',0,41,'PUBLISHED'),(167,'=VALUE(F8)',1,41,'PUBLISHED'),(168,'To make formulas and functions unconditional',0,42,'PUBLISHED'),(169,'To lock rows and columns so they won\'t change when a function is copied',1,42,'PUBLISHED'),(170,'To represent missing values in a formula or function',0,42,'PUBLISHED'),(171,'To remove unnecessary instructions from a formula or function',0,42,'PUBLISHED'),(172,'True',0,43,'PUBLISHED'),(173,'False',1,43,'PUBLISHED'),(174,'=VLOOKUP(Nigeria, A2,C10, 2, true)',0,44,'PUBLISHED'),(175,'=VLOOKUP(Nigeria, A2:C10, 3, false)',0,44,'PUBLISHED'),(176,'=VLOOKUP(Nigeria, A2:C10, 3, true)',0,44,'PUBLISHED'),(177,'=VLOOKUP(\"Nigeria\", A2:C10, 2, false)',1,44,'PUBLISHED'),(178,'=VLOOKUP(\"Mecca\", A2:D7, 3, false)',1,45,'PUBLISHED'),(179,'=VLOOKUP(Mecca, A2:D7, 2, true)',0,45,'PUBLISHED'),(180,'=VLOOKUP(Mecca, A2,D7, 3, true)',0,45,'PUBLISHED'),(181,'=VLOOKUP(Mecca, A2:D7, 2, false)',0,45,'PUBLISHED'),(182,'OUTER JOIN',0,46,'PUBLISHED'),(183,'LEFT JOIN',0,46,'PUBLISHED'),(184,'INNER JOIN',1,46,'PUBLISHED'),(185,'RIGHT JOIN',0,46,'PUBLISHED'),(186,'COUNT RANGE',0,47,'PUBLISHED'),(187,'COUNT VALUES',0,47,'PUBLISHED'),(188,'COUNT DISTINCT',1,47,'PUBLISHED'),(189,'COUNT',0,47,'PUBLISHED'),(190,'Tagging',1,48,'PUBLISHED'),(191,'Filtering',0,48,'PUBLISHED'),(192,'Naming',0,48,'PUBLISHED'),(193,'Aliasing',0,48,'PUBLISHED'),(194,'1',1,49,'PUBLISHED'),(195,'2',1,49,'PUBLISHED'),(196,'3',0,49,'PUBLISHED'),(197,'4',1,49,'PUBLISHED'),(198,'copying',0,50,'PUBLISHED'),(199,'naming',1,50,'PUBLISHED'),(200,'removing',0,50,'PUBLISHED'),(201,'hiding',0,50,'PUBLISHED'),(202,'True',0,51,'PUBLISHED'),(203,'False',1,51,'PUBLISHED'),(204,'Data aggregation',1,52,'PUBLISHED'),(205,'Data grouping',0,52,'PUBLISHED'),(206,'Data composition',0,52,'PUBLISHED'),(207,'Data mapping',0,52,'PUBLISHED'),(208,'DIGIT',0,53,'PUBLISHED'),(209,'FIGURE',0,53,'PUBLISHED'),(210,'VALUE',1,53,'PUBLISHED'),(211,'CONVERT',0,53,'PUBLISHED'),(212,'VLOOKUP will delete the values in the columns to the left of its column.',0,54,'PUBLISHED'),(213,'VLOOKUP will then search the data twice.',0,54,'PUBLISHED'),(214,'VLOOKUP will only search values in columns to the right of the column it is entered into.',1,54,'PUBLISHED'),(215,'VLOOKUP will return all the values found to the left of its column.',0,54,'PUBLISHED'),(216,'To avoid incorrect calculations caused by changing the array',1,55,'PUBLISHED'),(217,'To stop people from accessing sensitive information in the array',0,55,'PUBLISHED'),(218,'So that the data auto deletes after the function is used',0,55,'PUBLISHED'),(219,'So that other analysts’ functions can not access the array',0,55,'PUBLISHED'),(220,'=VLOOKUP(Pakistan, A2:B10, 3, false)',0,56,'PUBLISHED'),(221,'=VLOOKUP(\"Pakistan\", A2:B10, 2, false)',1,56,'PUBLISHED'),(222,'=VLOOKUP(Pakistan, A2*B10, 2, false)',0,56,'PUBLISHED'),(223,'=VLOOKUP(\"Pakistan\", A2:B10, 3, false)',0,56,'PUBLISHED'),(224,'It returns only the records with values that match from both tables.',0,57,'PUBLISHED'),(225,'It returns all records in both the fiction table and the books table.',0,57,'PUBLISHED'),(226,'It returns all the records in the fiction table and only the records from the books table with matching values.',0,57,'PUBLISHED'),(227,'It returns all records in the books table and only the records from the fiction table with matching values.',1,57,'PUBLISHED'),(228,'COUNT',0,58,'PUBLISHED'),(229,'RETURN',0,58,'PUBLISHED'),(230,'COUNT DISTINCT',1,58,'PUBLISHED'),(231,'RETURN VALUES',0,58,'PUBLISHED'),(232,'Outer query',1,59,'PUBLISHED'),(233,'Subquery',0,59,'PUBLISHED'),(234,'Central select',0,59,'PUBLISHED'),(235,'Outer select',1,59,'PUBLISHED'),(236,'=50x233',0,60,'PUBLISHED'),(237,'=50*233',1,60,'PUBLISHED'),(238,'50x233',0,60,'PUBLISHED'),(239,'50*233',0,60,'PUBLISHED'),(240,'=SUMIF(B2:B12,\">150\")',1,61,'PUBLISHED'),(241,'=SUMIF(B2:B12,<150)',0,61,'PUBLISHED'),(242,'=SUMIF(B2:B12,\"<150\")',0,61,'PUBLISHED'),(243,'=SUMIF(B2:B12,>150)',0,61,'PUBLISHED'),(244,'The values in cells B2 through B31',1,62,'PUBLISHED'),(245,'All cells with values greater than 100 ',0,62,'PUBLISHED'),(246,'Cells D7 and D14',0,62,'PUBLISHED'),(247,'All cells with number values',0,62,'PUBLISHED'),(248,'To find the average price of each product',0,63,'PUBLISHED'),(249,'To organize all of the data into a smaller format',0,63,'PUBLISHED'),(250,'To calculate the sum of individual prices for each product type',1,63,'PUBLISHED'),(251,'To summarize data about each product ',0,63,'PUBLISHED'),(252,'Summarize the values by product ',0,64,'PUBLISHED'),(253,'Add a new column labeled beige',0,64,'PUBLISHED'),(254,'Add a filter to show only beige products',1,64,'PUBLISHED'),(255,'Sort the current row by product color',0,64,'PUBLISHED'),(256,'A filter',0,65,'PUBLISHED'),(257,'Data validation ',0,65,'PUBLISHED'),(258,'Conditional formatting',0,65,'PUBLISHED'),(259,'A calculated field',1,65,'PUBLISHED'),(260,'unit_price * quantity',1,66,'PUBLISHED'),(261,'It converts a decimal to a percent',0,67,'PUBLISHED'),(262,'It finds the square root of a number ',0,67,'PUBLISHED'),(263,'It returns the remainder of a division calculation',1,67,'PUBLISHED'),(264,'It applies an exponent to a value ',0,67,'PUBLISHED'),(265,'first_quarter_expenses',1,68,'PUBLISHED'),(266,'first+quarter+expenses',0,68,'PUBLISHED'),(267,'first quarter expenses',0,68,'PUBLISHED'),(268,'Firstquarterexpenses',0,68,'PUBLISHED'),(269,'Data is complete and accurate',1,69,'PUBLISHED'),(270,'Data is secure',1,69,'PUBLISHED'),(271,'Data is sorted and filtered',0,69,'PUBLISHED'),(272,'Data is consistent',1,69,'PUBLISHED'),(273,'Data range',0,70,'PUBLISHED'),(274,'Data structure',0,70,'PUBLISHED'),(275,'Data type',0,70,'PUBLISHED'),(276,'Data consistency',1,70,'PUBLISHED'),(277,'IDs that are repeated',0,71,'PUBLISHED'),(278,'IDs in the wrong column ',0,71,'PUBLISHED'),(279,'IDs with text',1,71,'PUBLISHED'),(280,'IDs with more than eight characters',0,71,'PUBLISHED'),(281,'After completing all calculations in the table',0,72,'PUBLISHED'),(282,'After ending the session in a SQL database',1,72,'PUBLISHED'),(283,'After running a query in your SQL database',0,72,'PUBLISHED'),(284,'After running a report from the table',0,72,'PUBLISHED'),(285,'Bike trips that lasted exactly 60 minutes',1,73,'PUBLISHED'),(286,'Bike trips equal to or more than one hour ',0,73,'PUBLISHED'),(287,'The total number of bike trips',0,73,'PUBLISHED'),(288,' A random subset of bike trips',0,73,'PUBLISHED'),(289,'Specific naming conventions ',0,74,'PUBLISHED'),(290,'Metadata about the data in the table',0,74,'PUBLISHED'),(291,'Access for anyone to use the table',1,74,'PUBLISHED'),(292,'Automated calculations ',0,74,'PUBLISHED'),(293,'=COUNT(G2:G30,”=shipped”)',0,75,'PUBLISHED'),(294,'=MAX(G2:G30,”=shipped”)',0,75,'PUBLISHED'),(295,'=SUM(G2:G30,”=shipped”)',0,75,'PUBLISHED'),(296,'=COUNTIF(G2:G30,”=shipped”)',1,75,'PUBLISHED'),(297,'A1:A25',0,76,'PUBLISHED'),(298,'C1:C25',0,76,'PUBLISHED'),(299,'SUMIF',0,76,'PUBLISHED'),(300,'”<10”',1,76,'PUBLISHED'),(301,'Filter',0,77,'PUBLISHED'),(302,'Columns',0,77,'PUBLISHED'),(303,'Rows',0,77,'PUBLISHED'),(304,'Values',1,77,'PUBLISHED'),(305,'3',0,78,'PUBLISHED'),(306,'1',0,78,'PUBLISHED'),(307,'6',0,78,'PUBLISHED'),(308,'2',1,78,'PUBLISHED'),(309,'Calculate using data extracted from other tables',0,79,'PUBLISHED'),(310,'Return a specific key-value pair from a JSON object',0,79,'PUBLISHED'),(311,'Calculate the mathematical extract operation',0,79,'PUBLISHED'),(312,'Return a specific portion of a date',1,79,'PUBLISHED'),(313,'Parentheses - ( )',1,80,'PUBLISHED'),(314,'Curly Braces - { }',0,80,'PUBLISHED'),(315,'Square Brackets - [ ]',0,80,'PUBLISHED'),(316,'Quotation Marks - “ “',0,80,'PUBLISHED'),(317,'To ensure that all data is complete, accurate, secure, and consistent',1,81,'PUBLISHED'),(318,'To guarantee that visualizations are visually pleasing',0,81,'PUBLISHED'),(319,'To ensure that you are able to use every piece of data from your raw data',0,81,'PUBLISHED'),(320,'To guarantee that all of your stakeholders will be happy with your results',0,81,'PUBLISHED'),(321,'WHERE original_column !! recalculated_column',0,82,'PUBLISHED'),(322,'WHERE original_column NOT EQUALS recalculated_column',0,82,'PUBLISHED'),(323,'WHERE original_column ~= recalculated_column',0,82,'PUBLISHED'),(324,'WHERE original_column <> recalculated_column',1,82,'PUBLISHED'),(325,'A temporary table calculates formulas using less memory than standard tables.',0,83,'PUBLISHED'),(326,'A temporary table calculates formulas faster than standard tables.',0,83,'PUBLISHED'),(327,'A temporary table allows functions that are unavailable to standard tables.',0,83,'PUBLISHED'),(328,'A temporary table allows analysts to repeatedly work with the same subset of data.',1,83,'PUBLISHED'),(329,'SELECT * FROM table;',0,84,'PUBLISHED'),(330,'CREATE TABLE my_table AS (SELECT * FROM other_table);',1,84,'PUBLISHED'),(331,'WITH my_table AS (SELECT * FROM other_table WHERE x = 0);',1,84,'PUBLISHED'),(332,'WITH my_table FROM (SELECT * FROM other_table);',0,84,'PUBLISHED'),(333,'Select A2-R210, then use the drop-down menu to Sort Range by Column K from A to Z',0,85,'PUBLISHED'),(334,'Use the SORT function syntax: =SORT(A2:R210, 11, TRUE)',1,85,'PUBLISHED'),(335,'Use the SORT function syntax: =SORT(A2:R210, K, TRUE)',0,85,'PUBLISHED'),(336,'Select A2-R210, then use the drop-down menu to Sort Sheet by Column K from A to Z',1,85,'PUBLISHED'),(337,'VLOOKUP',0,86,'PUBLISHED'),(338,'data validation',1,86,'PUBLISHED'),(339,'the LIST function',0,86,'PUBLISHED'),(340,'the find tool',0,86,'PUBLISHED'),(341,'True',1,87,'PUBLISHED'),(342,'False',0,87,'PUBLISHED'),(343,'=LEFT(5,L2)',0,88,'PUBLISHED'),(344,'=RIGHT(5,L2)',0,88,'PUBLISHED'),(345,'=RIGHT(L2,5)',1,88,'PUBLISHED'),(346,'=LEFT(L2,5)',0,88,'PUBLISHED'),(347,'True',1,89,'PUBLISHED'),(348,'False',0,89,'PUBLISHED'),(349,'True',1,90,'PUBLISHED'),(350,'False',0,90,'PUBLISHED'),(351,'SELECT * FROM Donation_Form_List WHERE Board_Member = TRUE, Trustee = TRUE',0,91,'PUBLISHED'),(352,'SELECT * FROM Donation_Form_List WHERE Board_Member = \"TRUE\" OR Trustee = \"TRUE\"',1,91,'PUBLISHED'),(353,'SELECT * FROM Donation_Form_List WHERE Board_Member = \"TRUE\" AND Trustee = \"TRUE\"',0,91,'PUBLISHED'),(354,'SELECT * FROM Donation_Form_List WHERE Board_Member = TRUE AND Trustee = TRUE',0,91,'PUBLISHED'),(355,'INNER JOIN ',0,92,'PUBLISHED'),(356,'OUTER JOIN',1,92,'PUBLISHED'),(357,'RIGHT JOIN',0,92,'PUBLISHED'),(358,'LEFT JOIN',0,92,'PUBLISHED'),(359,'AVG(contributions_2019) AS AvgLineTotal',1,93,'PUBLISHED'),(360,'AVG(contributions_2019) = “AvgLineTotal”',0,93,'PUBLISHED'),(361,'AVG(“contributions_2019”) AS AvgLineTotal',0,93,'PUBLISHED'),(362,'AVG(“contributions_2019”) IN AvgLineTotal',0,93,'PUBLISHED'),(363,'=O2,P2',0,94,'PUBLISHED'),(364,'=(O2/P2)',0,94,'PUBLISHED'),(365,'=O2+P2',1,94,'PUBLISHED'),(366,'=SUM(O2,P2)',1,94,'PUBLISHED'),(367,'=COUNTIF(02:2010,”<=100”)',0,95,'PUBLISHED'),(368,'=SUMIF(02:2010,”>=100”)',0,95,'PUBLISHED'),(369,'=SUMIF(O2:2010,\">=100\")',0,95,'PUBLISHED'),(370,'=COUNTIF(O2:O210,\">=100\")',1,95,'PUBLISHED'),(371,'1',1,96,'PUBLISHED'),(372,'2',0,96,'PUBLISHED'),(373,'3',0,96,'PUBLISHED'),(374,'4',0,96,'PUBLISHED'),(375,'ORDER BY COUNT(DonorID) ASC',0,97,'PUBLISHED'),(376,'ORDER BY COUNT(DonorID) DESC',1,97,'PUBLISHED'),(377,'ORDER BY CITY(DonorID) ASC',0,97,'PUBLISHED'),(378,'ORDER BY CITY(DonorID) DESC',0,97,'PUBLISHED');
+/*!40000 ALTER TABLE `answer` ENABLE KEYS */;
+UNLOCK TABLES;
 
-CREATE TABLE instructor_info (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT,
-    name VARCHAR(255),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    phone VARCHAR(255),
-    bio TEXT,
-    avatar_url TEXT
-);
+--
+-- Table structure for table `category`
+--
 
-CREATE TABLE user_roles (
-    user_id BIGINT,
-    role_id BIGINT,
-    PRIMARY KEY (user_id, role_id),
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (role_id) REFERENCES role(id)
-);
+DROP TABLE IF EXISTS `category`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `category` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-CREATE TABLE course (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255),
-    description TEXT,
-    thumbnail_url TEXT,
-    category_id BIGINT,
-    instructor_id BIGINT,
-    created_by BIGINT,
-    last_updated_by BIGINT,
-    start_date DATE,
-    end_date DATE,
-    content_status VARCHAR(50) DEFAULT 'DRAFT',
-    approval_status VARCHAR(50) DEFAULT 'NOT_SUBMITTED',
-    reject_reason TEXT,
-    created_at DATE,
-    updated_at DATE,
-    FOREIGN KEY (category_id) REFERENCES category(id),
-    FOREIGN KEY (instructor_id) REFERENCES users(id),
-    FOREIGN KEY (created_by) REFERENCES users(id),
-    FOREIGN KEY (last_updated_by) REFERENCES users(id)
-);
+--
+-- Dumping data for table `category`
+--
 
-CREATE TABLE chapter (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255),
-    sequence INT,
-    course_id BIGINT,
-    content_status VARCHAR(50) DEFAULT 'DRAFT',
-    FOREIGN KEY (course_id) REFERENCES course(id)
-);
+LOCK TABLES `category` WRITE;
+/*!40000 ALTER TABLE `category` DISABLE KEYS */;
+INSERT INTO `category` VALUES (1,'Web Development','Courses about building websites and web applications'),(2,'Data Science','Courses about data analysis and machine learning'),(3,'Design','Courses on graphic and UI/UX design'),(4,'Finance','Courses on finance and accounting'),(5,'Programming','Courses on programming languages and algorithms'),(6,'Accounting','Courses on accounting and finance');
+/*!40000 ALTER TABLE `category` ENABLE KEYS */;
+UNLOCK TABLES;
 
-CREATE TABLE topic (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255),
-    description TEXT,
-    topic_type VARCHAR(255),
-    sequence INT,
-    chapter_id BIGINT,
-    content_status VARCHAR(50) DEFAULT 'DRAFT',
-    video_url TEXT,
-    file_url TEXT,
-    pass_point INT,
-    max_point INT,
-    time_limit INT,
-    FOREIGN KEY (chapter_id) REFERENCES chapter(id),
-    UNIQUE (chapter_id, sequence)
-);
+--
+-- Table structure for table `chapter`
+--
 
-CREATE TABLE question (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    content VARCHAR(255),
-    point INT,
-    question_type VARCHAR(255),
-    topic_id BIGINT NOT NULL,
-    content_status VARCHAR(255) DEFAULT 'DRAFT',
-    FOREIGN KEY (topic_id) REFERENCES topic(id)
-);
+DROP TABLE IF EXISTS `chapter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `chapter` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) DEFAULT NULL,
+  `sequence` int DEFAULT NULL,
+  `course_id` bigint DEFAULT NULL,
+  `content_status` varchar(50) DEFAULT 'DRAFT',
+  PRIMARY KEY (`id`),
+  KEY `course_id` (`course_id`),
+  CONSTRAINT `chapter_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `course` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-CREATE TABLE answer (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    content TEXT,
-    correct BOOLEAN,
-    question_id BIGINT,
-    content_status VARCHAR(50) DEFAULT 'DRAFT',
-    FOREIGN KEY (question_id) REFERENCES question(id)
-);
+--
+-- Dumping data for table `chapter`
+--
 
-CREATE TABLE enrollment (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT,
-    course_id BIGINT,
-    enrollment_date DATE,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (course_id) REFERENCES course(id)
-);
+LOCK TABLES `chapter` WRITE;
+/*!40000 ALTER TABLE `chapter` DISABLE KEYS */;
+INSERT INTO `chapter` VALUES (1,'Chapter 1: HTML Basics',1,1,'PUBLISHED'),(2,'Chapter 2: CSS Fundamentals',2,1,'PUBLISHED'),(3,'Chapter 1: Introduction to Data Science',1,2,'PUBLISHED'),(4,'Chapter 2: Machine Learning Basics',2,2,'PUBLISHED'),(5,'Chapter 1: Python Basics',1,3,'PUBLISHED'),(6,'Chapter 2: Python Intermediate',2,3,'PUBLISHED'),(7,'Chapter 1: Introduction to Machine Learning',1,4,'PUBLISHED'),(8,'Chapter 2: Machine Learning Advanced',2,4,'PUBLISHED'),(9,'Chapter 1: Cloud Computing Overview',1,5,'PUBLISHED'),(10,'Let\'s get organized',1,6,'PUBLISHED'),(11,'Data analysis basics',2,6,'PUBLISHED'),(12,'Organize data for analysis',3,6,'PUBLISHED'),(13,'Sort data in spreadsheets',4,6,'PUBLISHED'),(14,'Sort data using SQL',5,6,'PUBLISHED'),(15,'Practice Quiz 1',6,6,'PUBLISHED'),(16,'Convert and format data',7,6,'PUBLISHED'),(17,'Combine multiple datasets',8,6,'PUBLISHED'),(18,'Get support during analysis',9,6,'PUBLISHED'),(19,'Practice Quiz 2',10,6,'PUBLISHED'),(20,'VLOOKUP for data aggregation',11,6,'PUBLISHED'),(21,'Use JOINS to aggregate data in SQL',12,6,'PUBLISHED'),(22,'Work with subqueries',13,6,'PUBLISHED'),(23,'Practice Quiz 3',14,6,'PUBLISHED'),(24,'Get started with data calculations',15,6,'PUBLISHED'),(25,'Pivot...pivot...pivot...',16,6,'PUBLISHED'),(26,'Learn more SQL calculations',17,6,'PUBLISHED'),(27,'The data-validation process',18,6,'PUBLISHED'),(28,'Using SQL with temporary tables',19,6,'PUBLISHED'),(29,'Practice Quiz 4',20,6,'PUBLISHED'),(30,'Course Final Exam',21,6,'PUBLISHED'),(31,'M.A in Public Policy',1,7,'PUBLISHED'),(32,'Fundamentals of Data Manipulation with Python',1,8,'PUBLISHED'),(33,'C++ Basics: Selection and Iteration',1,9,'PUBLISHED'),(34,'Introduction and Balance Sheet',1,10,'PUBLISHED');
+/*!40000 ALTER TABLE `chapter` ENABLE KEYS */;
+UNLOCK TABLES;
 
-CREATE TABLE test_result (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    highest_score DOUBLE NOT NULL,
-    latest_score DOUBLE NOT NULL,
-    passed BOOLEAN NOT NULL,
-    participation_count INT,
-    test_type VARCHAR(255) NOT NULL,
-    user_id BIGINT NOT NULL,
-    topic_id BIGINT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (topic_id) REFERENCES topic(id)
-);
+--
+-- Table structure for table `comment`
+--
 
-CREATE TABLE score_weight (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    course_id BIGINT NOT NULL,
-    quiz_weight DOUBLE NOT NULL,
-    exam_weight DOUBLE NOT NULL
-);
+DROP TABLE IF EXISTS `comment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `comment` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `content` text NOT NULL,
+  `topic_discussion_id` bigint NOT NULL,
+  `created_by` bigint NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKfjofledklwgrbd4ay2ugyqk1a` (`created_by`),
+  KEY `FK87qhaktbxa5pfdrs3jhwmtxrk` (`topic_discussion_id`),
+  CONSTRAINT `FK87qhaktbxa5pfdrs3jhwmtxrk` FOREIGN KEY (`topic_discussion_id`) REFERENCES `topic_discussion` (`id`),
+  CONSTRAINT `FKfjofledklwgrbd4ay2ugyqk1a` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-CREATE TABLE study_process (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    course_id BIGINT NOT NULL,
-    last_view_topic BIGINT,
-    learning_progress DOUBLE,
-    final_score INT,
-    pass_course BOOLEAN,
-    progress_assessment TEXT
-);
+--
+-- Dumping data for table `comment`
+--
 
-CREATE TABLE learned_topic (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    topic_id BIGINT NOT NULL
-);
+LOCK TABLES `comment` WRITE;
+/*!40000 ALTER TABLE `comment` DISABLE KEYS */;
+INSERT INTO `comment` VALUES (1,'To use div tags effectively, you should combine them with CSS Flexbox or Grid. This will make layout management much easier.',1,3,'2024-01-02 10:30:00','2024-01-02 10:30:00'),(2,'Classes are used when you want to apply styles to multiple elements, while IDs should only be used for unique elements.',2,3,'2024-01-03 15:00:00','2024-01-03 15:00:00'),(3,'I recommend Harvard\'s CS109 course and the book \"Python for Data Analysis\".',3,3,'2024-01-04 10:00:00','2024-01-04 10:00:00'),(4,'You can use CSS text-align: center to center text.',4,7,'2024-01-05 11:45:00','2024-01-05 11:45:00'),(5,'To evenly space items in flexbox, you can use justify-content: space-between or space-around.',5,8,'2024-01-06 17:00:00','2024-01-06 17:00:00'),(6,'I am also learning this part, very helpful!',1,9,'2024-01-02 11:00:00','2024-01-02 11:00:00'),(7,'Thank you for sharing!',2,10,'2024-01-03 15:30:00','2024-01-03 15:30:00'),(8,'I will check out these resources.',3,11,'2024-01-04 10:30:00','2024-01-04 10:30:00'),(9,'You can also use margin: auto to center block elements.',4,12,'2024-01-05 12:00:00','2024-01-05 12:00:00'),(10,'Flexbox is really powerful for layouts!',5,13,'2024-01-06 17:30:00','2024-01-06 17:30:00');
+/*!40000 ALTER TABLE `comment` ENABLE KEYS */;
+UNLOCK TABLES;
 
+--
+-- Table structure for table `content_change_temporary`
+--
 
--- Table for tracking changes to published content
-CREATE TABLE content_change_temporary (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    entity_type VARCHAR(20) NOT NULL,
-    entity_id BIGINT NOT NULL, 
-    action VARCHAR(20) NOT NULL,
-    changes MEDIUMTEXT NOT NULL,
-    updated_by BIGINT NOT NULL,
-    change_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (updated_by) REFERENCES users(id),
-    UNIQUE (entity_type, entity_id)
-);
+DROP TABLE IF EXISTS `content_change_temporary`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `content_change_temporary` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `entity_type` varchar(20) NOT NULL,
+  `entity_id` bigint NOT NULL,
+  `action` varchar(20) NOT NULL,
+  `changes` text NOT NULL,
+  `updated_by` bigint NOT NULL,
+  `change_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `entity_type` (`entity_type`,`entity_id`),
+  KEY `updated_by` (`updated_by`),
+  CONSTRAINT `content_change_temporary_ibfk_1` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Create topic_discussions table
-CREATE TABLE topic_discussion (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    content TEXT,
-    topic_id BIGINT NOT NULL,
-    created_by BIGINT NOT NULL,
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL
-);
+--
+-- Dumping data for table `content_change_temporary`
+--
 
--- Create comments table
-CREATE TABLE comment (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    content TEXT NOT NULL,
-    topic_discussion_id BIGINT NOT NULL,
-    created_by BIGINT NOT NULL,
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL
-); 
+LOCK TABLES `content_change_temporary` WRITE;
+/*!40000 ALTER TABLE `content_change_temporary` DISABLE KEYS */;
+/*!40000 ALTER TABLE `content_change_temporary` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- Create forgot_password table
-CREATE TABLE forgot_password (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    token VARCHAR(255) NOT NULL,
-    expiry_date DATETIME NOT NULL,
-    UNIQUE (email)
-);
+--
+-- Table structure for table `course`
+--
 
--- Create ranking table
-CREATE TABLE rankings (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    course_id BIGINT NOT NULL,
-    all_course_score DOUBLE NOT NULL,
-    ranking_position INT NOT NULL,
-    UNIQUE (user_id, course_id)
-);
+DROP TABLE IF EXISTS `course`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `course` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `thumbnail_url` varchar(255) DEFAULT NULL,
+  `category_id` bigint DEFAULT NULL,
+  `instructor_id` bigint DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `content_status` varchar(50) DEFAULT 'DRAFT',
+  `approval_status` varchar(50) DEFAULT 'NOT_SUBMITTED',
+  `reject_reason` varchar(255) DEFAULT NULL,
+  `created_at` date DEFAULT NULL,
+  `updated_at` date DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `category_id` (`category_id`),
+  KEY `instructor_id` (`instructor_id`),
+  KEY `created_by` (`created_by`),
+  KEY `last_updated_by` (`last_updated_by`),
+  CONSTRAINT `course_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`),
+  CONSTRAINT `course_ibfk_2` FOREIGN KEY (`instructor_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `course_ibfk_3` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`),
+  CONSTRAINT `course_ibfk_4` FOREIGN KEY (`last_updated_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Insert sample data
+--
+-- Dumping data for table `course`
+--
 
--- Insert sample categories
-INSERT INTO category (name, description) VALUES 
-('Web Development', 'Courses about building websites and web applications'),
-('Data Science', 'Courses about data analysis and machine learning'),
-('Design', 'Courses on graphic and UI/UX design'),
-('Finance', 'Courses on finance and accounting'),
-('Programming', 'Courses on programming languages and algorithms'),
-('Accounting', 'Courses on accounting and finance');
+LOCK TABLES `course` WRITE;
+/*!40000 ALTER TABLE `course` DISABLE KEYS */;
+INSERT INTO `course` VALUES (1,'Introduction to Web Development','Learn the basics of web development including HTML, CSS, and JavaScript.','/img/courses/thumbnails/thumbnail1.jpg',1,3,3,3,'2024-01-01','2026-06-01','PUBLISHED','APPROVED',NULL,'2024-01-01','2024-01-01'),(2,'Data Science for Beginners','Learn the fundamentals of data science and machine learning.','/img/courses/thumbnails/thumbnail2.jpg',2,3,3,3,'2024-01-07','2024-07-31','PUBLISHED','APPROVED',NULL,'2024-02-01','2025-01-18'),(3,'Introduction to Python Programming','Master the basics of Python programming, including syntax and data structures.','/img/courses/thumbnails/thumbnail3.jpg',5,3,4,4,'2024-03-01','2025-09-01','PUBLISHED','APPROVED',NULL,'2024-03-01','2024-03-01'),(4,'Basics of Machine Learning','Understand the fundamentals of machine learning algorithms and their applications.','/img/courses/thumbnails/thumbnail4.jpg',2,3,5,5,'2024-04-01','2025-10-01','PUBLISHED','APPROVED',NULL,'2024-04-01','2024-04-01'),(5,'Understanding Cloud Computing','Explore the key concepts of cloud computing and its benefits.','/img/courses/thumbnails/thumbnail5.jpg',2,3,6,6,'2024-05-01','2025-11-01','PUBLISHED','APPROVED',NULL,'2024-05-01','2024-05-01'),(6,'Analyze Data to Answer Questions','Analyze and visualize data to solve business problems','/img/courses/thumbnails/thumbnail-0952223e-59e1-4075-98a5-c47dff841055.png',2,3,3,3,'2025-01-09','2026-02-18','PUBLISHED','APPROVED',NULL,'2025-01-16','2025-01-17'),(7,'Master of Business Administration','Management within organizations where technology plays a critical role in their competitiveness.','/img/courses/thumbnails/thumbnail-f2374b8e-5231-49e7-ae63-655280cf40e2.png',6,3,3,3,'2025-01-15','2025-07-30','PUBLISHED','APPROVED',NULL,'2025-01-18','2025-01-18'),(8,'Applied Data Science with Python Specialization','The 5 courses in this University of Michigan specialization introduce learners to data science through the python programming language.','/img/courses/thumbnails/thumbnail-49791974-eff1-4487-813f-2cf0127fe253.png',2,3,3,3,'2025-01-06','2025-06-14','PUBLISHED','APPROVED',NULL,'2025-01-18','2025-01-18'),(9,'Programming in C++: A Hands-on Introduction Specialization','This specialization is intended for people without programming experience who seek to develop C++ programming skills and learn about the underlying computer science concepts that will allow them to pick up other programming languages quickly. ','/img/courses/thumbnails/thumbnail-228600f2-e759-4e3e-8198-408edf6ec210.png',5,3,3,3,'2025-01-15','2025-11-19','PUBLISHED','APPROVED',NULL,'2025-01-18','2025-01-18'),(10,'Introduction to Financial Accounting','Master the technical skills needed to analyze financial statements and disclosures for use in financial analysis, and learn how accounting standards and managerial incentives affect the financial reporting process','/img/courses/thumbnails/thumbnail-2f54d28e-fc1f-41b1-8407-ec4c4178c5c0.jpg',6,3,3,3,'2025-01-02','2025-07-21','PUBLISHED','APPROVED',NULL,'2025-01-18','2025-01-18');
+/*!40000 ALTER TABLE `course` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- Insert sample roles
-INSERT INTO role (name) VALUES 
-('ADMIN'), 
-('MODERATOR'), 
-('INSTRUCTOR'),
-('STUDENT');
+--
+-- Table structure for table `enrollment`
+--
 
--- Insert sample users
-INSERT INTO users (username, email, full_name, password, locked, failed_attempts, verification_token, token_expiry_date, verified) VALUES
- ('admin', 'sloc.mail.system@gmail.com', 'Admin', '$2a$10$dbkSgQ9mW8ph/DH8YcoDrujNE10AR3n5RMD9wehJV2.cr04l6FxCa', false, 0, NULL, NULL, TRUE),
-('moderator_01', ' moderator 1@example.com', 'Mod One', '$2a$10$FQQim7953z6v2JQ4T64GSez7C1obtRKPxxJ3txyd7gl2eOeK25leS', false, 0, NULL, NULL, TRUE),
-('instructor_01', 'funixtesting12972@gmail.com', 'Instructor One', '$2a$10$JAxB.j.NXTrBY0LQXVXCD.WeQIbocrb3Q.8BJgUvX.pYC0Yq91WZe', false, 0, NULL, NULL, TRUE),
-('student_01', 'student1@example.com', 'Student One', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
-('student_02', 'student2@example.com', 'Student Two', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
-('student_03', 'student3@example.com', 'Student Three', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
-('student_04', 'student4@example.com', 'Student Four', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
-('student_05', 'student5@example.com', 'Student Five', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
-('student_06', 'student6@example.com', 'Student Six', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
-('student_07', 'student7@example.com', 'Student Seven', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
-('student_08', 'student8@example.com', 'Student Eight', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
-('student_09', 'student9@example.com', 'Student Nine', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
-('student_10', 'student10@example.com', 'Student Ten', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
-('instructor_02', 'instructor2@example.com', 'Instructor Two', '$2a$10$JAxB.j.NXTrBY0LQXVXCD.WeQIbocrb3Q.8BJgUvX.pYC0Yq91WZe', false, 0, NULL, NULL, TRUE);
+DROP TABLE IF EXISTS `enrollment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `enrollment` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint DEFAULT NULL,
+  `course_id` bigint DEFAULT NULL,
+  `enrollment_date` date DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `course_id` (`course_id`),
+  CONSTRAINT `enrollment_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `enrollment_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Assign roles to users
-INSERT INTO user_roles (user_id, role_id) VALUES
-(1, 1),  -- admin_user is an Admin
-(2, 2),  -- moderator_01 is a Moderator
-(3, 3),  -- instructor_01 is an Instructor
-(4, 4);  -- student_01 is a Student
-(5, 4);  -- student_02 is a Student
-(6, 4);  -- student_03 is a Student
-(7, 4);  -- student_04 is a Student
-(8, 4);  -- student_05 is a Student
-(9, 4);  -- student_06 is a Student
-(10, 4);  -- student_07 is a Student
-(11, 4);  -- student_08 is a Student
-(12, 4);  -- student_09 is a Student
-(13, 4);  -- student_10 is a Student
-(14, 3);  -- instructor_02 is an Instructor
+--
+-- Dumping data for table `enrollment`
+--
 
--- Insert sample courses
-INSERT INTO course (title, description, thumbnail_url, category_id, instructor_id, created_by, last_updated_by, start_date, end_date, content_status, approval_status, reject_reason, created_at, updated_at) VALUES
-('Introduction to Web Development', 'Learn the basics of web development including HTML, CSS, and JavaScript.', '/img/courses/thumbnails/thumbnail1.jpg', 1, 3, 3, 3, '2024-01-01', '2026-06-01', 'PUBLISHED', 'APPROVED', NULL, '2024-01-01', '2024-01-01'),
-('Data Science for Beginners', 'Learn the fundamentals of data science and machine learning.', '/img/courses/thumbnails/thumbnail2.jpg', 2, 3, 3, 3, '2024-02-01', '2024-07-01', 'PUBLISHED', 'APPROVED', NULL, '2024-02-01', '2024-02-01'),
-('Introduction to Python Programming', 'Master the basics of Python programming, including syntax and data structures.', '/img/courses/thumbnails/thumbnail3.jpg', 5, 3, 4, 4, '2024-03-01', '2025-09-01', 'PUBLISHED', 'APPROVED', NULL, '2024-03-01', '2024-03-01'),
-('Basics of Machine Learning', 'Understand the fundamentals of machine learning algorithms and their applications.', '/img/courses/thumbnails/thumbnail4.jpg', 2, 3, 5, 5, '2024-04-01', '2025-10-01', 'PUBLISHED', 'APPROVED', NULL, '2024-04-01', '2024-04-01'),
-('Understanding Cloud Computing', 'Explore the key concepts of cloud computing and its benefits.', '/img/courses/thumbnails/thumbnail5.jpg', 2, 3, 6, 6, '2024-05-01', '2025-11-01', 'PUBLISHED', 'APPROVED', NULL, '2024-05-01', '2024-05-01');
+LOCK TABLES `enrollment` WRITE;
+/*!40000 ALTER TABLE `enrollment` DISABLE KEYS */;
+INSERT INTO `enrollment` VALUES (1,4,1,'2024-01-01'),(2,4,2,'2024-02-01'),(3,4,6,'2025-01-17');
+/*!40000 ALTER TABLE `enrollment` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- Insert sample chapters
-INSERT INTO chapter (title, sequence, course_id, content_status) VALUES
-('Chapter 1: HTML Basics', 1, 1, 'PUBLISHED'),
-('Chapter 2: CSS Fundamentals', 2, 1, 'PUBLISHED'),
-('Chapter 1: Introduction to Data Science', 1, 2, 'PUBLISHED'),
-('Chapter 2: Machine Learning Basics', 2, 2, 'PUBLISHED'),
-('Chapter 1: Python Basics', 1, 3, 'PUBLISHED'),
-('Chapter 2: Python Intermediate', 2, 3, 'PUBLISHED'),
-('Chapter 1: Introduction to Machine Learning', 1, 4, 'PUBLISHED'),
-('Chapter 2: Machine Learning Advanced', 2, 4, 'PUBLISHED'),
-('Chapter 1: Cloud Computing Overview', 1, 5, 'PUBLISHED');
+--
+-- Table structure for table `forgot_password`
+--
 
--- Insert sample topics
-INSERT INTO topic (title, description, topic_type, sequence, chapter_id, content_status, video_url, file_url, pass_point, max_point, time_limit) VALUES
-('HTML Syntax', 'Learn the basic syntax of HTML', 'VIDEO', 1, 1, 'PUBLISHED', 'https://www.youtube.com/embed/9r_hbFzA8ho?si=pyTUZYtQjuOYk2Uh', NULL, NULL, NULL, NULL),
-('CSS Selectors', 'Learn about different CSS selectors and how to use them', 'VIDEO', 1, 2, 'PUBLISHED', 'https://www.youtube.com/embed/l1mER1bV0N0?si=Lhp6M1Tzl5La5BQ-', NULL, NULL, NULL, NULL),
-('What is Data Science?', 'Introduction to Data Science concepts', 'READING', 1, 3, 'PUBLISHED', NULL, '/reading/intro_data_science.pdf', NULL, NULL, NULL),
-('HTML Syntax Quiz', 'HTML Syntax Quiz', 'QUIZ', 2, 1, 'PUBLISHED', NULL, NULL, 3, 4, NULL),
-('CSS Selectors Quiz', 'CSS Selectors Quiz', 'QUIZ', 2, 2, 'PUBLISHED', NULL, NULL, 1, 1, NULL),
-('Final Exam for Data Science', 'Final Exam for Data Science', 'EXAM', 2, 4, 'PUBLISHED', NULL, NULL, 1, 1, 120),
-('Basics of Machine Learning', 'Explore the basics of machine learning and its applications.', 'READING', 1, 4, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
-('Introduction to Python', 'Learn the basics of Python programming language.', 'READING', 1, 5, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
-('Introduction to OOP', 'Learn the basics of object-oriented programming in Python.', 'READING', 1, 6, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
-('Supervised Learning', 'Understand the basics of supervised learning algorithms.', 'READING', 1, 7, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
-('Introduction to Neural Networks', 'Learn the structure and working of neural networks.', 'READING', 1, 8, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
-('What is Cloud Computing?', 'Introduction to the concept of cloud computing.', 'READING', 1, 9, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL);
+DROP TABLE IF EXISTS `forgot_password`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `forgot_password` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `expiry_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `forgot_password`
+--
 
--- Insert sample questions
-INSERT INTO question (content, point, question_type, topic_id, content_status) VALUES
-('What is HTML?', 1, 'CHOICE_ONE', 4, 'PUBLISHED'),
-('What is a CSS Selector?', 1, 'CHOICE_ONE', 5, 'PUBLISHED'),
-('What is Data Science?', 1, 'CHOICE_ONE', 6, 'PUBLISHED'),
-('What does the &lt;title&gt; tag do?', 1, 'CHOICE_ONE', 4, 'PUBLISHED'),
-('Which tag is used to create a hyperlink?', 1, 'CHOICE_ONE', 4, 'PUBLISHED'),
-('Which of the following are valid HTML tags?', 1, 'CHOICE_MANY', 4, 'PUBLISHED');
+LOCK TABLES `forgot_password` WRITE;
+/*!40000 ALTER TABLE `forgot_password` DISABLE KEYS */;
+/*!40000 ALTER TABLE `forgot_password` ENABLE KEYS */;
+UNLOCK TABLES;
 
+--
+-- Table structure for table `instructor_info`
+--
 
--- Insert sample answers
-INSERT INTO answer (content, correct, question_id, content_status) VALUES
-('A markup language', TRUE, 1, 'PUBLISHED'),
-('A programming language', FALSE, 1, 'PUBLISHED'),
-('A mathematical formula', FALSE, 1, 'PUBLISHED'),
-('A type of HTML tag', FALSE, 1, 'PUBLISHED'),
+DROP TABLE IF EXISTS `instructor_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `instructor_info` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  `bio` text,
+  `avatar_url` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-('A way to select HTML elements', TRUE, 2, 'PUBLISHED'),
-('A CSS property', FALSE, 2, 'PUBLISHED'),
-('A JavaScript function', FALSE, 2, 'PUBLISHED'),
-('A data format', FALSE, 2, 'PUBLISHED'),
+--
+-- Dumping data for table `instructor_info`
+--
 
-('An interdisciplinary field', TRUE, 3, 'PUBLISHED'),
-('A type of software', FALSE, 3, 'PUBLISHED'),
-('A programming language', FALSE, 3, 'PUBLISHED'),
-('A database', FALSE, 3, 'PUBLISHED'),
+LOCK TABLES `instructor_info` WRITE;
+/*!40000 ALTER TABLE `instructor_info` DISABLE KEYS */;
+INSERT INTO `instructor_info` VALUES (1,3,'Dr. Jame Smith','jane.smith@example.com','+1234567890','<p>\n  <strong>Dr. Jane Smith</strong> is a professor with over \n  <strong>10 years of experience</strong> in teaching \n  <em>computer science</em> and <em>software engineering</em>. \n  She specializes in <strong>AI</strong> and <strong>machine learning</strong>.\n</p>','/img/instructor_avatars/professor_jame_smith.png');
+/*!40000 ALTER TABLE `instructor_info` ENABLE KEYS */;
+UNLOCK TABLES;
 
-('Defines the title of the document', TRUE, 4, 'PUBLISHED'),
-('Adds a link to an image', FALSE, 4, 'PUBLISHED'),
-('Styles the text in bold', FALSE, 4, 'PUBLISHED'),
-('Creates a table in HTML', FALSE, 4, 'PUBLISHED'),
+--
+-- Table structure for table `learned_topic`
+--
 
-('<a>', TRUE, 5, 'PUBLISHED'),
-('<div>', FALSE, 5, 'PUBLISHED'),
-('<h1>', FALSE, 5, 'PUBLISHED'),
-('<img>', FALSE, 5, 'PUBLISHED'),
+DROP TABLE IF EXISTS `learned_topic`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `learned_topic` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint NOT NULL,
+  `topic_id` bigint NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-('<div>', TRUE, 6, 'PUBLISHED'),
-('<span>', TRUE, 6, 'PUBLISHED'),
-('<customtag>', FALSE, 6, 'PUBLISHED'),
-('<script>', TRUE, 6, 'PUBLISHED'),
-('<abc>', FALSE, 6, 'PUBLISHED');
+--
+-- Dumping data for table `learned_topic`
+--
 
--- Insert sample enrollment data
-INSERT INTO enrollment (user_id, course_id, enrollment_date) VALUES
-(4, 1, '2024-01-01'),  -- student_01 enrolls in Web Development course
-(4, 2, '2024-02-01');  -- student_01 enrolls in Data Science course
+LOCK TABLES `learned_topic` WRITE;
+/*!40000 ALTER TABLE `learned_topic` DISABLE KEYS */;
+INSERT INTO `learned_topic` VALUES (1,4,13),(2,4,14),(3,4,15),(4,4,16),(5,4,17),(6,4,21),(7,4,22),(8,4,23),(9,4,25),(10,4,26),(11,4,27),(12,4,29),(13,4,30),(14,4,31),(15,4,34),(16,4,35),(17,4,36),(18,4,37),(19,4,38),(20,4,40),(21,4,54),(22,4,55);
+/*!40000 ALTER TABLE `learned_topic` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- Insert sample topic discussions
-INSERT INTO topic_discussion (title, content, topic_id, created_by, created_at, updated_at) VALUES
-('How to use div tags effectively', 'I am having trouble using div tags for layout. Can someone explain how to use div tags effectively?', 1, 4, '2024-01-02 10:00:00', '2024-01-02 10:00:00'),
-('Difference between class and id in CSS', 'What is the difference between class and id in CSS? When should I use class and when should I use id?', 2, 4, '2024-01-03 14:30:00', '2024-01-03 14:30:00'),
-('Resources for learning Data Science', 'Can anyone recommend some good resources for learning more about Data Science?', 3, 4, '2024-01-04 09:15:00', '2024-01-04 09:15:00'),
-('How to center text in HTML', 'How can I center text in HTML? I tried using center but it does not work.', 1, 5, '2024-01-05 11:20:00', '2024-01-05 11:20:00'),
-('Issues with CSS Flexbox', 'I am having trouble with Flexbox. How can I evenly space items in a container?', 2, 6, '2024-01-06 16:45:00', '2024-01-06 16:45:00');
+--
+-- Table structure for table `question`
+--
 
--- Insert sample comments
-INSERT INTO comment (content, topic_discussion_id, created_by, created_at, updated_at) VALUES
-('To use div tags effectively, you should combine them with CSS Flexbox or Grid. This will make layout management much easier.', 1, 3, '2024-01-02 10:30:00', '2024-01-02 10:30:00'),
-('Classes are used when you want to apply styles to multiple elements, while IDs should only be used for unique elements.', 2, 3, '2024-01-03 15:00:00', '2024-01-03 15:00:00'),
-('I recommend Harvard''s CS109 course and the book "Python for Data Analysis".', 3, 3, '2024-01-04 10:00:00', '2024-01-04 10:00:00'),
-('You can use CSS text-align: center to center text.', 4, 7, '2024-01-05 11:45:00', '2024-01-05 11:45:00'),
-('To evenly space items in flexbox, you can use justify-content: space-between or space-around.', 5, 8, '2024-01-06 17:00:00', '2024-01-06 17:00:00'),
-('I am also learning this part, very helpful!', 1, 9, '2024-01-02 11:00:00', '2024-01-02 11:00:00'),
-('Thank you for sharing!', 2, 10, '2024-01-03 15:30:00', '2024-01-03 15:30:00'),
-('I will check out these resources.', 3, 11, '2024-01-04 10:30:00', '2024-01-04 10:30:00'),
-('You can also use margin: auto to center block elements.', 4, 12, '2024-01-05 12:00:00', '2024-01-05 12:00:00'),
-('Flexbox is really powerful for layouts!', 5, 13, '2024-01-06 17:30:00', '2024-01-06 17:30:00');
+DROP TABLE IF EXISTS `question`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `question` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `content` text,
+  `point` int DEFAULT NULL,
+  `question_type` varchar(255) DEFAULT NULL,
+  `topic_id` bigint NOT NULL,
+  `content_status` varchar(255) DEFAULT 'DRAFT',
+  PRIMARY KEY (`id`),
+  KEY `topic_id` (`topic_id`),
+  CONSTRAINT `question_ibfk_1` FOREIGN KEY (`topic_id`) REFERENCES `topic` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=98 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Insert sample instructor info
-INSERT INTO instructor_info (user_id, name, email, phone, bio, avatar_url) VALUES 
-(3, 'Dr. Jame Smith', 'jane.smith@example.com', '+1234567890', 
-'<p>
-  <strong>Dr. Jane Smith</strong> is a professor with over 
-  <strong>10 years of experience</strong> in teaching 
-  <em>computer science</em> and <em>software engineering</em>. 
-  She specializes in <strong>AI</strong> and <strong>machine learning</strong>.
-</p>'
-,  
-'/img/instructor_avatars/professor_jame_smith.png');
+--
+-- Dumping data for table `question`
+--
+
+LOCK TABLES `question` WRITE;
+/*!40000 ALTER TABLE `question` DISABLE KEYS */;
+INSERT INTO `question` VALUES (1,'What is HTML?',1,'CHOICE_ONE',4,'PUBLISHED'),(2,'What is a CSS Selector?',1,'CHOICE_ONE',5,'PUBLISHED'),(3,'What is Data Science?',1,'CHOICE_ONE',6,'PUBLISHED'),(4,'What does the &lt;title&gt; tag do?',1,'CHOICE_ONE',4,'PUBLISHED'),(5,'Which tag is used to create a hyperlink?',1,'CHOICE_ONE',4,'PUBLISHED'),(6,'Which of the following are valid HTML tags?',1,'CHOICE_MANY',4,'PUBLISHED'),(7,'<p>You ask volunteers at a theater production which tasks they have already completed and add that data to a spreadsheet containing all required tasks. You will use the information provided by the volunteers to figure out which tasks still need to be done. This is an example of which phase of analysis?</p>',30,'CHOICE_ONE',20,'PUBLISHED'),(8,'<p>You are working with three datasets about voter turnout in your county. First, you identify relationships and patterns between the datasets. Then, you use formulas and functions to make calculations based on your data. This is an example of which phase of analysis?</p>',30,'CHOICE_ONE',20,'PUBLISHED'),(9,'<p>You are working with a dataset from a local community college. You sort the students alphabetically by last name. This is an example of which phase of analysis?</p>',30,'CHOICE_ONE',20,'PUBLISHED'),(10,'<p>Fill in the blank: A data analyst uses _____ to decide which data is relevant to their analysis and which data types and variables are appropriate.</p>',30,'CHOICE_ONE',24,'PUBLISHED'),(11,'<p>A data analyst wants to organize a database to show only the 100 most recent real estate sales in Stamford, Connecticut. How can they do that?</p>',30,'CHOICE_ONE',24,'PUBLISHED'),(12,'<p>You are working with a database table that contains customer data. The <em>country</em> column designates the country where each customer is located. You want to find out which customers are located in Brazil.</p>\n<p>You write the SQL query below. Add a __ clause that will return only customers located in Brazil.</p>\n<p><em>SELECT&nbsp; * FROM&nbsp; customer</em></p>\n<p><em>___ country&nbsp;=&nbsp;\'Brazil\'</em></p>',30,'CHOICE_ONE',24,'PUBLISHED'),(13,'<p>Which spreadsheet menu function is used to sort all data in a spreadsheet by the ranking of a specific sorted column?</p>',30,'CHOICE_ONE',28,'PUBLISHED'),(14,'<p>In spreadsheets, data analysts can sort a range from the Data tab in the menu or by typing a function directly into an empty cell.</p>',20,'CHOICE_ONE',28,'PUBLISHED'),(15,'<p>An analyst uses =SORT to sort spreadsheet data in descending order. What do they type at the end of their sort function?</p>',30,'CHOICE_ONE',28,'PUBLISHED'),(16,'<p>A data analyst wants to sort a list of greenhouse shrubs by price from least expensive to most expensive. Which statement should they use?</p>',30,'CHOICE_ONE',32,'PUBLISHED'),(17,'<p>You are working with a database table that contains data about music genres. You want to sort the genres by name in ascending order. The genres are listed in the <em>genre_name</em> column.</p>\n<p>You write the SQL query below. Add an __ clause that will sort the genres by name in ascending order.</p>\n<p>SELECT&nbsp;* FROM&nbsp;genre</p>\n<p>__ genre_name</p>',30,'CHOICE_ONE',32,'PUBLISHED'),(18,'<p>You are working with a database table that contains employee data. You want to sort the employees by hire date in descending order. The hire dates are listed in the <em>hire_date</em> column.</p>\n<p>You write the SQL query below. Add an __ clause that will sort the employees by hire date in descending order.</p>\n<p>SELECT&nbsp;* FROM&nbsp;employee</p>\n<p>ORDER&nbsp;BY&nbsp;hire_date&nbsp;__</p>',30,'CHOICE_ONE',32,'PUBLISHED'),(19,'<p>Which phase of the data analysis process has the goal of identifying trends and relationships?</p>',10,'CHOICE_ONE',33,'PUBLISHED'),(20,'<p>A data analyst investigates the data they’ve collected to look for patterns and relationships between the data. They also perform calculations based on the data. In which of the four phases of analysis does this occur?</p>',10,'CHOICE_ONE',33,'PUBLISHED'),(21,'<p>A data analyst working on a dataset performs several calculations with the data. What phase of analysis is the analyst in?</p>',10,'CHOICE_ONE',33,'PUBLISHED'),(22,'<p>Fill in the blank: Filtering involves showing only the data that meets a specific _____ while hiding the rest.</p>',10,'CHOICE_ONE',33,'PUBLISHED'),(23,'<p>A data analyst is sorting spreadsheet data. They want to make sure that, when they rearrange the data, data across rows is kept together. What technique should they use to sort the data?</p>',10,'CHOICE_ONE',33,'PUBLISHED'),(24,'<p>A data analyst sorts a spreadsheet range between cells A1 and E50. They sort in descending order by the fourth column, Column D. What is the syntax they are using?</p>',20,'CHOICE_ONE',33,'PUBLISHED'),(25,'<p>You are querying a database that contains data about music. Each album is given an ID number. You are only interested in data related to the album with ID number 3. The album IDs are listed in the album_id column.</p>\n<p>You write the following SQL query, but it is incorrect. What is wrong with the query?</p>\n<p>SELECT *</p>\n<p>FROM Track</p>\n<p>WHERE album = 3</p>',20,'CHOICE_ONE',33,'PUBLISHED'),(26,'<p>Question 8</p>\n<p>You write the SQL query below. However this query is incorrect. What is wrong with it?</p>\n<p>SELECT *</p>\n<p>FROM invoice</p>\n<p>WHERE billing_city = “Chicago”</p>\n<p>ORDER total</p>',20,'CHOICE_ONE',33,'PUBLISHED'),(27,'<p>A spreadsheet cell contains the coldest temperature ever recorded in New Zealand: -22 °Celsius. What function will display that temperature in Fahrenheit?</p>',30,'CHOICE_ONE',39,'PUBLISHED'),(28,'<p>A data analyst wants to ensure spreadsheet formulas continue to run correctly, even if someone enters the wrong data by mistake. Which data-validation menu option should they select to flag data entry errors?</p>',30,'CHOICE_ONE',39,'PUBLISHED'),(29,'<p>A data analyst clicks on the Format Cells in drop-down menu and selects the option Text Is Exactly November. This changes the color of all the cells that contain the word November. What spreadsheet tool is the analyst using?</p>',30,'CHOICE_ONE',39,'PUBLISHED'),(30,'<p>Fill in the blank: In SQL, _____ is a function that can be used to combine groups of text strings in multiple cells in order to create a new string.</p>',30,'CHOICE_ONE',44,'PUBLISHED'),(31,'<p>You are working with a database table that contains data about playlists for different types of digital media. You are only interested in the first 4 playlists.</p>\n<p>You write the SQL query below. Add a __ clause that will return only the first 4 playlists.</p>\n<p>SELECT&nbsp; * FROM&nbsp; playlist __ 4</p>',30,'CHOICE_ONE',44,'PUBLISHED'),(32,'<p>What function can be used to return the number of characters in cell B8 so you can confirm that it contains exactly 20 characters?</p>',30,'CHOICE_ONE',44,'PUBLISHED'),(33,'<p>An analyst is working with a dataset of financial data. The data is formatted as U.S. dollars, and the analyst needs it to be in Japanese yen. What spreadsheet tool can help them select the right format?</p>',10,'CHOICE_ONE',49,'PUBLISHED'),(34,'<p>Which of the following are appropriate uses for a spreadsheet’s data validation tool? Select all that apply.</p>',20,'CHOICE_MANY',49,'PUBLISHED'),(35,'<p>A utility company uses a spreadsheet to track the number of consecutive months each customer has paid their bill on time. They use a spreadsheet tool to apply color to the cells when the number of consecutive months is 12 or greater. What tool are they using?</p>',10,'CHOICE_ONE',49,'PUBLISHED'),(36,'<p>You are working with a SQL database with tables for delivery routes in California. The table contains one column with the names of the pick-up locations. A different column in the same table contains the names of the drop-off locations. To create a new column that stores the combination of the pick-up and drop-off location names, which function do you use?</p>',10,'CHOICE_ONE',49,'PUBLISHED'),(37,'<p>You are querying a database of automobile sales to determine how many SUV models were available in green. For your project, you only need the first 50 records. What clause should you add to the following SQL query?</p>\n<p>&nbsp;</p>\n<p>SELECT SUV FROM vehicle_table WHERE color = “green”</p>',20,'CHOICE_ONE',49,'PUBLISHED'),(38,'<p>A data analyst is working with a spreadsheet that has very long text strings. Rather than counting the characters themselves to determine the number of characters they contain, what tool can they use?</p>',10,'CHOICE_ONE',49,'PUBLISHED'),(39,'<p>Spreadsheet cell F2 contains the text string “Dashboard”. To return the substring “board”, what is the correct syntax?</p>',20,'CHOICE_ONE',49,'PUBLISHED'),(40,'<p>You are using the FIND function to identify the position of the whitespace in the string in cell A6. Which of the following is the correct function syntax for this purpose?</p>',20,'CHOICE_ONE',49,'PUBLISHED'),(41,'<p>To change a text string in spreadsheet cell F8 to a numerical value, what is the correct function?</p>',20,'CHOICE_ONE',56,'PUBLISHED'),(42,'<p>What is the purpose of an absolute reference within a function, such as \"$C$3\"?</p>',20,'CHOICE_ONE',56,'PUBLISHED'),(43,'<p>In VLOOKUP, TRUE tells the function to search for exact matches, and FALSE tells the function to look for approximate matches.</p>',20,'CHOICE_ONE',56,'PUBLISHED'),(44,'<p>The following is a selection from a spreadsheet:</p>\n<table>\n <tbody>\n  <tr>\n   <td>\n    <p>&nbsp;</p></td>\n   <td>\n    <p>A</p></td>\n   <td>\n    <p>B</p></td>\n   <td>\n    <p>C</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>1</p></td>\n   <td>\n    <p><strong>Country</strong></p></td>\n   <td>\n    <p><strong>Population in 2020 (millions)</strong></p></td>\n   <td>\n    <p><strong>Growth in population 2000-2020</strong></p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>2</p></td>\n   <td>\n    <p>China</p></td>\n   <td>\n    <p>1,439,323,776</p></td>\n   <td>\n    <p>13.4%</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>3</p></td>\n   <td>\n    <p>India</p></td>\n   <td>\n    <p>1,380,004,385</p></td>\n   <td>\n    <p>37.1%</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>4</p></td>\n   <td>\n    <p>United States</p></td>\n   <td>\n    <p>331,002,651</p></td>\n   <td>\n    <p>17.3%</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>5</p></td>\n   <td>\n    <p>Indonesia</p></td>\n   <td>\n    <p>273,523,615</p></td>\n   <td>\n    <p>27.7%</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>6</p></td>\n   <td>\n    <p>Pakistan</p></td>\n   <td>\n    <p>220,892,340</p></td>\n   <td>\n    <p>44.9%</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>7</p></td>\n   <td>\n    <p>Brazil</p></td>\n   <td>\n    <p>212,559,417</p></td>\n   <td>\n    <p>21.9%</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>8</p></td>\n   <td>\n    <p>Nigeria</p></td>\n   <td>\n    <p>206,139,589</p></td>\n   <td>\n    <p>66.3%</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>9</p></td>\n   <td>\n    <p>Bangladesh</p></td>\n   <td>\n    <p>164,689,383</p></td>\n   <td>\n    <p>27.9%</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>10</p></td>\n   <td>\n    <p>Russia</p></td>\n   <td>\n    <p>145,934,462</p></td>\n   <td>\n    <p>-0.8%</p></td>\n  </tr>\n </tbody>\n</table>\n<p>To search for the population of Nigeria, what is the correct VLOOKUP syntax?</p>',20,'CHOICE_ONE',56,'PUBLISHED'),(45,'<p>The following is a selection from a spreadsheet:</p>\n<table>\n <tbody>\n  <tr>\n   <td>\n    <p>&nbsp;</p></td>\n   <td>\n    <p>A</p></td>\n   <td>\n    <p>B</p></td>\n   <td>\n    <p>C</p></td>\n   <td>\n    <p>D</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>1</p></td>\n   <td>\n    <p><strong>Location</strong></p></td>\n   <td>\n    <p><strong>Building</strong></p></td>\n   <td>\n    <p><strong>Height</strong></p></td>\n   <td>\n    <p><strong>Year completed</strong></p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>2</p></td>\n   <td>\n    <p>Dubai</p></td>\n   <td>\n    <p>Burj Khalifa</p></td>\n   <td>\n    <p>2,717 feet</p></td>\n   <td>\n    <p>2010</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>3</p></td>\n   <td>\n    <p>Shanghai</p></td>\n   <td>\n    <p>Shanghai Tower</p></td>\n   <td>\n    <p>2,073 feet</p></td>\n   <td>\n    <p>2015</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>4</p></td>\n   <td>\n    <p>Mecca</p></td>\n   <td>\n    <p>Makkah Royal Clock Tower</p></td>\n   <td>\n    <p>1,972 feet</p></td>\n   <td>\n    <p>2012</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>5</p></td>\n   <td>\n    <p>Shenzhen</p></td>\n   <td>\n    <p>Ping An Finance Center</p></td>\n   <td>\n    <p>1,965 feet</p></td>\n   <td>\n    <p>2017</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>6</p></td>\n   <td>\n    <p>St. Petersburg</p></td>\n   <td>\n    <p>Lakhta Center</p></td>\n   <td>\n    <p>1,516 feet</p></td>\n   <td>\n    <p>2019</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>7</p></td>\n   <td>\n    <p>Chicago</p></td>\n   <td>\n    <p>Willis Tower</p></td>\n   <td>\n    <p>1,451 feet</p></td>\n   <td>\n    <p>1974</p></td>\n  </tr>\n </tbody>\n</table>\n<p>To search for the height of the building in Mecca, what is the correct VLOOKUP syntax?</p>',20,'CHOICE_ONE',56,'PUBLISHED'),(46,'<p>A data analyst wants to retrieve only records from a database that have matching values in two different tables. Which JOIN function should they use?</p>',30,'CHOICE_ONE',62,'PUBLISHED'),(47,'<p>You are writing a SQL query to instruct a database to count values in a specified range. You only want to count each value once, even if it appears multiple times. Which function should you include in your query?</p>',30,'CHOICE_ONE',62,'PUBLISHED'),(48,'<p>A data analyst wants to temporarily name a column in their query to make it easier to read and write. What technique should they use?</p>',30,'CHOICE_ONE',62,'PUBLISHED'),(49,'<p>Which of the following queries contain subqueries? Select all that apply.</p>\n<p>1.</p>\n<p><img alt=\"SQL query\" src=\"https://d3c33hcgiwev3.cloudfront.net/imageAssetProxy.v1/sURB80EAQ_qEQfNBALP6jw_f6e01976eb724954b9c1a491309333e5_1.png?expiry=1737244800000&amp;hmac=5iPpHt4-jZiN8y4OX-jqSq7ezVCgGrL4Dx9bqfgABdo\"></p>\n<p>2.</p>\n<p><img alt=\"SQL query\" src=\"https://d3c33hcgiwev3.cloudfront.net/imageAssetProxy.v1/whVVy06oSjGVVctOqCoxOg_17a9af25ad1a4a88827fa2387694f5b7_1.png?expiry=1737244800000&amp;hmac=DN9R9M8P2jXo-hR97o71ZbYod6RkboOyYbvinyIO1Zw\"></p>\n<p>3.</p>\n<p><img alt=\"SQL query\" src=\"https://d3c33hcgiwev3.cloudfront.net/imageAssetProxy.v1/oqk3PwrjRgWpNz8K4wYFTA_0a199299b79147799cb6dafb07b2f89e_1.png?expiry=1737244800000&amp;hmac=opUKZtI85PI49rNq6du0emH-GxKvaSzDWvrz5y_AOjw\"></p>\n<p>4.</p>\n<p><img alt=\"SQL query\" src=\"https://d3c33hcgiwev3.cloudfront.net/imageAssetProxy.v1/RlYmKcurTbeWJinLq-23fQ_73275e5b64904bea8be82e1d4a9f0fda_1.png?expiry=1737244800000&amp;hmac=a15kA1iecdM995U9qqUK46OGjPaL4JpRcqmKDz6JngM\"></p>',40,'CHOICE_MANY',66,'PUBLISHED'),(50,'<p>Fill in the blank: A data analyst uses aliasing to make it easier to read and write a query. Aliasing involves temporarily _____ a table or column in a query.</p>',20,'CHOICE_ONE',66,'PUBLISHED'),(51,'<p>When working with subqueries, the outer query executes first.</p>',20,'CHOICE_ONE',66,'PUBLISHED'),(52,'<p>A data analyst is working with data that has been collected over time and stored in different databases. What process must they perform if they are to calculate the statistics of this data?</p>',10,'CHOICE_ONE',67,'PUBLISHED'),(53,'<p>A data analyst uses the SUM function to add together numbers from a spreadsheet. After getting a zero result, they realize the numbers are actually text. What function can they use to convert the text to a numeric value?</p>',10,'CHOICE_ONE',67,'PUBLISHED'),(54,'<p>A data analyst is using a VLOOKUP function in a column in their spreadsheet. They enter the function in a column to the left of the data columns. Why would they do this?</p>',10,'CHOICE_ONE',67,'PUBLISHED'),(55,'<p>A data analyst locks the rows and columns in their spreadsheet by wrapping their function’s data array in dollar signs ($). Why would they do this?</p>',10,'CHOICE_ONE',67,'PUBLISHED'),(56,'<p>The following is a selection from a spreadsheet:</p>\n<table>\n <tbody>\n  <tr>\n   <td>\n    <p>N/A</p></td>\n   <td>\n    <p>A</p></td>\n   <td>\n    <p>B</p></td>\n   <td>\n    <p>C</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>1</p></td>\n   <td>\n    <p><strong>Country</strong></p></td>\n   <td>\n    <p><strong>Population in 2020</strong></p></td>\n   <td>\n    <p><strong>Growth in population 2000-2020</strong></p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>2</p></td>\n   <td>\n    <p>China</p></td>\n   <td>\n    <p>1,439,323,776</p></td>\n   <td>\n    <p>13.4 %</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>3</p></td>\n   <td>\n    <p>India</p></td>\n   <td>\n    <p>1,380,004,385</p></td>\n   <td>\n    <p>37.1 %</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>4</p></td>\n   <td>\n    <p>United States</p></td>\n   <td>\n    <p>331,002,651</p></td>\n   <td>\n    <p>17.3 %</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>5</p></td>\n   <td>\n    <p>Indonesia</p></td>\n   <td>\n    <p>273,523,615</p></td>\n   <td>\n    <p>27.7%</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>6</p></td>\n   <td>\n    <p>Pakistan</p></td>\n   <td>\n    <p>220,892,340</p></td>\n   <td>\n    <p>44.9%</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>7</p></td>\n   <td>\n    <p>Brazil</p></td>\n   <td>\n    <p>212,559,417</p></td>\n   <td>\n    <p>21.9%</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>8</p></td>\n   <td>\n    <p>Nigeria</p></td>\n   <td>\n    <p>206,139,589</p></td>\n   <td>\n    <p>66.3%</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>9</p></td>\n   <td>\n    <p>Bangladesh</p></td>\n   <td>\n    <p>164,689,383</p></td>\n   <td>\n    <p>27.9%</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>10</p></td>\n   <td>\n    <p>Russia</p></td>\n   <td>\n    <p>145,934,462</p></td>\n   <td>\n    <p>-0.8%</p></td>\n  </tr>\n </tbody>\n</table>\n<p>To search for the population of Pakistan, what is the correct VLOOKUP syntax?</p>',20,'CHOICE_ONE',67,'PUBLISHED'),(57,'<p>A data analyst writes a query in SQL with the RIGHT JOIN function</p>\n<p>FROM fiction_table RIGHT JOIN books_table</p>\n<p>What does this function do?</p>',10,'CHOICE_ONE',67,'PUBLISHED'),(58,'<p>You are working with a dataset that has a large number of duplicate data values. What function can you use to determine the number of unique data values in a specified range?</p>',10,'CHOICE_ONE',67,'PUBLISHED'),(59,'<p>A data analyst writes a query in SQL. Inside this query, they have a second query. What is another name for the first query? Select all that apply.</p>',20,'CHOICE_MANY',67,'PUBLISHED'),(60,'<p>What is the correct spreadsheet formula for multiplying 50 and 233?</p>',30,'CHOICE_ONE',74,'PUBLISHED'),(61,'<p>The following is a selection of a spreadsheet:</p>\n<table>\n <tbody>\n  <tr>\n   <td>\n    <p>&nbsp;</p></td>\n   <td>\n    <p>A</p></td>\n   <td>\n    <p>B</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>1</p></td>\n   <td>\n    <p><strong>Expense</strong></p></td>\n   <td>\n    <p><strong>Amount</strong></p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>2</p></td>\n   <td>\n    <p>Rent</p></td>\n   <td>\n    <p>$680.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>3</p></td>\n   <td>\n    <p>Healthcare</p></td>\n   <td>\n    <p>$101.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>4</p></td>\n   <td>\n    <p>Groceries</p></td>\n   <td>\n    <p>$185.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>5</p></td>\n   <td>\n    <p>Clothing</p></td>\n   <td>\n    <p>$41.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>6</p></td>\n   <td>\n    <p>Transportation</p></td>\n   <td>\n    <p>$22.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>7</p></td>\n   <td>\n    <p>Mobile phone</p></td>\n   <td>\n    <p>$48.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>8</p></td>\n   <td>\n    <p>Dining out</p></td>\n   <td>\n    <p>$79.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>9</p></td>\n   <td>\n    <p>Car insurance</p></td>\n   <td>\n    <p>$65.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>10</p></td>\n   <td>\n    <p>Dog walker</p></td>\n   <td>\n    <p>$40.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>11</p></td>\n   <td>\n    <p>Gym membership</p></td>\n   <td>\n    <p>$19.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>12</p></td>\n   <td>\n    <p>Manicure</p></td>\n   <td>\n    <p>$23.00</p></td>\n  </tr>\n </tbody>\n</table>\n<p>You are trying to determine what percentage of your monthly income is spent on big-ticket items, such as rent and groceries. To add together only the values from Column B that cost more than $150, what is the correct syntax?</p>',30,'CHOICE_ONE',74,'PUBLISHED'),(62,'<p>A data analyst is working with a spreadsheet from a cosmetics company.</p>\n<p>You may click the link to create a copy of the dataset: <a href=\"https://docs.google.com/spreadsheets/d/1HhUqzfrpVb5Z2_YPbOFXXBCVb266W6J-2V4S5JLEKNo/copy\">Cosmetics Inc</a></p>\n<p>Which of the following is an example of an array in this spreadsheet?</p>',30,'CHOICE_ONE',74,'PUBLISHED'),(63,'<p>The following is a sample pivot table from a furniture company\'s spreadsheet:</p>\n<table>\n <thead>\n  <tr>\n   <th scope=\"col\">\n    <p><em>product</em></p></th>\n   <th scope=\"col\">\n    <p>SUM of purchase_price</p></th>\n  </tr>\n </thead>\n <tbody>\n  <tr>\n   <td>\n    <p>bed</p></td>\n   <td>\n    <p>$799.99</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>bookcase</p></td>\n   <td>\n    <p>$58.89</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>chair</p></td>\n   <td>\n    <p>$234.50</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>chaise</p></td>\n   <td>\n    <p>$399.95</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>couch</p></td>\n   <td>\n    <p>$9,000.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>desk</p></td>\n   <td>\n    <p>$509.85</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>fan</p></td>\n   <td>\n    <p>$111.92</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>lamp</p></td>\n   <td>\n    <p>$160.97</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>mirror</p></td>\n   <td>\n    <p>$199.95</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>ottoman</p></td>\n   <td>\n    <p>$299.99</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>rug</p></td>\n   <td>\n    <p>$808.65</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>vase</p></td>\n   <td>\n    <p>$19.98</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p><strong>Grand Total</strong></p></td>\n   <td>\n    <p><strong>12604.635</strong></p></td>\n  </tr>\n </tbody>\n</table>\n<p>What is the purpose of the pivot table in this spreadsheet?</p>',30,'CHOICE_ONE',79,'PUBLISHED'),(64,'<table>\n <thead>\n  <tr>\n   <th scope=\"col\">\n    <p><em>product</em></p></th>\n   <th scope=\"col\">\n    <p>SUM of purchase_price</p></th>\n  </tr>\n </thead>\n <tbody>\n  <tr>\n   <td>\n    <p>bed</p></td>\n   <td>\n    <p>$799.99</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>bookcase</p></td>\n   <td>\n    <p>$58.89</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>chair</p></td>\n   <td>\n    <p>$234.50</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>chaise</p></td>\n   <td>\n    <p>$399.95</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>couch</p></td>\n   <td>\n    <p>$9,000.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>desk</p></td>\n   <td>\n    <p>$509.85</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>fan</p></td>\n   <td>\n    <p>$111.92</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>lamp</p></td>\n   <td>\n    <p>$160.97</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>mirror</p></td>\n   <td>\n    <p>$199.95</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>ottoman</p></td>\n   <td>\n    <p>$299.99</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>rug</p></td>\n   <td>\n    <p>$808.65</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>vase</p></td>\n   <td>\n    <p>$19.98</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p><strong>Grand Total</strong></p></td>\n   <td>\n    <p><strong>12604.635</strong></p></td>\n  </tr>\n </tbody>\n</table>\n<p>How could the pivot table be adjusted to show the same data, but only for products categorized as beige?</p>',30,'CHOICE_ONE',79,'PUBLISHED'),(65,'<table>\n <tbody>\n  <tr>\n   <td>\n    <p><em>product</em></p></td>\n   <td>\n    <p>SUM of purchase_price</p></td>\n   <td>\n    <p>Calculated Field 1</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>bed</p></td>\n   <td>\n    <p>$799.99</p></td>\n   <td>\n    <p>$0.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>bookcase</p></td>\n   <td>\n    <p>$58.89</p></td>\n   <td>\n    <p>$0.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>chair</p></td>\n   <td>\n    <p>$234.50</p></td>\n   <td>\n    <p>$0.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>chaise</p></td>\n   <td>\n    <p>$399.95</p></td>\n   <td>\n    <p>$0.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>couch</p></td>\n   <td>\n    <p>$9,000.00</p></td>\n   <td>\n    <p>$0.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>desk</p></td>\n   <td>\n    <p>$509.85</p></td>\n   <td>\n    <p>$0.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>fan</p></td>\n   <td>\n    <p>$111.92</p></td>\n   <td>\n    <p>$0.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>lamp</p></td>\n   <td>\n    <p>$160.97</p></td>\n   <td>\n    <p>$0.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>mirror</p></td>\n   <td>\n    <p>$199.95</p></td>\n   <td>\n    <p>$0.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>ottoman</p></td>\n   <td>\n    <p>$299.99</p></td>\n   <td>\n    <p>$0.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>rug</p></td>\n   <td>\n    <p>$808.65</p></td>\n   <td>\n    <p>$0.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>vase</p></td>\n   <td>\n    <p>$19.98</p></td>\n   <td>\n    <p>$0.00</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p><strong>Grand Total</strong></p></td>\n   <td>\n    <p><strong>12604.635</strong></p></td>\n   <td>\n    <p><strong>$0.00</strong></p></td>\n  </tr>\n </tbody>\n</table>\n<p>Which spreadsheet tool should you use if you want to find an average value using values generated within a pivot table?</p>',30,'CHOICE_ONE',79,'PUBLISHED'),(66,'<p>You are working with a database table that contains invoice data. The table includes columns for <em>invoice_line_id</em> (line items for each invoice), <em>invoice_id</em>, <em>unit_price</em>, and <em>quantity</em> (the number of purchases in each line item). Each invoice contains multiple line items. You want to know the total price for each of the first 5 line items in the table. You decide to multiply unit price by quantity to get the total price for each line item, and use the AS command to store the total in a new column called <em>line_total</em>.</p>\n<p>Add a statement to your SQL query that calculates the total price for each line item and stores it in a new column as <em>line_total</em>.</p>\n<p>NOTE: The three dots (...) indicate where to add the statement.</p>\n<p>&nbsp;</p>\n<p>SELECT&nbsp;invoice_line_id, invoice_id, unit_price, quantity, (...)&nbsp;</p>\n<p>AS&nbsp;line_total FROM invoice_item&nbsp;</p>\n<p>LIMIT&nbsp;5</p>\n<p>&nbsp;</p>\n<p><em>Note: Use spaces between functions and / or delimeter&nbsp;</em></p>\n<p><em>For example: a*b is wrong answer, a * b is right answer</em></p>',30,'INPUT_TEXT',84,'PUBLISHED'),(67,'<p>In a SQL query, which calculation does the modulo (%) operator perform?</p>',30,'CHOICE_ONE',84,'PUBLISHED'),(68,'<p>You are working with a dataset with the column name “firstquarterexpenses.” How can you rename this column to make it more readable?</p>',30,'CHOICE_ONE',84,'PUBLISHED'),(69,'<p>What are the goals of checking and rechecking the quality of your data during data validation? Select all that apply.</p>',40,'CHOICE_MANY',89,'PUBLISHED'),(70,'<p>You’re analyzing patient data for a health care company. During the data-validation process, you notice that the first date of service for some of the patients is later than the most recent date of service. Which type of data-validation check are you completing?</p>',30,'CHOICE_ONE',89,'PUBLISHED'),(71,'<p>During analysis, you complete a data-validation check for errors in customer identification (ID) numbers. Customer IDs must be eight characters and can contain numbers only. Which of the following customer ID errors will a data-type check help you identify?</p>',30,'CHOICE_ONE',89,'PUBLISHED'),(72,'<p>When are temporary tables automatically deleted?</p>',30,'CHOICE_ONE',95,'PUBLISHED'),(73,'<p>The following SQL query contains information about bike trips:</p>\n<p><img alt=\"sql query\" src=\"https://d3c33hcgiwev3.cloudfront.net/imageAssetProxy.v1/HJEQXvKlQ9WREF7ypXPVzw_e8c0258ad4c94ad0b98a27f1a9831207_1.png?expiry=1737244800000&amp;hmac=hJAswDN9wvpcYwvGQCNz8wGO_LMRxuVGQWHmCopAGgs\"></p>\n<p>What data will appear in the temporary table created through this query?</p>',30,'CHOICE_ONE',95,'PUBLISHED'),(74,'<p>What benefit does a CREATE TABLE statement add to a temporary table?</p>',30,'CHOICE_ONE',95,'PUBLISHED'),(75,'<p>A data analyst wants to calculate the number of rows that have a value of “shipped”. Which function could they use?</p>',10,'CHOICE_ONE',96,'PUBLISHED'),(76,'<p>You are working in a spreadsheet and use the SUMIF function in the following formula as part of your analysis.</p>\n<p>=SUMIF(A1:A25,”&lt;10”,C1:C25)</p>\n<p>Which part of this formula is the criteria or condition?</p>',10,'CHOICE_ONE',96,'PUBLISHED'),(77,'<p>Which portion of a pivot table do you change if you want to use a different calculation to combine the results?</p>',10,'CHOICE_ONE',96,'PUBLISHED'),(78,'<p>Question 4</p>\n<p>How many different columns have been added to the values section of the pivot table editor?</p>\n<table>\n <tbody>\n  <tr>\n   <td>\n    <p>&nbsp;</p></td>\n   <td>\n    <p>&nbsp;</p></td>\n   <td>\n    <p><em>Direction</em></p></td>\n   <td>\n    <p>&nbsp;</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p><em>Date</em></p></td>\n   <td>\n    <p><em>Values</em></p></td>\n   <td>\n    <p>Down</p></td>\n   <td>\n    <p>Up</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>2/3</p></td>\n   <td>\n    <p>MAX of A</p></td>\n   <td>\n    <p>300</p></td>\n   <td>\n    <p>100</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>&nbsp;</p></td>\n   <td>\n    <p>MIN of C</p></td>\n   <td>\n    <p>12</p></td>\n   <td>\n    <p>1</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>2/4</p></td>\n   <td>\n    <p>MAX of A</p></td>\n   <td>\n    <p>100</p></td>\n   <td>\n    <p>100</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>&nbsp;</p></td>\n   <td>\n    <p>MIN of C</p></td>\n   <td>\n    <p>14</p></td>\n   <td>\n    <p>19</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>2/5</p></td>\n   <td>\n    <p>MAX of A</p></td>\n   <td>\n    <p>450</p></td>\n   <td>\n    <p>&nbsp;</p></td>\n  </tr>\n  <tr>\n   <td>\n    <p>&nbsp;</p></td>\n   <td>\n    <p>MIN of C</p></td>\n   <td>\n    <p>9</p></td>\n   <td>&nbsp;</td>\n  </tr>\n </tbody>\n</table>',10,'CHOICE_ONE',96,'PUBLISHED'),(79,'<p>What is the purpose of the EXTRACT function in SQL?</p>',10,'CHOICE_ONE',96,'PUBLISHED'),(80,'<p>When writing custom calculations in SQL, what characters can be used to group calculations to change the order of calculation?</p>',10,'CHOICE_ONE',96,'PUBLISHED'),(81,'<p>What is the purpose of using data validation during your analysis process?</p>',10,'CHOICE_ONE',96,'PUBLISHED'),(82,'<p>A data analyst is trying to manually recalculate a column that was present in their dataset. They want to find rows where the values in their column do not match the values in the original column. Which of the following SQL clauses could they use?</p>',10,'CHOICE_ONE',96,'PUBLISHED'),(83,'<p>What is a reason to use a temporary table instead of a standard table in SQL?</p>',10,'CHOICE_ONE',96,'PUBLISHED'),(84,'<p>Which of the following SQL statements can be used to create temporary tables in SQL? Select all that apply.</p>',20,'CHOICE_MANY',96,'PUBLISHED'),(85,'<p><strong>Scenario 1, Questions 1-7</strong></p>\n<p>For the past six months, you have been working for a direct-mail marketing firm as a junior marketing analyst. Direct mail is advertising material sent to people through the mail. These people can be current or prospective customers, clients, or donors. Many charities depend on direct mail for financial support.</p>\n<p>Your company, Directly Dynamic, creates direct-mail pieces with its in-house staff of graphic designers, expert mail list services, and on-site printing. Your team has just been hired by a local nonprofit, Food Justice Rock Springs. The mission of Food Justice Rock Springs is to eliminate food deserts by establishing local gardens, providing mobile pantries, educating residents, and more.&nbsp;<a href=\"https://drive.google.com/file/d/1vSihBt7l2GyV2HwykcNqaChzkHR6Iybf/view?usp=drive_link\">Click </a>here&nbsp;to read the email from Tayen Bell, vice president of marketing and outreach<a href=\"https://drive.google.com/file/d/1vSihBt7l2GyV2HwykcNqaChzkHR6Iybf/view?usp=drive_link\">.</a></p>\n<p>&nbsp;</p>\n<p>You begin by reviewing the dataset. To use the template for this dataset, click the link below and select “Use Template.”</p>\n<p>Link to template: <a href=\"https://docs.google.com/spreadsheets/d/1RB9k74fY75CQjjwGG410IYm6BoxJLAnEM9y-1cVeH2Q/template/preview?resourcekey=0-FV3_UaMyz88IxLqQsiKRzg\">Dynamic Dataset</a></p>\n<p>&nbsp;</p>\n<p>The client has asked you to send two separate mailings: one to people within 50 miles of Rock Springs; the other to anyone outside that area. So, to research each donor’s distance from the city, you first need to find out where all of these people live.</p>\n<p>You could scroll through 209 rows of data, but you know there is a more efficient way to organize the cities.</p>\n<p><strong>Which of the following procedures will enable you to sort your spreadsheet by city (Column K) in ascending order? Select all that apply.</strong></p>',20,'CHOICE_MANY',97,'PUBLISHED'),(86,'<p>You notice that many cells in the city column, Column K, are missing a value. So, you use the zip codes to research the correct cities. Now, you want to add the cities to each donor’s row. However, you are concerned about making a mistake, such as a spelling typo.</p>\n<p><strong>Fill in the blank: To add drop-down lists to your worksheet with predetermined options for each city name, you decide to use _____.</strong></p>',10,'CHOICE_ONE',97,'PUBLISHED'),(87,'<p>Now, you decide to address Tayen’s request to include a handwritten note in the direct-mail piece for anyone who gave at least $100 last year.</p>\n<p><strong>To change how cells appear, you use conditional formatting. Then, to highlight cells with a value of at least $100, you choose to format cells if they have a value greater than or equal to 100.</strong></p>',10,'CHOICE_ONE',97,'PUBLISHED'),(88,'<p>At this point, you notice that the information about state and zip code is in the same cell. However, your company’s mailing list software requires states to be on a separate line from zip codes.</p>\n<p><strong>What function do you use to move the 5-digit zip code in cell L2 into its own column?</strong></p>',10,'CHOICE_ONE',97,'PUBLISHED'),(89,'<p>Next, you duplicate your dataset twice using the Sheet Menu. You rename the first sheet Donation Form List, and you remove the cities that are further than 50 miles from Rock Springs. You rename the second sheet Postcard List, and you remove the cities that are within 50 miles of Rock Springs.</p>\n<p>Then, you import these datasets into your company’s mailing list database. In a mailing list database, you create two tables: Donation_Form_List and Postcard_List. You decide to clean the Donation_Form_List first.</p>\n<p>Your company’s mailing list software requires units to be on the same line as street addresses. However, they are currently in two separate columns (street_address and unit).</p>\n<p><strong>You use a SQL function to instruct the database to combine the two columns into a new column called “address.” The syntax is: JOIN(street_address, \" to \", unit) as address.</strong></p>',10,'CHOICE_ONE',97,'PUBLISHED'),(90,'<p>Your database contains people who live in many areas of Wyoming. However, it’s important to align your in-house data with the data from Food Justice Rock Springs. You also need to separate your data into the two lists: Donation_Form_List and Postcard_List. They will be based on each city’s distance from Rock Springs.</p>\n<p><strong>The zip codes are in a column called zip_code. To select all data from the Donation_Form_List organized by zip code, you use the ORDER BY function. The syntax is:</strong></p>\n<p><img alt=\"SELECT * FROM Donation_Form_List ORDER BY zip_code\" src=\"https://d3c33hcgiwev3.cloudfront.net/imageAssetProxy.v1/6e410dbc-381b-47e3-8382-351a96a321f8image13.png?expiry=1737244800000&amp;hmac=Zp1J6XSQml--FALtY6nxpqAFhs1WmZfmc4hm2EgMwRg\"></p>',10,'CHOICE_ONE',97,'PUBLISHED'),(91,'<p>You finish cleaning your datasets, so you decide to review Tayen’s email one more time to make sure you completed the task fully. It’s a good thing you checked because you forgot to identify people who have served on the board of directors or board of trustees. She wants to write them a thank-you note, so you need to locate them in the database.</p>\n<p><strong>To retrieve only those records that include people who have served on the board of trustees or on the board of directors, what is the correct query?</strong></p>',10,'CHOICE_ONE',97,'PUBLISHED'),(92,'<p><strong>Scenario 2, Questions 8-13</strong></p>\n<p>Your company’s direct-mail campaign was very successful, and Food Justice Rock Springs has continued partnering with Directly Dynamic. One thing you’ve been working on is assigning all donors identification numbers. This will enable you to clean and organize the lists more effectively.</p>\n<p>Meanwhile, another team member has been creating a prospect list that contains data about people who have indicated interest in getting involved with Food Justice Rock Springs. These people are also assigned a unique ID. Now, you need to compare your donor list with the dataset in your database and collect certain data from both.</p>\n<p><strong>What SQL function will combine RIGHT and LEFT JOIN to return all matching records and create additional null values in a table of non-matching records in both tables?</strong></p>',10,'CHOICE_ONE',97,'PUBLISHED'),(93,'<p>Your next task is to identify the average contribution given by donors over the past two years. Tayen will use this information to set a donation minimum for inviting donors to an upcoming event.</p>\n<p><strong>You start with 2019. To return average contributions in 2019 (contributions_2019), you use the AVG function. What portion of your SQL statement will instruct the database to find this average and store it in the AvgLineTotal variable?</strong></p>',10,'CHOICE_ONE',97,'PUBLISHED'),(94,'<p>Now that you provided her with the average donation amount, Tayen decides to invite 50 people to the grand opening of a new community garden. You return to your New Donor List spreadsheet to determine how much each donor gave in the past two years. You will use that information to identify the 50 top donors and invite them to the event.</p>\n<p><strong>What syntax adds the contribution amounts in cells O2 and P2? Select all that apply.</strong></p>',20,'CHOICE_MANY',97,'PUBLISHED'),(95,'<p>Tayen informs you that she’s thinking about inviting anyone who donated at least $100 in 2018, as well. However, she only has five open spaces. She asks you to report how many people gave at least $100 so she can determine if they can also be invited to the event.</p>\n<p><strong>What is the correct syntax to count how many donations of $100 or great appear in Column O?</strong></p>',10,'CHOICE_ONE',97,'PUBLISHED'),(96,'<p>The community garden grand opening was a success. In addition to the 55 donors Food Justice Rock Springs invited, 20 other prospects attended the event. Now, Tayen wants to know more about the donations that came in from new prospects compared to the original donors.</p>\n<p><strong>Which SQL query can be used to calculate the percentage of contributions from prospects?</strong></p>\n<p>1.</p>\n<p><img alt=\"query\" src=\"https://d3c33hcgiwev3.cloudfront.net/imageAssetProxy.v1/6e410dbc-381b-47e3-8382-351a96a321f8image28.png?expiry=1737244800000&amp;hmac=cHaY5_V_SWzq7QVSf7YNlE-NS3yj4x3INVSGU6IuYFc\"></p>\n<p>2.</p>\n<p><img alt=\"query\" src=\"https://d3c33hcgiwev3.cloudfront.net/imageAssetProxy.v1/6e410dbc-381b-47e3-8382-351a96a321f8image22.png?expiry=1737244800000&amp;hmac=UalcI3HyzHjjgqsoNn5UpRjhlV4pPhnA0Nl9vfKbLaU\"></p>\n<p>3.</p>\n<p><img alt=\"query\" src=\"https://d3c33hcgiwev3.cloudfront.net/imageAssetProxy.v1/6e410dbc-381b-47e3-8382-351a96a321f8image1.png?expiry=1737244800000&amp;hmac=bPdFuAwXfYgVepjYZ6ryfthAUlHH3cHjn_ikJMp9J2M\"></p>\n<p>4.</p>\n<p><img alt=\"query\" src=\"https://d3c33hcgiwev3.cloudfront.net/imageAssetProxy.v1/6e410dbc-381b-47e3-8382-351a96a321f8image27.png?expiry=1737244800000&amp;hmac=tE-N5juILukzExeDj7uNkcvp1HCAMMNMDb7XUdF4hnM\"></p>',10,'CHOICE_ONE',97,'PUBLISHED'),(97,'<p>Your team creates a highly effective prospects list for Food Justice Rock Springs. After a few months, many of these prospects become donors. Now, Tayen wants to know the top three cities in which these new donors live. She will use that information to determine if it’s still true that people who live closer to Rock Springs are more likely to donate.</p>\n<p><strong>What clause do you add to the following query to sort the donors in each city from high to low? </strong></p>\n<p><img alt=\"SELECT COUNT (DonorID), City FROM new_donor_list GROUP BY City\" src=\"https://d3c33hcgiwev3.cloudfront.net/imageAssetProxy.v1/6e410dbc-381b-47e3-8382-351a96a321f8image7.png?expiry=1737244800000&amp;hmac=HKB-KP_Wi5GQ15kOFoezEWM3yK5ugD40f3_9X6Y0EHw\"></p>',10,'CHOICE_ONE',97,'PUBLISHED');
+/*!40000 ALTER TABLE `question` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `rankings`
+--
+
+DROP TABLE IF EXISTS `rankings`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `rankings` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint NOT NULL,
+  `course_id` bigint NOT NULL,
+  `all_course_score` double NOT NULL,
+  `ranking_position` int NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`,`course_id`),
+  KEY `FKi0vf35mvbvhf5h2joyitu20yw` (`course_id`),
+  CONSTRAINT `FKcup4ei1jmensgunlbncpb5rnv` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FKi0vf35mvbvhf5h2joyitu20yw` FOREIGN KEY (`course_id`) REFERENCES `course` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `rankings`
+--
+
+LOCK TABLES `rankings` WRITE;
+/*!40000 ALTER TABLE `rankings` DISABLE KEYS */;
+INSERT INTO `rankings` VALUES (1,4,6,26.8,1);
+/*!40000 ALTER TABLE `rankings` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `role`
+--
+
+DROP TABLE IF EXISTS `role`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `role` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `role`
+--
+
+LOCK TABLES `role` WRITE;
+/*!40000 ALTER TABLE `role` DISABLE KEYS */;
+INSERT INTO `role` VALUES (1,'ADMIN'),(3,'INSTRUCTOR'),(2,'MODERATOR'),(4,'STUDENT');
+/*!40000 ALTER TABLE `role` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `score_weight`
+--
+
+DROP TABLE IF EXISTS `score_weight`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `score_weight` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `course_id` bigint NOT NULL,
+  `quiz_weight` double NOT NULL,
+  `exam_weight` double NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `score_weight`
+--
+
+LOCK TABLES `score_weight` WRITE;
+/*!40000 ALTER TABLE `score_weight` DISABLE KEYS */;
+INSERT INTO `score_weight` VALUES (1,6,0.4,0.6);
+/*!40000 ALTER TABLE `score_weight` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `study_process`
+--
+
+DROP TABLE IF EXISTS `study_process`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `study_process` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint NOT NULL,
+  `course_id` bigint NOT NULL,
+  `last_view_topic` bigint DEFAULT NULL,
+  `learning_progress` double DEFAULT NULL,
+  `final_score` int DEFAULT NULL,
+  `pass_course` tinyint(1) DEFAULT NULL,
+  `progress_assessment` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `study_process`
+--
+
+LOCK TABLES `study_process` WRITE;
+/*!40000 ALTER TABLE `study_process` DISABLE KEYS */;
+INSERT INTO `study_process` VALUES (1,4,1,NULL,0,NULL,NULL,'You are falling behind in your studies, try harder.'),(2,4,6,55,25.301204819277107,NULL,NULL,'You are behind schedule. You currently have to complete at least 0 exercises/tests but have only completed 0.');
+/*!40000 ALTER TABLE `study_process` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `test_result`
+--
+
+DROP TABLE IF EXISTS `test_result`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `test_result` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `highest_score` double NOT NULL,
+  `latest_score` double NOT NULL,
+  `passed` tinyint(1) NOT NULL,
+  `participation_count` int DEFAULT NULL,
+  `test_type` varchar(255) NOT NULL,
+  `user_id` bigint NOT NULL,
+  `topic_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `topic_id` (`topic_id`),
+  CONSTRAINT `test_result_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `test_result_ibfk_2` FOREIGN KEY (`topic_id`) REFERENCES `topic` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `test_result`
+--
+
+LOCK TABLES `test_result` WRITE;
+/*!40000 ALTER TABLE `test_result` DISABLE KEYS */;
+INSERT INTO `test_result` VALUES (1,67,67,0,1,'QUIZ',4,20);
+/*!40000 ALTER TABLE `test_result` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `topic`
+--
+
+DROP TABLE IF EXISTS `topic`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `topic` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) DEFAULT NULL,
+  `description` text,
+  `topic_type` varchar(255) DEFAULT NULL,
+  `sequence` int DEFAULT NULL,
+  `chapter_id` bigint DEFAULT NULL,
+  `content_status` varchar(50) DEFAULT 'DRAFT',
+  `video_url` varchar(255) DEFAULT NULL,
+  `file_url` varchar(255) DEFAULT NULL,
+  `pass_point` int DEFAULT NULL,
+  `max_point` int DEFAULT NULL,
+  `time_limit` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `chapter_id` (`chapter_id`,`sequence`),
+  CONSTRAINT `topic_ibfk_1` FOREIGN KEY (`chapter_id`) REFERENCES `chapter` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=98 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `topic`
+--
+
+LOCK TABLES `topic` WRITE;
+/*!40000 ALTER TABLE `topic` DISABLE KEYS */;
+INSERT INTO `topic` VALUES (1,'HTML Syntax','Learn the basic syntax of HTML','VIDEO',1,1,'PUBLISHED','https://www.youtube.com/embed/9r_hbFzA8ho?si=pyTUZYtQjuOYk2Uh',NULL,NULL,NULL,NULL),(2,'CSS Selectors','Learn about different CSS selectors and how to use them','VIDEO',1,2,'PUBLISHED','https://www.youtube.com/embed/l1mER1bV0N0?si=Lhp6M1Tzl5La5BQ-',NULL,NULL,NULL,NULL),(3,'What is Data Science?','Introduction to Data Science concepts','READING',1,3,'PUBLISHED',NULL,'/reading/intro_data_science.pdf',NULL,NULL,NULL),(4,'HTML Syntax Quiz','HTML Syntax Quiz','QUIZ',2,1,'PUBLISHED',NULL,NULL,3,4,NULL),(5,'CSS Selectors Quiz','CSS Selectors Quiz','QUIZ',2,2,'PUBLISHED',NULL,NULL,1,1,NULL),(6,'Final Exam for Data Science','Final Exam for Data Science','EXAM',2,4,'PUBLISHED',NULL,NULL,1,1,120),(7,'Basics of Machine Learning','Explore the basics of machine learning and its applications.','READING',1,4,'PUBLISHED',NULL,NULL,NULL,NULL,NULL),(8,'Introduction to Python','Learn the basics of Python programming language.','READING',1,5,'PUBLISHED',NULL,NULL,NULL,NULL,NULL),(9,'Introduction to OOP','Learn the basics of object-oriented programming in Python.','READING',1,6,'PUBLISHED',NULL,NULL,NULL,NULL,NULL),(10,'Supervised Learning','Understand the basics of supervised learning algorithms.','READING',1,7,'PUBLISHED',NULL,NULL,NULL,NULL,NULL),(11,'Introduction to Neural Networks','Learn the structure and working of neural networks.','READING',1,8,'PUBLISHED',NULL,NULL,NULL,NULL,NULL),(12,'What is Cloud Computing?','Introduction to the concept of cloud computing.','READING',1,9,'PUBLISHED',NULL,NULL,NULL,NULL,NULL),(13,'Introduction to getting organized','<p>You learned how to navigate spreadsheets and why&nbsp;structured thinking was key to solving problems.&nbsp;You also explored the best ways&nbsp;to collect and store your data.&nbsp;From there, you gained an understanding of&nbsp;clean data and data integrity.</p>','VIDEO',1,10,'PUBLISHED','http://localhost:9000/sloc-system/2a980803-e4ff-4d67-8592-c756492538a0.mp4',NULL,NULL,NULL,NULL),(14,'Course syllabus','<p>The goal of data analysis is to make sense out of the data you collect and receive.</p>','READING',2,10,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/5b2d4362-0627-4492-9026-81953331a048.pdf',NULL,NULL,NULL),(15,'Learning Log: Process and organize your data','<h2>Overview</h2>\n<p>So far, you’ve learned about the steps required to prepare for data analysis. Now, you are learning about the steps required to <em>actually</em> analyze data. First on that list of steps is organizing and formatting data. You’ll complete an entry in your learning log to explore your thoughts on organization and how that might apply to data analysis. You will also reflect on what you think the organization process will be like and what you would like to learn more about in this course. By the time you complete this entry, you will be prepared to start learning more about the organization process.</p>\n<p>&nbsp;</p>\n<h2>Reflect on organization</h2>\n<p>Organizing your data is one of the most important steps for analysis! Once you get organized, you can perform calculations to find clear and objective answers to any data question. Before you start your learning log entry, take a moment to consider what comes to mind when you think about organizing data; you’ll reflect on these thoughts in the learning log template linked below.&nbsp;</p>\n<p>At the end of this course, review your responses and see how your understanding of organizing data has changed. Is it more important than you thought? Less important? Is it more or less difficult? Understanding how your ideas have changed throughout this course will be a great way to check-in with your growth and progress as a data analyst.</p>','READING',3,10,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/aec1ba7a-7896-404a-b894-22c0c2003321.pdf',NULL,NULL,NULL),(16,'The analysis process','<p>We\'ve learned how to ask the right questions,&nbsp;prepare data for exploration,&nbsp;and then process that data&nbsp;to make sure it\'s squeaky clean.&nbsp;Now it\'s time for the heart of&nbsp;the process: the actual analysis!</p>','VIDEO',1,11,'PUBLISHED','http://localhost:9000/sloc-system/fd619134-8e11-4de4-9c9e-8ff498c3d655.mp4',NULL,NULL,NULL,NULL),(17,'Ayanna: Sticking with it','<p>Here\'s what Ayanna, global information manager at Google, and key informant for this course, has to say.</p>','VIDEO',2,11,'PUBLISHED','http://localhost:9000/sloc-system/7271b58c-2a2c-4553-84ea-73a9b745d34b.mp4',NULL,NULL,NULL,NULL),(20,'Test your knowledge on understanding data analysis','Describe what is involved in the data analysis process with reference to goals and key tasks','QUIZ',3,11,'PUBLISHED',NULL,NULL,70,90,NULL),(21,'Always a need to organize','<p>It\'s super important that you keep your data organized throughout&nbsp;your analysis.&nbsp;How your data is classified and structured will impact your findings,&nbsp;whether you\'re working in a spreadsheet or a database.&nbsp;And once you know how your data is organized, you\'ll be able to capture or&nbsp;collect the information you need.</p>','VIDEO',1,12,'PUBLISHED','http://localhost:9000/sloc-system/813a6010-c72d-4f0d-90a6-eac67d993293.mp4',NULL,NULL,NULL,NULL),(22,'Keeping data organized with sorting and filters','<p>You have learned about four phases of analysis:&nbsp;</p>\n<ul>\n <li>\n  <p>Organize data</p></li>\n <li>\n  <p>Format and adjust data</p></li>\n <li>\n  <p>Get input from others</p></li>\n <li>\n  <p>Transform data</p></li>\n</ul>\n<p>The organization of datasets is really important for data analysts. Most of the datasets you will use will be organized as tables. Tables are helpful because they let you manipulate your data and categorize it. Having distinct categories and classifications lets you focus on, and differentiate between, your data quickly and easily.</p>\n<p>Data analysts also need to format and adjust data when performing an analysis. <strong>Sorting</strong> and <strong>filtering</strong> are two ways you can keep things organized when you format and adjust data to work with it. For example, a filter can help you find errors or outliers so you can fix or flag them before your analysis. <strong>Outliers</strong> are data points that are very different from similarly collected data and might not be reliable values. The benefit of filtering the data is that after you fix errors or identify outliers, you can remove the filter and return the data to its original organization.</p>\n<p>In this reading, you will learn the difference between sorting and filtering. You will also be introduced to how a particular form of sorting is done in a pivot table.&nbsp;</p>','READING',2,12,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/5d4082fd-22e9-4d16-83f8-2c01f442486d.pdf',NULL,NULL,NULL),(23,'More on sorting and filtering','<p>As with any collection, it is easier to manage and care for a group of information when there is structure around it. Remember that organization is not just about keeping things neat, it is also about making it easier to find and locate the data you need. As a data analyst, you will often have to sort and filter through databases. The two most common ways to do this are sorting and filtering. We talked about sorting and filtering earlier, and it is important that you know what each one is.</p>','VIDEO',3,12,'PUBLISHED','http://localhost:9000/sloc-system/a5738e73-abf5-4b38-8251-52c7cbaa46f5.mp4',NULL,NULL,NULL,NULL),(24,'Test your knowledge on organizing data','Recall the steps involved in sorting and filtering data through the use of SQL queries','QUIZ',4,12,'PUBLISHED',NULL,NULL,70,90,NULL),(25,'Sort data in spreadsheets','<p>We\'ve done some sorting in&nbsp;spreadsheets earlier in the program.&nbsp;Now it\'s time to build on what we\'ve covered and&nbsp;introduce some more advanced sorting techniques.&nbsp;</p>','VIDEO',1,13,'PUBLISHED','http://localhost:9000/sloc-system/eac83163-6f79-4027-be04-e7a9a4cf8108.mp4',NULL,NULL,NULL,NULL),(26,'The SORT function','<p>We\'ve talked about how there\'s two methods of sorting data in spreadsheets.&nbsp;The first method uses the Data tab in the menu of your spreadsheet program.&nbsp;The second way to store information in a spreadsheet is by writing a SORT function.&nbsp;In spreadsheets, functions are preset commands that perform a specific process.&nbsp;So in this case, the SORT function, as you might be able to guess, sorts your data.</p>','VIDEO',2,13,'PUBLISHED','http://localhost:9000/sloc-system/f42fab9c-9b6b-4b34-bf0a-e568339935cc.mp4',NULL,NULL,NULL,NULL),(27,'Emma: Journey to a meaningful career','<p>Here are some tips from Emma, ​​a product analyst at Google Health.</p>','VIDEO',3,13,'PUBLISHED','http://localhost:9000/sloc-system/29e110f5-cb1f-4178-9a34-8677091ebf6e.mp4',NULL,NULL,NULL,NULL),(28,'Test your knowledge on sorting in spreadsheets','Describe sorting as it relates to data in a spreadsheet or database with reference to functionality and benefits','QUIZ',4,13,'PUBLISHED',NULL,NULL,70,80,NULL),(29,'Sorting queries in SQL','<p>Sorting is one of the things we talked about earlier when using SQL with large data sets. When a spreadsheet has too much data, you can get an error message or it can cause your program to crash. That is something we definitely want to avoid. SQL shortcuts processes that would otherwise take a long time or be impossible to do in a spreadsheet. This is faster than a spreadsheet and is often very useful.</p>','VIDEO',1,14,'PUBLISHED','http://localhost:9000/sloc-system/463c9737-2d9a-4e5b-b14b-7c7d4d834e68.mp4',NULL,NULL,NULL,NULL),(30,'Hands-On Activity: SQL sorting queries','<p>So far, you’ve learned about SQL and used SQL queries to interact with databases. In this activity, you’ll practice sorting data by using SQL queries with ORDER BY and WHERE clauses.&nbsp;</p>\n<p>By the time you complete this activity, you will be able to write queries that sort data depending on your needs. This will enable you to organize and use data more efficiently in your career as a data analyst.</p>\n<h2>&nbsp;</h2>\n<p>To practice sorting data with SQL, you’ll query the CDC Births Data Summary public dataset. The queries you write will help you obtain some answers about which counties in the United States have the most and least births in the years 2016-2018.&nbsp;</p>','READING',2,14,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/adbbdcb5-a7d2-4d3b-becf-8227eab0710d.pdf',NULL,NULL,NULL),(31,'Hands-On Activity: Analyze weather data in BigQuery','<p>Previously, you learned how to use BigQuery to clean data and prepare it for analysis. Now you will query a dataset and save the results into a new table. This is a useful skill when the original data source changes continuously and you need to preserve a specific dataset for continued analysis. It’s also valuable when you are dealing with a large dataset and know you’ll be doing more than one analysis using the same subset of data.&nbsp;</p>\n<p>In this scenario, you’re a data analyst at a local news station. You have been tasked with answering questions for meteorologists about the weather. You will work with public data from the National Oceanic and Atmospheric Administration (NOAA), which has data for the entire United States. This is why you will need to save a subset of the data in a separate table.&nbsp;</p>\n<p>By the time you complete this activity, you will be able to use SQL queries to create new tables when dealing with complex datasets. This will greatly simplify your analysis in the future.</p>','READING',3,14,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/b7b652bc-e125-4d72-b955-c19f9a9c8551.pdf',NULL,NULL,NULL),(32,'Test your knowledge on sorting in SQL','Recall the steps involved in sorting and filtering data through the use of SQL queries','QUIZ',4,14,'PUBLISHED',NULL,NULL,70,90,NULL),(33,'Practice Quiz 1','Chapter 1 - Chapter 5 overall quiz','QUIZ',1,15,'PUBLISHED',NULL,NULL,80,110,NULL),(34,'From one type to another','<p>Sometimes, you need to convert data when you\'re working with spreadsheets.&nbsp;That might mean changing numbers into dates, strings, percentages, or&nbsp;even currency.It\'s important to double check that all of your data is in the right format for&nbsp;your analysis.&nbsp;Sometimes even after cleaning and processing data,&nbsp;it still might not be in the right format you need.</p>','VIDEO',1,16,'PUBLISHED','http://localhost:9000/sloc-system/5b59333f-392c-4f48-9e81-5b6721890fb6.mp4',NULL,NULL,NULL,NULL),(35,'Hands-On Activity: Combine multiple pieces of data','<p>In previous activities, you gained experience using spreadsheet functions for manipulating and cleaning data. In this activity, you’ll use the CONCAT and CONCATENATE functions to help you quickly and efficiently combine multiple pieces of raw data into new data.</p>\n<p>By the time you complete this activity, you will be able to use these functions to combine data. This will enable you to simplify and condense data, which is important for processing and cleaning data in your career as a data analyst.</p>\n<p>&nbsp;</p>\n<p>To get started, you will need the CONCAT function exercise spreadsheet.</p>\n<p>To use the template for the spreadsheet, click the link below and select “Use Template.”&nbsp;</p>\n<p>Link to template: <a href=\"https://docs.google.com/spreadsheets/d/1Na9M4xb-3CA746BHECX75n3B9V04pxLo0xNs9i8jMNo/template/preview\">CONCAT Function Exercise Spreadsheet</a></p>','READING',2,16,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/f5c788a3-cb5b-42c1-9038-d777240a5f01.pdf',NULL,NULL,NULL),(36,'Data validation','<p>Let\'s talk about what&nbsp;data validation does in spreadsheets.&nbsp;Basically, it allows you to control what&nbsp;can and can\'t be entered in your worksheet.&nbsp;Usually, data validation is used to add&nbsp;drop-down lists to cells with&nbsp;predetermined options for users to choose from.&nbsp;If you have a spreadsheet with a lot of collaborators,&nbsp;this can make it easier for them to&nbsp;interact with your table.&nbsp;You can think of it like&nbsp;a multiple choice question on a quiz.&nbsp;Since you control what\'s&nbsp;being entered into the worksheet,&nbsp;it cuts down on how much data&nbsp;cleaning you have to do later on.&nbsp;</p>','VIDEO',3,16,'PUBLISHED','http://localhost:9000/sloc-system/b22b7d61-0780-4d28-bd17-b0b7496bc671.mp4',NULL,NULL,NULL,NULL),(37,'Conditional formatting','<p>So earlier we talked about conditional formatting as a spreadsheet tool that&nbsp;changes how cells appear when values meet specific conditions.&nbsp;This lets you add visual cues to your spreadsheets that&nbsp;make it easier to understand your table at a glance, and&nbsp;it makes the information in the worksheet clearer to your stakeholders.&nbsp;In this video, we\'ll take that even further by combining&nbsp;conditional formatting and data validation to create custom tools for our spreadsheets.&nbsp;</p>','VIDEO',4,16,'PUBLISHED','http://localhost:9000/sloc-system/b756d624-81e3-4f77-bb04-0f3e75255e0d.mp4',NULL,NULL,NULL,NULL),(38,'Transforming data in SQL','<p>Data analysts usually need to convert data from one format to another to complete an analysis. But what if you are using SQL rather than a spreadsheet? Just like spreadsheets, SQL uses standard rules to convert one type of data to another. If you are wondering why data transformation is an important skill to have as a data analyst, think of it like being a driver who is able to change a flat tire. Being able to convert data to the right format speeds you along in your analysis. You don’t have to wait for someone else to convert the data for you.&nbsp;</p>\n<p>&nbsp;</p>\n<p>In this reading, you will go over the conversions that can be done using the <strong>CAST</strong> function. There are also more specialized functions like <strong>COERCION</strong> to work with big numbers, and <strong>UNIX_DATE</strong> to work with dates. <strong>UNIX_DATE</strong> returns the number of days that have passed since January 1, 1970 and is used to compare and work with dates across multiple time zones. You will likely use <strong>CAST</strong> most often.&nbsp;&nbsp;</p>','READING',5,16,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/75a3a30f-2b93-4451-a93e-987ca391c338.pdf',NULL,NULL,NULL),(39,'Test your knowledge on converting and formatting data','Explain what is involved in the conversion and formatting of data','QUIZ',6,16,'PUBLISHED',NULL,NULL,70,90,NULL),(40,'Merging and multiple sources','<p>In this lesson, we\'ll build on what we\'ve learned about the CONCATENATE function and importing ranges by exploring a new SQL query - CONCAT.</p>','VIDEO',1,17,'PUBLISHED','http://localhost:9000/sloc-system/c522e8fa-8cf3-4932-887b-498d58baf8eb.mp4',NULL,NULL,NULL,NULL),(41,'Strings in spreadsheets','<p>So far we\'ve worked with strings in both SQL and spreadsheets before, and&nbsp;we\'ve learned that they usually have similar functions.&nbsp;In this video, we\'ll take another look at LEN, LEFT, RIGHT and FIND.You\'ve come across these functions used in SQL, but&nbsp;now you\'ll find out how they work in spreadsheets.</p>','VIDEO',2,17,'PUBLISHED','http://localhost:9000/sloc-system/afb9b168-5738-4f23-a296-4f06e675b977.mp4',NULL,NULL,NULL,NULL),(42,'Manipulating strings in SQL','<p>Knowing how to convert and manipulate your data for an accurate analysis is an important part of a data analyst’s job. In this reading, you will learn about different SQL functions and their usage, especially regarding string combinations.&nbsp;</p>','READING',3,17,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/9e11b440-5612-48b5-8b8a-93ba66d53a7a.pdf',NULL,NULL,NULL),(43,' Learning Log: A data analysis checklist','<h2>Overview</h2>\n<p>By now, you’ve already learned a lot about the steps involved in analyzing data. As you begin your career as a data analyst, you’ll need to analyze a lot of it! In this learning log entry, you’ll start developing a data analysis checklist. This will help you stay organized during your analysis, even when you have a lot of data to deal with in the future.&nbsp;&nbsp;</p>\n<p>&nbsp;</p>\n<h2>Create your checklist</h2>\n<p>In the learning log template linked below, start a checklist of tasks you need to complete during analysis using the steps you have already learned: <strong>Ask, Prepare, Process, Analyze, Share </strong>and <strong>Act</strong>. This way, you can always remember what you need to do and in what order. As your projects get more complicated, you can add to and adapt your checklist to fit any situation.&nbsp;</p>\n<p>For now, your checklist can be a high-level overview of the steps you need to take to complete your analysis; for example, you might include “clean the data” as a high-level task under the Process stage. You will return to your checklist again later in this course to add more detail and finish creating your checklist. You can also continue adding to this checklist whenever you have new ideas for it!</p>','READING',4,17,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/b1b7a134-1ad2-4a8a-a7a2-f0ee08d74728.pdf',NULL,NULL,NULL),(44,'Test your knowledge on combining multiple datasets','Demonstrate how to use SQL spreadsheets and SQL queries to combine multiple pieces of data','QUIZ',5,17,'PUBLISHED',NULL,NULL,70,90,NULL),(45,'What to do when you get stuck','<p>Data analysts&nbsp;spend a lot of time problem-solving,&nbsp;and that means there\'s going to be&nbsp;times when you get stuck,&nbsp;but the trick is knowing what to do when that happens.</p>','VIDEO',1,18,'PUBLISHED','http://localhost:9000/sloc-system/33448cfe-4b40-41b5-8ba3-7ae2b1239d9b.mp4',NULL,NULL,NULL,NULL),(46,'Layla: All about the analyze phase','<p>Below are some shares from Layla - an analyst at Google.</p>','VIDEO',2,18,'PUBLISHED','http://localhost:9000/sloc-system/40933275-e9eb-4b17-b518-2d88370d1e87.mp4',NULL,NULL,NULL,NULL),(47,'Running into challenges? Not to worry!','<p>You might think that great data analysts don\'t regularly&nbsp;rely on outside resources, but that\'s a myth.&nbsp;The best data analysts&nbsp;know that finding answers to their problems&nbsp;online can be empowering and&nbsp;give them new knowledge for the future.&nbsp;Being able to find&nbsp;new ideas and combine them with what you&nbsp;already know can help you&nbsp;come up with some amazing things.&nbsp;Don\'t be afraid to turn to&nbsp;the internet to find your answers.&nbsp;It\'s a great resource that lots of&nbsp;analysts use.&nbsp;</p>','VIDEO',3,18,'PUBLISHED','http://localhost:9000/sloc-system/82e03b2f-86d8-44c2-82ad-5fdd880ae2ff.mp4',NULL,NULL,NULL,NULL),(48,'When to use which tool','<p>We\'ve also talked about choosing&nbsp;the right tool before you start a project.&nbsp;But sometimes you find yourself stuck on&nbsp;a problem during your data analysis.&nbsp;That might mean it\'s time to&nbsp;reconsider which tool you\'re using for the job.&nbsp;</p>','VIDEO',4,18,'PUBLISHED','http://localhost:9000/sloc-system/b55baca1-e445-482e-a992-3c63d1f31d81.mp4',NULL,NULL,NULL,NULL),(49,'Practice Quiz 2','Chapter 6 - Chapter 9 overall quiz','QUIZ',1,19,'PUBLISHED',NULL,NULL,100,120,NULL),(50,'Aggregate data for analysis','<p>Aggregation means collecting or gathering many separate pieces into a whole. For&nbsp;example, the Milky Way galaxy is an aggregation of stars, dust, and gases.&nbsp;So data aggregation is the process of gathering data from multiple&nbsp;sources in order to combine it into a single summarized collection.&nbsp;In data analytics, a summarized collection, or summary, describes&nbsp;identifying the data you need and gathering it all together in one place</p>','VIDEO',1,20,'PUBLISHED','http://localhost:9000/sloc-system/5d1b477a-a944-48bd-b400-d91d634bf2c6.mp4',NULL,NULL,NULL,NULL),(51,'Preparing for VLOOKUP','<p>As you learned before,&nbsp;data aggregation is the process of gathering data from&nbsp;multiple sources in order to&nbsp;combine it into a single summarized collection.&nbsp;Data aggregation can give you all kinds of&nbsp;information about the data you are looking at.</p>','VIDEO',2,20,'PUBLISHED','http://localhost:9000/sloc-system/e97419d3-336e-4162-b0d2-d3c401a8011c.mp4',NULL,NULL,NULL,NULL),(52,'VLOOKUP in action','<p>In a previous video,&nbsp;we talked about VLOOKUP for data cleaning.&nbsp;We also discussed the importance of preparing&nbsp;our spreadsheet before putting VLOOKUP to use.&nbsp;Now we\'re going to experience it in action.&nbsp;</p>','VIDEO',3,20,'PUBLISHED','http://localhost:9000/sloc-system/7d1e709c-bf0a-4de4-8dd5-88b590ae2c4c.mp4',NULL,NULL,NULL,NULL),(53,'Identifying common VLOOKUP errors','<p>We\'ll learn how you can use troubleshooting to solve all kinds of&nbsp;problems.&nbsp;To do this, we\'ll need to talk about some of the limitations of VLOOKUP and&nbsp;then practice fixing some of the most common problems that data analysts face.</p>','VIDEO',4,20,'PUBLISHED','http://localhost:9000/sloc-system/4bb69cd8-6d72-4b54-9a15-f5cbd133df6a.mp4',NULL,NULL,NULL,NULL),(54,'VLOOKUP core concepts','<p>Functions can be used to quickly find information and perform calculations using specific values. In this reading, you will learn about the importance of one such function, <strong>VLOOKUP</strong>, or Vertical Lookup, which searches for a certain value in a spreadsheet column and returns a corresponding piece of information from the row in which the searched value is found.</p>','READING',5,20,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/0a8e0829-947b-4fee-a11c-7bec1bb5ba7e.pdf',NULL,NULL,NULL),(55,'Hands-On Activity: Using VLOOKUP','<p>Earlier, you learned about VLOOKUP, a function that uses vertical lookup to find specific values in a spreadsheet. In this activity, you will practice using VLOOKUP to consolidate information between two spreadsheets, clean data, and create a summary table from a query.</p>\n<p>By the time you complete this activity, you will be able to use VLOOKUP to complete a variety of tasks in spreadsheets. This will enable you to clean and analyze data more efficiently, which is important for working with large datasets in your career as a data analyst.</p>\n<p>&nbsp;</p>\n<p>To get started, first access the VLOOKUP Practice Worksheet.</p>\n<p>Click the link to the worksheet to create a copy. If you don’t have a Google account, you may download the VLOOKUP Practice Worksheet directly from the attachments below.</p>\n<p>Link to the worksheet: <a href=\"https://docs.google.com/spreadsheets/d/1Js6kRVYy6Nx6VENibaX9dmNOAP_7CXWuOqUjUz9cBtA/template/preview\">VLOOKUP Practice Worksheet</a></p>','READING',6,20,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/4d6affd3-36b2-4736-ae8c-8409f1cc6258.pdf',NULL,NULL,NULL),(56,'Test your knowledge on VLOOKUP','Use VLOOKUP to query data, trim data, convert text data to numeric data, and create a summary table from a queried information','QUIZ',7,20,'PUBLISHED',NULL,NULL,80,100,NULL),(57,'Understanding JOINS','<p>JOIN is an SQL clause used to combine rows from two or more tables based on a related column. In simple terms, you can think of JOIN as the SQL version of VLOOKUP that we just discussed. There are four common types of JOINs that data analysts use: INNER, LEFT, RIGHT, and OUTER.</p>','VIDEO',1,21,'PUBLISHED','http://localhost:9000/sloc-system/cb52b422-3ab0-42b1-a26c-b57688563d3e.mp4',NULL,NULL,NULL,NULL),(58,'Secret identities: The importance of aliases','<p>In this reading, you will learn about using aliasing to simplify your SQL queries. <strong>Aliases</strong> are used in SQL queries to create temporary names for a column or table. Aliases make referencing tables and columns in your SQL queries much simpler when you have table or column names that are too long or complex to make use of in queries. Imagine a table name like special_projects_customer_negotiation_mileages. That would be difficult to retype every time you use that table. With an alias, you can create a meaningful nickname that you can use for your analysis. In this case “special_projects_customer_negotiation_mileages” can be aliased to simply “mileage.” Instead of having to write out the long table name, you can use a meaningful nickname that you decide.&nbsp;</p>','READING',2,21,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/7c69aa85-1adf-4d22-bea4-13a215a6134b.pdf',NULL,NULL,NULL),(59,'Using JOINs effectively','<p>In this reading, you will review how JOINs are used and will be introduced to some resources that you can use to learn more about them. A JOIN combines tables by using a primary or foreign key to align the information coming from both tables in the combination process. JOINs use these keys to identify relationships and corresponding values across tables.</p>','READING',3,21,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/91851554-709c-4695-90d3-c704441b9aa8.pdf',NULL,NULL,NULL),(60,'Hands-On Activity: Queries for JOINS','<p>You’ve come a long way in working with relational databases and SQL. Now, you’ll gain practice writing queries that join multiple tables together.</p>\n<p>In this activity, you’ll work with the World Bank’s International Education Dataset. By mastering JOIN statements, you’ll be able to fully harness the power of relational databases by combining data from tables linked by the two types of keys. &nbsp;</p>','READING',4,21,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/ec744dd2-9f01-483e-beb3-6a7604dcf662.pdf',NULL,NULL,NULL),(61,'COUNT and COUNT DISTINCT ','<p>COUNT can be used to count the total number of numerical values within a specific range in spreadsheets. COUNT in SQL does the same thing. COUNT is a query that returns the number of rows in a specified range, but COUNT DISTINCT is a little different. COUNT DISTINCT is a query that only returns the distinct values in that range. Basically, this means COUNT DISTINCT doesn\'t count repeating values.</p>','VIDEO',5,21,'PUBLISHED','http://localhost:9000/sloc-system/d9fc7b45-4b78-4ac2-b9a8-0350e22f4b34.mp4',NULL,NULL,NULL,NULL),(62,'Test your knowledge on using JOINS to aggregate data','Demonstrate how to use functions and syntax to create SQL queries for combining data from multiple database tablesDemonstrate how to use functions and syntax to create SQL queries for combining data from multiple database tables','QUIZ',6,21,'PUBLISHED',NULL,NULL,70,90,NULL),(63,'Queries within queries ','<p>A subquery is a SQL query that is nested inside of a larger query. Have you ever seen one of those nesting doll toys? They\'re also known as matryoshka Russian nesting dolls. Subqueries are a lot like nesting dolls.&nbsp;</p>','VIDEO',1,22,'PUBLISHED','http://localhost:9000/sloc-system/9f48bbc6-c975-498c-9668-5e6bf0fadae8.mp4',NULL,NULL,NULL,NULL),(64,'Using subqueries to aggregate data','<p>We\'ve got some experience nesting subqueries into our SQL statements to perform more complicated queries. Now, it\'s time to talk about how to aggregate data with subqueries.</p>','VIDEO',2,22,'PUBLISHED','http://localhost:9000/sloc-system/9ccd9359-87df-4624-b2c5-def93ad1499c.mp4',NULL,NULL,NULL,NULL),(65,'Justin: Where data analysis takes you','<p>Below are some shares from Justin - a Google employee in the field of Google Cloud.</p>','VIDEO',3,22,'PUBLISHED','http://localhost:9000/sloc-system/cecd58c9-24d9-404a-946c-a296ecb166d8.mp4',NULL,NULL,NULL,NULL),(66,'Test your knowledge on working with subqueries','Demonstrate how to use functions and syntax to create SQL queries for combining data from multiple database tables','QUIZ',4,22,'PUBLISHED',NULL,NULL,60,80,NULL),(67,'Practice Quiz 3','Chapter 11 - Chapter 13 overall quiz','QUIZ',1,23,'PUBLISHED',NULL,NULL,80,100,NULL),(68,'Data calculations','<p>Coming up, we\'re going to be reviewing some familiar concepts and then using those concepts to explore new ones. As a data analyst, you\'ll use key tools and processes over and over, but you\'ll also learn new things as you grow in your job. It could be anything from building a new kind of analysis to a time-saving shortcut.&nbsp;</p>','VIDEO',1,24,'PUBLISHED','http://localhost:9000/sloc-system/18225b6e-fabe-4104-ada6-5496235dab4f.mp4',NULL,NULL,NULL,NULL),(69,'Common calculation formulas','<p>You probably do a lot of calculations in your daily life. Maybe it\'s figuring out how much to tip someone or balancing your budget. You might do some of these calculations in your head or with paper and pencil or the calculator on your phone. You might even have shortcuts to use to make the calculations easier. You\'ll perform a lot of calculations as a data analyst too. But they\'ll involve more numbers in a wider range of calculations. That\'s where you\'ll put your data analyst tools to work.</p>','VIDEO',2,24,'PUBLISHED','http://localhost:9000/sloc-system/eab8d2f9-7a26-417c-9e72-792647eb31f0.mp4',NULL,NULL,NULL,NULL),(70,'Functions and conditions','<p>One of the first calculations most kids learn how to do is counting. Soon after, they learn adding, and that doesn\'t go away. No matter what age we are, we\'re always counting or adding something, whether it\'s change at the grocery store or measurements in a recipe. Data analysts do a lot of counting and adding too. And with the amount of data you\'ll come across as a data analyst, you\'ll be grateful to have functions that can do the counting and adding for you. So let\'s learn how these functions COUNTIF and SUMIF can help you do calculations for your analysis more easily and accurately.</p>','VIDEO',2,23,'PUBLISHED','http://localhost:9000/sloc-system/773688a5-c33f-4dec-b5e5-17cfe22cfdce.mp4',NULL,NULL,NULL,NULL),(71,'Functions with multiple conditions','<p>In this reading, you will learn more about conditional functions and how to construct functions with multiple conditions.&nbsp;Recall that conditional functions and formulas perform calculations according to specific conditions. Previously, you learned how to use functions like <strong>SUMIF</strong> and <strong>COUNTIF</strong> that have one condition. You can use the <strong>SUMIFS</strong> and <strong>COUNTIFS</strong> functions if you have two or more conditions. You will learn their basic syntax in Google Sheets, and check out an example.&nbsp;</p>\n<p>Refer to the resources at the end of this reading for information about similar functions in Microsoft Excel.</p>','READING',3,24,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/3b493f66-3db7-4f0d-aabb-cd34a117f6c0.pdf',NULL,NULL,NULL),(72,'Hands-On Activity: Working with conditions','<p>In previous activities, you used basic spreadsheet functions such as COUNT, SUM, AVERAGE, and MAX. In this activity, you will work with the conditional versions of these functions: COUNTIF, SUMIF, AVERAGEIF, and MAXIFS.</p>\n<p><strong>Conditional functions</strong> are functions that perform a specific task, but only on cells that satisfy some defined criteria. They are usually identified with an IF suffix adjoined to the desired operation. They are frequently used when constructing more complex queries that cannot be accomplished using more basic functions.</p>\n<p>By the time you complete this activity, you will be able to use conditional functions and understand when and why they are appropriate. This will enable you to do more complex analysis with spreadsheets as you continue to develop your data analyst’s skill set.</p>\n<p>&nbsp;</p>\n<p>To get started, first access the Working with Conditions spreadsheet.</p>\n<p>Click the link to the spreadsheet to create a copy. If you don’t have a Google account, you may download the spreadsheet directly from the attachments below. Make sure to select “Use Template” on the downloadable item.</p>\n<p>Link to spreadsheet: <a href=\"https://docs.google.com/spreadsheets/d/1sKNqBzV63Na76jjoKLukjTtDyDMwVW0Vjz4mM-sJDEM/template/preview#gid=895883562\">Working with Conditions</a></p>','READING',4,24,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/01934261-be92-49fb-b1a7-33ce64d4bf03.pdf',NULL,NULL,NULL),(73,'Composite functions','<p>&nbsp;Data analysts love discovering new ways to work on their analysis, especially when those new ways simplify their work.&nbsp;</p>','VIDEO',5,24,'PUBLISHED','http://localhost:9000/sloc-system/a946bb89-aba0-4bca-b084-3566fcd9f6bd.mp4',NULL,NULL,NULL,NULL),(74,'Test your knowledge on data calculations','Describe the use of functions to conduct basic calculations on data in spreadsheets Reflect on how conditional statements can be used to create complex queries and functions Generate multiple points of summary based on a wide variety of conditions using COUNTIF, SUMIF, MAXIF, and AVERAGEIF','QUIZ',6,24,'PUBLISHED',NULL,NULL,70,90,NULL),(75,'Start working with pivot tables','<p>By now, we\'ve learned a lot about functions and formulas. They are very helpful tools for your toolbox and great for finding shortcuts to complete calculations. But there\'s another tool out there that does some of the same things in a spreadsheet: the pivot table. As a quick reminder, pivot tables let you view data in multiple ways to find insights and trends.&nbsp;</p>','VIDEO',1,25,'PUBLISHED','http://localhost:9000/sloc-system/faf0f47d-34d4-42c5-9533-030f57829ebb.mp4',NULL,NULL,NULL,NULL),(76,'Pivot tables continued','<p>Now we are going to apply filters in calculated fields to explore the data more.&nbsp;</p>','VIDEO',2,25,'PUBLISHED','http://localhost:9000/sloc-system/aaa6961b-9891-491d-bea5-7e64d97f4b46.mp4',NULL,NULL,NULL,NULL),(77,'Elements of a pivot table','<p>Previously, you learned that a pivot table is a tool used to sort, reorganize, group, count, total, or average data in spreadsheets. In this reading, you will learn more about the parts of a pivot table and how data analysts use them to summarize data and answer questions about their data.</p>','READING',3,25,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/71567e88-0ca5-42d2-8ae8-32481727d521.pdf',NULL,NULL,NULL),(78,'Hands-On Activity: Explore movie data with pivot tables','<p>In the previous video,&nbsp; you were introduced to pivot tables as a tool for quickly comparing metrics, performing calculations, and generating readable reports. In this activity, you will create and work with pivot tables using the movie spreadsheet from the video to draw new insights into this dataset and create visualizations to share with stakeholders.&nbsp;</p>\n<p>By the time you complete this activity, you will be able to apply pivot tables in your own analysis projects. This will enable you to draw insights and create reports directly from your spreadsheets, which is important for your career as a data analyst.</p>\n<p>&nbsp;</p>\n<p>To get started, first access the movie spreadsheet from the previous video.</p>\n<p>Click the link to the movie spreadsheet to create a copy. If you don’t have a Google account, you may download the data directly from the attachments below.</p>\n<p>Link to movie data: <a href=\"https://docs.google.com/spreadsheets/d/1FLaUmMn62YlHYihV6pK1DJqWcFYCnuoqoxFWmm_o5b0/template/preview\">movie data starter project</a></p>','READING',4,25,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/4210b4aa-6ac5-44bb-b2cf-01ffb7b57a0d.pdf',NULL,NULL,NULL),(79,'Test your knowledge on using pivot tables','Discuss the use of pivot tables to conduct calculations on data in spreadsheets','QUIZ',5,25,'PUBLISHED',NULL,NULL,70,90,NULL),(80,'Queries and calculations','<p>By now, you probably know that there\'s more than one way to do the daily task of a data analyst. Calculations are no exception. As we\'ve shown in earlier videos, you can complete the same calculations in lots of different ways in spreadsheets. You can also complete them using SQL.&nbsp;</p>','VIDEO',1,26,'PUBLISHED','http://localhost:9000/sloc-system/890bcbc1-b01d-41aa-998f-35306895c06f.mp4',NULL,NULL,NULL,NULL),(81,'Embedding simple calculations in SQL','<p>In the previous sections, you performed calculations in SQL. While there are a number of different ways to do this, embedding them into queries is a very useful way. When you include a calculation in a query with other commands, you can do more work quickly.</p>','VIDEO',2,26,'PUBLISHED','http://localhost:9000/sloc-system/f04c2096-b1b2-4683-aaa0-f03c4a4c3dd3.mp4',NULL,NULL,NULL,NULL),(82,'Calculations with other statements','<p>As a data analyst, you will find that your calculations come in many different shapes and sizes. While basic calculations are great, sometimes you will need to group data before performing calculations. The GROUP BY and ORDER BY commands will help you do this. Often these commands are combined with aggregate functions like SUM or COUNT.</p>','VIDEO',3,26,'PUBLISHED','http://localhost:9000/sloc-system/7c48fc26-8445-49e8-9ac5-9bd895574a8f.mp4',NULL,NULL,NULL,NULL),(83,'Hands-On Activity: Calculations in SQL','<p>In previous lessons, you were introduced to SQL. In this activity, you will practice it by learning how to write basic calculations in an SQL query.</p>\n<p>By the time you complete this activity, you will be able to use operators in SQL queries. This will enable you to make calculations using SQL and combine multiple arithmetic operations in a single query. This will help you to work faster and more efficiently in SQL as you quickly discover significant patterns in your data—a key skill for data analysts.</p>','READING',4,26,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/ecc45a6a-8c5f-4f01-9fa1-93d16bdf1b4f.pdf',NULL,NULL,NULL),(84,'Test your knowledge on SQL calculations','Demonstrate how to use SQL queries to complete calculations in SQL','QUIZ',5,26,'PUBLISHED',NULL,NULL,70,90,NULL),(85,'Check and recheck','<p>Earlier, we covered data validation, a spreadsheet function that adds drop-down lists to cells. Using data validation lets you control what can and can\'t be entered into your worksheet. One of its uses is protecting structured data and formulas in your spreadsheets. But as useful as it is, the data validation function is just one part of a larger data validation process. This process involves checking and rechecking the quality of your data so that it is complete, accurate, secure, and consistent.&nbsp;</p>','VIDEO',1,27,'PUBLISHED','http://localhost:9000/sloc-system/9029a91f-7e76-4a5f-982d-16d614691f1d.mp4',NULL,NULL,NULL,NULL),(86,'Types of data validation','<p>This reading describes the purpose, examples, and limitations of six types of data validation. The first five are validation types associated with the data (type, range, constraint, consistency, and structure) and the sixth type focuses on the validation of application code used to accept data from user input.&nbsp;</p>\n<p>As a junior data analyst, you might not perform all of these validations. But you could ask if and how the data was validated before you begin working with a dataset. Data validation helps to ensure the integrity of data. It also gives you confidence that the data you are using is clean. The following list outlines six types of data validation and the purpose of each, and includes examples and limitations.</p>','READING',2,27,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/9c53b475-3159-48b2-b178-aec70e0eebbc.pdf',NULL,NULL,NULL),(87,'Hands-On Activity: From spreadsheets to BigQuery','<p>By now, you have worked with data using both spreadsheets and SQL. These tools operate very differently: In spreadsheets, you are able to observe and interact with data directly; with SQL, you interact with data through queries to the database. In this activity, you will use spreadsheets to clean your data before importing it into SQL for analysis.&nbsp;</p>\n<p>In this scenario, you have been working for a national store chain as a data analyst. Management is interested in the amount of inventory being kept in storage at regional sites. Your supervisor has asked you to perform an analysis on inventory and sales data to make recommendations for changes to inventory management practices. You have been provided with three datasets containing information about inventory, products, and sales.&nbsp;</p>\n<p>By the time you complete this activity, you will be able to combine tools to successfully analyze data. Switching between spreadsheets and SQL can be challenging because they’re so different, but once you’re more used to both tools, you’ll be able to use both more easily. This is important for tackling larger and more complex projects in your career as a data analyst.</p>\n<p>&nbsp;</p>\n<p>To get started, first download the three store data CSV files: inventory, products, and sales.</p>\n<p>Click the link to each CSV file to create a copy. If you don’t have a Google account, you may download the data directly from the attachments below.</p>\n<p>Link to data: <a href=\"https://drive.google.com/u/0/uc?id=1FCo85-_jwlOkqucuiizlP3WyCEu1uXBH&amp;export=download\">inventory</a>, <a href=\"https://drive.google.com/u/0/uc?id=1hQ3_EqXPANEPhyY-VDKa9LTuB73E_DVT&amp;export=download\">sales</a>, and <a href=\"https://drive.google.com/u/0/uc?id=1Qm1FFskt30Cc1I8XbptukBnT3T1ZHeJ-&amp;export=download\">products</a>.</p>','READING',3,27,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/c694c1e3-5e52-4c52-af70-1d6ba9406310.pdf',NULL,NULL,NULL),(88,'Learning Log: Finish your data analysis checklist','<h2>Overview</h2>\n<p>In a previous learning log, you started creating a high-level data analysis checklist. Now, you’ll complete that checklist with more detailed steps. By the time you complete this activity, you will have an in-depth data analysis checklist to help keep you organized during analysis projects. As a data analyst, staying organized will ensure that you don’t make any mistakes or miss any steps-- saving you time and effort!</p>\n<p>&nbsp;</p>\n<h2>Complete Your Checklist&nbsp;</h2>\n<p>The high-level outline of your checklist was based on the phases of the data analysis process: <strong>Ask, Prepare, Process, Analyze, Share,</strong> and <strong>Act</strong>.&nbsp;</p>\n<p>Now, you can fill in each step of your high-level checklist with detailed substeps. For example, for the Process phase, you probably have a step for cleaning data. You might break this step down to include detailed substeps such as checking that each variable is one column and that each observation is one row.</p>\n<p>You could create a step in your checklist like this:</p>\n<p><strong>Process Phase</strong></p>\n<p>Step X: Cleaning data</p>\n<ul>\n <li>\n  <p>Is each variable one column?</p></li>\n <li>\n  <p>Is each observation one row?</p></li>\n</ul>\n<p>This example takes a high-level data analysis task like cleaning data and breaks it down into more specific steps. Ultimately, you get to decide how detailed you want your checklist to be and which specific steps to include. This is meant to be a useful tool for you, so you can customize it however you want!&nbsp;</p>\n<p>You might not know how to break down every phase of the data analysis process. Here are a few questions that you can consider as you think about it:</p>\n<ul>\n <li>\n  <p>What are the high-level steps you need to take? How can the phases of analysis help you organize the whole process?</p></li>\n <li>\n  <p>What specific details are necessary to complete these high-level steps?</p></li>\n <li>\n  <p>How can you simplify each step as you go? Are there any shortcuts that can help you?</p></li>\n <li>\n  <p>Are there any steps you might be most at risk of forgetting? If so, how can your checklist remind you to complete these steps?</p></li>\n</ul>\n<p>You can always adapt and add to your checklist as you have new ideas or as your project needs change.&nbsp;</p>\n<p>In the learning log template linked below, copy and paste your original checklist and complete it with the specific steps and tasks you want to add.</p>','READING',4,27,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/bcbe6ec4-18cc-4cd3-a846-61f0765510fa.pdf',NULL,NULL,NULL),(89,'Test your knowledge on data validation','Explain the importance of the data-validation process for ensuring accuracy and consistency in your analysis','QUIZ',5,27,'PUBLISHED',NULL,NULL,70,100,NULL),(90,'Temporary tables','<p>Post-it notes are useful and important, but they are also temporary because you usually only need them for a short period of time before recycling them. Data analysts have their own version of post-it notes when they work in SQL. They are called temporary tables and we will learn about them.</p>','VIDEO',1,28,'PUBLISHED','http://localhost:9000/sloc-system/cd0780de-f5c2-4e4f-bacc-8c118346fedb.mp4',NULL,NULL,NULL,NULL),(91,'Hands-On Activity: Create temporary tables','<p>In previous lessons, you learned about temporary tables. In this activity, you will practice making one and using it to run a query.</p>\n<p>By the time you complete this activity, you will be able to use temporary tables to work with data without changing the original data. This will help you complete more complicated analytical tasks in your career as a data analyst.</p>','READING',2,28,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/ea0ab4d6-a5dd-42b7-bbc4-5e6d08b7ec45.pdf',NULL,NULL,NULL),(92,'Multiple table variations','<p>Earlier we introduced you to temporary tables. They\'re a great resource to use during your analysis because they help you keep your SQL code organized and efficient. You learned how to use a WITH clause to create a type of temporary table. Now, we\'ll get into some other ways you can create temp tables along with the pros and cons they present. That\'s one of the great things about data analytics. There\'s almost always more than one way to get your analysis done.&nbsp;</p>','VIDEO',3,28,'PUBLISHED','http://localhost:9000/sloc-system/4568fde4-6f52-4158-ac5c-a433f02b4595.mp4',NULL,NULL,NULL,NULL),(93,'Working with temporary tables','<p><strong>Temporary tables</strong> are exactly what they sound like—temporary tables in a SQL database that aren’t stored permanently. In this reading, you will learn the methods to create temporary tables using SQL commands. You will also learn a few best practices to follow when working with temporary tables.&nbsp;</p>','READING',4,28,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/11d2273f-f5ac-46bc-8d8b-a632a1176bec.pdf',NULL,NULL,NULL),(94,'Using Connected Sheets with BigQuery','<p>In this reading, you will learn about Connected Sheets, a tool that allows data professionals to use basic spreadsheet functions to analyze large datasets housed in BigQuery. With Connected Sheets users don’t need to know SQL. Instead, anyone, not just data professionals,&nbsp; can generate insights with basic spreadsheet operations such as formulas, charts, and pivot tables.</p>','READING',5,28,'PUBLISHED',NULL,'http://localhost:9000/sloc-system/a37edb6a-fdf0-4a9b-b374-39b47e4ac197.pdf',NULL,NULL,NULL),(95,'Test your knowledge on using SQL with temporary tables','Discuss the use of SQL queries to manage temporary tables','QUIZ',6,28,'PUBLISHED',NULL,NULL,70,90,NULL),(96,'Practice Quiz 4','Chapter 15 - Chapter 19 overall quiz','QUIZ',1,29,'PUBLISHED',NULL,NULL,100,110,NULL),(97,'Course Final Exam','Analyze Data to Answer Questions - Final Exam','EXAM',1,30,'PUBLISHED',NULL,NULL,120,150,45);
+/*!40000 ALTER TABLE `topic` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `topic_discussion`
+--
+
+DROP TABLE IF EXISTS `topic_discussion`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `topic_discussion` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `content` text,
+  `topic_id` bigint NOT NULL,
+  `created_by` bigint NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKa8ks0cumm4t2kgqogjv8fyy3x` (`created_by`),
+  KEY `FK5kwy0u9ymyhcxyaa0p6ii9tec` (`topic_id`),
+  CONSTRAINT `FK5kwy0u9ymyhcxyaa0p6ii9tec` FOREIGN KEY (`topic_id`) REFERENCES `topic` (`id`),
+  CONSTRAINT `FKa8ks0cumm4t2kgqogjv8fyy3x` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `topic_discussion`
+--
+
+LOCK TABLES `topic_discussion` WRITE;
+/*!40000 ALTER TABLE `topic_discussion` DISABLE KEYS */;
+INSERT INTO `topic_discussion` VALUES (1,'How to use div tags effectively','I am having trouble using div tags for layout. Can someone explain how to use div tags effectively?',1,4,'2024-01-02 10:00:00','2024-01-02 10:00:00'),(2,'Difference between class and id in CSS','What is the difference between class and id in CSS? When should I use class and when should I use id?',2,4,'2024-01-03 14:30:00','2024-01-03 14:30:00'),(3,'Resources for learning Data Science','Can anyone recommend some good resources for learning more about Data Science?',3,4,'2024-01-04 09:15:00','2024-01-04 09:15:00'),(4,'How to center text in HTML','How can I center text in HTML? I tried using center but it does not work.',1,5,'2024-01-05 11:20:00','2024-01-05 11:20:00'),(5,'Issues with CSS Flexbox','I am having trouble with Flexbox. How can I evenly space items in a container?',2,6,'2024-01-06 16:45:00','2024-01-06 16:45:00');
+/*!40000 ALTER TABLE `topic_discussion` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_roles`
+--
+
+DROP TABLE IF EXISTS `user_roles`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `user_roles` (
+  `user_id` bigint NOT NULL,
+  `role_id` bigint NOT NULL,
+  PRIMARY KEY (`user_id`,`role_id`),
+  KEY `role_id` (`role_id`),
+  CONSTRAINT `user_roles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `user_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_roles`
+--
+
+LOCK TABLES `user_roles` WRITE;
+/*!40000 ALTER TABLE `user_roles` DISABLE KEYS */;
+INSERT INTO `user_roles` VALUES (1,1),(2,2),(3,3),(14,3),(4,4),(5,4),(6,4),(7,4),(8,4),(9,4),(10,4),(11,4),(12,4),(13,4);
+/*!40000 ALTER TABLE `user_roles` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `users` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `full_name` varchar(255) DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `locked` tinyint(1) DEFAULT '0',
+  `failed_attempts` int DEFAULT '0',
+  `verification_token` varchar(255) DEFAULT NULL,
+  `token_expiry_date` datetime DEFAULT NULL,
+  `verified` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `users`
+--
+
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (1,'admin','sloc.mail.system@gmail.com','Admin','$2a$10$dbkSgQ9mW8ph/DH8YcoDrujNE10AR3n5RMD9wehJV2.cr04l6FxCa',0,0,NULL,NULL,1),(2,'moderator_01',' moderator 1@example.com','Mod One','$2a$10$Lq2vvSTj/naAmyvM583MSOZllNqclLhZy/1PwXgFUS.FgI7MOfzUC',0,0,NULL,NULL,1),(3,'instructor_01','funixtesting12972@gmail.com','Instructor One','$2a$10$JAxB.j.NXTrBY0LQXVXCD.WeQIbocrb3Q.8BJgUvX.pYC0Yq91WZe',0,0,NULL,NULL,1),(4,'student_01','student1@example.com','Student One','$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK',0,0,NULL,NULL,1),(5,'student_02','student2@example.com','Student Two','$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK',0,0,NULL,NULL,1),(6,'student_03','student3@example.com','Student Three','$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK',0,0,NULL,NULL,1),(7,'student_04','student4@example.com','Student Four','$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK',0,0,NULL,NULL,1),(8,'student_05','student5@example.com','Student Five','$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK',0,0,NULL,NULL,1),(9,'student_06','student6@example.com','Student Six','$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK',0,0,NULL,NULL,1),(10,'student_07','student7@example.com','Student Seven','$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK',0,0,NULL,NULL,1),(11,'student_08','student8@example.com','Student Eight','$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK',0,0,NULL,NULL,1),(12,'student_09','student9@example.com','Student Nine','$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK',0,0,NULL,NULL,1),(13,'student_10','student10@example.com','Student Ten','$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK',0,0,NULL,NULL,1),(14,'instructor_02','instructor2@example.com','Instructor Two','$2a$10$JAxB.j.NXTrBY0LQXVXCD.WeQIbocrb3Q.8BJgUvX.pYC0Yq91WZe',0,0,NULL,NULL,1);
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-01-18 15:56:47
