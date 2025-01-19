@@ -1,0 +1,408 @@
+-- Drop tables in reverse order of dependency to avoid foreign key issues
+DROP TABLE IF EXISTS instructor_info;
+DROP TABLE IF EXISTS instructor_course;
+DROP TABLE IF EXISTS enrollment;
+DROP TABLE IF EXISTS rankings;
+DROP TABLE IF EXISTS learned_topic;
+DROP TABLE IF EXISTS study_process;
+DROP TABLE IF EXISTS score_weight;
+DROP TABLE IF EXISTS test_result;
+DROP TABLE IF EXISTS comment;
+DROP TABLE IF EXISTS topic_discussion;
+DROP TABLE IF EXISTS forgot_password;
+DROP TABLE IF EXISTS content_change_temporary;
+DROP TABLE IF EXISTS course_change_temporary;
+DROP TABLE IF EXISTS answer;
+DROP TABLE IF EXISTS question;
+DROP TABLE IF EXISTS exam;
+DROP TABLE IF EXISTS quiz;
+DROP TABLE IF EXISTS reading_lesson;
+DROP TABLE IF EXISTS video_lesson;
+DROP TABLE IF EXISTS topic;
+DROP TABLE IF EXISTS chapter;
+DROP TABLE IF EXISTS course;
+DROP TABLE IF EXISTS user_roles;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS role;
+DROP TABLE IF EXISTS category;
+
+-- Create tables
+
+CREATE TABLE category (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    description TEXT
+);
+
+CREATE TABLE role (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL
+);
+
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    full_name VARCHAR(255),
+    password VARCHAR(255) NOT NULL,
+    locked BOOLEAN DEFAULT FALSE,
+    failed_attempts INT DEFAULT 0,
+    verification_token VARCHAR(255),
+    token_expiry_date DATETIME,
+    verified BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE instructor_info (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT,
+    name VARCHAR(255),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone VARCHAR(255),
+    bio TEXT,
+    avatar_url TEXT
+);
+
+CREATE TABLE user_roles (
+    user_id BIGINT,
+    role_id BIGINT,
+    PRIMARY KEY (user_id, role_id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (role_id) REFERENCES role(id)
+);
+
+CREATE TABLE course (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    description TEXT,
+    thumbnail_url TEXT,
+    category_id BIGINT,
+    instructor_id BIGINT,
+    created_by BIGINT,
+    last_updated_by BIGINT,
+    start_date DATE,
+    end_date DATE,
+    content_status VARCHAR(50) DEFAULT 'DRAFT',
+    approval_status VARCHAR(50) DEFAULT 'NOT_SUBMITTED',
+    reject_reason TEXT,
+    created_at DATE,
+    updated_at DATE,
+    FOREIGN KEY (category_id) REFERENCES category(id),
+    FOREIGN KEY (instructor_id) REFERENCES users(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (last_updated_by) REFERENCES users(id)
+);
+
+CREATE TABLE chapter (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    sequence INT,
+    course_id BIGINT,
+    content_status VARCHAR(50) DEFAULT 'DRAFT',
+    FOREIGN KEY (course_id) REFERENCES course(id)
+);
+
+CREATE TABLE topic (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    description TEXT,
+    topic_type VARCHAR(255),
+    sequence INT,
+    chapter_id BIGINT,
+    content_status VARCHAR(50) DEFAULT 'DRAFT',
+    video_url TEXT,
+    file_url TEXT,
+    pass_point INT,
+    max_point INT,
+    time_limit INT,
+    FOREIGN KEY (chapter_id) REFERENCES chapter(id),
+    UNIQUE (chapter_id, sequence)
+);
+
+CREATE TABLE question (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    content TEXT,
+    point INT,
+    question_type VARCHAR(255),
+    topic_id BIGINT NOT NULL,
+    content_status VARCHAR(255) DEFAULT 'DRAFT',
+    FOREIGN KEY (topic_id) REFERENCES topic(id)
+);
+
+CREATE TABLE answer (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    content TEXT,
+    correct BOOLEAN,
+    question_id BIGINT,
+    content_status VARCHAR(50) DEFAULT 'DRAFT',
+    FOREIGN KEY (question_id) REFERENCES question(id)
+);
+
+CREATE TABLE enrollment (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT,
+    course_id BIGINT,
+    enrollment_date DATE,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (course_id) REFERENCES course(id)
+);
+
+CREATE TABLE test_result (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    highest_score DOUBLE NOT NULL,
+    latest_score DOUBLE NOT NULL,
+    passed BOOLEAN NOT NULL,
+    participation_count INT,
+    test_type VARCHAR(255) NOT NULL,
+    user_id BIGINT NOT NULL,
+    topic_id BIGINT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (topic_id) REFERENCES topic(id)
+);
+
+CREATE TABLE score_weight (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    course_id BIGINT NOT NULL,
+    quiz_weight DOUBLE NOT NULL,
+    exam_weight DOUBLE NOT NULL
+);
+
+CREATE TABLE study_process (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    course_id BIGINT NOT NULL,
+    last_view_topic BIGINT,
+    learning_progress DOUBLE,
+    final_score INT,
+    pass_course BOOLEAN,
+    progress_assessment TEXT
+);
+
+CREATE TABLE learned_topic (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    topic_id BIGINT NOT NULL
+);
+
+
+-- Table for tracking changes to published content
+CREATE TABLE content_change_temporary (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    entity_type VARCHAR(20) NOT NULL,
+    entity_id BIGINT NOT NULL, 
+    action VARCHAR(20) NOT NULL,
+    changes MEDIUMTEXT NOT NULL,
+    updated_by BIGINT NOT NULL,
+    change_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (updated_by) REFERENCES users(id),
+    UNIQUE (entity_type, entity_id)
+);
+
+-- Create topic_discussions table
+CREATE TABLE topic_discussion (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    content TEXT,
+    topic_id BIGINT NOT NULL,
+    created_by BIGINT NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL
+);
+
+-- Create comments table
+CREATE TABLE comment (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    content TEXT NOT NULL,
+    topic_discussion_id BIGINT NOT NULL,
+    created_by BIGINT NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL
+); 
+
+-- Create forgot_password table
+CREATE TABLE forgot_password (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    token VARCHAR(255) NOT NULL,
+    expiry_date DATETIME NOT NULL,
+    UNIQUE (email)
+);
+
+-- Create ranking table
+CREATE TABLE rankings (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    course_id BIGINT NOT NULL,
+    all_course_score DOUBLE NOT NULL,
+    ranking_position INT NOT NULL,
+    UNIQUE (user_id, course_id)
+);
+
+-- Insert sample data
+
+-- Insert sample categories
+INSERT INTO category (name, description) VALUES 
+('Web Development', 'Courses about building websites and web applications'),
+('Data Science', 'Courses about data analysis and machine learning'),
+('Design', 'Courses on graphic and UI/UX design'),
+('Finance', 'Courses on finance and accounting'),
+('Programming', 'Courses on programming languages and algorithms'),
+('Accounting', 'Courses on accounting and finance');
+
+-- Insert sample roles
+INSERT INTO role (name) VALUES 
+('ADMIN'), 
+('MODERATOR'), 
+('INSTRUCTOR'),
+('STUDENT');
+
+-- Insert sample users
+INSERT INTO users (username, email, full_name, password, locked, failed_attempts, verification_token, token_expiry_date, verified) VALUES
+ ('admin', 'sloc.mail.system@gmail.com', 'Admin', '$2a$10$dbkSgQ9mW8ph/DH8YcoDrujNE10AR3n5RMD9wehJV2.cr04l6FxCa', false, 0, NULL, NULL, TRUE),
+('moderator_01', ' moderator 1@example.com', 'Mod One', '$2a$10$FQQim7953z6v2JQ4T64GSez7C1obtRKPxxJ3txyd7gl2eOeK25leS', false, 0, NULL, NULL, TRUE),
+('instructor_01', 'funixtesting12972@gmail.com', 'Instructor One', '$2a$10$JAxB.j.NXTrBY0LQXVXCD.WeQIbocrb3Q.8BJgUvX.pYC0Yq91WZe', false, 0, NULL, NULL, TRUE),
+('student_01', 'student1@example.com', 'Student One', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
+('student_02', 'student2@example.com', 'Student Two', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
+('student_03', 'student3@example.com', 'Student Three', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
+('student_04', 'student4@example.com', 'Student Four', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
+('student_05', 'student5@example.com', 'Student Five', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
+('student_06', 'student6@example.com', 'Student Six', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
+('student_07', 'student7@example.com', 'Student Seven', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
+('student_08', 'student8@example.com', 'Student Eight', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
+('student_09', 'student9@example.com', 'Student Nine', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
+('student_10', 'student10@example.com', 'Student Ten', '$2a$10$LUD6vQhV5lu5U56dBBp80e3mWPIenZ6bkW.vUhx2R1WLKcvU3z7VK', false, 0, NULL, NULL, TRUE),
+('instructor_02', 'instructor2@example.com', 'Instructor Two', '$2a$10$JAxB.j.NXTrBY0LQXVXCD.WeQIbocrb3Q.8BJgUvX.pYC0Yq91WZe', false, 0, NULL, NULL, TRUE);
+
+-- Assign roles to users
+INSERT INTO user_roles (user_id, role_id) VALUES
+(1, 1),  -- admin_user is an Admin
+(2, 2),  -- moderator_01 is a Moderator
+(3, 3),  -- instructor_01 is an Instructor
+(4, 4),  -- student_01 is a Student
+(5, 4),  -- student_02 is a Student
+(6, 4),  -- student_03 is a Student
+(7, 4),  -- student_04 is a Student
+(8, 4),  -- student_05 is a Student
+(9, 4),  -- student_06 is a Student
+(10, 4),  -- student_07 is a Student
+(11, 4),  -- student_08 is a Student
+(12, 4),  -- student_09 is a Student
+(13, 4),  -- student_10 is a Student
+(14, 3);  -- instructor_02 is an Instructor
+
+-- Insert sample courses
+INSERT INTO course (title, description, thumbnail_url, category_id, instructor_id, created_by, last_updated_by, start_date, end_date, content_status, approval_status, reject_reason, created_at, updated_at) VALUES
+('Introduction to Web Development', 'Learn the basics of web development including HTML, CSS, and JavaScript.', '/img/courses/thumbnails/thumbnail1.jpg', 1, 3, 3, 3, '2024-01-01', '2026-06-01', 'PUBLISHED', 'APPROVED', NULL, '2024-01-01', '2024-01-01'),
+('Data Science for Beginners', 'Learn the fundamentals of data science and machine learning.', '/img/courses/thumbnails/thumbnail2.jpg', 2, 3, 3, 3, '2024-02-01', '2024-07-01', 'PUBLISHED', 'APPROVED', NULL, '2024-02-01', '2024-02-01'),
+('Introduction to Python Programming', 'Master the basics of Python programming, including syntax and data structures.', '/img/courses/thumbnails/thumbnail3.jpg', 5, 3, 4, 4, '2024-03-01', '2025-09-01', 'PUBLISHED', 'APPROVED', NULL, '2024-03-01', '2024-03-01'),
+('Basics of Machine Learning', 'Understand the fundamentals of machine learning algorithms and their applications.', '/img/courses/thumbnails/thumbnail4.jpg', 2, 3, 5, 5, '2024-04-01', '2025-10-01', 'PUBLISHED', 'APPROVED', NULL, '2024-04-01', '2024-04-01'),
+('Understanding Cloud Computing', 'Explore the key concepts of cloud computing and its benefits.', '/img/courses/thumbnails/thumbnail5.jpg', 2, 3, 6, 6, '2024-05-01', '2025-11-01', 'PUBLISHED', 'APPROVED', NULL, '2024-05-01', '2024-05-01');
+
+-- Insert sample chapters
+INSERT INTO chapter (title, sequence, course_id, content_status) VALUES
+('Chapter 1: HTML Basics', 1, 1, 'PUBLISHED'),
+('Chapter 2: CSS Fundamentals', 2, 1, 'PUBLISHED'),
+('Chapter 1: Introduction to Data Science', 1, 2, 'PUBLISHED'),
+('Chapter 2: Machine Learning Basics', 2, 2, 'PUBLISHED'),
+('Chapter 1: Python Basics', 1, 3, 'PUBLISHED'),
+('Chapter 2: Python Intermediate', 2, 3, 'PUBLISHED'),
+('Chapter 1: Introduction to Machine Learning', 1, 4, 'PUBLISHED'),
+('Chapter 2: Machine Learning Advanced', 2, 4, 'PUBLISHED'),
+('Chapter 1: Cloud Computing Overview', 1, 5, 'PUBLISHED');
+
+-- Insert sample topics
+INSERT INTO topic (title, description, topic_type, sequence, chapter_id, content_status, video_url, file_url, pass_point, max_point, time_limit) VALUES
+('HTML Syntax', 'Learn the basic syntax of HTML', 'VIDEO', 1, 1, 'PUBLISHED', 'https://www.youtube.com/embed/9r_hbFzA8ho?si=pyTUZYtQjuOYk2Uh', NULL, NULL, NULL, NULL),
+('CSS Selectors', 'Learn about different CSS selectors and how to use them', 'VIDEO', 1, 2, 'PUBLISHED', 'https://www.youtube.com/embed/l1mER1bV0N0?si=Lhp6M1Tzl5La5BQ-', NULL, NULL, NULL, NULL),
+('What is Data Science?', 'Introduction to Data Science concepts', 'READING', 1, 3, 'PUBLISHED', NULL, '/reading/intro_data_science.pdf', NULL, NULL, NULL),
+('HTML Syntax Quiz', 'HTML Syntax Quiz', 'QUIZ', 2, 1, 'PUBLISHED', NULL, NULL, 3, 4, NULL),
+('CSS Selectors Quiz', 'CSS Selectors Quiz', 'QUIZ', 2, 2, 'PUBLISHED', NULL, NULL, 1, 1, NULL),
+('Final Exam for Data Science', 'Final Exam for Data Science', 'EXAM', 2, 4, 'PUBLISHED', NULL, NULL, 1, 1, 120),
+('Basics of Machine Learning', 'Explore the basics of machine learning and its applications.', 'READING', 1, 4, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
+('Introduction to Python', 'Learn the basics of Python programming language.', 'READING', 1, 5, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
+('Introduction to OOP', 'Learn the basics of object-oriented programming in Python.', 'READING', 1, 6, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
+('Supervised Learning', 'Understand the basics of supervised learning algorithms.', 'READING', 1, 7, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
+('Introduction to Neural Networks', 'Learn the structure and working of neural networks.', 'READING', 1, 8, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL),
+('What is Cloud Computing?', 'Introduction to the concept of cloud computing.', 'READING', 1, 9, 'PUBLISHED', NULL, NULL, NULL, NULL, NULL);
+
+
+-- Insert sample questions
+INSERT INTO question (content, point, question_type, topic_id, content_status) VALUES
+('What is HTML?', 1, 'CHOICE_ONE', 4, 'PUBLISHED'),
+('What is a CSS Selector?', 1, 'CHOICE_ONE', 5, 'PUBLISHED'),
+('What is Data Science?', 1, 'CHOICE_ONE', 6, 'PUBLISHED'),
+('What does the &lt;title&gt; tag do?', 1, 'CHOICE_ONE', 4, 'PUBLISHED'),
+('Which tag is used to create a hyperlink?', 1, 'CHOICE_ONE', 4, 'PUBLISHED'),
+('Which of the following are valid HTML tags?', 1, 'CHOICE_MANY', 4, 'PUBLISHED');
+
+
+-- Insert sample answers
+INSERT INTO answer (content, correct, question_id, content_status) VALUES
+('A markup language', TRUE, 1, 'PUBLISHED'),
+('A programming language', FALSE, 1, 'PUBLISHED'),
+('A mathematical formula', FALSE, 1, 'PUBLISHED'),
+('A type of HTML tag', FALSE, 1, 'PUBLISHED'),
+
+('A way to select HTML elements', TRUE, 2, 'PUBLISHED'),
+('A CSS property', FALSE, 2, 'PUBLISHED'),
+('A JavaScript function', FALSE, 2, 'PUBLISHED'),
+('A data format', FALSE, 2, 'PUBLISHED'),
+
+('An interdisciplinary field', TRUE, 3, 'PUBLISHED'),
+('A type of software', FALSE, 3, 'PUBLISHED'),
+('A programming language', FALSE, 3, 'PUBLISHED'),
+('A database', FALSE, 3, 'PUBLISHED'),
+
+('Defines the title of the document', TRUE, 4, 'PUBLISHED'),
+('Adds a link to an image', FALSE, 4, 'PUBLISHED'),
+('Styles the text in bold', FALSE, 4, 'PUBLISHED'),
+('Creates a table in HTML', FALSE, 4, 'PUBLISHED'),
+
+('<a>', TRUE, 5, 'PUBLISHED'),
+('<div>', FALSE, 5, 'PUBLISHED'),
+('<h1>', FALSE, 5, 'PUBLISHED'),
+('<img>', FALSE, 5, 'PUBLISHED'),
+
+('<div>', TRUE, 6, 'PUBLISHED'),
+('<span>', TRUE, 6, 'PUBLISHED'),
+('<customtag>', FALSE, 6, 'PUBLISHED'),
+('<script>', TRUE, 6, 'PUBLISHED'),
+('<abc>', FALSE, 6, 'PUBLISHED');
+
+-- Insert sample enrollment data
+INSERT INTO enrollment (user_id, course_id, enrollment_date) VALUES
+(4, 1, '2024-01-01'),  -- student_01 enrolls in Web Development course
+(4, 2, '2024-02-01');  -- student_01 enrolls in Data Science course
+
+-- Insert sample topic discussions
+INSERT INTO topic_discussion (title, content, topic_id, created_by, created_at, updated_at) VALUES
+('How to use div tags effectively', 'I am having trouble using div tags for layout. Can someone explain how to use div tags effectively?', 1, 4, '2024-01-02 10:00:00', '2024-01-02 10:00:00'),
+('Difference between class and id in CSS', 'What is the difference between class and id in CSS? When should I use class and when should I use id?', 2, 4, '2024-01-03 14:30:00', '2024-01-03 14:30:00'),
+('Resources for learning Data Science', 'Can anyone recommend some good resources for learning more about Data Science?', 3, 4, '2024-01-04 09:15:00', '2024-01-04 09:15:00'),
+('How to center text in HTML', 'How can I center text in HTML? I tried using center but it does not work.', 1, 5, '2024-01-05 11:20:00', '2024-01-05 11:20:00'),
+('Issues with CSS Flexbox', 'I am having trouble with Flexbox. How can I evenly space items in a container?', 2, 6, '2024-01-06 16:45:00', '2024-01-06 16:45:00');
+
+-- Insert sample comments
+INSERT INTO comment (content, topic_discussion_id, created_by, created_at, updated_at) VALUES
+('To use div tags effectively, you should combine them with CSS Flexbox or Grid. This will make layout management much easier.', 1, 3, '2024-01-02 10:30:00', '2024-01-02 10:30:00'),
+('Classes are used when you want to apply styles to multiple elements, while IDs should only be used for unique elements.', 2, 3, '2024-01-03 15:00:00', '2024-01-03 15:00:00'),
+('I recommend Harvard''s CS109 course and the book "Python for Data Analysis".', 3, 3, '2024-01-04 10:00:00', '2024-01-04 10:00:00'),
+('You can use CSS text-align: center to center text.', 4, 7, '2024-01-05 11:45:00', '2024-01-05 11:45:00'),
+('To evenly space items in flexbox, you can use justify-content: space-between or space-around.', 5, 8, '2024-01-06 17:00:00', '2024-01-06 17:00:00'),
+('I am also learning this part, very helpful!', 1, 9, '2024-01-02 11:00:00', '2024-01-02 11:00:00'),
+('Thank you for sharing!', 2, 10, '2024-01-03 15:30:00', '2024-01-03 15:30:00'),
+('I will check out these resources.', 3, 11, '2024-01-04 10:30:00', '2024-01-04 10:30:00'),
+('You can also use margin: auto to center block elements.', 4, 12, '2024-01-05 12:00:00', '2024-01-05 12:00:00'),
+('Flexbox is really powerful for layouts!', 5, 13, '2024-01-06 17:30:00', '2024-01-06 17:30:00');
+
+-- Insert sample instructor info
+INSERT INTO instructor_info (user_id, name, email, phone, bio, avatar_url) VALUES 
+(3, 'Dr. Jame Smith', 'jane.smith@example.com', '+1234567890', 
+'<p>
+  <strong>Dr. Jane Smith</strong> is a professor with over 
+  <strong>10 years of experience</strong> in teaching 
+  <em>computer science</em> and <em>software engineering</em>. 
+  She specializes in <strong>AI</strong> and <strong>machine learning</strong>.
+</p>'
+,  
+'/img/instructor_avatars/professor_jame_smith.png');
