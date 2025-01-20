@@ -1,18 +1,11 @@
 package funix.sloc_system.service;
 
-import funix.sloc_system.dto.CourseDTO;
-import funix.sloc_system.dto.QuestionDTO;
-import funix.sloc_system.dto.AnswerDTO;
-import funix.sloc_system.dto.ChapterDTO;
-import funix.sloc_system.dto.TopicDTO;
-import funix.sloc_system.entity.Course;
+import funix.sloc_system.dto.*;
 import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.mapper.CourseMapper;
 import funix.sloc_system.repository.CourseRepository;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
@@ -21,8 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -30,18 +22,14 @@ import static org.mockito.Mockito.*;
 @Rollback
 public class DTOServiceTest {
 
-    @InjectMocks
+    @Autowired
     private DTOService dtoService;
 
-    @Mock
+    @Autowired
     private CourseRepository courseRepository;
 
-    @Mock
+    @Autowired
     private CourseMapper courseMapper;
-
-    public DTOServiceTest() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     public void testGetAvailableChapters() {

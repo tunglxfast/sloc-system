@@ -4,21 +4,17 @@ import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.Course;
-import funix.sloc_system.entity.ContentChangeTemporary;
 import funix.sloc_system.enums.ApprovalStatus;
-import funix.sloc_system.enums.ContentAction;
 import funix.sloc_system.enums.ContentStatus;
-import funix.sloc_system.enums.EntityType;
 import funix.sloc_system.repository.ContentChangeRepository;
 import funix.sloc_system.repository.CourseRepository;
 import funix.sloc_system.util.AppUtil;
 import funix.sloc_system.util.ReviewCourseHolder;
-
-import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +28,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 @Rollback
 public class ModeratorServiceTest {
+
+    @MockBean
+    private EmailService mailSender;
 
     @Autowired
     private ModeratorService moderatorService;

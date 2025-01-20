@@ -5,11 +5,11 @@ import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.TopicDTO;
 import funix.sloc_system.entity.Chapter;
 import funix.sloc_system.entity.Course;
+import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.repository.ChapterRepository;
 import funix.sloc_system.repository.CourseRepository;
 import funix.sloc_system.util.AppUtil;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,6 +35,8 @@ public class ChapterServiceTest {
 
     @Autowired
     private CourseRepository courseRepository;
+    @Autowired
+    private ChapterRepository chapterRepository;
 
 
     @Test
@@ -105,10 +107,27 @@ public class ChapterServiceTest {
     }
 
     @Test
+    public void testUpdateChapter_CourseContentStatusDraft() throws Exception {
+        Long courseId = 1L;
+        Long chapterId = 1L;
+        String newTitle = "Updated Chapter";
+        Long instructorId = 1L;
+
+        Course course = courseRepository.findById(courseId).orElse(null);
+        course.setContentStatus(ContentStatus.DRAFT);
+        courseRepository.save(course);
+
+        assertDoesNotThrow(() -> chapterService.updateChapter(courseId, chapterId, newTitle, instructorId));
+        Chapter updatedChapter = chapterService.findById(chapterId);
+        assertNotNull(updatedChapter);
+        assertEquals(newTitle, updatedChapter.getTitle());
+    }
+
+    @Test
     public void testSaveOrUpdateChapters() {
         Long courseId = 1L;
         List<String> titles = List.of("Chapter 1", "Chapter 2");
-        List<Long> chapterIds = List.of(1L, 2L);
+        List<Long> chapterIds = List.of(1L, -2L);
 
         List<ChapterDTO> savedChapters = chapterService.saveOrUpdateChapters(courseId, titles, chapterIds);
         assertNotNull(savedChapters);
@@ -164,5 +183,19 @@ public class ChapterServiceTest {
           }
         }
         assertTrue(chapterExist == false);
+    }
+
+    @Test
+    public void testDeleteChapter_CourseDraft() throws Exception {
+        Long courseId = 1L;
+        Long chapterId = 1L;
+        Long instructorId = 1L;
+
+        Course course = courseRepository.findById(courseId).orElse(null);
+        course.setContentStatus(ContentStatus.DRAFT);
+        courseRepository.save(course);
+
+        assertDoesNotThrow(() -> chapterService.deleteChapter(courseId, chapterId, instructorId));
+        assertNull(chapterService.findById(chapterId));
     }
 } 
