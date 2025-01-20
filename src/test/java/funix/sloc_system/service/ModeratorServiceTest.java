@@ -45,7 +45,7 @@ public class ModeratorServiceTest {
     private AppUtil appUtil;
 
     @BeforeEach
-    private void setUp() {
+    public void setUp() {
       // make course 1L pending
       Course course = courseRepository.findById(1L).orElse(null);
       course.setApprovalStatus(ApprovalStatus.PENDING);

@@ -58,6 +58,15 @@ public class InstructorInfoServiceTest {
     }
 
     @Test
+    public void testUpdateInstructorInfo_WrongId() throws IOException {
+        assertThrows(RuntimeException.class, () ->
+                instructorInfoService.updateInstructorInfo(
+                999L, "Jane Doe", "jane.doe@example.com",
+                "987654321", "Updated bio", null)
+        );
+    }
+
+    @Test
     public void testCreateInstructorInfo() throws IOException {
         MockMultipartFile avatar = new MockMultipartFile("avatar", "avatar.png", "image/png", new byte[1]);
         InstructorInfo createdInfo = instructorInfoService.createInstructorInfo(2L, "Alice Smith", "alice.smith@example.com", "123456789", "Bio of Alice", avatar);

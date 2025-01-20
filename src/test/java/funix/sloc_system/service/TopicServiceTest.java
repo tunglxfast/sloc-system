@@ -8,12 +8,8 @@ import funix.sloc_system.enums.ApprovalStatus;
 import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.TopicType;
 import funix.sloc_system.repository.ChapterRepository;
-import funix.sloc_system.repository.ContentChangeRepository;
 import funix.sloc_system.repository.CourseRepository;
 import funix.sloc_system.repository.TopicRepository;
-import funix.sloc_system.util.AppUtil;
-
-import org.checkerframework.checker.units.qual.t;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +46,7 @@ public class TopicServiceTest {
     private final Long INSTRUCTOR_ID = 3L;
 
     @BeforeEach
-    private void setUp() {
+    public void setUp() {
       //make course 1L draft
       Course course = courseRepository.findById(COURSE_ID).orElse(null);
       course.setApprovalStatus(APP_STATUS);

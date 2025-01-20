@@ -9,9 +9,13 @@ import funix.sloc_system.mapper.CourseMapper;
 import funix.sloc_system.repository.CourseRepository;
 import funix.sloc_system.repository.UserRepository;
 import funix.sloc_system.util.AppUtil;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
@@ -45,6 +49,10 @@ public class CourseServiceTest {
 
     private final long INSTRUCTOR_ID = 3L;
     private final long COURSE_ID = 1L;
+    private final long NULL_ID = 999L;
+    private final String WEB_DEVELOPMENT = "Web Development";
+    private final String WEB_DEVELOPMENT_TITLE = "Introduction to Web Development";
+    private final String NOT_EXIST = "not exist";
 
     @Test
     public void testGetAllCourses() {
@@ -112,35 +120,35 @@ public class CourseServiceTest {
 
     @Test
     public void testFindCoursesByTitle() {
-        List<Course> courses = courseService.findCoursesByTitle("Introduction to Web Development");
+        List<Course> courses = courseService.findCoursesByTitle(WEB_DEVELOPMENT_TITLE);
         assertNotNull(courses);
         assertTrue(courses.size() == 1);
     }
 
     @Test
     public void testFindCoursesByCategory() {
-        List<Course> courses = courseService.findCoursesByCategory("Web Development");
+        List<Course> courses = courseService.findCoursesByCategory(WEB_DEVELOPMENT);
         assertNotNull(courses);
         assertTrue(courses.size() == 1);
     }
 
     @Test
     public void testFindCoursesByCategory_WrongCategory() {
-        List<Course> courses = courseService.findCoursesByCategory("Not exist");
+        List<Course> courses = courseService.findCoursesByCategory(NOT_EXIST);
         assertNotNull(courses);
         assertTrue(courses.size() == 0);
     }
 
     @Test
     public void testFindCoursesByTitleAndCategory() {
-        List<Course> courses = courseService.findCoursesByTitleAndCategory("Introduction to Web Development", "Web Development");
+        List<Course> courses = courseService.findCoursesByTitleAndCategory(WEB_DEVELOPMENT_TITLE, WEB_DEVELOPMENT);
         assertNotNull(courses);
         assertTrue(courses.size() == 1);
     }
 
     @Test
     public void testFindCoursesByTitleAndCategory_WrongCategory() {
-        List<Course> courses = courseService.findCoursesByTitleAndCategory("Introduction to Web Development", "Not exist");
+        List<Course> courses = courseService.findCoursesByTitleAndCategory(WEB_DEVELOPMENT_TITLE, NOT_EXIST);
         assertNotNull(courses);
         assertTrue(courses.size() == 0);
     }
@@ -189,6 +197,14 @@ public class CourseServiceTest {
     }
 
     @Test
+    public void testUpdateCourseStatus_CourseNull() {
+        Long courseId = NULL_ID;
+        Exception exception = assertThrows(EntityNotFoundException.class,
+                () -> courseService.updateCourseStatus(courseId, ApprovalStatus.APPROVED, ContentStatus.PUBLISHED));
+        assertTrue(exception.getMessage().contains("Course not found"));
+    }
+
+    @Test
     public void testUpdateCourseInstructor() {
         Long courseId = COURSE_ID; 
         Long instructorId = INSTRUCTOR_ID; 
@@ -197,6 +213,24 @@ public class CourseServiceTest {
         assertNotNull(course);
         User instructor = userRepository.findById(instructorId).orElse(null);
         assertEquals(instructor, course.getInstructor());
+    }
+
+    public void testUpdateCourseInstructor_InstrutorNull() {
+        Long courseId = COURSE_ID;
+        Long instructorId = null;
+        Exception exception = assertThrows(IllegalArgumentException.class,
+                () -> courseService.updateCourseInstructor(courseId, instructorId));
+
+        assertTrue(exception.getMessage().contains("Instructor not found"));
+    }
+
+    public void testUpdateCourseInstructor_CourseNull() {
+        Long courseId = null;
+        Long instructorId = INSTRUCTOR_ID;
+        Exception exception = assertThrows(EntityNotFoundException.class,
+                () -> courseService.updateCourseInstructor(courseId, instructorId));
+
+        assertTrue(exception.getMessage().contains("Course not found"));
     }
 
     @Test
@@ -208,7 +242,7 @@ public class CourseServiceTest {
     @Test
     public void testSubmitForReview_CourseNotExist() {
         Exception exception = assertThrows(IllegalArgumentException.class,
-                () -> courseService.submitForReview(999L));
+                () -> courseService.submitForReview(NULL_ID));
         assertTrue(exception.getMessage().contains("Course not found!"));
     }
 
@@ -323,7 +357,7 @@ public class CourseServiceTest {
 
         MockMultipartFile video = new MockMultipartFile("video", "video.mp4", "video/mp4", new byte[1]);
         Exception exception = assertThrows(RuntimeException.class,
-                () -> courseService.updateCourse(COURSE_ID, courseDTO, null, video, course.getCategory().getId()));
+                () -> courseService.updateCourse(COURSE_ID, courseDTO, NULL_ID, video, course.getCategory().getId()));
 
         assertTrue(exception.getMessage().contains("Missing user information, please login again."));
     }
@@ -337,7 +371,7 @@ public class CourseServiceTest {
 
         MockMultipartFile video = new MockMultipartFile("video", "video.mp4", "video/mp4", new byte[1]);
         Exception exception = assertThrows(RuntimeException.class,
-                () -> courseService.updateCourse(COURSE_ID, courseDTO, INSTRUCTOR_ID, video, null));
+                () -> courseService.updateCourse(COURSE_ID, courseDTO, INSTRUCTOR_ID, video, NULL_ID));
 
         assertTrue(exception.getMessage().contains("Category information error, please contact support center."));
     }
@@ -358,9 +392,117 @@ public class CourseServiceTest {
     @Test
     public void testResetCourse() {
         Course course = courseRepository.findById(COURSE_ID).orElse(null);
-        course.setApprovalStatus(ApprovalStatus.PENDING);
-        courseRepository.save(course);
         assertDoesNotThrow(() -> courseService.resetCourse(COURSE_ID, INSTRUCTOR_ID));
+    }
+
+    @Test
+    public void testGetCoursesWithPagination() {
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Course> coursePage = courseService.getCoursesWithPagination(pageable);
+        assertTrue(coursePage.getTotalPages() == 2);
+        assertTrue(coursePage.getTotalElements() == 4);
+    }
+
+    @Test
+    public void testSearchCoursesByCategoryWithPagination() {
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Course> coursePage = courseService.searchCoursesByCategoryWithPagination(WEB_DEVELOPMENT, pageable);
+        assertEquals(1, coursePage.getTotalPages());
+        assertEquals(1, coursePage.getTotalElements());
+    }
+
+    @Test
+    public void testSearchCoursesByCategoryWithPagination_CategoryNotExist() {
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Course> coursePage = courseService.searchCoursesByCategoryWithPagination(NOT_EXIST, pageable);
+        assertTrue(coursePage.isEmpty());
+    }
+
+    @Test
+    public void testSearchCoursesByCategoryWithPagination_CategoryNull() {
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Course> coursePage = courseService.searchCoursesByCategoryWithPagination(null, pageable);
+        assertTrue(coursePage.isEmpty());
+    }
+
+    @Test
+    public void testSearchCoursesByTitleWithPagination() {
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Course> coursePage = courseService.searchCoursesByTitleWithPagination(WEB_DEVELOPMENT_TITLE, pageable);
+        assertEquals(1, coursePage.getTotalPages());
+        assertEquals(1, coursePage.getTotalElements());
+    }
+
+    @Test
+    public void testSearchCoursesByTitleWithPagination_TitleNull() {
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Course> coursePage = courseService.searchCoursesByTitleWithPagination(null, pageable);
+        assertTrue(coursePage.isEmpty());
+    }
+
+    @Test
+    public void testSearchCoursesByTitleAndCategoryWithPagination() {
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Course> coursePage = courseService
+                .searchCoursesByTitleAndCategoryWithPagination(WEB_DEVELOPMENT_TITLE, WEB_DEVELOPMENT, pageable);
+        assertEquals(1, coursePage.getTotalPages());
+        assertEquals(1, coursePage.getTotalElements());
+    }
+
+    @Test
+    public void testSearchCoursesByTitleAndCategoryWithPagination_TitleNull() {
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Course> coursePage = courseService
+                .searchCoursesByTitleAndCategoryWithPagination(null, WEB_DEVELOPMENT, pageable);
+        assertTrue(coursePage.isEmpty());
+    }
+
+    @Test
+    public void testSearchCoursesByTitleAndCategoryWithPagination_CategoryNotExist() {
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Course> coursePage = courseService
+                .searchCoursesByTitleAndCategoryWithPagination(WEB_DEVELOPMENT_TITLE, NOT_EXIST, pageable);
+        assertTrue(coursePage.isEmpty());
+    }
+
+    @Test
+    public void testGetCoursesPagination() {
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Course> coursePage = courseService.getCoursesPagination(WEB_DEVELOPMENT_TITLE, WEB_DEVELOPMENT, pageable);
+        assertEquals(1, coursePage.getTotalPages());
+        assertEquals(1, coursePage.getTotalElements());
+    }
+
+    @Test
+    public void testGetCoursesPagination_TitleAndCategoryNull() {
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Course> coursePage = courseService.getCoursesPagination(null, null, pageable);
+        assertTrue(coursePage.getTotalPages() == 2);
+        assertTrue(coursePage.getTotalElements() == 4);
+    }
+
+    @Test
+    public void testGetCoursesPagination_TitleNull() {
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Course> coursePage = courseService.getCoursesPagination(null, WEB_DEVELOPMENT, pageable);
+        assertEquals(1, coursePage.getTotalPages());
+        assertEquals(1, coursePage.getTotalElements());
+    }
+    @Test
+    public void testGetCoursesPagination_CategoryNull() {
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Course> coursePage = courseService.getCoursesPagination(WEB_DEVELOPMENT_TITLE, null, pageable);
+        assertEquals(1, coursePage.getTotalPages());
+        assertEquals(1, coursePage.getTotalElements());
+    }
+
+    @Test
+    public void testUpdateCourse_EndDateEqualStartDate_ThrowException() throws Exception {
+        CourseDTO courseDTO = appUtil.getEditingCourseDTO(COURSE_ID);
+        courseDTO.setEndDate(courseDTO.getStartDate());
+        Exception exception = assertThrows(RuntimeException.class,
+                () -> courseService.updateCourse(COURSE_ID, courseDTO, INSTRUCTOR_ID, null, courseDTO.getCategory().getId()));
+        assertTrue(exception.getMessage().contains("Course end date must before course start date at least 7 day!"));
     }
 
 } 

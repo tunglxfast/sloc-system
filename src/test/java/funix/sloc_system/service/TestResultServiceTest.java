@@ -1,16 +1,13 @@
 package funix.sloc_system.service;
 
 import funix.sloc_system.dto.TestResultDTO;
-import funix.sloc_system.entity.Answer;
 import funix.sloc_system.entity.TestResult;
 import funix.sloc_system.entity.Topic;
 import funix.sloc_system.entity.User;
 import funix.sloc_system.enums.TopicType;
-import funix.sloc_system.repository.*;
-import funix.sloc_system.dto.QuestionDTO;
-import funix.sloc_system.mapper.TestResultMapper;
-import funix.sloc_system.mapper.TopicMapper;
-
+import funix.sloc_system.repository.TestResultRepository;
+import funix.sloc_system.repository.TopicRepository;
+import funix.sloc_system.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -46,7 +43,7 @@ public class TestResultServiceTest {
     private final long TOPIC_ID = 4L;
 
     @BeforeEach
-    private void setUp() {
+    public void setUp() {
       User user = userRepository.findById(USER_ID).orElse(null);
       Topic topic = topicRepository.findById(TOPIC_ID).orElse(null);
       TestResult testResult = new TestResult(0.0, 0.0, false, 1, TopicType.QUIZ.name(), user, topic);

@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -30,6 +30,19 @@ public class DTOServiceTest {
 
     @Autowired
     private CourseMapper courseMapper;
+
+    @Test
+    public void testGetAvailableCourseDTO() {
+        CourseDTO courseDTO = dtoService.getAvailableCourseDTO(1L);
+        assertEquals(1L, courseDTO.getId());
+    }
+
+    @Test
+    public void testGetAvailableCourseDTO_WrongId() {
+        Exception exception = assertThrows(IllegalArgumentException.class,
+                () -> dtoService.getAvailableCourseDTO(999L));
+        assertTrue(exception.getMessage().contains("Course not found"));
+    }
 
     @Test
     public void testGetAvailableChapters() {
