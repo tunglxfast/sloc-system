@@ -1,22 +1,19 @@
 package funix.sloc_system.service;
 
 import funix.sloc_system.entity.User;
-import funix.sloc_system.repository.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -27,6 +24,10 @@ public class UserServiceTest {
     @Autowired
     private UserService userService;
 
+    private final String STUDENT_USER = "student_01";
+    private final String STUDENT_EMAIL = "student1@example.com";
+    private final Long STUDENT_ID = 4L;
+
     @Test
     public void testCheckRegistered_UsernameAndEmailNotEmpty() {
         String result = userService.checkRegistered("testuser", "test@example.com");
@@ -35,13 +36,13 @@ public class UserServiceTest {
 
     @Test
     public void testCheckRegistered_UsernameExists() {
-        String result = userService.checkRegistered("student_01", "student1@example.com");
+        String result = userService.checkRegistered(STUDENT_USER, STUDENT_EMAIL);
         assertEquals("Username already exists", result);
     }
 
     @Test
     public void testCheckRegistered_EmailExists() {
-        String result = userService.checkRegistered("newUser", "student1@example.com");
+        String result = userService.checkRegistered("newUser", STUDENT_EMAIL);
         assertEquals("Email already exists", result);
     }
 
@@ -53,9 +54,9 @@ public class UserServiceTest {
 
     @Test
     public void testFindByUsername_UserExists() {
-        User user = userService.findByUsername("student_01");
+        User user = userService.findByUsername(STUDENT_USER);
         assertNotNull(user);
-        assertEquals("student_01", user.getUsername());
+        assertEquals(STUDENT_USER, user.getUsername());
     }
 
     @Test
@@ -73,23 +74,23 @@ public class UserServiceTest {
 
     @Test
     public void testUpdateUser() {
-        User user = userService.findByUsername("student_01");
+        User user = userService.findByUsername(STUDENT_USER);
         user.setFullName("Updated Name");
         userService.updateUser(user);
 
-        User updatedUser = userService.findByUsername("student_01");
+        User updatedUser = userService.findByUsername(STUDENT_USER);
         assertEquals("Updated Name", updatedUser.getFullName());
     }
 
     @Test
     public void testGetCurrentUser() {
         // create authentication mock
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken("student_01", "studentpassword", AuthorityUtils.createAuthorityList("STUDENT"));
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(STUDENT_USER, "studentpassword", AuthorityUtils.createAuthorityList("STUDENT"));
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         User currentUser = userService.getCurrentUser();
         assertNotNull(currentUser);
-        assertEquals("student_01", currentUser.getUsername());
+        assertEquals(STUDENT_USER, currentUser.getUsername());
 
         // clear context after test
         SecurityContextHolder.clearContext();
@@ -100,5 +101,43 @@ public class UserServiceTest {
         assertThrows(NullPointerException.class, () -> {
             userService.getCurrentUser();
         });
+    }
+
+    @Test
+    public void testExistsByEmail() {
+        assertTrue(userService.existsByEmail(STUDENT_EMAIL));
+    }
+
+    @Test
+    public void testFindById() {
+        User user = userService.findById(STUDENT_ID);
+        assertNotNull(user);
+        assertEquals(STUDENT_ID, user.getId());
+    }
+
+    @Test
+    public void testGetUserById() {
+        User user = userService.getUserById(STUDENT_ID);
+        assertNotNull(user);
+        assertEquals(STUDENT_ID, user.getId());
+    }
+
+    @Test
+    public void testGetAllInstructors() {
+        List<User> users = userService.getAllInstructors();
+        assertNotNull(users);
+        assertTrue(users.size() == 2);
+    }
+
+    @Test
+    public void testFindByEmail() {
+        User user = userService.findByEmail(STUDENT_EMAIL);
+        assertNotNull(user);
+        assertEquals(STUDENT_ID, user.getId());
+    }
+
+    @Test
+    public void testExistsByUsername() {
+        assertTrue(userService.existsByUsername(STUDENT_USER));
     }
 }

@@ -1,12 +1,17 @@
 package funix.sloc_system.service;
 
+import funix.sloc_system.dto.ChapterDTO;
 import funix.sloc_system.dto.CourseDTO;
 import funix.sloc_system.dto.QuestionDTO;
+import funix.sloc_system.dto.TopicDTO;
+import funix.sloc_system.entity.Course;
 import funix.sloc_system.entity.Question;
-import funix.sloc_system.entity.Topic;
+import funix.sloc_system.enums.ApprovalStatus;
+import funix.sloc_system.enums.ContentStatus;
 import funix.sloc_system.enums.QuestionType;
+import funix.sloc_system.mapper.QuestionMapper;
+import funix.sloc_system.repository.CourseRepository;
 import funix.sloc_system.repository.QuestionRepository;
-import funix.sloc_system.repository.TopicRepository;
 import funix.sloc_system.util.AppUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,59 +33,145 @@ public class QuestionServiceTest {
 
     @Autowired
     private QuestionService questionService;
+    @Autowired
+    private QuestionRepository questionRepository;
+    @Autowired
+    private CourseRepository courseRepository;
+    @Autowired
+    private QuestionMapper questionMapper;
+    @Autowired
+    private AppUtil appUtil;
+
+    private final Long COURSE_ID = 1L;
+    private final Long TOPIC_ID = 4L;
+    private final Long INSTRUCTOR_ID = 3L;
+    private final String CONTENT = "1+1";
+    private final Long EDIT_QUESTION_ID = 1L;
+
 
     @Test
     public void testGetQuestionsByTopic() {
-        Long topicId = 1L;
-        List<Question> questions = new ArrayList<>();
+        Long topicId = TOPIC_ID;
 
         List<Question> result = questionService.getQuestionsByTopic(topicId);
         assertNotNull(result);
-        assertEquals(questions, result);
+        assertTrue(result.size() > 0);
     }
 
     @Test
     public void testSaveQuestionChanges_DraftCourse() throws Exception {
-        QuestionDTO questionDTO = new QuestionDTO();
-        questionDTO.setId(1L);
+        Question editQuestion = questionRepository.findById(EDIT_QUESTION_ID).orElse(null);
+        String oldContent = editQuestion.getContent();
 
-        assertDoesNotThrow(() -> questionService.saveQuestionChanges(questionDTO, 1L));
+        QuestionDTO questionDTO = questionMapper.toDTO(editQuestion);
+        questionDTO.setContent(CONTENT);
+
+        // make course draft
+        Course course = courseRepository.findById(COURSE_ID).orElse(null);
+        assertNotNull(course);
+        course.setContentStatus(ContentStatus.DRAFT);
+        course.setApprovalStatus(ApprovalStatus.NOT_SUBMITTED);
+        courseRepository.save(course);
+
+        assertDoesNotThrow(() -> questionService.saveQuestionChanges(questionDTO, INSTRUCTOR_ID));
+        Question question = questionRepository.findById(EDIT_QUESTION_ID).orElse(null);
+        assertNotNull(question);
+        assertNotEquals(oldContent, question.getContent());
+        assertEquals(CONTENT, question.getContent());
     }
 
     @Test
     public void testSaveQuestionChanges_NonDraftCourse() throws Exception {
-        QuestionDTO questionDTO = new QuestionDTO();
-        questionDTO.setId(1L);
+        Question editQuestion = questionRepository.findById(EDIT_QUESTION_ID).orElse(null);
+        String oldContent = editQuestion.getContent();
 
-        assertDoesNotThrow(() -> questionService.saveQuestionChanges(questionDTO, 1L));
+        QuestionDTO questionDTO = questionMapper.toDTO(editQuestion);
+        questionDTO.setContent(CONTENT);
+
+        assertDoesNotThrow(() -> questionService.saveQuestionChanges(questionDTO, INSTRUCTOR_ID));
+
+        Question question = questionRepository.findById(EDIT_QUESTION_ID).orElse(null);
+        assertNotNull(question);
+        assertEquals(oldContent, question.getContent());
+
+        CourseDTO course = appUtil.getEditingCourseDTO(COURSE_ID);
+        boolean updated = false;
+        for (ChapterDTO chapterDTO : course.getChapters()) {
+            for (TopicDTO topicDTO : chapterDTO.getTopics()) {
+                if (topicDTO.getQuestions()!=null) {
+                    for (QuestionDTO q : topicDTO.getQuestions()) {
+                        if (EDIT_QUESTION_ID.equals(q.getId())) {
+                            if (CONTENT.equals(q.getContent())){
+                                updated = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        assertTrue(updated);
     }
 
     @Test
     public void testHandleTopicQuestions_DraftCourse() throws Exception {
-        Long topicId = 4L;
-        List<QuestionDTO> questionDTOs = new ArrayList<>();
-        QuestionDTO questionDTO = new QuestionDTO();
-        questionDTO.setContent("1+1");
-        questionDTO.setPoint(1);
-        questionDTO.setTopicId(topicId);
-        questionDTO.setQuestionType(QuestionType.INPUT_TEXT.name());
+        // make course draft
+        Course course = courseRepository.findById(COURSE_ID).orElse(null);
+        assertNotNull(course);
+        course.setContentStatus(ContentStatus.DRAFT);
+        course.setApprovalStatus(ApprovalStatus.NOT_SUBMITTED);
+        courseRepository.save(course);
 
+        Long topicId = TOPIC_ID;
+        List<QuestionDTO> questionDTOs = new ArrayList<>();
+        Question question = questionRepository.findById(EDIT_QUESTION_ID).orElse(null);
+        QuestionDTO questionDTO = questionMapper.toDTO(question);
+        questionDTO.setContent(CONTENT);
         questionDTOs.add(questionDTO);
 
-        List<QuestionDTO> result = questionService.handleTopicQuestions(topicId, questionDTOs, 3L);
+        List<QuestionDTO> result = questionService.handleTopicQuestions(topicId, questionDTOs, INSTRUCTOR_ID);
+        assertNotNull(result);
+        assertEquals(questionDTOs.size(), result.size());
+    }
+
+    @Test
+    public void testHandleTopicQuestions_PublishCourse() throws Exception {
+        // make course draft
+        Course course = courseRepository.findById(COURSE_ID).orElse(null);
+        assertNotNull(course);
+        course.setContentStatus(ContentStatus.PUBLISHED);
+        course.setApprovalStatus(ApprovalStatus.APPROVED);
+        courseRepository.save(course);
+
+        Long topicId = TOPIC_ID;
+        List<QuestionDTO> questionDTOs = new ArrayList<>();
+        Question question = questionRepository.findById(EDIT_QUESTION_ID).orElse(null);
+        QuestionDTO questionDTO = questionMapper.toDTO(question);
+        questionDTO.setContent(CONTENT);
+        questionDTOs.add(questionDTO);
+
+        Question newQuestion = new Question();
+        newQuestion.setContent(CONTENT);
+        newQuestion.setQuestionType(QuestionType.INPUT_TEXT);
+        newQuestion.setTopic(question.getTopic());
+        newQuestion.setPoint(1);
+
+        questionDTOs.add(questionMapper.toDTO(newQuestion));
+
+        List<QuestionDTO> result = questionService.handleTopicQuestions(topicId, questionDTOs, INSTRUCTOR_ID);
         assertNotNull(result);
         assertEquals(questionDTOs.size(), result.size());
     }
 
     @Test
     public void testCreateQuestion() throws Exception {
-        Long topicId = 4L;
+        Long topicId = TOPIC_ID;
         QuestionDTO questionDTO = new QuestionDTO();
-        questionDTO.setContent("1+1");
+        questionDTO.setContent(CONTENT);
         questionDTO.setPoint(1);
         questionDTO.setTopicId(topicId);
         questionDTO.setQuestionType(QuestionType.INPUT_TEXT.name());
-        QuestionDTO result = questionService.createQuestion(topicId, questionDTO, 3L);
+        QuestionDTO result = questionService.createQuestion(topicId, questionDTO, INSTRUCTOR_ID);
         assertNotNull(result);
     }
 } 
