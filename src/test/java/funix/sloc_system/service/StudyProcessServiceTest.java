@@ -52,6 +52,14 @@ public class StudyProcessServiceTest {
     }
 
     @Test
+    public void testSaveLastViewTopic_ReadingTopic() {
+        Long readingTopicId = 1L;
+        StudyProcess studyProcess = studyProcessService.saveLastViewTopic(STUDENT_ID, COURSE_ID, readingTopicId);
+        assertNotNull(studyProcess);
+        assertEquals(readingTopicId, studyProcess.getLastViewTopic());
+    }
+
+    @Test
     public void testSaveLastViewTopic_UserIdNull() {
         StudyProcess studyProcess = studyProcessService.saveLastViewTopic(null, COURSE_ID, TOPIC_ID);
         assertNull(studyProcess);

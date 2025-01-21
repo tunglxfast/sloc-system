@@ -10,6 +10,7 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -68,7 +69,12 @@ public class InstructorInfoServiceTest {
 
     @Test
     public void testCreateInstructorInfo() throws IOException {
-        MockMultipartFile avatar = new MockMultipartFile("avatar", "avatar.png", "image/png", new byte[1]);
+        MockMultipartFile avatar = new MockMultipartFile("avatar", "avatar.png", "image/png", new byte[1]) {
+            @Override
+            public void transferTo(File dest){
+                // do nothing
+            }
+        };
         InstructorInfo createdInfo = instructorInfoService.createInstructorInfo(2L, "Alice Smith", "alice.smith@example.com", "123456789", "Bio of Alice", avatar);
         
         assertNotNull(createdInfo);

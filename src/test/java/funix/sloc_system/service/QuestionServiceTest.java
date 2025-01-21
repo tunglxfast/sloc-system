@@ -135,6 +135,35 @@ public class QuestionServiceTest {
     }
 
     @Test
+    public void testHandleTopicQuestions_PublishCourse() throws Exception {
+        // make course draft
+        Course course = courseRepository.findById(COURSE_ID).orElse(null);
+        assertNotNull(course);
+        course.setContentStatus(ContentStatus.PUBLISHED);
+        course.setApprovalStatus(ApprovalStatus.APPROVED);
+        courseRepository.save(course);
+
+        Long topicId = TOPIC_ID;
+        List<QuestionDTO> questionDTOs = new ArrayList<>();
+        Question question = questionRepository.findById(EDIT_QUESTION_ID).orElse(null);
+        QuestionDTO questionDTO = questionMapper.toDTO(question);
+        questionDTO.setContent(CONTENT);
+        questionDTOs.add(questionDTO);
+
+        Question newQuestion = new Question();
+        newQuestion.setContent(CONTENT);
+        newQuestion.setQuestionType(QuestionType.INPUT_TEXT);
+        newQuestion.setTopic(question.getTopic());
+        newQuestion.setPoint(1);
+
+        questionDTOs.add(questionMapper.toDTO(newQuestion));
+
+        List<QuestionDTO> result = questionService.handleTopicQuestions(topicId, questionDTOs, INSTRUCTOR_ID);
+        assertNotNull(result);
+        assertEquals(questionDTOs.size(), result.size());
+    }
+
+    @Test
     public void testCreateQuestion() throws Exception {
         Long topicId = TOPIC_ID;
         QuestionDTO questionDTO = new QuestionDTO();

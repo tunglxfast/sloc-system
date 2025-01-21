@@ -10,6 +10,7 @@ import funix.sloc_system.repository.CourseRepository;
 import funix.sloc_system.repository.UserRepository;
 import funix.sloc_system.util.AppUtil;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,7 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,6 +55,18 @@ public class CourseServiceTest {
     private final String WEB_DEVELOPMENT = "Web Development";
     private final String WEB_DEVELOPMENT_TITLE = "Introduction to Web Development";
     private final String NOT_EXIST = "not exist";
+    private MockMultipartFile thumbnailFile;
+
+    @BeforeEach
+    public void setUp() {
+        // prepare thumbnail
+        thumbnailFile = new MockMultipartFile("thumbnailFile", "thumbnail.png", "image/png", "thumbnailFile".getBytes()) {
+            @Override
+            public void transferTo(File dest){
+                // do nothing
+            }
+        };
+    }
 
     @Test
     public void testGetAllCourses() {
@@ -302,8 +316,7 @@ public class CourseServiceTest {
         courseDTO.setStartDate(exitedCourseDTO.getStartDate());
         courseDTO.setEndDate(exitedCourseDTO.getEndDate());
 
-        MockMultipartFile video = new MockMultipartFile("video", "video.mp4", "video/mp4", new byte[1]);
-        CourseDTO returnCourseDTO = courseService.createNewCourse(courseDTO, INSTRUCTOR_ID, video, course.getCategory().getId());
+        CourseDTO returnCourseDTO = courseService.createNewCourse(courseDTO, INSTRUCTOR_ID, thumbnailFile, course.getCategory().getId());
 
         assertNotNull(returnCourseDTO);
         assertNotNull(returnCourseDTO.getId());
@@ -319,8 +332,7 @@ public class CourseServiceTest {
         CourseDTO courseDTO = new CourseDTO();
         courseDTO.setTitle("New Course");
 
-        MockMultipartFile video = new MockMultipartFile("video", "video.mp4", "video/mp4", new byte[1]);
-        courseService.updateCourse(COURSE_ID, courseDTO, INSTRUCTOR_ID, video, course.getCategory().getId());
+        courseService.updateCourse(COURSE_ID, courseDTO, INSTRUCTOR_ID, thumbnailFile, course.getCategory().getId());
 
         CourseDTO afterCourse = appUtil.getEditingCourseDTO(COURSE_ID);
 
@@ -338,8 +350,7 @@ public class CourseServiceTest {
         CourseDTO courseDTO = new CourseDTO();
         courseDTO.setTitle("New Course");
 
-        MockMultipartFile video = new MockMultipartFile("video", "video.mp4", "video/mp4", new byte[1]);
-        courseService.updateCourse(COURSE_ID, courseDTO, INSTRUCTOR_ID, video, course.getCategory().getId());
+        courseService.updateCourse(COURSE_ID, courseDTO, INSTRUCTOR_ID, thumbnailFile, course.getCategory().getId());
 
         Course afterCourse = courseRepository.findById(COURSE_ID).orElse(null);
 
@@ -355,9 +366,8 @@ public class CourseServiceTest {
         CourseDTO courseDTO = new CourseDTO();
         courseDTO.setTitle("New Course");
 
-        MockMultipartFile video = new MockMultipartFile("video", "video.mp4", "video/mp4", new byte[1]);
         Exception exception = assertThrows(RuntimeException.class,
-                () -> courseService.updateCourse(COURSE_ID, courseDTO, NULL_ID, video, course.getCategory().getId()));
+                () -> courseService.updateCourse(COURSE_ID, courseDTO, NULL_ID, thumbnailFile, course.getCategory().getId()));
 
         assertTrue(exception.getMessage().contains("Missing user information, please login again."));
     }
@@ -369,9 +379,8 @@ public class CourseServiceTest {
         CourseDTO courseDTO = new CourseDTO();
         courseDTO.setTitle("New Course");
 
-        MockMultipartFile video = new MockMultipartFile("video", "video.mp4", "video/mp4", new byte[1]);
         Exception exception = assertThrows(RuntimeException.class,
-                () -> courseService.updateCourse(COURSE_ID, courseDTO, INSTRUCTOR_ID, video, NULL_ID));
+                () -> courseService.updateCourse(COURSE_ID, courseDTO, INSTRUCTOR_ID, thumbnailFile, NULL_ID));
 
         assertTrue(exception.getMessage().contains("Category information error, please contact support center."));
     }
