@@ -81,10 +81,34 @@ public class DTOServiceTest {
     }
 
     @Test
+    public void testGetAvailableQuestions_PUBLISHED_EDITING() {
+        TopicDTO topicDTO = new TopicDTO();
+        QuestionDTO questionDTO = new QuestionDTO();
+        questionDTO.setContentStatus(ContentStatus.PUBLISHED_EDITING.name());
+        List<QuestionDTO> questions = new ArrayList<>();
+        questions.add(questionDTO);
+        topicDTO.setQuestions(questions);
+        List<QuestionDTO> availableQuestions = dtoService.getAvailableQuestions(topicDTO);
+        assertEquals(1, availableQuestions.size());
+    }
+
+    @Test
     public void testGetAvailableAnswers() {
         QuestionDTO questionDTO = new QuestionDTO();
         AnswerDTO answerDTO = new AnswerDTO();
         answerDTO.setContentStatus(ContentStatus.PUBLISHED.name());
+        List<AnswerDTO> answers = new ArrayList<>();
+        answers.add(answerDTO);
+        questionDTO.setAnswers(answers);
+        List<AnswerDTO> availableAnswers = dtoService.getAvailableAnswers(questionDTO);
+        assertEquals(1, availableAnswers.size());
+    }
+
+    @Test
+    public void testGetAvailableAnswers_PUBLISHED_EDITING() {
+        QuestionDTO questionDTO = new QuestionDTO();
+        AnswerDTO answerDTO = new AnswerDTO();
+        answerDTO.setContentStatus(ContentStatus.PUBLISHED_EDITING.name());
         List<AnswerDTO> answers = new ArrayList<>();
         answers.add(answerDTO);
         questionDTO.setAnswers(answers);

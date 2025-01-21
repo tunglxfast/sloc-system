@@ -28,7 +28,7 @@ public class MinioService {
     private static final long MAX_PDF_SIZE = 5 * 1024 * 1024; // 5MB
     private static final long MAX_VIDEO_SIZE = 150 * 1024 * 1024; // 150MB
 
-    private MinioClient getMinioClient() {
+    protected MinioClient getMinioClient() {
         return MinioClient.builder()
                 .endpoint(minioEndpoint)
                 .credentials(accessKey, secretKey)
@@ -103,4 +103,8 @@ public class MinioService {
         }
         return true;
     }
-} 
+
+    public void setBucket(String bucket) {
+        this.bucket = bucket;
+    }
+}

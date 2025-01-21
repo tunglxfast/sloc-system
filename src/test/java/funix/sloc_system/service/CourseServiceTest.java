@@ -23,6 +23,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,6 +85,16 @@ public class CourseServiceTest {
 
     @Test
     public void testArchiveExpiredCourses() {
+        // turn ARCHIVED to PUBLISHED
+        List<Course> allCourses = courseService.getAllCourses();
+        for (Course course : allCourses) {
+            if (course.getContentStatus().equals(ContentStatus.ARCHIVED)) {
+                if (course.getEndDate().isBefore(LocalDate.now())) {
+                    course.setContentStatus(ContentStatus.PUBLISHED);
+                }
+            }
+        }
+
         courseService.archiveExpiredCourses();
         List<Course> courseList = courseService.getAllCourses();
         boolean haveArchived = false;
@@ -176,7 +187,7 @@ public class CourseServiceTest {
     }
 
     @Test
-    public void testDeleteDraftCourse() throws Exception {
+    public void testDeleteCourse_CourseDraft() throws Exception {
         Course existCourse = courseRepository.findById(COURSE_ID).orElse(null);
         Course course = new Course();
         course.setTitle(existCourse.getTitle());
@@ -193,11 +204,11 @@ public class CourseServiceTest {
     }
 
     @Test
-    public void testDeleteCourseRequest() throws Exception {
-        Long courseId = COURSE_ID; 
-        Long instructorId = INSTRUCTOR_ID; 
+    public void testDeleteCourse_WrongCourse() throws Exception {
+        Long courseId = 999L;
+        Long instructorId = INSTRUCTOR_ID;
         String result = courseService.deleteCourse(courseId, instructorId);
-        assertEquals("Delete course request is sent, please wait for approval.", result);
+        assertEquals("Course not found.", result);
     }
 
     @Test
@@ -323,6 +334,51 @@ public class CourseServiceTest {
 
         assertEquals("New Course", returnCourseDTO.getTitle());
         assertNotEquals(returnCourseDTO.getId(), exitedCourseDTO.getId());
+    }
+
+    @Test
+    public void testCreateNewCourse_FileTooBig() throws Exception {
+        Course course = courseRepository.findById(COURSE_ID).orElse(null);
+        CourseDTO exitedCourseDTO = courseMapper.toDTO(course);
+
+        CourseDTO courseDTO = new CourseDTO();
+        courseDTO.setTitle("New Course");
+        courseDTO.setCategory(exitedCourseDTO.getCategory());
+        courseDTO.setInstructor(exitedCourseDTO.getInstructor());
+        courseDTO.setCreatedBy(exitedCourseDTO.getCreatedBy());
+        courseDTO.setStartDate(exitedCourseDTO.getStartDate());
+        courseDTO.setEndDate(exitedCourseDTO.getEndDate());
+
+        thumbnailFile = new MockMultipartFile("thumbnailFile", "thumbnail.png", "image/png", new byte[11 * 1024 * 1024]) {
+            @Override
+            public void transferTo(File dest){
+                // do nothing
+            }
+        };
+
+        Exception exception = assertThrows(IllegalArgumentException.class,
+                () -> courseService.createNewCourse(courseDTO, INSTRUCTOR_ID, thumbnailFile, course.getCategory().getId()));
+        assertTrue(exception.getMessage().contains("Thumbnail size must be less than 10MB"));
+
+    }
+
+    @Test
+    public void testCreateNewCourse_FileNull() throws Exception {
+        Course course = courseRepository.findById(COURSE_ID).orElse(null);
+        CourseDTO exitedCourseDTO = courseMapper.toDTO(course);
+
+        CourseDTO courseDTO = new CourseDTO();
+        courseDTO.setTitle("New Course");
+        courseDTO.setCategory(exitedCourseDTO.getCategory());
+        courseDTO.setInstructor(exitedCourseDTO.getInstructor());
+        courseDTO.setCreatedBy(exitedCourseDTO.getCreatedBy());
+        courseDTO.setStartDate(exitedCourseDTO.getStartDate());
+        courseDTO.setEndDate(exitedCourseDTO.getEndDate());
+
+        Exception exception = assertThrows(Exception.class,
+                () -> courseService.createNewCourse(courseDTO, INSTRUCTOR_ID, null, course.getCategory().getId()));
+        assertTrue(exception.getMessage().contains("Can not upload file."));
+
     }
 
     @Test

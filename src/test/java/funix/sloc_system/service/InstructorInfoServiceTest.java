@@ -75,9 +75,40 @@ public class InstructorInfoServiceTest {
                 // do nothing
             }
         };
-        InstructorInfo createdInfo = instructorInfoService.createInstructorInfo(2L, "Alice Smith", "alice.smith@example.com", "123456789", "Bio of Alice", avatar);
+        InstructorInfo createdInfo = instructorInfoService.createInstructorInfo(
+                2L, "Alice Smith", "alice.smith@example.com",
+                "123456789", "Bio of Alice", avatar);
         
         assertNotNull(createdInfo);
         assertEquals("Alice Smith", createdInfo.getName());
+        assertNotNull(createdInfo.getAvatarUrl());
+    }
+
+    @Test
+    public void testCreateInstructorInfo_AvatarNull() throws IOException {
+        InstructorInfo createdInfo = instructorInfoService.createInstructorInfo(
+                2L, "Alice Smith", "alice.smith@example.com",
+                "123456789", "Bio of Alice", null);
+
+        assertNotNull(createdInfo);
+        assertEquals("Alice Smith", createdInfo.getName());
+        assertNull(createdInfo.getAvatarUrl());
+    }
+
+    @Test
+    public void testCreateInstructorInfo_AvatarTooBig() throws IOException {
+        MockMultipartFile avatar = new MockMultipartFile("avatar", "avatar.png", "image/png", new byte[11 * 1024 * 1024]) {
+            @Override
+            public void transferTo(File dest){
+                // do nothing
+            }
+        };
+
+        Exception exception = assertThrows(IllegalArgumentException.class,
+                () -> instructorInfoService.createInstructorInfo(
+                        2L, "Alice Smith", "alice.smith@example.com",
+                        "123456789", "Bio of Alice", avatar));
+
+        assertTrue(exception.getMessage().contains("Avatar size must be less than 10MB"));
     }
 } 
