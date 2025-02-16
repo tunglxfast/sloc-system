@@ -158,7 +158,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Email</th>
-                        <th>Full Name</th>
+                        <th>Username</th>
                         <th>Password</th>
                         <th>Roles</th>
                         <th>Status</th>
@@ -168,7 +168,7 @@
                     <tr th:each="user : ${users}">
                         <td th:text="${user.id}"></td>
                         <td th:text="${user.email}"></td>
-                        <td th:text="${user.fullName}"></td>
+                        <td th:text="${user.username}"></td>
                         <td>
                             <button type="button" class="btn btn-link p-0" data-bs-toggle="modal" th:data-bs-target="'#changePasswordModal' + ${user.id}">
                                 <i class="fas fa-key"></i> Change Password
